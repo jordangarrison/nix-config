@@ -1,0 +1,5 @@
+.env.sed
+.tmp/*.nix
+.tmp.configuration.nix
+*.backup
+raspberry-pi/img

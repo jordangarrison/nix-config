@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-# Set a flag for $DRY_RUN
-DRY_RUN=false
 # Read in the command line arguments and set the $DRY_RUN flag
 while getopts ":d" opt; do
   case $opt in

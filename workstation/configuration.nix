@@ -51,6 +51,7 @@ in
   # Enable the GNOME Desktop Environment.
   services.xserver.displayManager.gdm.enable = true;
   services.xserver.desktopManager.gnome.enable = true;
+  services.gnome.gnome-keyring.enable = true;
 
   # Env vars
   # environment.variables = {
@@ -105,6 +106,7 @@ in
       unstable.btop
       unstable.emacs
       unstable.chezmoi
+      unstable.k9s
       vim
       wget
       htop

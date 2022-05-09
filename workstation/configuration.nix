@@ -142,7 +142,7 @@ in
       unstable.brave
       unstable.slack
       unstable.todoist
-      unstable.todoist-electron
+      # unstable.todoist-electron
       # unstable.steam
       wally-cli
       firefox
@@ -151,6 +151,7 @@ in
       _1password
       nextcloud-client
       vscode
+      lens
       barrier
       gparted
       gnome.gnome-tweaks

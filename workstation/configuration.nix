@@ -144,6 +144,7 @@ in
       unstable.todoist
       # unstable.todoist-electron
       # unstable.steam
+      unstable.zoom-us
       wally-cli
       firefox
       vlc

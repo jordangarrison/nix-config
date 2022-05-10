@@ -120,6 +120,8 @@ in
       # fnm
       bat
       jq
+      ripgrep
+      tmux
 
       # Servers
       # unstable.shairport-sync
@@ -144,7 +146,8 @@ in
       unstable.todoist
       # unstable.todoist-electron
       # unstable.steam
-      unstable.zoom-us
+      # unstable.zoom-us
+      alacritty
       wally-cli
       firefox
       vlc

@@ -114,8 +114,8 @@
 
       # Split panes easily
       bind c new-window -c "#{pane_current_path}"
-      bind | split-window -h -c "#{pane_current_path}"
-      bind - split-window -v -c "#{pane_current_path}"
+      bind -n M-'|' split-window -h -c "#{pane_current_path}"
+      bind -n M-'\' split-window -v -c "#{pane_current_path}"
       unbind '"'
       unbind %
 
@@ -125,10 +125,11 @@
       bind -n M-k select-pane -U
       bind -n M-j select-pane -D
 
-      bind -n M-H resize-pane -L
-      bind -n M-L resize-pane -R
-      bind -n M-K resize-pane -U
-      bind -n M-J resize-pane -D
+      bind -n M-H resize-pane -L 5
+      bind -n M-L resize-pane -R 5
+      bind -n M-K resize-pane -U 5
+      bind -n M-J resize-pane -D 5
+      bind -n M-M resize-pane -Z
 
       # mouse mode
       set -g mouse on
@@ -148,6 +149,7 @@
 
     # Alacritty
     ".config/alacritty/alacritty.yml".text = ''
+      live_config_reload: true
       shell:
         program: zsh
         args:
@@ -160,9 +162,13 @@
         bold:
           family: Fira Code
           style: Bold
-        italic:
-          family: Menlo
-          style: Italic
+      # Window
+      window:
+        startup_mode: Maximized
+        decorations: none
+        padding:
+          x: 5
+          y: 5
       # Colors (substrata)
       colors:
         primary:
@@ -186,7 +192,6 @@
           magenta: '#c6aed7'
           cyan:    '#7dc2c7'
           white:   '#f0ecfe'
-      TERM: xterm-256color
     '';
   };
 }

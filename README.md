@@ -4,7 +4,7 @@ To set up please do the following:
 
 1. Clone the repository to your local machine.
 2. Run `git crypt unlock` to unlock secrets folder
-3. Update the `<folder>.example.sed` files with your own values and place them in `.secrets/`.
+3. Update the `<folder>.example.sed` files with your own values and place them in `.secrets/<folder>.sed`.
 4. Run `./update-config.sh` to update the configuration files.
 
 ## `./update-config.sh`

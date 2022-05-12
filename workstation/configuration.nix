@@ -122,6 +122,7 @@ in
       jq
       ripgrep
       tmux
+      fd
 
       # Servers
       # unstable.shairport-sync
@@ -148,15 +149,12 @@ in
       # unstable.steam
       # unstable.zoom-us
       alacritty
-      wally-cli
       firefox
       vlc
       _1password-gui
       _1password
       nextcloud-client
       vscode
-      lens
-      barrier
       gparted
       gnome.gnome-tweaks
       gnome3.gnome-settings-daemon

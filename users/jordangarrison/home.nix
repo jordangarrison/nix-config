@@ -22,17 +22,24 @@
   programs.home-manager.enable = true;
 
   home.packages = with pkgs; [
-    wally-cli
+    # Apps
     spotify
     lens
     apple-music-electron
     barrier
     lens
     gnaural
+
+    # Utilities
+    wally-cli
+
+    # Git
     git
     git-crypt
     gnupg
     pinentry
+
+    # Language Servers
     gopls
     rnix-lsp
     nodePackages.bash-language-server

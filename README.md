@@ -22,7 +22,7 @@ This is a helper script which will update the configuration files, not used for 
 
 ### `./update-users.sh`
 
-This is a helper script which will run home manager.
+This is a helper script which will run home manager for the currently logged in user if they are in the repo.
 
 ```sh
 ./update-users.sh

@@ -21,16 +21,17 @@ SCRIPTPATH="$(
   pwd -P
 )"
 CONFIG_DIR="$SCRIPTPATH"/"$SELECTION"
+SECRET_DIR="$SCRIPTPATH"/.secrets
 echo "$CONFIG_DIR"
 
+# copy old file to tmp
+mkdir -p "$SCRIPTPATH"/.tmp
+cp $CONFIG_DIR/.tmp.configuration.nix "${SCRIPTPATH}/.tmp/configuration-backup-$(date +'%F-%H%M%S').nix"
 # update the config
-sed -f "$CONFIG_DIR"/.env.sed "$CONFIG_DIR"/configuration.nix >"$CONFIG_DIR"/.tmp.configuration.nix
+sed -f "$SECRET_DIR"/"${SELECTION}.sed" "$CONFIG_DIR"/configuration.nix >"$CONFIG_DIR"/.tmp.configuration.nix
 
 # copy new file to /etc/nixos unless $DRY_RUN is set
 if [ -z "$DRY_RUN" ]; then
-  # copy old file to tmp
-  mkdir -p "$SCRIPTPATH"/.tmp
-  cp /etc/nixos/configuration.nix "${SCRIPTPATH}/.tmp/configuration-backup-$(date +'%F-%H%M%S').nix"
 
   sudo nixos-rebuild switch -I nixos-config=$CONFIG_DIR/.tmp.configuration.nix
 else

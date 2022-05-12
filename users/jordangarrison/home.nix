@@ -32,12 +32,21 @@
     git
     git-crypt
     gnupg
+    pinentry
     gopls
     rnix-lsp
     nodePackages.bash-language-server
     nodePackages.vim-language-server
     nodePackages.yaml-language-server
   ];
+
+  programs.gpg = {
+    enable = true;
+  };
+
+  services.gpg-agent = {
+    enable = true;
+  };
 
   programs.vim = {
     enable = true;

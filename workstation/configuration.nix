@@ -76,6 +76,7 @@ in
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.jordangarrison = {
     isNormalUser = true;
+    initialHashedPassword = "";
     extraGroups = [
       "wheel" # Enable ‘sudo’ for the user.
       "docker"
@@ -167,10 +168,10 @@ in
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   programs.mtr.enable = true;
-  # programs.gnupg.agent = {
-  #   enable = true;
-  #   enableSSHSupport = true;
-  # };
+  programs.gnupg.agent = {
+    enable = true;
+    enableSSHSupport = true;
+  };
 
   # Steam
   # programs.steam = {

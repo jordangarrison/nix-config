@@ -32,7 +32,7 @@ if [ -z "$DRY_RUN" ]; then
   mkdir -p "$SCRIPTPATH"/.tmp
   cp /etc/nixos/configuration.nix "${SCRIPTPATH}/.tmp/configuration-backup-$(date +'%F-%H%M%S').nix"
 
-  sudo cp $CONFIG_DIR/.tmp.configuration.nix /etc/nixos/configuration.nix
+  sudo nixos-rebuild switch -I nixos-config=$CONFIG_DIR/.tmp.configuration.nix
 else
   echo "Dry run, not copying new configuration to /etc/nixos"
 fi

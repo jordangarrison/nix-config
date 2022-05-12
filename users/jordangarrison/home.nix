@@ -28,6 +28,7 @@
     apple-music-electron
     barrier
     lens
+    gnaural
     git
     git-crypt
     gnupg

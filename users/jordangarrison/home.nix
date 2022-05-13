@@ -1,6 +1,23 @@
 { config, pkgs, lib, ... }:
 
-{
+let
+  doom-emacs = pkgs.callPackage (builtins.fetchTarball {
+    url = https://github.com/vlaci/nix-doom-emacs/archive/master.tar.gz;
+  }) {
+    doomPrivateDir = ./tools/doom.d;
+                             
+    dependencyOverrides = {
+      "emacs-overlay" = (builtins.fetchTarball {
+          url = https://github.com/nix-community/emacs-overlay/archive/master.tar.gz;
+      });
+    };
+    # Look at Issue #394 
+    emacsPackagesOverlay = self: super: {
+      gitignore-mode = pkgs.emacsPackages.git-modes;
+      gitconfig-mode = pkgs.emacsPackages.git-modes;
+    };
+  };
+in {
   nixpkgs.config.allowUnfree = true;
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
@@ -20,6 +37,8 @@
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 
+  
+
   home.packages = with pkgs; [
     # Apps
     spotify
@@ -27,6 +46,7 @@
     apple-music-electron
     barrier
     gnaural
+    doom-emacs
 
     # Utilities
     wally-cli
@@ -46,7 +66,10 @@
     nodePackages.typescript
     nodePackages.typescript-language-server
     rust-analyzer
+    nixfmt
   ];
+
+  imports = (import ./tools);
 
   programs.gpg = {
     enable = true;
@@ -71,60 +94,6 @@
     settings = { ignorecase = true; };
     extraConfig= ''
       set mouse=a
-    '';
-  };
-
-  nixpkgs.overlays = [
-    (import (builtins.fetchTarball {
-      url = https://github.com/nix-community/neovim-nightly-overlay/archive/master.tar.gz;
-    }))
-  ];
-
-  programs.neovim = {
-    enable = true;
-    package = pkgs.neovim-nightly;
-    viAlias = true;
-    vimAlias = true;
-    withNodeJs = true;
-    withPython3 = true;
-    plugins = with pkgs.vimPlugins; [ 
-      editorconfig-vim
-      vim-airline
-      vim-airline-themes
-      vim-nix
-      ctrlp-vim
-      coc-yaml
-      coc-tsserver
-      coc-prettier
-      coc-nvim
-      coc-html
-      coc-go
-      coc-git
-      coc-fzf
-      coc-eslint
-      coc-css
-      vim-smoothie
-      { plugin = vim-startify; config = "let g:startify_change_to_vcs_root = 0"; }
-      # which-key-nvim
-    ];
-    extraPackages = with pkgs; [
-      # Language Servers
-      gopls
-      rnix-lsp
-      sumneko-lua-language-server
-      nodePackages.bash-language-server
-      nodePackages.vim-language-server
-      nodePackages.yaml-language-server
-      nodePackages.typescript
-      nodePackages.typescript-language-server
-      rust-analyzer
-    ];
-    extraConfig = ''
-      set mouse=a
-      set timeoutlen=0
-      lua << EOF
-      ${lib.strings.fileContents ./init.lua}
-      EOF
     '';
   };
 
@@ -182,6 +151,10 @@
   };
 
   home.file = {
+    # Doom Emacs
+    ".emacs.d/init.el".text = ''
+      (load "default.el")
+    '';
 
     # Alacritty
     ".config/alacritty/alacritty.yml".text = ''

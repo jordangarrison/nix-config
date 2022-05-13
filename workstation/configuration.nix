@@ -103,9 +103,7 @@ in
   environment.systemPackages = with pkgs;
     [
       # utilities
-      unstable.neovim
       unstable.btop
-      unstable.emacs
       unstable.chezmoi
       unstable.k9s
       vim

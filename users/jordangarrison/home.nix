@@ -1,7 +1,6 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 {
-
   nixpkgs.config.allowUnfree = true;
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
@@ -27,7 +26,6 @@
     lens
     apple-music-electron
     barrier
-    lens
     gnaural
 
     # Utilities
@@ -45,6 +43,9 @@
     nodePackages.bash-language-server
     nodePackages.vim-language-server
     nodePackages.yaml-language-server
+    nodePackages.typescript
+    nodePackages.typescript-language-server
+    rust-analyzer
   ];
 
   programs.gpg = {
@@ -53,6 +54,15 @@
 
   services.gpg-agent = {
     enable = true;
+  };
+
+  programs.zsh = {
+    enable = true;
+    enableAutosuggestions = true;
+    enableSyntaxHighlighting = true;
+    initExtra = ''
+      source ~/.dotfiles/zshrc
+    '';
   };
 
   programs.vim = {
@@ -64,8 +74,15 @@
     '';
   };
 
+  nixpkgs.overlays = [
+    (import (builtins.fetchTarball {
+      url = https://github.com/nix-community/neovim-nightly-overlay/archive/master.tar.gz;
+    }))
+  ];
+
   programs.neovim = {
     enable = true;
+    package = pkgs.neovim-nightly;
     viAlias = true;
     vimAlias = true;
     withNodeJs = true;
@@ -73,7 +90,7 @@
     plugins = with pkgs.vimPlugins; [ 
       editorconfig-vim
       vim-airline
-      # vim-airline-themes
+      vim-airline-themes
       vim-nix
       ctrlp-vim
       coc-yaml
@@ -87,17 +104,27 @@
       coc-eslint
       coc-css
       vim-smoothie
+      { plugin = vim-startify; config = "let g:startify_change_to_vcs_root = 0"; }
       # which-key-nvim
+    ];
+    extraPackages = with pkgs; [
+      # Language Servers
+      gopls
+      rnix-lsp
+      sumneko-lua-language-server
+      nodePackages.bash-language-server
+      nodePackages.vim-language-server
+      nodePackages.yaml-language-server
+      nodePackages.typescript
+      nodePackages.typescript-language-server
+      rust-analyzer
     ];
     extraConfig = ''
       set mouse=a
       set timeoutlen=0
-
-      " lua << EOF
-      "   require("which-key").setup {
-      "     -- Your config here
-      "   }
-      " EOF
+      lua << EOF
+      ${lib.strings.fileContents ./init.lua}
+      EOF
     '';
   };
 
@@ -135,6 +162,7 @@
       set -g mouse on
 
       # Design
+      set -g status-position top
       set -g visual-activity off
       set -g visual-bell off
       set -g visual-silence off
@@ -143,6 +171,14 @@
       # Last window
       bind-key C-b last-window
     '';
+  };
+
+  programs.direnv = {
+    enable = true;
+    nix-direnv = {
+      enable = true;
+      enableFlakes = true;
+    };
   };
 
   home.file = {

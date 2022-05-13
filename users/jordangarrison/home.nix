@@ -59,7 +59,10 @@ in {
     pinentry
 
     # Language Servers
+    gcc
     gopls
+    gocode
+    godef
     rnix-lsp
     nodePackages.bash-language-server
     nodePackages.vim-language-server

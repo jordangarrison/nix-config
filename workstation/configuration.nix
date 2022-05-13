@@ -5,16 +5,16 @@
 { config, pkgs, ... }:
 
 let
-  unstableTarball = fetchTarball "https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz";
-in
-{
-  imports =
-    [
-      # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-      # VSCode Server
-      (fetchTarball "https://github.com/msteen/nixos-vscode-server/tarball/master")
-    ];
+  unstableTarball = fetchTarball
+    "https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz";
+in {
+  imports = [
+    # Include the results of the hardware scan.
+    ./hardware-configuration.nix
+    # VSCode Server
+    (fetchTarball
+      "https://github.com/msteen/nixos-vscode-server/tarball/master")
+  ];
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -46,7 +46,6 @@ in
 
   # Enable the X11 windowing system.
   services.xserver.enable = true;
-
 
   # Enable the GNOME Desktop Environment.
   services.xserver.displayManager.gdm.enable = true;
@@ -88,80 +87,73 @@ in
   hardware.keyboard.zsa.enable = true;
 
   # Allow unfree packages
-  nixpkgs.config =
-    {
-      allowUnfree = true;
-      packageOverrides = pkgs: with pkgs; {
-        unstable = import unstableTarball {
-          config = config.nixpkgs.config;
-        };
+  nixpkgs.config = {
+    allowUnfree = true;
+    packageOverrides = pkgs:
+      with pkgs; {
+        unstable = import unstableTarball { config = config.nixpkgs.config; };
       };
-    };
+  };
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
-  environment.systemPackages = with pkgs;
-    [
-      # utilities
-      unstable.btop
-      unstable.chezmoi
-      unstable.k9s
-      vim
-      wget
-      htop
-      git
-      gh
-      diff-so-fancy
-      zsh
-      starship
-      hstr
-      dig
-      # fnm
-      bat
-      jq
-      ripgrep
-      tmux
-      fd
+  environment.systemPackages = with pkgs; [
+    # utilities
+    unstable.btop
+    unstable.chezmoi
+    unstable.k9s
+    vim
+    wget
+    htop
+    git
+    gh
+    diff-so-fancy
+    zsh
+    starship
+    hstr
+    dig
+    # fnm
+    bat
+    jq
+    ripgrep
+    tmux
+    fd
 
-      # Servers
-      # unstable.shairport-sync
+    # Servers
+    # unstable.shairport-sync
 
-      # Languages, runtimes and SDKs
-      unstable.go
-      unstable.deno
-      unstable.nodejs
-      python39Full
-      nixpkgs-fmt
-      # google-cloud-sdk
+    # Languages, runtimes and SDKs
+    unstable.go
+    unstable.deno
+    unstable.nodejs
+    python39Full
+    nixpkgs-fmt
+    # google-cloud-sdk
 
-      # services
-      tailscale
+    # services
+    tailscale
 
-      #fonts
-      fira-code
+    #fonts
+    fira-code
 
-      # Desktop
-      unstable.brave
-      unstable.slack
-      unstable.todoist
-      # unstable.todoist-electron
-      # unstable.steam
-      # unstable.zoom-us
-      alacritty
-      firefox
-      vlc
-      _1password-gui
-      _1password
-      nextcloud-client
-      vscode
-      gparted
-      gnome.gnome-tweaks
-      gnome3.gnome-settings-daemon
-      gnomeExtensions.appindicator
-      gnomeExtensions.sound-output-device-chooser
-      gnomeExtensions.clipboard-indicator
-      gnomeExtensions.system-monitor
-    ];
+    # Desktop
+    unstable.brave
+    unstable.todoist
+    alacritty
+    firefox
+    vlc
+    _1password-gui
+    _1password
+    nextcloud-client
+    vscode
+    gparted
+    gnome.gnome-tweaks
+    gnome3.gnome-settings-daemon
+    gnomeExtensions.appindicator
+    gnomeExtensions.sound-output-device-chooser
+    gnomeExtensions.clipboard-indicator
+    gnomeExtensions.system-monitor
+  ];
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
@@ -232,7 +224,7 @@ in
   };
 
   # Docker
-  virtualisation. docker.enable = true;
+  virtualisation.docker.enable = true;
 
   # VSCode Server
   services.vscode-server.enable = true;

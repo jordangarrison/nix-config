@@ -2,13 +2,15 @@
 
 let
   doom-emacs = pkgs.callPackage (builtins.fetchTarball {
-    url = https://github.com/nix-community/nix-doom-emacs/archive/master.tar.gz;
+    url =
+      "https://github.com/nix-community/nix-doom-emacs/archive/master.tar.gz";
   }) {
     doomPrivateDir = ./tools/doom.d;
-                             
+
     dependencyOverrides = {
       "emacs-overlay" = (builtins.fetchTarball {
-          url = https://github.com/nix-community/emacs-overlay/archive/master.tar.gz;
+        url =
+          "https://github.com/nix-community/emacs-overlay/archive/master.tar.gz";
       });
     };
     # Look at Issue #394 
@@ -37,13 +39,12 @@ in {
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 
-  
-
   home.packages = with pkgs; [
     # Apps
     spotify
-    lens
     apple-music-electron
+    slack
+    lens
     barrier
     gnaural
     doom-emacs
@@ -71,13 +72,9 @@ in {
 
   imports = (import ./tools);
 
-  programs.gpg = {
-    enable = true;
-  };
+  programs.gpg = { enable = true; };
 
-  services.gpg-agent = {
-    enable = true;
-  };
+  services.gpg-agent = { enable = true; };
 
   programs.zsh = {
     enable = true;
@@ -90,9 +87,9 @@ in {
 
   programs.vim = {
     enable = true;
-    plugins = with pkgs.vimPlugins ; [ vim-airline ];
+    plugins = with pkgs.vimPlugins; [ vim-airline ];
     settings = { ignorecase = true; };
-    extraConfig= ''
+    extraConfig = ''
       set mouse=a
     '';
   };

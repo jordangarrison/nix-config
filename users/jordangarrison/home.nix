@@ -80,9 +80,9 @@ in {
 
   imports = (import ./tools);
 
-  programs.gpg = { enable = true; };
+  programs.gpg = { enable = pkgs.stdenv.isLinux; };
 
-  services.gpg-agent = { enable = true; };
+  services.gpg-agent = { enable = pkgs.stdenv.isLinux; };
 
   programs.zsh = {
     enable = true;

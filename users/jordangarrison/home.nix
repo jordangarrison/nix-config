@@ -39,44 +39,50 @@ in {
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 
-  home.packages = with pkgs; [
-    # Apps
-    spotify
-    apple-music-electron
-    slack
-    lens
-    barrier
-    gnaural
-    doom-emacs
+  home.packages = with pkgs;
+    [
+      # Apps
+      gnaural
+      doom-emacs
 
-    # Utilities
-    wally-cli
-    httpie
+      # Utilities
+      wally-cli
+      httpie
 
-    # Fonts
-    source-code-pro
-    fira-code
+      # Fonts
+      source-code-pro
+      fira-code
 
-    # Git
-    git
-    git-crypt
-    gnupg
-    pinentry
+      # Git
+      git
+      git-crypt
+      gnupg
+      pinentry
 
-    # Language Servers
-    gcc
-    gopls
-    gocode
-    godef
-    rnix-lsp
-    nodePackages.bash-language-server
-    nodePackages.vim-language-server
-    nodePackages.yaml-language-server
-    nodePackages.typescript
-    nodePackages.typescript-language-server
-    rust-analyzer
-    nixfmt
-  ];
+      # Language Servers
+      gcc
+      gopls
+      gocode
+      godef
+      rnix-lsp
+      nodePackages.bash-language-server
+      nodePackages.vim-language-server
+      nodePackages.yaml-language-server
+      nodePackages.typescript
+      nodePackages.typescript-language-server
+      rust-analyzer
+      nixfmt
+    ] ++ (if pkgs.stdenv.isDarwin then
+      [ ]
+    else [
+      lens
+      barrier
+      spotify
+      apple-music-electron
+      slack
+    ]
+
+    );
 
   imports = (import ./tools);
 

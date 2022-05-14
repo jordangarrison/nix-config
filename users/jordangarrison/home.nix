@@ -24,7 +24,11 @@ in {
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
   home.username = "jordangarrison";
-  home.homeDirectory = "/home/jordangarrison";
+  # temporary hack for work
+  home.homeDirectory = if pkgs.stdenv.isLinux then
+    "/home/jordangarrison"
+  else
+    "/Users/jordan.garrison";
 
   # This value determines the Home Manager release that your
   # configuration is compatible with. This helps avoid breakage

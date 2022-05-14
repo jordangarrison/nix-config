@@ -76,7 +76,6 @@ in {
 
       # Language Servers and runtimes
       deno
-      gcc
       go
       gocode
       gopls
@@ -94,10 +93,11 @@ in {
     ] ++ (if pkgs.stdenv.isDarwin then
       [ ]
     else [
-      lens
-      barrier
-      spotify
       apple-music-electron
+      barrier
+      gcc
+      lens
+      spotify
       slack
     ]
 

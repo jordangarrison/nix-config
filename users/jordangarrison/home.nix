@@ -49,10 +49,20 @@ in {
       # Apps
       gnaural
       doom-emacs
+      alacritty
 
       # Utilities
-      wally-cli
+      bat
+      diff-so-fancy
+      dig
+      git
+      hstr
       httpie
+      jq
+      k9s
+      ripgrep
+      starship
+      wally-cli
 
       # Fonts
       source-code-pro
@@ -64,19 +74,23 @@ in {
       gnupg
       pinentry
 
-      # Language Servers
+      # Language Servers and runtimes
+      deno
       gcc
-      gopls
+      go
       gocode
+      gopls
       godef
-      rnix-lsp
+      nixfmt
+      nixpkgs-fmt
       nodePackages.bash-language-server
       nodePackages.vim-language-server
       nodePackages.yaml-language-server
       nodePackages.typescript
       nodePackages.typescript-language-server
+      python39Full
+      rnix-lsp
       rust-analyzer
-      nixfmt
     ] ++ (if pkgs.stdenv.isDarwin then
       [ ]
     else [

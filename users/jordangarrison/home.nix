@@ -51,6 +51,11 @@ in {
 
     # Utilities
     wally-cli
+    httpie
+
+    # Fonts
+    source-code-pro
+    fira-code
 
     # Git
     git
@@ -121,6 +126,9 @@ in {
       bind -n M-k select-pane -U
       bind -n M-j select-pane -D
 
+      bind -n C-L next-window
+      bind -n C-H previous-window
+
       bind -n M-H resize-pane -L 5
       bind -n M-L resize-pane -R 5
       bind -n M-K resize-pane -U 5
@@ -164,13 +172,16 @@ in {
         args:
           - -c
           - tmux
-      fonts:
+      font:
         normal:
-          family: Fira Code
-          style: Regular
+          family: Source Code Pro
+          style: Semibold
         bold:
-          family: Fira Code
+          family: Source Code Pro
           style: Bold
+        offset:
+          x: 0
+          y: 3
       # Window
       window:
         startup_mode: Maximized
@@ -201,6 +212,12 @@ in {
           magenta: '#c6aed7'
           cyan:    '#7dc2c7'
           white:   '#f0ecfe'
+    '';
+    ".config/k9s/config.yml".text = ''
+      ${lib.strings.fileContents ./tools/k9s/config.yml}
+    '';
+    ".config/k9s/skin.yml".text = ''
+      ${lib.strings.fileContents ./tools/k9s/skin.yml}
     '';
   };
 }

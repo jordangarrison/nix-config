@@ -24,7 +24,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-acario-dark)
+(setq doom-theme 'doom-horizon)
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
@@ -170,7 +170,7 @@ Version 2019-11-04"
 ;;
 ;; Toggle themes
 ;;
-(defvar *jag-theme-dark* 'doom-acario-dark)
+(defvar *jag-theme-dark* 'doom-horizon)
 (defvar *jag-theme-light* 'doom-acario-light)
 (defvar *jag-current-theme* *jag-theme-dark*)
 

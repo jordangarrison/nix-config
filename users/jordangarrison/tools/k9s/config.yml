@@ -1,0 +1,67 @@
+k9s:
+  refreshRate: 2
+  maxConnRetry: 5
+  enableMouse: false
+  headless: false
+  logoless: false
+  crumbsless: false
+  readOnly: false
+  noIcons: false
+  logger:
+    tail: 100
+    buffer: 5000
+    sinceSeconds: 60
+    fullScreenLogs: false
+    textWrap: false
+    showTime: false
+  currentContext: gke_flosports-174016_us-central1-a_stag
+  currentCluster: gke_flosports-174016_us-central1-a_stag
+  clusters:
+    gke_flosports-174016_us-central1-a_prod:
+      namespace:
+        active: prod
+        favorites:
+        - prod
+        - internal
+        - default
+      view:
+        active: ns
+      featureGates:
+        nodeShell: false
+      shellPod:
+        image: busybox:1.31
+        command: []
+        args: []
+        namespace: default
+        limits:
+          cpu: 100m
+          memory: 100Mi
+      portForwardAddress: localhost
+    gke_flosports-174016_us-central1-a_stag:
+      namespace:
+        active: vault
+        favorites:
+        - stag
+        - internal
+        - default
+      view:
+        active: ns
+      featureGates:
+        nodeShell: false
+      shellPod:
+        image: busybox:1.31
+        command: []
+        args: []
+        namespace: default
+        limits:
+          cpu: 100m
+          memory: 100Mi
+      portForwardAddress: localhost
+  thresholds:
+    cpu:
+      critical: 90
+      warn: 70
+    memory:
+      critical: 90
+      warn: 70
+  screenDumpDir: /tmp/k9s-screens-jordangarrison

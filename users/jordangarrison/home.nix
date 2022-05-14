@@ -23,7 +23,8 @@ in {
   nixpkgs.config.allowUnfree = true;
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
-  home.username = "jordangarrison";
+  home.username =
+    if pkgs.stdenv.isLinux then "jordangarrison" else "jordan.garrison";
   # temporary hack for work
   home.homeDirectory = if pkgs.stdenv.isLinux then
     "/home/jordangarrison"

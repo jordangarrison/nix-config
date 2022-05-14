@@ -19,7 +19,9 @@ SCRIPTPATH="$(
   cd "$(dirname "$0")"
   pwd -P
 )"
-CONFIG_DIR="$SCRIPTPATH"/users/$USER
+USER_SELECTION="${1:-$USER}"
+
+CONFIG_DIR="$SCRIPTPATH"/users/"${USER_SELECTION}"
 echo "$CONFIG_DIR"
 
 # update the config

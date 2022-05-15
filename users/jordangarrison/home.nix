@@ -81,7 +81,6 @@ in {
       gopls
       godef
       nixfmt
-      nixpkgs-fmt
       nodePackages.bash-language-server
       nodePackages.vim-language-server
       nodePackages.yaml-language-server

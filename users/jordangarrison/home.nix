@@ -54,7 +54,6 @@ in {
       # Utilities
       bat
       diff-so-fancy
-      dig
       git
       hstr
       httpie
@@ -76,6 +75,7 @@ in {
 
       # Language Servers and runtimes
       deno
+      gcc
       go
       gocode
       gopls
@@ -94,7 +94,7 @@ in {
     else [
       apple-music-electron
       barrier
-      gcc
+      dig
       lens
       spotify
       slack

@@ -191,52 +191,7 @@ in {
 
     # Alacritty
     ".config/alacritty/alacritty.yml".text = ''
-      live_config_reload: true
-      shell:
-        program: zsh
-        args:
-          - -c
-          - tmux
-      font:
-        normal:
-          family: Source Code Pro
-          style: Semibold
-        bold:
-          family: Source Code Pro
-          style: Bold
-        offset:
-          x: 0
-          y: 3
-      # Window
-      window:
-        startup_mode: Maximized
-        decorations: none
-        padding:
-          x: 5
-          y: 5
-      # Colors (substrata)
-      colors:
-        primary:
-          background: '#191c25'
-          foreground: '#b5b4c9'
-        normal:
-          black:   '#2e313d'
-          red:     '#cf8164'
-          green:   '#76a065'
-          yellow:  '#ab924c'
-          blue:    '#8296b0'
-          magenta: '#a18daf'
-          cyan:    '#659ea2'
-          white:   '#b5b4c9'
-        bright:
-          black:   '#5b5f71'
-          red:     '#fe9f7c'
-          green:   '#92c47e'
-          yellow:  '#d2b45f'
-          blue:    '#a0b9d8'
-          magenta: '#c6aed7'
-          cyan:    '#7dc2c7'
-          white:   '#f0ecfe'
+      ${lib.strings.fileContents ./tools/alacritty/alacritty.yml}
     '';
     ".config/k9s/config.yml".text = ''
       ${lib.strings.fileContents ./tools/k9s/config.yml}

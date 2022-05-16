@@ -54,7 +54,6 @@ in {
       # Utilities
       bat
       diff-so-fancy
-      eternal-terminal
       git
       hstr
       httpie

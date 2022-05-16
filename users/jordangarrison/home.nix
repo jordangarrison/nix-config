@@ -54,11 +54,13 @@ in {
       # Utilities
       bat
       diff-so-fancy
+      eternal-terminal
       git
       hstr
       httpie
       jq
       k9s
+      mosh
       ripgrep
       starship
       wally-cli

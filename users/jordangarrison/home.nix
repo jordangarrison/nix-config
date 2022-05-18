@@ -47,7 +47,6 @@ in {
   home.packages = with pkgs;
     [
       # Apps
-      dbeaver
       gnaural
       doom-emacs
       alacritty
@@ -96,6 +95,7 @@ in {
     else [
       apple-music-electron
       barrier
+      dbeaver
       dig
       lens
       spotify

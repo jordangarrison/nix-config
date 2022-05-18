@@ -47,6 +47,7 @@ in {
   home.packages = with pkgs;
     [
       # Apps
+      dbeaver
       gnaural
       doom-emacs
       alacritty
@@ -99,6 +100,7 @@ in {
       lens
       spotify
       slack
+      xclip
     ]
 
     );
@@ -198,6 +200,9 @@ in {
     '';
     ".config/k9s/skin.yml".text = ''
       ${lib.strings.fileContents ./tools/k9s/skin.yml}
+    '';
+    ".config/btop/btop.conf".text = ''
+      ${lib.strings.fileContents ./tools/btop/btop.conf.yml}
     '';
   };
 }

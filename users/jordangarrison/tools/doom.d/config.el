@@ -37,6 +37,7 @@
 (setq display-line-numbers-type t)
 
 (xterm-mouse-mode 1)
+(xclip-mode 1)
 
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;

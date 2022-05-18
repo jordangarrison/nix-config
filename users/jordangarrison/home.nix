@@ -1,6 +1,9 @@
 { config, pkgs, lib, ... }:
 
 let
+  unstable = import
+    (fetchTarball "https://nixos.org/channels/nixos-unstable/nixexprs.tar.xz")
+    { };
   doom-emacs = pkgs.callPackage (builtins.fetchTarball {
     url =
       "https://github.com/nix-community/nix-doom-emacs/archive/master.tar.gz";
@@ -47,6 +50,7 @@ in {
   home.packages = with pkgs;
     [
       # Apps
+      unstable.dbeaver
       gnaural
       doom-emacs
       alacritty
@@ -95,7 +99,6 @@ in {
     else [
       apple-music-electron
       barrier
-      dbeaver
       dig
       lens
       spotify

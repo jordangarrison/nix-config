@@ -51,12 +51,14 @@ in {
     [
       # Apps
       unstable.dbeaver
+      alacritty
+      element-desktop
       gnaural
       doom-emacs
-      alacritty
 
       # Utilities
       bat
+      cargo
       diff-so-fancy
       git
       hstr
@@ -100,6 +102,7 @@ in {
       apple-music-electron
       barrier
       dig
+      discord
       lens
       spotify
       slack

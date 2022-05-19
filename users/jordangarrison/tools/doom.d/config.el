@@ -59,6 +59,13 @@
 ;;
 ;; `use-package!' section
 ;;
+;; Tree Sitter
+;; (use-package! tree-sitter
+;;   :config
+;;   (require 'tree-sitter-langs)
+;;   (global-tree-sitter-mode)
+;;   (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode))
+
 ;;
 ;; Just some key bindings
 ;;
@@ -69,6 +76,7 @@
 (map! :leader :desc "Maximize Frame" "w m v" #'toggle-frame-fullscreen)
 (map! :leader :desc "Shell command" "j !" #'shell-command)
 (map! :leader :desc "Comment line" "j /" #'comment-line)
+;; (map! :leader :desc "Go to definition" "j k" #')
 
 ;; Little details
 (setq-default line-spacing 3)

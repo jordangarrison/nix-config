@@ -74,7 +74,7 @@
 (map! :leader :desc "Switch other Frame" "w f" #'other-frame)
 (map! :leader :desc "Maximize Frame" "w m f" #'toggle-frame-maximized)
 (map! :leader :desc "Maximize Frame" "w m v" #'toggle-frame-fullscreen)
-(map! :leader :desc "Shell command" "j !" #'shell-command)
+(map! :leader :desc "Shell command" "j s" #'shell-command)
 (map! :leader :desc "Comment line" "j /" #'comment-line)
 ;; (map! :leader :desc "Go to definition" "j k" #')
 

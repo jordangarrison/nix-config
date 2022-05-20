@@ -57,9 +57,11 @@ in {
       doom-emacs
 
       # Utilities
+      _1password
       bat
       cargo
       diff-so-fancy
+      fzf
       git
       hstr
       httpie
@@ -180,6 +182,10 @@ in {
 
       # Last window
       bind-key C-b last-window
+
+      # Plugins
+      run-shell ${pkgs.tmuxPlugins.resurrect.rtp}
+      run-shell ${pkgs.tmuxPlugins.continuum.rtp}
     '';
   };
 

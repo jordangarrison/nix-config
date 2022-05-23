@@ -59,6 +59,7 @@ in {
 
       # Utilities
       _1password
+      aws
       bat
       cargo
       diff-so-fancy

@@ -10,12 +10,13 @@ let
   }) {
     doomPrivateDir = ./tools/doom.d;
 
-    dependencyOverrides = {
-      "emacs-overlay" = (builtins.fetchTarball {
-        url =
-          "https://github.com/nix-community/emacs-overlay/archive/master.tar.gz";
-      });
-    };
+    # This is currently broken so commenting out
+    # dependencyOverrides = {
+    #   "emacs-overlay" = (builtins.fetchTarball {
+    #     url =
+    #       "https://github.com/nix-community/emacs-overlay/archive/master.tar.gz";
+    #   });
+    # };
     # Look at Issue #394 
     emacsPackagesOverlay = self: super: {
       gitignore-mode = pkgs.emacsPackages.git-modes;

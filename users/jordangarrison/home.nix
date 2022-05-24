@@ -108,6 +108,7 @@ in {
       dig
       discord
       lens
+      obs-studio
       spotify
       slack
       xclip

@@ -152,6 +152,7 @@ in {
 
       # Split panes easily
       bind c new-window -c "#{pane_current_path}"
+      bind-key -r j run-shell "tmux neww ~/.local/bin/tmux-cht.sh"
       bind -n M-'|' split-window -h -c "#{pane_current_path}"
       bind -n M-'\' split-window -v -c "#{pane_current_path}"
       unbind '"'
@@ -206,17 +207,18 @@ in {
     '';
 
     # Alacritty
-    ".config/alacritty/alacritty.yml".text = ''
-      ${lib.strings.fileContents ./tools/alacritty/alacritty.yml}
-    '';
-    ".config/k9s/config.yml".text = ''
-      ${lib.strings.fileContents ./tools/k9s/config.yml}
-    '';
-    ".config/k9s/skin.yml".text = ''
-      ${lib.strings.fileContents ./tools/k9s/skin.yml}
-    '';
-    ".config/btop/btop.conf".text = ''
-      ${lib.strings.fileContents ./tools/btop/btop.conf.yml}
-    '';
+    ".config/alacritty/alacritty.yml".source = ./tools/alacritty/alacritty.yml;
+
+    # K9s
+    ".config/k9s/config.yml".source = ./tools/k9s/config.yml;
+    ".config/k9s/skin.yml".source = ./tools/k9s/skin.yml;
+
+    # Btop
+    ".config/btop/btop.conf".source = ./tools/btop/btop.conf.yml;
+
+    # Scripts
+    ".local/bin/tmux-cht.sh".source = ./tools/scripts/tmux-cht.sh;
+    ".tmux-cht-languages".source = ./tools/scripts/tmux-cht-languages.txt;
+    ".tmux-cht-commands".source = ./tools/scripts/tmux-cht-commands.txt;
   };
 }

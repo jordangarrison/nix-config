@@ -8,9 +8,23 @@ let
   interface = "@ENVSUB_INTERFACE@";
   hostname = "@ENVSUB_HOSTNAME@";
   piVersion = "@ENVSUB_PI_VERSION@";
-in
-{
-  imports = [ "${fetchTarball "https://github.com/NixOS/nixos-hardware/archive/936e4649098d6a5e0762058cb7687be1b2d90550.tar.gz" }/raspberry-pi/${piVersion}" ];
+in {
+  imports = [
+    "${
+      fetchTarball
+      "https://github.com/NixOS/nixos-hardware/archive/936e4649098d6a5e0762058cb7687be1b2d90550.tar.gz"
+    }/raspberry-pi/${piVersion}"
+  ];
+
+  nix.buildMachines = [{
+    hostName = "builder";
+    systems = [ "x86_64-linux" "aarch64-linux" ];
+    supportedFeatures = [ "nixos-test" "benchmark" "big-parallel" "kvm" ];
+  }];
+
+  nix.extraOptions = ''
+    builders-use-substitutes = true
+  '';
 
   fileSystems = {
     "/" = {

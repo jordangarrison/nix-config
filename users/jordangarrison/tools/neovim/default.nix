@@ -2,26 +2,29 @@
 
 let
   plugins = pkgs.vimPlugins;
-  
+
   myPlugins = with plugins; [
-      editorconfig-vim
-      vim-airline
-      vim-airline-themes
-      vim-nix
-      vim-surround
-      ctrlp-vim
-      coc-yaml
-      coc-tsserver
-      coc-prettier
-      coc-nvim
-      coc-html
-      coc-go
-      coc-git
-      coc-fzf
-      coc-eslint
-      coc-css
-      vim-smoothie
-      { plugin = vim-startify; config = "let g:startify_change_to_vcs_root = 0"; }
+    editorconfig-vim
+    vim-airline
+    vim-airline-themes
+    vim-nix
+    vim-surround
+    ctrlp-vim
+    coc-yaml
+    coc-tsserver
+    coc-prettier
+    # coc-nvim
+    coc-html
+    coc-go
+    coc-git
+    coc-fzf
+    coc-eslint
+    coc-css
+    vim-smoothie
+    {
+      plugin = vim-startify;
+      config = "let g:startify_change_to_vcs_root = 0";
+    }
   ];
 
   baseConfig = builtins.readFile ./config.vim;
@@ -50,7 +53,8 @@ in {
 
   nixpkgs.overlays = [
     (import (builtins.fetchTarball {
-      url = https://github.com/nix-community/neovim-nightly-overlay/archive/master.tar.gz;
+      url =
+        "https://github.com/nix-community/neovim-nightly-overlay/archive/master.tar.gz";
     }))
   ];
 
@@ -66,7 +70,5 @@ in {
     withPython3 = true;
   };
 
-  xdg.configFile = {
-    "nvim/coc-settings.json".text = cocSettings;
-  };
+  xdg.configFile = { "nvim/coc-settings.json".text = cocSettings; };
 }

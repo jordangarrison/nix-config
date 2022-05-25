@@ -96,11 +96,10 @@ in {
       nodePackages.yaml-language-server
       nodePackages.typescript
       nodePackages.typescript-language-server
-      python39Full
       rnix-lsp
       rust-analyzer
     ] ++ (if pkgs.stdenv.isDarwin then
-      [ ]
+      [ unstable.nodejs ]
     else [
       apple-music-electron
       barrier
@@ -109,6 +108,7 @@ in {
       gnaural
       lens
       obs-studio
+      python39Full
       spotify
       slack
       xclip

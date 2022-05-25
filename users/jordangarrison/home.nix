@@ -54,7 +54,6 @@ in {
       unstable.dbeaver
       alacritty
       element-desktop
-      gnaural
       doom-emacs
 
       # Utilities
@@ -107,6 +106,7 @@ in {
       barrier
       dig
       discord
+      gnaural
       lens
       obs-studio
       spotify

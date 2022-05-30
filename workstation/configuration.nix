@@ -44,15 +44,31 @@ in {
   #   keyMap = "us";
   # };
 
+  services.xserver = {
+    enable = true;
+    displayManager = {
+      gdm = {
+        enable = true;
+        autoSuspend = false;
+      };
+    };
+    desktopManager.gnome.enable = true;
+    windowManager.awesome = {
+      enable = true;
+      luaModules = with pkgs.luaPackages; [ luarocks ];
+    };
+  };
+
   # Enable the X11 windowing system.
-  services.xserver.enable = true;
+
+  # services.xserver.enable = true;
 
   # Enable the GNOME Desktop Environment.
-  services.xserver.displayManager.gdm.enable = true;
-  services.xserver.desktopManager.gnome.enable = true;
-  services.gnome.gnome-keyring.enable = true;
+  # services.xserver.displayManager.gdm.enable = true;
+  # services.xserver.desktopManager.gnome.enable = true;
+  # services.gnome.gnome-keyring.enable = true;
   # prevent autosuspend when no user is logged in
-  services.xserver.displayManager.gdm.autoSuspend = false;
+  # services.xserver.displayManager.gdm.autoSuspend = false;
 
   # Env vars
   # environment.variables = {

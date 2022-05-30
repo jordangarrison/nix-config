@@ -53,10 +53,12 @@ in {
   services.xserver = {
     enable = true;
     displayManager = {
-      gdm.enable = true;
-      gdm.autoSuspend = false;
-      defaultSession = "none+awesome";
+      gdm = {
+        enable = true;
+        autoSuspend = false;
+      };
     };
+    desktopManager.gnome.enable = true;
     windowManager.awesome = {
       enable = true;
       luaModules = with pkgs.luaPackages; [ luarocks ];

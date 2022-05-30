@@ -53,6 +53,7 @@ in {
       # Apps
       unstable.dbeaver
       alacritty
+      arandr
       element-desktop
       doom-emacs
 
@@ -209,6 +210,9 @@ in {
 
     # Alacritty
     ".config/alacritty/alacritty.yml".source = ./tools/alacritty/alacritty.yml;
+
+    # Awesome
+    ".config/awesome/rc.lua".source = ./tools/awesome/rc.lua;
 
     # K9s
     ".config/k9s/config.yml".source = ./tools/k9s/config.yml;

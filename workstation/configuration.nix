@@ -58,6 +58,11 @@ in {
     };
     # Enable the GNOME Desktop Environment.
     desktopManager.gnome.enable = true;
+    # Aweseome WM
+    windowManager.awesome = {
+      enable = true;
+      luaModules = with pkgs.luaPackages; [ luarocks ];
+    };
   };
   services.gnome.gnome-keyring.enable = true;
 
@@ -146,13 +151,13 @@ in {
     fira-code
 
     # Desktop
+    unstable._1password-gui
+    unstable._1password
     unstable.brave
     unstable.todoist
     alacritty
     firefox
     vlc
-    _1password-gui
-    _1password
     nextcloud-client
     vscode
     gparted
@@ -162,6 +167,7 @@ in {
     gnomeExtensions.sound-output-device-chooser
     gnomeExtensions.clipboard-indicator
     gnomeExtensions.system-monitor
+    lxappearance # awesomewm
   ];
 
   # Some programs need SUID wrappers, can be configured further or are

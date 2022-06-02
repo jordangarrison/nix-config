@@ -102,6 +102,7 @@ in {
     ] ++ (if pkgs.stdenv.isDarwin then
       [ unstable.nodejs ]
     else [
+      unstable.comixcursors
       apple-music-electron
       barrier
       dig
@@ -110,8 +111,10 @@ in {
       lens
       obs-studio
       python39Full
+      redshift
       spotify
       slack
+      xcb-util-cursor
       xclip
     ]
 
@@ -208,11 +211,37 @@ in {
       (load "default.el")
     '';
 
+    # Cursors for AwesomeWM
+    ".Xresources".text = ''
+      Xcursor.size = 24
+    '';
+
+    ".config/gtk-3.0/settings.ini".text = ''
+      [Settings]
+      gtk-application-prefer-dark-theme=0
+      gtk-theme-name=Adwaita-dark
+      gtk-icon-theme-name=Adwaita
+      gtk-font-name=Sans 10
+      gtk-cursor-theme-size=24
+      gtk-toolbar-style=GTK_TOOLBAR_BOTH_HORIZ
+      gtk-toolbar-icon-size=GTK_ICON_SIZE_SMALL_TOOLBAR
+      gtk-button-images=0
+      gtk-menu-images=0
+      gtk-enable-event-sounds=1
+      gtk-enable-input-feedback-sounds=1
+      gtk-xft-antialias=1
+      gtk-xft-hinting=1
+      gtk-xft-hintstyle=hintslight
+      gtk-xft-rgba=rgb
+      gtk-cursor-theme-name=Adwaita
+    '';
+
     # Alacritty
     ".config/alacritty/alacritty.yml".source = ./tools/alacritty/alacritty.yml;
 
     # Awesome
     ".config/awesome/rc.lua".source = ./tools/awesome/rc.lua;
+    ".config/awesome/background.jpg".source = ./tools/awesome/background.jpg;
 
     # K9s
     ".config/k9s/config.yml".source = ./tools/k9s/config.yml;
@@ -220,6 +249,9 @@ in {
 
     # Btop
     ".config/btop/btop.conf".source = ./tools/btop/btop.conf.yml;
+
+    # Redshift
+    ".config/redshift.conf".source = ./tools/redshift/redshift.conf;
 
     # Scripts
     ".local/bin/tmux-cht.sh".source = ./tools/scripts/tmux-cht.sh;

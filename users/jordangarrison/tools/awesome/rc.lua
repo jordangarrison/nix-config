@@ -75,15 +75,15 @@ modkey = "Mod4"
 awful.layout.layouts = {
     awful.layout.suit.tile,
     awful.layout.suit.tile.bottom,
-    awful.layout.suit.fair,
-    awful.layout.suit.spiral.dwindle,
-    awful.layout.suit.max,
     awful.layout.suit.magnifier,
-    awful.layout.suit.floating,
+    -- awful.layout.suit.floating,
+    -- awful.layout.suit.fair,
     -- awful.layout.suit.tile.left,
     -- awful.layout.suit.tile.top,
     -- awful.layout.suit.fair.horizontal,
     -- awful.layout.suit.spiral,
+    -- awful.layout.suit.spiral.dwindle,
+    -- awful.layout.suit.max,
     -- awful.layout.suit.max.fullscreen,
     -- awful.layout.suit.corner.nw,
     -- awful.layout.suit.corner.ne,
@@ -182,9 +182,9 @@ awful.screen.connect_for_each_screen(function(s)
 
     -- Each screen has its own tag table.
     -- awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
-    local names = {"main", "www", "slack", "4", "5", "6", "7", "8", "9" }
+    local names = {"1", "2", "3", "4", "5", "6", "7", "8", "9" }
     local l = awful.layout.suit
-    local layouts = { l.tile, l.max, l.max, l.tile, l.tile, l.tile, l.tile, l.tile, l.tile }
+    local layouts = { l.tile, l.tile, l.tile, l.tile, l.tile, l.tile, l.tile, l.tile, l.tile }
     awful.tag(names, s, layouts)
 
     -- Create a promptbox for each screen
@@ -227,7 +227,9 @@ awful.screen.connect_for_each_screen(function(s)
         { -- Right widgets
             layout = wibox.layout.fixed.horizontal,
             -- custom widgets
-            github_contributions_widget {username = 'jordangarrison'},
+            github_contributions_widget {
+                username = 'jordangarrison'
+            },
             cpu_widget(),
             ram_widget(),
             -- github_prs_widget {username = 'jordangarrison'},
@@ -484,7 +486,7 @@ awful.rules.rules = {
                      keys = clientkeys,
                      buttons = clientbuttons,
                      screen = awful.screen.preferred,
-                     placement = awful.placement.no_overlap+awful.placement.no_offscreen
+                     placement = awful.placement.no_overlap+awful.placement.no_offscreen,
      }
     },
 
@@ -515,7 +517,7 @@ awful.rules.rules = {
         role = {
           "AlarmWindow",  -- Thunderbird's calendar.
           "ConfigManager",  -- Thunderbird's about:config.
-          "pop-up",       -- e.g. Google Chrome's (detached) Developer Tools.
+          -- "pop-up",       -- e.g. Google Chrome's (detached) Developer Tools.
         }
       }, properties = { floating = true }},
 

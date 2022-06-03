@@ -110,6 +110,7 @@ in {
       gnaural
       lens
       obs-studio
+      pavucontrol
       python39Full
       redshift
       spotify
@@ -242,6 +243,12 @@ in {
     # Awesome
     ".config/awesome/rc.lua".source = ./tools/awesome/rc.lua;
     ".config/awesome/background.jpg".source = ./tools/awesome/background.jpg;
+    ".config/awesome/awesome-wm-widgets".source = pkgs.fetchFromGitHub {
+      owner = "streetturtle";
+      repo = "awesome-wm-widgets";
+      rev = "83914c91c86eee4d70120a2849e752f7762908d7";
+      sha256 = "0w0y11qzp287n8asr3ml0n05lxja77cc8cl8q5n2drxywpb675aw";
+    };
 
     # K9s
     ".config/k9s/config.yml".source = ./tools/k9s/config.yml;

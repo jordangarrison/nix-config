@@ -18,6 +18,16 @@ local hotkeys_popup = require("awful.hotkeys_popup")
 -- when client with a matching name is opened:
 require("awful.hotkeys_popup.keys")
 
+-- custom widgets
+local cpu_widget = require("awesome-wm-widgets.cpu-widget.cpu-widget")
+-- local docker_widget = require("awesome-wm-widgets.docker-widget.docker")
+local github_contributions_widget = require("awesome-wm-widgets.github-contributions-widget.github-contributions-widget")
+-- local github_prs_widget = require("awesome-wm-widgets.github-prs-widget")
+-- local jira_widget = require("awesome-wm-widgets.jira-widget.jira")
+local logout_menu_widget = require("awesome-wm-widgets.logout-menu-widget.logout-menu")
+local ram_widget = require("awesome-wm-widgets.ram-widget.ram-widget")
+local volume_widget = require('awesome-wm-widgets.volume-widget.volume')
+
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
 -- another config (This code will only ever execute for the fallback config)
@@ -216,6 +226,21 @@ awful.screen.connect_for_each_screen(function(s)
         s.mytasklist, -- Middle widget
         { -- Right widgets
             layout = wibox.layout.fixed.horizontal,
+            -- custom widgets
+            github_contributions_widget {username = 'jordangarrison'},
+            cpu_widget(),
+            ram_widget(),
+            -- github_prs_widget {username = 'jordangarrison'},
+            -- jira_widget { host = 'https://flocasts.atlassian.net' },
+            -- docker_widget {
+            --     containers = 5
+            -- },
+            volume_widget {
+                device = 'default',
+                widget_type = 'arc'
+            },
+            logout_menu_widget(),
+            -- defaults
             mykeyboardlayout,
             wibox.widget.systray(),
             mytextclock,

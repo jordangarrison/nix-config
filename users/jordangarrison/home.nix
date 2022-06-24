@@ -70,8 +70,10 @@ in {
       jq
       k9s
       mosh
+      pandoc
       ripgrep
       starship
+      tree
       wally-cli
 
       # Fonts
@@ -192,6 +194,9 @@ in {
       # Last window
       bind-key C-b last-window
 
+      # renumber windows
+      set-option -g renumber-windows on
+
       # Plugins
       run-shell ${pkgs.tmuxPlugins.resurrect.rtp}
       run-shell ${pkgs.tmuxPlugins.continuum.rtp}
@@ -235,6 +240,13 @@ in {
       gtk-xft-hintstyle=hintslight
       gtk-xft-rgba=rgb
       gtk-cursor-theme-name=Adwaita
+    '';
+
+    # Cobra CLI
+    ".cobra.yaml".text = ''
+      author: Jordan Garrison <dev@jordangarrison.dev>
+      license: MIT
+      useViper: true
     '';
 
     # Alacritty

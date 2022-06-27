@@ -3,37 +3,47 @@
 let
   unstable = import
     (fetchTarball "https://nixos.org/channels/nixos-unstable/nixexprs.tar.xz")
-    { };
-  doom-emacs = pkgs.callPackage (builtins.fetchTarball {
-    url =
-      "https://github.com/nix-community/nix-doom-emacs/archive/master.tar.gz";
-  }) {
-    doomPrivateDir = ./tools/doom.d;
-
-    # This is currently broken so commenting out
-    # dependencyOverrides = {
-    #   "emacs-overlay" = (builtins.fetchTarball {
-    #     url =
-    #       "https://github.com/nix-community/emacs-overlay/archive/master.tar.gz";
-    #   });
-    # };
-    # Look at Issue #394 
-    emacsPackagesOverlay = self: super: {
-      gitignore-mode = pkgs.emacsPackages.git-modes;
-      gitconfig-mode = pkgs.emacsPackages.git-modes;
+    {
+      config = config.nixpkgs.config;
     };
-  };
-in {
+  ###################################################################
+  # Currently broken, need to get this updates with new doom cli
+  ###################################################################
+  # doom-emacs = pkgs.callPackage
+  #   (builtins.fetchTarball {
+  #     url =
+  #       "https://github.com/nix-community/nix-doom-emacs/archive/master.tar.gz";
+  #   })
+  #   {
+  #     doomPrivateDir = ./tools/doom.d;
+
+  #     # This is currently broken so commenting out
+  #     # dependencyOverrides = {
+  #     #   "emacs-overlay" = (builtins.fetchTarball {
+  #     #     url =
+  #     #       "https://github.com/nix-community/emacs-overlay/archive/master.tar.gz";
+  #     #   });
+  #     # };
+  #     # Look at Issue #394
+  #     emacsPackagesOverlay = self: super: {
+  #       gitignore-mode = pkgs.emacsPackages.git-modes;
+  #       gitconfig-mode = pkgs.emacsPackages.git-modes;
+  #     };
+  #   };
+  ###################################################################
+in
+{
   nixpkgs.config.allowUnfree = true;
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
   home.username =
     if pkgs.stdenv.isLinux then "jordangarrison" else "jordan.garrison";
   # temporary hack for work
-  home.homeDirectory = if pkgs.stdenv.isLinux then
-    "/home/jordangarrison"
-  else
-    "/Users/jordan.garrison";
+  home.homeDirectory =
+    if pkgs.stdenv.isLinux then
+      "/home/jordangarrison"
+    else
+      "/Users/jordan.garrison";
 
   # This value determines the Home Manager release that your
   # configuration is compatible with. This helps avoid breakage
@@ -55,7 +65,7 @@ in {
       alacritty
       arandr
       element-desktop
-      doom-emacs
+      # doom-emacs
 
       # Utilities
       _1password
@@ -63,8 +73,10 @@ in {
       bat
       cargo
       diff-so-fancy
+      fd
       fzf
       git
+      gnutls
       hstr
       httpie
       jq
@@ -72,6 +84,7 @@ in {
       mosh
       pandoc
       ripgrep
+      sqlite
       starship
       tree
       wally-cli
@@ -105,16 +118,15 @@ in {
       [ unstable.nodejs ]
     else [
       unstable.comixcursors
+      unstable.discord
       apple-music-electron
       barrier
       dig
-      discord
       gnaural
       lens
       obs-studio
       pavucontrol
       python39Full
-      redshift
       spotify
       slack
       xcb-util-cursor
@@ -122,8 +134,6 @@ in {
     ]
 
     );
-
-  imports = (import ./tools);
 
   programs.gpg = { enable = pkgs.stdenv.isLinux; };
 
@@ -212,36 +222,6 @@ in {
   };
 
   home.file = {
-    # Doom Emacs
-    ".emacs.d/init.el".text = ''
-      (load "default.el")
-    '';
-
-    # Cursors for AwesomeWM
-    ".Xresources".text = ''
-      Xcursor.size = 24
-    '';
-
-    ".config/gtk-3.0/settings.ini".text = ''
-      [Settings]
-      gtk-application-prefer-dark-theme=0
-      gtk-theme-name=Adwaita-dark
-      gtk-icon-theme-name=Adwaita
-      gtk-font-name=Sans 10
-      gtk-cursor-theme-size=24
-      gtk-toolbar-style=GTK_TOOLBAR_BOTH_HORIZ
-      gtk-toolbar-icon-size=GTK_ICON_SIZE_SMALL_TOOLBAR
-      gtk-button-images=0
-      gtk-menu-images=0
-      gtk-enable-event-sounds=1
-      gtk-enable-input-feedback-sounds=1
-      gtk-xft-antialias=1
-      gtk-xft-hinting=1
-      gtk-xft-hintstyle=hintslight
-      gtk-xft-rgba=rgb
-      gtk-cursor-theme-name=Adwaita
-    '';
-
     # Cobra CLI
     ".cobra.yaml".text = ''
       author: Jordan Garrison <dev@jordangarrison.dev>
@@ -252,15 +232,10 @@ in {
     # Alacritty
     ".config/alacritty/alacritty.yml".source = ./tools/alacritty/alacritty.yml;
 
-    # Awesome
-    ".config/awesome/rc.lua".source = ./tools/awesome/rc.lua;
-    ".config/awesome/background.jpg".source = ./tools/awesome/background.jpg;
-    ".config/awesome/awesome-wm-widgets".source = pkgs.fetchFromGitHub {
-      owner = "streetturtle";
-      repo = "awesome-wm-widgets";
-      rev = "83914c91c86eee4d70120a2849e752f7762908d7";
-      sha256 = "0w0y11qzp287n8asr3ml0n05lxja77cc8cl8q5n2drxywpb675aw";
-    };
+    # Doom emacs
+    ".emacs.d/init.el".text = ''
+      (load "default.el")
+    '';
 
     # K9s
     ".config/k9s/config.yml".source = ./tools/k9s/config.yml;
@@ -268,9 +243,6 @@ in {
 
     # Btop
     ".config/btop/btop.conf".source = ./tools/btop/btop.conf.yml;
-
-    # Redshift
-    ".config/redshift.conf".source = ./tools/redshift/redshift.conf;
 
     # Scripts
     ".local/bin/tmux-cht.sh".source = ./tools/scripts/tmux-cht.sh;

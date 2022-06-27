@@ -149,13 +149,13 @@ Version 2019-11-04"
 ;;
 ;; Python Black Formatter
 ;;
-(use-package! python-black
-  :demand t
-  :after python)
-(add-hook! 'python-mode-hook #'python-black-on-save-mode)
-(map! :leader :desc "Blacken Buffer" "m p b" #'python-black-buffer)
-(map! :leader :desc "Blacken Region" "m p r" #'python-black-region)
-(map! :leader :desc "Blacken Statement" "m p s" #'python-black-statement)
+;; (use-package! python-black
+;;   :demand t
+;;   :after python)
+;; (add-hook! 'python-mode-hook #'python-black-on-save-mode)
+;; (map! :leader :desc "Blacken Buffer" "m p b" #'python-black-buffer)
+;; (map! :leader :desc "Blacken Region" "m p r" #'python-black-region)
+;; (map! :leader :desc "Blacken Statement" "m p s" #'python-black-statement)
 
 
 ;;

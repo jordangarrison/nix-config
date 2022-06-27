@@ -7,7 +7,8 @@
 let
   unstableTarball = fetchTarball
     "https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz";
-in {
+in
+{
   imports = [
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
@@ -58,11 +59,6 @@ in {
     };
     # Enable the GNOME Desktop Environment.
     desktopManager.gnome.enable = true;
-    # Aweseome WM
-    windowManager.awesome = {
-      enable = true;
-      luaModules = with pkgs.luaPackages; [ luarocks ];
-    };
   };
   services.gnome.gnome-keyring.enable = true;
   services.compton.enable = true;
@@ -168,7 +164,6 @@ in {
     gnomeExtensions.sound-output-device-chooser
     gnomeExtensions.clipboard-indicator
     gnomeExtensions.system-monitor
-    lxappearance # awesomewm
   ];
 
   # Some programs need SUID wrappers, can be configured further or are

@@ -111,7 +111,6 @@ in
   environment.systemPackages = with pkgs; [
     # utilities
     unstable.btop
-    unstable.chezmoi
     unstable.k9s
     vim
     wget

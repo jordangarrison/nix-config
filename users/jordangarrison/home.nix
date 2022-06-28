@@ -144,7 +144,6 @@ in
     enableAutosuggestions = true;
     enableSyntaxHighlighting = true;
     initExtra = ''
-      PATH="~/.local/bin:$PATH"
       source ~/.dotfiles/zshrc
     '';
   };

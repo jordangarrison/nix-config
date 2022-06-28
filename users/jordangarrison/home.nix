@@ -137,7 +137,7 @@ in
 
   programs.gpg = { enable = pkgs.stdenv.isLinux; };
 
-  services.gpg-agent = { enable = pkgs.stdenv.isLinux; };
+  # services.gpg-agent = { enable = pkgs.stdenv.isLinux; };
 
   programs.zsh = {
     enable = true;

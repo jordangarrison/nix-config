@@ -28,7 +28,7 @@ echo "$CONFIG_DIR"
 
 # copy new file to /etc/nixos unless $DRY_RUN is set
 if [ -z "$DRY_RUN" ]; then
-  home-manager switch -f "${CONFIG_DIR}/home.nix"
+  home-manager switch -v -f "${CONFIG_DIR}/home.nix"
 else
   echo "Dry Run"
 fi

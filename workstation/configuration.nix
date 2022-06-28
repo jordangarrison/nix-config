@@ -110,8 +110,8 @@ in
   # $ nix search wget
   environment.systemPackages = with pkgs; [
     # utilities
-    unstable.btop
     unstable.k9s
+    btop
     vim
     wget
     htop

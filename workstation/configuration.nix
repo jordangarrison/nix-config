@@ -152,12 +152,14 @@ in
     unstable.brave
     unstable.todoist
     alacritty
+    input-remapper
     firefox
     vlc
     nextcloud-client
     vscode
     gparted
     gnome.gnome-tweaks
+    gnome.gnome-remote-desktop
     gnome3.gnome-settings-daemon
     gnomeExtensions.appindicator
     gnomeExtensions.sound-output-device-chooser

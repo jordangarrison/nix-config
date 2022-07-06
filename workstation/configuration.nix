@@ -61,7 +61,6 @@ in
     desktopManager.gnome.enable = true;
   };
   services.gnome.gnome-keyring.enable = true;
-  services.compton.enable = true;
 
   # Env vars
   # environment.variables = {
@@ -82,6 +81,16 @@ in
 
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
+
+  # Enable Code Server
+  services.code-server = {
+    enable = true;
+    user = "jordangarrison";
+    group = "users";
+    extraArguments = [ "--disable-telemetry" ];
+    host = "0.0.0.0";
+    auth = "none";
+  };
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.jordangarrison = {
@@ -134,7 +143,6 @@ in
 
     # Languages, runtimes and SDKs
     unstable.go
-    unstable.deno
     unstable.nodejs
     python39Full
     nixpkgs-fmt

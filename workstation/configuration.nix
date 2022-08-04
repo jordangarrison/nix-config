@@ -92,6 +92,19 @@ in
     auth = "none";
   };
 
+  services.avahi = {
+    enable = true;
+    nssmdns = true;
+    wideArea = true;
+    openFirewall = true;
+    publish = {
+      enable = true;
+      workstation = true;
+      addresses = true;
+      userServices = true;
+    };
+  };
+
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.jordangarrison = {
     isNormalUser = true;
@@ -162,6 +175,7 @@ in
     alacritty
     input-remapper
     firefox
+    uxplay
     vlc
     nextcloud-client
     vscode

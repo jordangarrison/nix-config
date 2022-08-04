@@ -238,8 +238,8 @@ in
     '';
 
     # K9s
-    ".config/k9s/config.yml".source = ./tools/k9s/config.yml;
-    ".config/k9s/skin.yml".source = ./tools/k9s/skin.yml;
+    # ".config/k9s/config.yml".source = ./tools/k9s/config.yml;
+    # ".config/k9s/skin.yml".source = ./tools/k9s/skin.yml;
 
     # Btop
     ".config/btop/btop.conf".source = ./tools/btop/btop.conf.yml;

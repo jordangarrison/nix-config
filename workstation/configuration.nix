@@ -274,5 +274,12 @@ in
       options = [ "x-systemd.automount" ];
     };
   };
+
+  # Workarounds
+
+  # Network Manager breaks nixos rebuild switch
+  # https://discourse.nixos.org/t/how-to-disable-networkmanager-wait-online-service-in-the-configuration-file/19963/4
+  # https://github.com/NixOS/nixpkgs/issues/180175
+  systemd.services.NetworkManager-wait-online.enable = false;
 }
 

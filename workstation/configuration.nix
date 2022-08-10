@@ -172,13 +172,13 @@ in
     unstable._1password
     unstable.brave
     unstable.todoist
+    unstable.vscode
     alacritty
-    input-remapper
     firefox
+    input-remapper
+    nextcloud-client
     uxplay
     vlc
-    nextcloud-client
-    vscode
     gparted
     gnome.gnome-tweaks
     gnome.gnome-remote-desktop

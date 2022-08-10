@@ -145,6 +145,7 @@ in
     enableSyntaxHighlighting = true;
     initExtra = ''
       source ~/.dotfiles/zshrc
+      [[ "$TERM_PROGRAM" == "vscode" ]] && . "$(code --locate-shell-integration-path zsh)"
     '';
   };
 

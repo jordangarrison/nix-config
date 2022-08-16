@@ -179,6 +179,7 @@ in
     nextcloud-client
     uxplay
     vlc
+    xsel
     gparted
     gnome.gnome-tweaks
     gnome.gnome-remote-desktop

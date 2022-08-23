@@ -146,6 +146,13 @@ in
     initExtra = ''
       source ~/.dotfiles/zshrc
       [[ "$TERM_PROGRAM" == "vscode" ]] && . "$(code --locate-shell-integration-path zsh)"
+      # Nix
+      if [[ "$(uname -s)" == "Darwin" ]] ; then
+        if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+            . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+        fi
+      fi
+      # End Nix
     '';
   };
 

@@ -82,6 +82,7 @@ in
       jq
       k9s
       mosh
+      nmap
       pandoc
       ripgrep
       sqlite

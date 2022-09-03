@@ -61,10 +61,10 @@ in
   home.packages = with pkgs;
     [
       # Apps
-      unstable.dbeaver
       alacritty
       arandr
       element-desktop
+      dbeaver
       # doom-emacs
 
       # Utilities
@@ -88,7 +88,6 @@ in
       sqlite
       starship
       tree
-      wally-cli
 
       # Fonts
       source-code-pro
@@ -101,7 +100,6 @@ in
       pinentry
 
       # Language Servers and runtimes
-      deno
       gcc
       go
       gocode
@@ -116,12 +114,15 @@ in
       rnix-lsp
       rust-analyzer
     ] ++ (if pkgs.stdenv.isDarwin then
-      [ unstable.nodejs ]
+      [
+        unstable.nodejs
+      ]
     else [
       unstable.comixcursors
       unstable.discord
       apple-music-electron
       barrier
+      deno
       dig
       gnaural
       lens
@@ -130,6 +131,7 @@ in
       python39Full
       spotify
       slack
+      wally-cli
       xcb-util-cursor
       xclip
     ]

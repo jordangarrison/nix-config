@@ -253,7 +253,7 @@ in
     # ".config/k9s/skin.yml".source = ./tools/k9s/skin.yml;
 
     # Btop
-    ".config/btop/btop.conf".source = ./tools/btop/btop.conf.yml;
+    # ".config/btop/btop.conf".source = ./tools/btop/btop.conf.yml;
 
     # Scripts
     ".local/bin/tmux-cht.sh".source = ./tools/scripts/tmux-cht.sh;

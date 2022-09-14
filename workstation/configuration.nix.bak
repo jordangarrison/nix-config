@@ -11,21 +11,15 @@ in
 {
   imports = [
     # Include the results of the hardware scan.
-    # ./hardware-configuration.nix
-    ./hardware-configuration-endeavour-vm.nix
-    # ./hardware-configuration-endeavour-hw.nix
+    ./hardware-configuration.nix
     # VSCode Server
     (fetchTarball
       "https://github.com/msteen/nixos-vscode-server/tarball/master")
   ];
 
   # Use the systemd-boot EFI boot loader.
-  # If in a VM
-  boot.loader.grub.device = "/dev/sda";
-
-  # If physical device
-  # boot.loader.systemd-boot.enable = true;
-  # boot.loader.efi.canTouchEfiVariables = true;
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
 
   networking.hostName = "endeavour"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -110,8 +104,6 @@ in
       userServices = true;
     };
   };
-
-  services.qemuGuest.enable = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.jordangarrison = {

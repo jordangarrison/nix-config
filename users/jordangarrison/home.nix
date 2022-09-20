@@ -69,7 +69,6 @@ in
 
       # Utilities
       _1password
-      aws
       bat
       cargo
       diff-so-fancy
@@ -121,6 +120,7 @@ in
       unstable.comixcursors
       unstable.discord
       apple-music-electron
+      aws
       barrier
       deno
       dig

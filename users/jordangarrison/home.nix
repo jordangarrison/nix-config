@@ -68,6 +68,7 @@ in
       # doom-emacs
 
       # Utilities
+      unstable.helix
       _1password
       bat
       cargo
@@ -114,7 +115,7 @@ in
       rust-analyzer
     ] ++ (if pkgs.stdenv.isDarwin then
       [
-        unstable.nodejs
+        nodejs
       ]
     else [
       unstable.comixcursors

@@ -105,6 +105,7 @@ in
       gocode
       gopls
       godef
+      jdk11
       nixfmt
       nodePackages.bash-language-server
       nodePackages.vim-language-server
@@ -157,6 +158,15 @@ in
         fi
       fi
       # End Nix
+
+      # OktaAWSCLI
+      if [[ -f "$HOME/.okta/bash_functions" ]]; then
+          . "$HOME/.okta/bash_functions"
+      fi
+      if [[ -d "$HOME/.okta/bin" && ":$PATH:" != *":$HOME/.okta/bin:"* ]]; then
+          PATH="$HOME/.okta/bin:$PATH"
+      fi
+      # End OktaAWSCLI
     '';
   };
 

@@ -108,10 +108,11 @@ in
       jdk11
       nixfmt
       nodePackages.bash-language-server
-      nodePackages.vim-language-server
-      nodePackages.yaml-language-server
+      nodePackages.prettier
       nodePackages.typescript
       nodePackages.typescript-language-server
+      nodePackages.vim-language-server
+      nodePackages.yaml-language-server
       rnix-lsp
       rust-analyzer
     ] ++ (if pkgs.stdenv.isDarwin then

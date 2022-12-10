@@ -180,6 +180,19 @@ in
     '';
   };
 
+  programs.neovim = {
+    enable = true;
+    viAlias = true;
+    extraPackages = [
+      unstable.vimPlugins.telescope-nvim
+      unstable.vimPlugins.telescope-fzf-native-nvim
+      unstable.tree-sitter
+      pkgs.rnix-lsp
+      unstable.nodePackages.typescript
+      unstable.nodePackages.typescript-language-server
+    ];
+  };
+
   programs.tmux = {
     enable = true;
     aggressiveResize = true;

@@ -105,7 +105,6 @@ in
       gocode
       gopls
       godef
-      jdk11
       nixfmt
       nodePackages.bash-language-server
       nodePackages.prettier
@@ -128,6 +127,7 @@ in
       deno
       dig
       gnaural
+      jdk11
       lens
       obs-studio
       pavucontrol
@@ -159,6 +159,9 @@ in
         fi
       fi
       # End Nix
+
+      # java
+      export PATH="/opt/homebrew/opt/openjdk@11/bin:$PATH" 
 
       # OktaAWSCLI
       if [[ -f "$HOME/.okta/bash_functions" ]]; then

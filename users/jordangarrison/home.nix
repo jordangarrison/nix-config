@@ -70,6 +70,7 @@ in
       # Utilities
       unstable.helix
       _1password
+      awscli
       bat
       cargo
       diff-so-fancy
@@ -81,12 +82,17 @@ in
       httpie
       jq
       k9s
+      kubectl
+      kubernetes-helm-wrapped
+      kustomize
       mosh
       nmap
       pandoc
       ripgrep
       sqlite
       starship
+      terraform
+      terraform-docs
       tree
 
       # Fonts
@@ -122,7 +128,7 @@ in
       unstable.comixcursors
       unstable.discord
       apple-music-electron
-      aws
+      # aws
       barrier
       deno
       dig
@@ -185,7 +191,7 @@ in
 
   programs.neovim = {
     enable = true;
-    viAlias = true;
+    # viAlias = true;
     extraPackages = [
       unstable.vimPlugins.telescope-nvim
       unstable.vimPlugins.telescope-fzf-native-nvim
@@ -261,6 +267,9 @@ in
   };
 
   home.file = {
+    # # NVIM config
+    # ".config/nvim/init.lua".source = ./tools/nvim/init.lua;
+
     # Cobra CLI
     ".cobra.yaml".text = ''
       author: Jordan Garrison <dev@jordangarrison.dev>

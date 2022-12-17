@@ -6,31 +6,6 @@ let
     {
       config = config.nixpkgs.config;
     };
-  ###################################################################
-  # Currently broken, need to get this updates with new doom cli
-  ###################################################################
-  # doom-emacs = pkgs.callPackage
-  #   (builtins.fetchTarball {
-  #     url =
-  #       "https://github.com/nix-community/nix-doom-emacs/archive/master.tar.gz";
-  #   })
-  #   {
-  #     doomPrivateDir = ./tools/doom.d;
-
-  #     # This is currently broken so commenting out
-  #     # dependencyOverrides = {
-  #     #   "emacs-overlay" = (builtins.fetchTarball {
-  #     #     url =
-  #     #       "https://github.com/nix-community/emacs-overlay/archive/master.tar.gz";
-  #     #   });
-  #     # };
-  #     # Look at Issue #394
-  #     emacsPackagesOverlay = self: super: {
-  #       gitignore-mode = pkgs.emacsPackages.git-modes;
-  #       gitconfig-mode = pkgs.emacsPackages.git-modes;
-  #     };
-  #   };
-  ###################################################################
 in
 {
   nixpkgs.config.allowUnfree = true;

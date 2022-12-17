@@ -157,6 +157,14 @@ Version 2019-11-04"
 ;; (map! :leader :desc "Blacken Region" "m p r" #'python-black-region)
 ;; (map! :leader :desc "Blacken Statement" "m p s" #'python-black-statement)
 
+;; accept completion from copilot and fallback to company
+(use-package! copilot
+  :hook (prog-mode . copilot-mode)
+  :bind (("C-TAB" . 'copilot-accept-completion-by-word)
+         ("C-<tab>" . 'copilot-accept-completion-by-word)
+         :map copilot-completion-map
+         ("<tab>" . 'copilot-accept-completion)
+         ("TAB" . 'copilot-accept-completion)))
 
 ;;
 ;; JS Prettier mode

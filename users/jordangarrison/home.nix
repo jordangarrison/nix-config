@@ -65,6 +65,7 @@ in
       arandr
       element-desktop
       dbeaver
+      emacs
       # doom-emacs
 
       # Utilities
@@ -128,7 +129,6 @@ in
       unstable.comixcursors
       unstable.discord
       apple-music-electron
-      # aws
       barrier
       deno
       dig
@@ -191,7 +191,7 @@ in
 
   programs.neovim = {
     enable = true;
-    # viAlias = true;
+    viAlias = true;
     extraPackages = [
       unstable.vimPlugins.telescope-nvim
       unstable.vimPlugins.telescope-fzf-native-nvim
@@ -200,6 +200,9 @@ in
       unstable.nodePackages.typescript
       unstable.nodePackages.typescript-language-server
     ];
+    extraConfig = ''
+      luafile ${./tools/nvim/jag.lua}
+    '';
   };
 
   programs.tmux = {
@@ -267,8 +270,10 @@ in
   };
 
   home.file = {
-    # # NVIM config
-    # ".config/nvim/init.lua".source = ./tools/nvim/init.lua;
+    # doom emacs
+    ".doom.d/init.el".source = ./tools/doom.d/init.el;
+    ".doom.d/packages.el".source = ./tools/doom.d/packages.el;
+    ".doom.d/config.el".source = ./tools/doom.d/config.el;
 
     # Cobra CLI
     ".cobra.yaml".text = ''

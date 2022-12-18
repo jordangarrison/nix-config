@@ -49,10 +49,12 @@ in
       awscli
       bat
       cargo
+      cmake
       diff-so-fancy
       fd
       fzf
       git
+      gnumake
       gnutls
       hstr
       httpie
@@ -61,6 +63,7 @@ in
       kubectl
       kubernetes-helm-wrapped
       kustomize
+      libtool
       mosh
       nmap
       pandoc

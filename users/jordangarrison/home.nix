@@ -64,6 +64,7 @@ in
       kubernetes-helm-wrapped
       kustomize
       libtool
+      miller
       mosh
       nmap
       pandoc

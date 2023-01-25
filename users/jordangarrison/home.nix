@@ -45,6 +45,7 @@ in
 
       # Utilities
       unstable.helix
+      unstable.ouch
       _1password
       awscli
       bat

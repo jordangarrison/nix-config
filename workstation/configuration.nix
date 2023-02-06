@@ -147,6 +147,7 @@ in
     htop
     git
     gh
+    glibc
     diff-so-fancy
     zsh
     starship

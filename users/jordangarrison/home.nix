@@ -93,6 +93,9 @@ in
       gopls
       godef
       nixfmt
+      unstable.nodePackages.aws-cdk
+      nodePackages.cdk8s-cli
+      nodePackages.cdktf-cli
       nodePackages.bash-language-server
       nodePackages.prettier
       nodePackages.typescript

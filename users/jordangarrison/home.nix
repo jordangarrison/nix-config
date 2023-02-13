@@ -93,7 +93,7 @@ in
       gopls
       godef
       nixfmt
-      unstable.nodePackages.aws-cdk
+      # unstable.nodePackages.aws-cdk
       nodePackages.cdk8s-cli
       nodePackages.cdktf-cli
       nodePackages.bash-language-server
@@ -111,7 +111,6 @@ in
     else [
       unstable.comixcursors
       unstable.discord
-      apple-music-electron
       barrier
       deno
       dig

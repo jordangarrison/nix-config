@@ -104,6 +104,7 @@ in
       nodePackages.yaml-language-server
       rnix-lsp
       rust-analyzer
+      yarn
     ] ++ (if pkgs.stdenv.isDarwin then
       [
         nodejs

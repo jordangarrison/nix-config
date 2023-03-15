@@ -269,6 +269,16 @@ in
 
   # Docker
   virtualisation.docker.enable = true;
+  # Docker services
+  virtualisation.oci-containers = {
+    backend = "docker";
+    containers = {
+      "jsoncrack" = {
+        image = "shokohsc/jsoncrack";
+        ports = [ "8888:8080" ];
+      };
+    };
+  };
 
   # VSCode Server
   services.vscode-server.enable = true;

@@ -161,6 +161,9 @@ in
           PATH="$HOME/.okta/bin:$PATH"
       fi
       # End OktaAWSCLI
+
+      # nix scripts
+      export PATH="$HOME/.local/bin:$PATH"
     '';
   };
 

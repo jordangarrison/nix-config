@@ -163,7 +163,7 @@ in
       # End OktaAWSCLI
 
       # nix scripts
-      export PATH="$HOME/.local/bin:$PATH"
+      export PATH="~/.local/bin:$PATH"
     '';
   };
 

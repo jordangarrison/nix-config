@@ -286,5 +286,8 @@ in
     ".tmux-cht-languages".source = ./tools/scripts/tmux-cht-languages.txt;
     ".tmux-cht-commands".source = ./tools/scripts/tmux-cht-commands.txt;
     ".local/bin/okaws".source = ./tools/scripts/awsokta.sh;
+    ".config/nix/nix.conf".text = ''
+      experimental-features = nix-command flakes
+    '';
   };
 }

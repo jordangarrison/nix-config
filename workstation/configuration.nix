@@ -7,8 +7,7 @@
 let
   unstableTarball = fetchTarball
     "https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz";
-in
-{
+in {
   imports = [
     # Include the results of the hardware scan.
     # ./hardware-configuration.nix
@@ -229,6 +228,9 @@ in
   # # networking.firewall.allowedUDPPorts = [ ... ];
   # Or disable the firewall altogether.
   networking.firewall.enable = false;
+  networking.extraHosts = ''
+    127.0.0.1 www.milesplit.local
+  '';
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions

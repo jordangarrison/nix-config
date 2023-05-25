@@ -47,7 +47,7 @@ in
       unstable.helix
       unstable.ouch
       _1password
-      awscli
+      awscli2
       bat
       cargo
       cmake

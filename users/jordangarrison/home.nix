@@ -86,6 +86,7 @@ in {
       pinentry
 
       # Language Servers and runtimes
+      unstable.terraform-ls
       gcc
       go
       gocode

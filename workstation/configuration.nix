@@ -7,7 +7,8 @@
 let
   unstableTarball = fetchTarball
     "https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz";
-in {
+in
+{
   imports = [
     # Include the results of the hardware scan.
     # ./hardware-configuration.nix
@@ -124,6 +125,8 @@ in {
     shell = pkgs.zsh;
   };
 
+  nix.settings.trusted-users = [ "root" "jordangarrison" ];
+
   hardware.keyboard.zsa.enable = true;
 
   # Allow unfree packages
@@ -196,6 +199,8 @@ in {
     gnomeExtensions.sound-output-device-chooser
     gnomeExtensions.clipboard-indicator
     gnomeExtensions.system-monitor
+
+    (import (fetchTarball https://github.com/cachix/devenv/archive/v0.6.2.tar.gz)).default
   ];
 
   # Some programs need SUID wrappers, can be configured further or are

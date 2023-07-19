@@ -43,6 +43,7 @@ in {
       # Utilities
       unstable.helix
       unstable.lapce
+      unstable.okta-aws-cli
       unstable.ouch
       _1password
       awscli2

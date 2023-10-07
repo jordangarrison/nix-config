@@ -43,6 +43,7 @@ in {
       # Utilities
       unstable.helix
       unstable.lapce
+      unstable.neovim
       unstable.okta-aws-cli
       unstable.ouch
       _1password
@@ -172,21 +173,13 @@ in {
     '';
   };
 
-  programs.neovim = {
-    enable = true;
-    viAlias = true;
-    extraPackages = [
-      unstable.vimPlugins.telescope-nvim
-      unstable.vimPlugins.telescope-fzf-native-nvim
-      unstable.tree-sitter
-      pkgs.rnix-lsp
-      unstable.nodePackages.typescript
-      unstable.nodePackages.typescript-language-server
-    ];
-    extraConfig = ''
-      luafile ${./tools/nvim/jag.lua}
-    '';
-  };
+  # programs.neovim = {
+  #   enable = true;
+  #   viAlias = true;
+  #   extraConfig = ''
+  #     luafile ${./tools/nvim/jag.lua}
+  #   '';
+  # };
 
   programs.tmux = {
     enable = true;
@@ -257,6 +250,9 @@ in {
     ".doom.d/init.el".source = ./tools/doom.d/init.el;
     ".doom.d/packages.el".source = ./tools/doom.d/packages.el;
     ".doom.d/config.el".source = ./tools/doom.d/config.el;
+
+    # neovim
+    ".config/nvim/init.lua".source = ./tools/nvim/jag.lua;
 
     # Cobra CLI
     ".cobra.yaml".text = ''

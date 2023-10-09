@@ -136,6 +136,7 @@ in
 
   # NixOs Sepecific settings
   nix.settings.trusted-users = [ "root" "jordangarrison" ];
+  # https://jorel.dev/NixOS4Noobs/garbage.html
   nix.gc = {
     automatic = true;
     dates = "03:15";

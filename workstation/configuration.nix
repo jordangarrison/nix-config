@@ -134,7 +134,13 @@ in
     shell = pkgs.zsh;
   };
 
+  # NixOs Sepecific settings
   nix.settings.trusted-users = [ "root" "jordangarrison" ];
+  nix.gc = {
+    automatic = true;
+    dates = "03:15";
+    options = "--delete-older-than 30d";
+  };
 
   hardware.keyboard.zsa.enable = true;
 

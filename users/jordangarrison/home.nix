@@ -113,10 +113,9 @@ in {
       rnix-lsp
       rust-analyzer
       yarn
-    ] ++ (if pkgs.stdenv.isDarwin then [
-      unstable.karabiner-elements
-      xquartz
-    ] else [
+    ] ++ (if pkgs.stdenv.isDarwin then
+      [ unstable.karabiner-elements ]
+    else [
       unstable.comixcursors
       unstable.discord
       barrier

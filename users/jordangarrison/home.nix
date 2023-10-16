@@ -114,7 +114,7 @@ in {
       rust-analyzer
       yarn
     ] ++ (if pkgs.stdenv.isDarwin then
-      [ nodejs ]
+      [ unstable.karabiner-elements ]
     else [
       unstable.comixcursors
       unstable.discord

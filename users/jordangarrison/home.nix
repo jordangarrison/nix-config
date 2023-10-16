@@ -30,6 +30,11 @@ in {
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 
+  nix = with pkgs; {
+    package = nixFlakes;
+    settings.experimental-features = [ "nix-command" "flakes" ];
+  };
+
   home.packages = with pkgs;
     [
       # Apps
@@ -95,6 +100,7 @@ in {
       gopls
       godef
       nixfmt
+      unstable.nodejs
       # unstable.nodePackages.aws-cdk
       nodePackages.cdk8s-cli
       nodePackages.cdktf-cli
@@ -281,8 +287,8 @@ in {
     ".tmux-cht-languages".source = ./tools/scripts/tmux-cht-languages.txt;
     ".tmux-cht-commands".source = ./tools/scripts/tmux-cht-commands.txt;
     ".local/bin/okaws".source = ./tools/scripts/awsokta.sh;
-    ".config/nix/nix.conf".text = ''
-      experimental-features = nix-command flakes
-    '';
+    # ".config/nix/nix.conf".text = ''
+    #   experimental-features = nix-command flakes
+    # '';
   };
 }

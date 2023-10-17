@@ -7,8 +7,7 @@
 let
   unstableTarball = fetchTarball
     "https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz";
-in
-{
+in {
   imports = [
     # Include the results of the hardware scan.
     # ./hardware-configuration.nix
@@ -216,7 +215,8 @@ in
     gnomeExtensions.clipboard-indicator
     gnomeExtensions.system-monitor
 
-    (import (fetchTarball https://github.com/cachix/devenv/archive/v0.6.2.tar.gz)).default
+    (import (fetchTarball
+      "https://github.com/cachix/devenv/archive/v0.6.2.tar.gz")).default
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -238,6 +238,9 @@ in
 
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
+  services.openssh.forwardX11 = true;
+  programs.ssh.forwardX11 = true;
+  programs.ssh.setXAuthLocation = true;
 
   # Enable shairport-sync.
   # services.shairport-sync = {

@@ -70,3 +70,7 @@
 
 (package! copilot
   :recipe (:host github :repo "zerolfx/copilot.el" :files ("*.el" "dist")))
+
+
+(package! git-link
+  :recipe (:host github :repo "sshaw/git-link"))

@@ -165,8 +165,8 @@
        (web +html +css +lsp)              ; the tubes
 
        :os
-       (:if IS-MAC macos)
-       tty
+       ;; (:if IS-MAC macos)
+       ;; tty
 
        :email
        ;;(mu4e +gmail)

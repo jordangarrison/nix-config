@@ -145,6 +145,8 @@ Version 2019-11-04"
 ;; Projectile
 ;;
 (setq projectile-project-search-path '("~/dev"))
+(setq projectile-git-fd-args "-0 -H --color=never --type file --exclude .git --strip-cwd-prefix")
+
 
 ;;
 ;; Python Black Formatter
@@ -212,9 +214,3 @@ Version 2019-11-04"
 (map! :leader :desc "Toggle theme" "j t" #'jag/toggle-theme)
 
 (map! :leader :desc "Format buffer" "m j f" #'cider-format-buffer)
-
-
-;;
-;; Tramp
-;;
-;; set up tramp to ignore ascii color codes when looking for files

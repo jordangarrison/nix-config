@@ -168,6 +168,7 @@ in {
       fi
       # End OktaAWSCLI
 
+      alias fd="fd --color=never"
       # dumb TERM
       [[ $TERM == dumb ]] && unsetopt zle && PS1='$ ' && return
     '';

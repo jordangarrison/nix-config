@@ -207,8 +207,14 @@ Version 2019-11-04"
   (interactive)
   (cond ((eq *jag-current-theme* *jag-theme-dark*) (jag/next-theme *jag-theme-light*))
         ((eq *jag-current-theme* *jag-theme-light*) (jag/next-theme *jag-theme-dark*))))
-        ;; ((eq *jag-current-theme
+;; ((eq *jag-current-theme
 
 (map! :leader :desc "Toggle theme" "j t" #'jag/toggle-theme)
 
 (map! :leader :desc "Format buffer" "m j f" #'cider-format-buffer)
+
+
+;;
+;; Tramp
+;;
+;; set up tramp to ignore ascii color codes when looking for files

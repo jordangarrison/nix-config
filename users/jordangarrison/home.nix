@@ -167,6 +167,9 @@ in {
           PATH="$HOME/.okta/bin:$PATH"
       fi
       # End OktaAWSCLI
+
+      # dumb TERM
+      [[ $TERM == dumb ]] && unsetopt zle && PS1='$ ' && return
     '';
   };
 

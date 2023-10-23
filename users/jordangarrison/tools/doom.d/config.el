@@ -147,6 +147,12 @@ Version 2019-11-04"
 (setq projectile-project-search-path '("~/dev"))
 (setq projectile-git-fd-args "-0 -H --color=never --type file --exclude .git --strip-cwd-prefix")
 
+;;
+;; Tramp
+;;
+;; (add-to-list 'tramp-connection-properties
+;;              (list (regexp-quote "/ssh:endeavour:")
+;;                    "remote-shell" "/run/current-system/sw/bin/zsh"))
 
 ;;
 ;; Python Black Formatter

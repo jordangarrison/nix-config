@@ -1,6 +1,9 @@
 { config, pkgs, ... }:
 
 {
+  imports = [ <nixpkgs/nixos/modules/virtualisation/amazon-image.nix> ];
+  ec2.hvm = true;
+
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.nix-user = {
     isNormalUser = true;
@@ -24,7 +27,7 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-    # utilities
+    # utilities - we don't actually need these we could just nix-shell -p them
     vim
     wget
     htop

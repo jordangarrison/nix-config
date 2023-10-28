@@ -174,6 +174,11 @@ Version 2019-11-04"
          ("<tab>" . 'copilot-accept-completion)
          ("TAB" . 'copilot-accept-completion)))
 
+;; kubernetes
+(use-package! kubernetes)
+(use-package! kubernetes-evil
+  :after kubernetes)
+
 ;;
 ;; JS Prettier mode
 ;;

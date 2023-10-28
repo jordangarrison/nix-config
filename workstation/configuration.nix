@@ -103,6 +103,7 @@ in
     user = "jordangarrison";
     group = "users";
     extraArguments = [ "--disable-telemetry" ];
+    extraGroups = [ "docker" ];
     host = "0.0.0.0";
     auth = "none";
   };

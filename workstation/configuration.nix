@@ -17,6 +17,16 @@ in
     # VSCode Server
     (fetchTarball
       "https://github.com/msteen/nixos-vscode-server/tarball/master")
+
+    # Users
+    ../users/jordangarrison.nix
+    ../users/mattwilliams.nix
+
+    # Modules
+    ../modules/code-server.nix
+    ../modules/docker.nix
+    ../modules/gnome-desktop.nix
+    ../modules/jenkins.nix
   ];
 
   # Use the systemd-boot EFI boot loader.
@@ -53,36 +63,6 @@ in
 
   # environment.pathsToLink = [ "/libexec" ];
 
-  # GUI
-  services.xserver = {
-    enable = true;
-    displayManager = {
-      gdm = {
-        enable = true;
-        # prevent autosuspend when no user is logged in
-        autoSuspend = false;
-      };
-    };
-    # Enable the GNOME Desktop Environment.
-    desktopManager.gnome.enable = true;
-  };
-  services.gnome.gnome-keyring.enable = true;
-  services.gnome.gnome-remote-desktop.enable = true;
-
-  # services.xserver.enable = true;
-  # services.xserver.displayManager.sddm.enable = true;
-  # services.xserver.desktopManager.plasma5.enable = true;
-
-  # services.xrdp.enable = true;
-  # services.xrdp.defaultWindowManager = "startplasma-x11";
-  # services.xrdp.openFirewall = true;
-
-  # Env vars
-  # environment.variables = {
-  #   # Set sandbox variable for gnome accounts to work
-  #   WEBKIT_FORCE_SANDBOX = "0";
-  # };
-
   # Configure keymap in X11
   # services.xserver.layout = "us";
   # services.xserver.xkbOptions = "eurosign:e";
@@ -97,16 +77,6 @@ in
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
 
-  # Enable Code Server
-  services.code-server = {
-    enable = true;
-    user = "jordangarrison";
-    group = "users";
-    extraArguments = [ "--disable-telemetry" ];
-    extraGroups = [ "docker" ];
-    host = "0.0.0.0";
-    auth = "none";
-  };
 
   services.avahi = {
     enable = true;
@@ -123,31 +93,6 @@ in
 
   services.qemuGuest.enable = true;
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users.jordangarrison = {
-    isNormalUser = true;
-    initialHashedPassword = "";
-    extraGroups = [
-      "wheel" # Enable ‘sudo’ for the user.
-      "docker"
-      "plugdev"
-    ];
-    shell = pkgs.zsh;
-  };
-
-  users.users.mattwilliams = {
-    isNormalUser = true;
-    initialHashedPassword = "";
-    extraGroups = [
-      "wheel" # Enable ‘sudo’ for the user.
-      "docker"
-    ];
-    shell = pkgs.zsh;
-    openssh.authorizedKeys.keys = [
-      "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC+oebBdFiGA+bAfSsy4CypRsyqB7gTHuCMIH9adpIl8Nqg/bDnl957PR0GeYiJOTJ3dTNniPOOdNHLw0XO3htkIid1x4xdBp3do43e7uiJ8hRcr8XQEK7dytUKfHVmKwX68AweT869qQJ+WwgVFFe3rZywq1HnMkl2O90RDRpjgoOfgOdToGYEK6qL4LsUD9Psd0GXL6Qfic1sokHXD9tgCKVSzj3QaYvJ74vKxIbE0uOgRpaZUJAxewcxjtc9V3ViabpsuadXgEOl9ctOK3siCSfSjioeo2ZAka5cNtsLtJaP/dDU+yDyJ5kxua8bxQgIRzPm6FC5KFEULeubQwg7 matt@williams-tech.net"
-    ];
-  };
-
   # NixOs Sepecific settings
   nix.settings.trusted-users = [ "root" "jordangarrison" ];
   # https://jorel.dev/NixOS4Noobs/garbage.html
@@ -157,7 +102,6 @@ in
     options = "--delete-older-than 30d";
   };
 
-  hardware.keyboard.zsa.enable = true;
 
   # Allow unfree packages
   nixpkgs.config = {
@@ -222,13 +166,6 @@ in
     vlc
     xsel
     gparted
-    gnome.gnome-tweaks
-    gnome.gnome-remote-desktop
-    gnome3.gnome-settings-daemon
-    gnomeExtensions.appindicator
-    gnomeExtensions.sound-output-device-chooser
-    gnomeExtensions.clipboard-indicator
-    gnomeExtensions.system-monitor
 
     (import (fetchTarball
       "https://github.com/cachix/devenv/archive/v0.6.2.tar.gz")).default
@@ -308,23 +245,6 @@ in
     '';
   };
 
-  # Docker
-  virtualisation.docker.enable = true;
-  # Docker services
-  virtualisation.oci-containers = {
-    backend = "docker";
-    containers = {
-      "jsoncrack" = {
-        image = "shokohsc/jsoncrack";
-        ports = [ "8888:8080" ];
-      };
-      "it-tools" = {
-        image = "ghcr.io/corentinth/it-tools:latest";
-        ports = [ "8889:80" ];
-      };
-    };
-  };
-
   # VSCode Server
   services.vscode-server.enable = true;
 
@@ -338,12 +258,6 @@ in
       fsType = "nfs";
       options = [ "x-systemd.automount" ];
     };
-  };
-
-  # Testing out Jenkins
-  services.jenkins = {
-    enable = true;
-    port = 7878;
   };
 
   # Workarounds

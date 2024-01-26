@@ -2,20 +2,23 @@
 
 let
   unstable = import
-    (fetchTarball "https://nixos.org/channels/nixos-unstable/nixexprs.tar.xz") {
+    (fetchTarball "https://nixos.org/channels/nixos-unstable/nixexprs.tar.xz")
+    {
       config = config.nixpkgs.config;
     };
-in {
+in
+{
   nixpkgs.config.allowUnfree = true;
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
   home.username =
     if pkgs.stdenv.isLinux then "jordangarrison" else "jordan.garrison";
   # temporary hack for work
-  home.homeDirectory = if pkgs.stdenv.isLinux then
-    "/home/jordangarrison"
-  else
-    "/Users/jordan.garrison";
+  home.homeDirectory =
+    if pkgs.stdenv.isLinux then
+      "/home/jordangarrison"
+    else
+      "/Users/jordan.garrison";
 
   # This value determines the Home Manager release that your
   # configuration is compatible with. This helps avoid breakage
@@ -75,6 +78,7 @@ in {
       libtool
       miller
       mosh
+      nixpacks
       nmap
       pandoc
       ripgrep

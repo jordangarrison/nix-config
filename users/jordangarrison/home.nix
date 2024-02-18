@@ -99,6 +99,9 @@ in
       pinentry
 
       # Language Servers and runtimes
+      unstable.nodejs
+      unstable.ruby_3_2
+      unstable.rubyPackages_3_2.rails
       unstable.terraform-ls
       gcc
       go
@@ -106,7 +109,6 @@ in
       gopls
       godef
       nixfmt
-      unstable.nodejs
       # unstable.nodePackages.aws-cdk
       nodePackages.cdk8s-cli
       nodePackages.cdktf-cli

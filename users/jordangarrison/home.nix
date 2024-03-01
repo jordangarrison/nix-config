@@ -100,6 +100,7 @@ in
 
       # Language Servers and runtimes
       unstable.terraform-ls
+      unstable.bun
       gcc
       go
       gocode

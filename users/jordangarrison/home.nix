@@ -191,6 +191,7 @@ in
   };
 
   # programs.neovim = {
+  #   package = unstable.neovim;
   #   enable = true;
   #   viAlias = true;
   #   extraConfig = ''

@@ -99,7 +99,7 @@ in
   nix.gc = {
     automatic = true;
     dates = "03:15";
-    options = "--delete-older-than 30d";
+    options = "--delete-older-than 15d";
   };
 
 
@@ -168,7 +168,7 @@ in
     gparted
 
     (import (fetchTarball
-      "https://github.com/cachix/devenv/archive/v0.6.2.tar.gz")).default
+      "https://install.devenv.sh/latest")).default
   ];
 
   # Some programs need SUID wrappers, can be configured further or are

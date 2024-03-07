@@ -32,8 +32,10 @@ sed -f "$SECRET_DIR"/"${SELECTION}.sed" "$CONFIG_DIR"/configuration.nix >"$CONFI
 
 # copy new file to /etc/nixos unless $DRY_RUN is set
 if [ -z "$DRY_RUN" ]; then
-
+  echo sudo nixos-rebuild switch -I nixos-config=$CONFIG_DIR/.tmp.configuration.nix
   sudo nixos-rebuild switch -I nixos-config=$CONFIG_DIR/.tmp.configuration.nix
+  # echo sudo nixos-rebuild switch --flake "${CONFIG_DIR}/#${SELECTION}"
+  # sudo nixos-rebuild switch --flake "${CONFIG_DIR}/#${SELECTION}"
 else
   echo "Dry run, not copying new configuration to /etc/nixos"
 fi

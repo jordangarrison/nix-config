@@ -32,9 +32,9 @@ in
       direnv.enable = true;
       lightline.enable = true;
     };
-    extraPlugins = with pkgs.vimPlugins; [
-      vim-nix
-      codeium-vim
-    ];
+    # extraPlugins = with pkgs.vimPlugins; [
+    #   vim-nix
+    #   codeium-vim
+    # ];
   };
 }

@@ -105,10 +105,9 @@ in
       unstable.terraform-ls
       unstable.bun
       gcc
-      go
-      gocode
-      gopls
-      godef
+      unstable.go
+      unstable.gopls
+      unstable.godef
       nixfmt
       unstable.nodejs
       # unstable.nodePackages.aws-cdk

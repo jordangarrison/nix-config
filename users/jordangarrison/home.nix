@@ -2,12 +2,10 @@
 
 let
   unstable = import
-    (fetchTarball "https://nixos.org/channels/nixos-unstable/nixexprs.tar.xz")
-    {
+    (fetchTarball "https://nixos.org/channels/nixos-unstable/nixexprs.tar.xz") {
       config = config.nixpkgs.config;
     };
-in
-{
+in {
   imports = [
     # ./tools/nvim/nvim.nix
   ];
@@ -17,11 +15,10 @@ in
   home.username =
     if pkgs.stdenv.isLinux then "jordangarrison" else "jordan.garrison";
   # temporary hack for work
-  home.homeDirectory =
-    if pkgs.stdenv.isLinux then
-      "/home/jordangarrison"
-    else
-      "/Users/jordan.garrison";
+  home.homeDirectory = if pkgs.stdenv.isLinux then
+    "/home/jordangarrison"
+  else
+    "/Users/jordan.garrison";
 
   # This value determines the Home Manager release that your
   # configuration is compatible with. This helps avoid breakage
@@ -51,6 +48,7 @@ in
       # doom-emacs
 
       # Utilities
+      unstable.aws-sso-cli
       unstable.gptcommit
       unstable.helix
       unstable.lapce
@@ -61,7 +59,7 @@ in
       awscli2
       bat
       cachix
-      devenv
+      #devenv
       cargo
       cmake
       diff-so-fancy

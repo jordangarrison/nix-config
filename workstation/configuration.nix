@@ -7,8 +7,7 @@
 let
   unstableTarball = fetchTarball
     "https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz";
-in
-{
+in {
   imports = [
     # Include the results of the hardware scan.
     # ./hardware-configuration.nix
@@ -23,7 +22,7 @@ in
     ../users/mattwilliams.nix
 
     # Modules
-    ../modules/code-server.nix
+    # ../modules/code-server.nix
     ../modules/docker.nix
     ../modules/gnome-desktop.nix
     ../modules/jenkins.nix
@@ -77,7 +76,6 @@ in
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
 
-
   services.avahi = {
     enable = true;
     nssmdns = true;
@@ -102,7 +100,6 @@ in
     options = "--delete-older-than 15d";
   };
 
-
   # Allow unfree packages
   nixpkgs.config = {
     allowUnfree = true;
@@ -123,7 +120,7 @@ in
     htop
     git
     gh
-    glibc
+    # glibc
     diff-so-fancy
     zsh
     starship
@@ -142,7 +139,6 @@ in
     # Languages, runtimes and SDKs
     unstable.go
     unstable.nodejs
-    python39Full
     nixpkgs-fmt
     # google-cloud-sdk
 
@@ -153,22 +149,21 @@ in
     fira-code
 
     # Desktop
-    unstable._1password-gui
-    unstable._1password
-    unstable.brave
-    unstable.todoist
+    _1password-gui
+    _1password
+    # unstable.brave
+    # unstable.todoist
     unstable.vscode
     alacritty
     firefox
     input-remapper
     nextcloud-client
-    uxplay
+    # uxplay
     vlc
     xsel
     gparted
 
-    (import (fetchTarball
-      "https://install.devenv.sh/latest")).default
+    (import (fetchTarball "https://install.devenv.sh/latest")).default
   ];
 
   # Some programs need SUID wrappers, can be configured further or are

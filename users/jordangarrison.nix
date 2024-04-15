@@ -13,6 +13,8 @@
     shell = pkgs.zsh;
   };
 
+  programs.zsh.enable = true;
+
   # Let me use the moonlander plz
   hardware.keyboard.zsa.enable = true;
 }

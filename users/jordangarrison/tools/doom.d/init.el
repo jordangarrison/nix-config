@@ -145,7 +145,7 @@
        ;;ocaml             ; an objective camel
        org               ; organize your plain life in plain text
        ;;perl              ; write code no one else can comprehend
-       ;; php               ; perl's insecure younger brother
+       php               ; perl's insecure younger brother
        ;;plantuml          ; diagrams for confusing people more
        ;;purescript        ; javascript, but functional
        ;; python            ; beautiful is better than ugly

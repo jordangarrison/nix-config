@@ -159,7 +159,7 @@ in {
     input-remapper
     nextcloud-client
     # uxplay
-    vlc
+    # vlc
     xsel
     gparted
 

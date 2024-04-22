@@ -5,10 +5,9 @@
 { config, pkgs, ... }:
 
 {
-  imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-    ];
+  imports = [ # Include the results of the hardware scan.
+    ./hardware-configuration.nix
+  ];
 
   # Bootloader.
   boot.loader.grub.enable = true;
@@ -84,10 +83,11 @@
     isNormalUser = true;
     description = "jordangarrison";
     extraGroups = [ "networkmanager" "wheel" ];
-    packages = with pkgs; [
-      firefox
-    #  thunderbird
-    ];
+    packages = with pkgs;
+      [
+        firefox
+        #  thunderbird
+      ];
   };
 
   # Allow unfree packages
@@ -118,6 +118,7 @@
 
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
+  services.grocy.enable = true;
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];

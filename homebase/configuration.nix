@@ -118,7 +118,10 @@
 
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
-  services.grocy.enable = true;
+  services.grocy = {
+    enable = true;
+    hostName = "homebase";
+  };
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];

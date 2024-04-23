@@ -40,6 +40,9 @@ in {
 
   home.packages = with pkgs;
     [
+      # nix utilities
+      unstable.nh
+
       # Apps
       alacritty
       arandr

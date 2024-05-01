@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
 
 # Read in the command line arguments and set the $DRY_RUN flag
-while getopts ":d" opt; do
+while getopts ":du" opt; do
   case $opt in
   d)
     DRY_RUN=true
+    shift
+    ;;
+  u)
+    UPGRADE="--upgrade"
     shift
     ;;
   \?)
@@ -32,8 +36,8 @@ sed -f "$SECRET_DIR"/"${SELECTION}.sed" "$CONFIG_DIR"/configuration.nix >"$CONFI
 
 # copy new file to /etc/nixos unless $DRY_RUN is set
 if [ -z "$DRY_RUN" ]; then
-  echo sudo nixos-rebuild switch -I nixos-config=$CONFIG_DIR/.tmp.configuration.nix
-  sudo nixos-rebuild switch -I nixos-config=$CONFIG_DIR/.tmp.configuration.nix
+  echo sudo nixos-rebuild switch -I nixos-config=$CONFIG_DIR/.tmp.configuration.nix ${UPGRADE}
+  sudo nixos-rebuild switch -I nixos-config=$CONFIG_DIR/.tmp.configuration.nix ${UPGRADE}
   # echo sudo nixos-rebuild switch --flake "${CONFIG_DIR}/#${SELECTION}"
   # sudo nixos-rebuild switch --flake "${CONFIG_DIR}/#${SELECTION}"
 else

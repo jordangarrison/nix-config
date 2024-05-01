@@ -277,3 +277,5 @@ Version 2019-11-04"
 (use-package! chatgpt
   :defer t
   :bind ("C-c q" . chatgpt-query))
+
+(setq auth-sources '("~/.authinfo"))

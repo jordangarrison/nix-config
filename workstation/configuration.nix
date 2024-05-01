@@ -25,7 +25,7 @@ in {
     # ../modules/code-server.nix
     ../modules/docker.nix
     ../modules/gnome-desktop.nix
-    ../modules/jenkins.nix
+    # ../modules/jenkins.nix
   ];
 
   # Use the systemd-boot EFI boot loader.
@@ -113,20 +113,14 @@ in {
   # $ nix search wget
   environment.systemPackages = with pkgs; [
     # utilities
-    unstable.k9s
-    btop
     vim
     wget
     htop
     git
-    gh
-    # glibc
-    diff-so-fancy
     zsh
     starship
     hstr
     dig
-    # fnm
     bat
     jq
     ripgrep
@@ -138,7 +132,7 @@ in {
 
     # Languages, runtimes and SDKs
     unstable.go
-    unstable.nodejs
+    nodejs
     nixpkgs-fmt
     # google-cloud-sdk
 
@@ -151,15 +145,11 @@ in {
     # Desktop
     _1password-gui
     _1password
-    # unstable.brave
-    # unstable.todoist
     unstable.vscode
     alacritty
-    firefox
+    # firefox
     input-remapper
     nextcloud-client
-    # uxplay
-    # vlc
     xsel
     gparted
 

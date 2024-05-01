@@ -53,6 +53,7 @@ in {
       # Utilities
       unstable.aws-sso-cli
       unstable.gptcommit
+      unstable.gh
       unstable.helix
       unstable.lapce
       unstable.neovim
@@ -89,6 +90,7 @@ in {
       terraform
       terraform-docs
       tree
+      up
 
       # Fonts
       source-code-pro

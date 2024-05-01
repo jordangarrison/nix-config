@@ -80,3 +80,6 @@
 
 (package! chatgpt
   :recipe (:host github :repo "joshcho/ChatGPT.el" :files ("dist" "*.el")))
+
+(package! org-readwise
+  :recipe (:type git :host sourcehut :repo "gloatingfiddle/org-readwise" :files ("*.el") :branch "main"))

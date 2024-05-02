@@ -27,52 +27,19 @@
 (setq doom-theme 'doom-nord)
 
 ;; doom dashboard configuration
-;; (let* ((banner '("                   ---.           ,-----,       --,              "
-;;                  "                  /|||||           |OOO0|      /OO0|             "
-;;                  "                  |/|||||           |OOO0|    /OOOO|             "
-;;                  "                   |/|||||           |OOO0|  /OOOO/              "
-;;                  "                    |/|||||           |OOO0|/OOOO/               "
-;;                  "              -------|/|||||---------  |OOOOOOOO/                "
-;;                  "             ///////////////////////||  |OOOOOO/                 "
-;;                  "            /||||||||||||||||||||||||||  |OOOO0|                 "
-;;                  "           ****************************   |00000|                "
-;;                  "                                           |OOO00|               "
-;;                  "                  ,-----                    |O0000|    |         "
-;;                  "                 /OOOOO/                     |00000/  /||        "
-;;                  "                /OOOOO/                       |000/  /||||       "
-;;                  "               /0OOOO/                         |0/  /||||/`      "
-;;                  "              /00OOO/                           /  /||||//       "
-;;                  ",-===========/000OO/                              //|||//        "
-;;                  "|0000OOOOOOOOOOOOO/                              //|||//         "
-;;                  " |00000OOOOOOOOOO/                              //|||/---------  "
-;;                  "  `*******/OOOOO/                              /|||||||||||||||| "
-;;                  "         /OOOOO/                              /|||||////////////;"
-;;                  "        /OOOOO/                              /||||/************' "
-;;                  "       /0OOOO/  |                           /||||//              "
-;;                  "      |00OOO/  *||                         /||||//               "
-;;                  "       |000/  *///|                       /||||//                "
-;;                  "        |0/  */////|                     /||||//                 "
-;;                  "         `    */////|                   *******                  "
-;;                  "               */////|                                           "
-;;                  "                */////|  =============================           "
-;;                  "                 */////|  |000OOOOOOOOOOOOOOOOOOOOOO/            "
-;;                  "                 ///////|  |00000OOOOOOOOOO0000OOOO/             "
-;;                  "                /////////|  `********`|OOOO|*******              "
-;;                  "               ////||//|//|            |OOOO|                    "
-;;                  "              ////||/ |/|//|            |0OOO|                   "
-;;                  "             ////||/   |/|//|            |00OO|                  "
-;;                  "             *//||/     |/|//|            |0000|                 "
-;;                  "              ****       ``***`            ****                  "))
-;;        (longest-line (apply #'max (mapcar #'length banner))))
-;;   (put-text-property
-;;    (point)
-;;    (dolist (line banner (point))
-;;      (insert (+doom-dashboard--center
-;;               +doom-dashboard--width
-;;               (concat line(make-string (max 0 (- longest-line (length line))) 32)))
-;;              "\n"))
-;;    'face 'doom-dashboard-banner))
-;; (setq +doom-dashboard-ascii-banner-fn #'nix-banner)
+(defun my-dashboard ()
+  (let* ((banner '("Emacs"))
+         (longest-line (apply #'max (mapcar #'length banner))))
+    (put-text-property
+     (point)
+     (dolist (line banner (point))
+       (insert (+doom-dashboard--center
+                +doom-dashboard--width
+                (concat line (make-string (max 0 (- longest-line (length line))) 32)))
+               "\n"))
+     'face 'doom-dashboard-banner)))
+
+(setq +doom-dashboard-ascii-banner-fn #'my-dashboard)
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!

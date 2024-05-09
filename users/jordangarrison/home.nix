@@ -48,6 +48,8 @@ in {
       arandr
       element-desktop
       emacs
+      emacsPackages.sqlite3
+      sqlite
       # doom-emacs
 
       # Utilities

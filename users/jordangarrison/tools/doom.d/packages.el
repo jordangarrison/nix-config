@@ -76,10 +76,12 @@
   :recipe (:host github :repo "sshaw/git-link"))
 
 
-(package! projectile :pin "d24b8173223fd0e10ecd4b5e0cfa676dfc3b90c4")
+;; (package! projectile :pin "d24b8173223fd0e10ecd4b5e0cfa676dfc3b90c4")
 
 (package! chatgpt
   :recipe (:host github :repo "joshcho/ChatGPT.el" :files ("dist" "*.el")))
 
 (package! org-readwise
   :recipe (:type git :host sourcehut :repo "gloatingfiddle/org-readwise" :files ("*.el") :branch "main"))
+
+(package! sqlite3)

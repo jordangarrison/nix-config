@@ -1,6 +1,8 @@
 { config, pkgs, lib, ... }:
 
 let
+  nixpkgs = import <nixpkgs> { };
+  home-manager = import <home-manager> { inherit config lib pkgs; };
   unstable = import
     (fetchTarball "https://nixos.org/channels/nixos-unstable/nixexprs.tar.xz") {
       config = config.nixpkgs.config;

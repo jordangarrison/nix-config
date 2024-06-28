@@ -24,7 +24,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-nord)
+(setq doom-theme 'doom-plain-dark)
 
 ;; doom dashboard configuration
 (defun my-dashboard ()
@@ -215,8 +215,8 @@ Version 2019-11-04"
 ;;
 ;; Toggle themes
 ;;
-(defvar *jag-theme-dark* 'doom-nord)
-(defvar *jag-theme-light* 'leuven)
+(defvar *jag-theme-dark* 'doom-plain-dark)
+(defvar *jag-theme-light* 'doom-plain)
 (defvar *jag-current-theme* *jag-theme-dark*)
 
 (defadvice load-theme (before theme-dont-propagate activate)

@@ -59,10 +59,12 @@ in {
       unstable.gptcommit
       unstable.gh
       unstable.helix
+      unstable.k9s
       unstable.lapce
       unstable.neovim
       unstable.nil
-      unstable.k9s
+      unstable.terraform
+      unstable.terraform-ls
       # unstable.okta-aws-cli
       _1password
       amazon-ecr-credential-helper
@@ -92,7 +94,6 @@ in {
       ripgrep
       sqlite
       starship
-      terraform
       terraform-docs
       tree
       up

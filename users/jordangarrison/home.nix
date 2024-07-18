@@ -96,7 +96,6 @@ in {
       terraform-docs
       tree
       up
-      jnv
 
       # Fonts
       source-code-pro

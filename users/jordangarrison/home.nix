@@ -61,6 +61,8 @@ in {
       unstable.helix
       unstable.lapce
       unstable.neovim
+      unstable.nil
+      unstable.k9s
       # unstable.okta-aws-cli
       _1password
       amazon-ecr-credential-helper
@@ -79,7 +81,6 @@ in {
       hstr
       httpie
       jq
-      k9s
       kubectl
       kubernetes-helm-wrapped
       kustomize
@@ -95,6 +96,7 @@ in {
       terraform-docs
       tree
       up
+      jnv
 
       # Fonts
       source-code-pro

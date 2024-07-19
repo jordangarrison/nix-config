@@ -63,7 +63,8 @@ in {
       unstable.lapce
       unstable.neovim
       unstable.nil
-      unstable.terraform
+      unstable.tenv
+      # unstable.terraform
       unstable.terraform-ls
       # unstable.okta-aws-cli
       _1password

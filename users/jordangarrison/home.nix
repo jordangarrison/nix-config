@@ -7,6 +7,10 @@ let
     (fetchTarball "https://nixos.org/channels/nixos-unstable/nixexprs.tar.xz") {
       config = config.nixpkgs.config;
     };
+  vscodeScriptPath = pkgs.writeTextFile {
+    name = "vscode";
+    text = builtins.readFile ./tools/scripts/vscode.sh;
+  };
 in {
   imports = [
     # ./tools/nvim/nvim.nix
@@ -175,6 +179,8 @@ in {
       alias fd="fd --color=never"
       # dumb TERM
       # [[ $TERM == dumb ]] && unsetopt zle && PS1='$ ' && return
+
+      source ${vscodeScriptPath}
     '';
   };
 

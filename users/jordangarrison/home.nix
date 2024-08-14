@@ -11,6 +11,10 @@ let
     name = "vscode";
     text = builtins.readFile ./tools/scripts/vscode.sh;
   };
+  borkedNsScriptPath = pkgs.writeTextFile {
+    name = "borked-ns";
+    text = builtins.readFile ./tools/scripts/borked-ns.sh;
+  };
 in {
   imports = [
     # ./tools/nvim/nvim.nix
@@ -181,6 +185,7 @@ in {
       # [[ $TERM == dumb ]] && unsetopt zle && PS1='$ ' && return
 
       source ${vscodeScriptPath}
+      source ${borkedNsScriptPath}
     '';
   };
 

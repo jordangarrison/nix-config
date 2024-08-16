@@ -178,7 +178,7 @@ in {
   services.openssh.forwardX11 = true;
   programs.ssh.forwardX11 = true;
   programs.ssh.setXAuthLocation = true;
-  programs.nix-ld.enable = true;
+  # programs.nix-ld.enable = true;
 
   # Enable shairport-sync.
   # services.shairport-sync = {

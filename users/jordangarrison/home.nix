@@ -63,18 +63,14 @@ in {
       # doom-emacs
 
       # Utilities
-      unstable.aws-sso-cli
-      unstable.gptcommit
+      # unstable.aws-sso-cli
       unstable.gh
       unstable.helix
       unstable.k9s
-      unstable.lapce
       unstable.neovim
       unstable.nil
       unstable.tenv
-      # unstable.terraform
       unstable.terraform-ls
-      # unstable.okta-aws-cli
       _1password
       amazon-ecr-credential-helper
       awscli2
@@ -89,6 +85,8 @@ in {
       git
       gnumake
       gnutls
+      gptcommit
+      grip
       hstr
       httpie
       jq
@@ -139,6 +137,7 @@ in {
     ] ++ (if pkgs.stdenv.isDarwin then
       [ ]
     else [
+      unstable.aws-sso-cli
       unstable.comixcursors
       unstable.discord
       barrier

@@ -216,7 +216,7 @@ Version 2019-11-04"
 ;; Toggle themes
 ;;
 (defvar *jag-theme-dark* 'doom-nord)
-(defvar *jag-theme-light* 'leuven)
+(defvar *jag-theme-light* 'doom-solarized-light)
 (defvar *jag-current-theme* *jag-theme-dark*)
 
 (defadvice load-theme (before theme-dont-propagate activate)

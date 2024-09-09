@@ -85,3 +85,5 @@
   :recipe (:type git :host sourcehut :repo "gloatingfiddle/org-readwise" :files ("*.el") :branch "main"))
 
 (package! sqlite3)
+
+(package! vcl-mode)

@@ -73,6 +73,7 @@ in {
       unstable.terraform-ls
       _1password
       amazon-ecr-credential-helper
+      asdf-vm
       awscli2
       bat
       cachix

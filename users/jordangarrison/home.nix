@@ -86,7 +86,7 @@ in {
       git
       gnumake
       gnutls
-      gptcommit
+      # gptcommit
       hstr
       httpie
       jq

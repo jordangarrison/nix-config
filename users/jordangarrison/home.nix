@@ -87,7 +87,6 @@ in {
       gnumake
       gnutls
       gptcommit
-      grip
       hstr
       httpie
       jq
@@ -146,6 +145,7 @@ in {
       dig
       glibc
       gnaural
+      grip
       jdk11
       lens
       obs-studio

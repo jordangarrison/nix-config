@@ -115,16 +115,16 @@
        ;;common-lisp       ; if you've seen one lisp, you've seen them all
        ;;coq               ; proofs-as-programs
        ;;crystal           ; ruby at the speed of c
-       ;;csharp            ; unity, .NET, and mono shenanigans
+       (csharp +dotnet +lsp +tree-sitter)            ; unity, .NET, and mono shenanigans
        data              ; config/data formats
        ;; (dart +flutter)   ; paint ui and not much else
-       ;;elixir            ; erlang done right
+       ;; elixir            ; erlang done right
        ;;elm               ; care for a cup of TEA?
        emacs-lisp        ; drown in parentheses
        ;;erlang            ; an elegant language for a more civilized age
        ;;ess               ; emacs speaks statistics
        ;;faust             ; dsp, but you get to keep your soul
-       ;;fsharp           ; ML stands for Microsoft's Language
+       (fsharp +lsp)          ; ML stands for Microsoft's Language
        ;;fstar             ; (dependent) types and (monadic) effects and Z3
        (go +lsp +tree-sitter)                ; the hipster dialect
        ;;(haskell +dante)  ; a language that's lazier than I am

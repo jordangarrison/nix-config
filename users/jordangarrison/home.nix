@@ -185,12 +185,17 @@ in {
       # dumb TERM
       # [[ $TERM == dumb ]] && unsetopt zle && PS1='$ ' && return
 
+      eval "$(atuin init zsh)"
+
       source ${vscodeScriptPath}
       source ${borkedNsScriptPath}
     '';
   };
 
-  programs.atuin = { enable = true; };
+  programs.atuin = {
+    enable = true;
+    settings = { sync_frequency = "10m"; };
+  };
 
   programs.vim = {
     enable = true;

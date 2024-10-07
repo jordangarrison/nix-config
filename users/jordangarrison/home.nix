@@ -121,6 +121,7 @@ in {
       unstable.go
       unstable.gopls
       unstable.godef
+      lua
       nixfmt
       unstable.nodejs
       # unstable.nodePackages.aws-cdk
@@ -188,6 +189,8 @@ in {
       source ${borkedNsScriptPath}
     '';
   };
+
+  programs.atuin = { enable = true; };
 
   programs.vim = {
     enable = true;
@@ -283,12 +286,15 @@ in {
     # Cobra CLI
     ".cobra.yaml".text = ''
       author: Jordan Garrison <dev@jordangarrison.dev>
-      license: MIT
+      license: MIkT
       useViper: true
     '';
 
     # Alacritty
     ".config/alacritty/alacritty.yml".source = ./tools/alacritty/alacritty.yml;
+
+    # Wezterm
+    ".config/wezterm/wezterm.lua".source = ./tools/wezterm/wezterm.lua;
 
     # Doom emacs
     ".emacs.d/init.el".text = ''

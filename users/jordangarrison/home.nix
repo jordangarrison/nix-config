@@ -60,10 +60,12 @@ in {
       emacs
       emacsPackages.sqlite3
       sqlite
+      unstable.wezterm
       # doom-emacs
 
       # Utilities
       # unstable.aws-sso-cli
+      unstable.exercism
       unstable.gh
       unstable.helix
       unstable.k9s
@@ -168,7 +170,7 @@ in {
 
   programs.zsh = {
     enable = true;
-    enableAutosuggestions = true;
+    autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
     initExtra = ''
       source ~/.dotfiles/zshrc

@@ -188,6 +188,7 @@ Version 2019-11-04"
          :map copilot-completion-map
          ("<tab>" . 'copilot-accept-completion)
          ("TAB" . 'copilot-accept-completion)))
+(setq! copilot-node-executable "~/.nix-profile/bin/node")
 
 ;; kubernetes
 ;; (use-package! kubernetes)
@@ -200,6 +201,7 @@ Version 2019-11-04"
 (add-hook! 'js2-mode-hook #'prettier-js-mode)
 (add-hook! 'web-mode-hook #'prettier-js-mode)
 (add-hook! 'typescript-mode-hook #'prettier-js-mode)
+(add-hook! 'json-mode-hook #'prettier-js-mode)
 
 ;;
 ;; Vue JS

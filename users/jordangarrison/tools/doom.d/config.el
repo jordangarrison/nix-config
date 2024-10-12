@@ -24,7 +24,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-nord)
+(setq doom-theme 'doom-rose-pine)
 
 ;; doom dashboard configuration
 (defun my-dashboard ()
@@ -217,8 +217,8 @@ Version 2019-11-04"
 ;;
 ;; Toggle themes
 ;;
-(defvar *jag-theme-dark* 'doom-nord)
-(defvar *jag-theme-light* 'doom-solarized-light)
+(defvar *jag-theme-dark* 'doom-rose-pine)
+(defvar *jag-theme-light* 'doom-rose-pine-dawn)
 (defvar *jag-current-theme* *jag-theme-dark*)
 
 (defadvice load-theme (before theme-dont-propagate activate)
@@ -248,3 +248,5 @@ Version 2019-11-04"
   :bind ("C-c q" . chatgpt-query))
 
 (setq auth-sources '("~/.authinfo"))
+
+(use-package! exercism)

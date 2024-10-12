@@ -87,3 +87,5 @@
 (package! sqlite3)
 
 (package! vcl-mode)
+
+(package! exercism)

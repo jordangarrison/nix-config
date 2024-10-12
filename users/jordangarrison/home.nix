@@ -283,9 +283,10 @@ in {
 
   home.file = {
     # doom emacs
-    ".doom.d/init.el".source = ./tools/doom.d/init.el;
-    ".doom.d/packages.el".source = ./tools/doom.d/packages.el;
-    ".doom.d/config.el".source = ./tools/doom.d/config.el;
+    ".doom.d".source = ./tools/doom.d;
+    ".emacs.d/init.el".text = ''
+      (load "default.el")
+    '';
 
     # neovim
     ".config/nvim/init.lua".source = ./tools/nvim/jag.lua;
@@ -302,11 +303,6 @@ in {
 
     # Wezterm
     ".config/wezterm/wezterm.lua".source = ./tools/wezterm/wezterm.lua;
-
-    # Doom emacs
-    ".emacs.d/init.el".text = ''
-      (load "default.el")
-    '';
 
     # K9s
     # ".config/k9s/config.yml".source = ./tools/k9s/config.yml;

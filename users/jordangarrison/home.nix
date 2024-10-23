@@ -196,7 +196,10 @@ in {
 
   programs.atuin = {
     enable = true;
-    settings = { sync_frequency = "10m"; };
+    settings = {
+      sync_frequency = "10m";
+      inline_height = 20;
+    };
   };
 
   programs.vim = {

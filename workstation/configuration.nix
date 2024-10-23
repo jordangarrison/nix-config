@@ -174,10 +174,18 @@ in {
   # List services that you want to enable:
 
   # Enable the OpenSSH daemon.
-  services.openssh.enable = true;
-  services.openssh.forwardX11 = true;
+  services.openssh = {
+    enable = true;
+    settings.X11Forwarding = true;
+    extraConfig = ''
+      ClientAliveInterval 180
+      ClientAliveCountMax 10
+    '';
+  };
+
   programs.ssh.forwardX11 = true;
   programs.ssh.setXAuthLocation = true;
+
   # programs.nix-ld.enable = true;
 
   # Enable shairport-sync.

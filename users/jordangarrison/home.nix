@@ -96,7 +96,7 @@ in {
       kubernetes-helm-wrapped
       kustomize
       libtool
-      mosh
+      # mosh
       nixpacks
       nmap
       pandoc

@@ -9,6 +9,7 @@ local config = wezterm.config_builder()
 config.color_scheme = 'rose-pine'
 config.font = wezterm.font('Source Code Pro', { bold = true })
 config.font_size = 14
+config.default_cursor_style = 'SteadyBar'
 
 -- background
 config.window_background_opacity = 0.95

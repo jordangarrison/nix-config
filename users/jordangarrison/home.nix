@@ -44,7 +44,7 @@ in {
   programs.home-manager.enable = true;
 
   nix = with pkgs; {
-    package = nixFlakes;
+    package = nixVersions.stable;
     settings.experimental-features = [ "nix-command" "flakes" ];
   };
 

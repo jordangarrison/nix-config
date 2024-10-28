@@ -68,8 +68,9 @@
 ;; our package manager can't deal with; see raxod502/straight.el#279)
                                         ;(package! builtin-package :recipe (:branch "develop"))
 
-(package! copilot
-  :recipe (:host github :repo "copilot-emacs/copilot.el" :files ("*.el")))
+(unless (eq system-type 'darwin)
+  (package! copilot
+    :recipe (:host github :repo "copilot-emacs/copilot.el" :files ("*.el"))))
 
 
 (package! git-link

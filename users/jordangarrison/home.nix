@@ -79,7 +79,6 @@ in {
       awscli2
       bat
       cachix
-      #devenv
       cargo
       cmake
       diff-so-fancy
@@ -138,7 +137,9 @@ in {
       rust-analyzer
       yarn
     ] ++ (if pkgs.stdenv.isDarwin then
-      [ ]
+    [
+      devenv
+    ]
     else [
       unstable.aws-sso-cli
       unstable.comixcursors

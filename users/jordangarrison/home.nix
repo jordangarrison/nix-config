@@ -119,6 +119,9 @@ in {
       unstable.terraform-ls
       unstable.bun
       gcc
+      unstable.gleam
+      unstable.erlang
+      unstable.rebar3
       unstable.go
       unstable.gopls
       unstable.godef

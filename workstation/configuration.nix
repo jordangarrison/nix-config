@@ -7,7 +7,8 @@
 let
   unstableTarball = fetchTarball
     "https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz";
-in {
+in
+{
   imports = [
     # Include the results of the hardware scan.
     # ./hardware-configuration.nix

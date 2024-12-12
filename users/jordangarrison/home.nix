@@ -4,7 +4,8 @@ let
   nixpkgs = import <nixpkgs> { };
   home-manager = import <home-manager> { inherit config lib pkgs; };
   unstable = import
-    (fetchTarball "https://nixos.org/channels/nixos-unstable/nixexprs.tar.xz") {
+    (fetchTarball "https://nixos.org/channels/nixos-unstable/nixexprs.tar.xz")
+    {
       config = config.nixpkgs.config;
     };
   vscodeScriptPath = pkgs.writeTextFile {
@@ -15,7 +16,8 @@ let
     name = "borked-ns";
     text = builtins.readFile ./tools/scripts/borked-ns.sh;
   };
-in {
+in
+{
   imports = [
     # ./tools/nvim/nvim.nix
   ];
@@ -25,10 +27,11 @@ in {
   home.username =
     if pkgs.stdenv.isLinux then "jordangarrison" else "jordan.garrison";
   # temporary hack for work
-  home.homeDirectory = if pkgs.stdenv.isLinux then
-    "/home/jordangarrison"
-  else
-    "/Users/jordan.garrison";
+  home.homeDirectory =
+    if pkgs.stdenv.isLinux then
+      "/home/jordangarrison"
+    else
+      "/Users/jordan.garrison";
 
   # This value determines the Home Manager release that your
   # configuration is compatible with. This helps avoid breakage
@@ -111,6 +114,7 @@ in {
       fira-code
 
       # Git
+      ghq
       git
       git-crypt
       gnupg
@@ -140,9 +144,9 @@ in {
       rust-analyzer
       yarn
     ] ++ (if pkgs.stdenv.isDarwin then
-    [
-      devenv
-    ]
+      [
+        devenv
+      ]
     else [
       unstable.aws-sso-cli
       unstable.comixcursors

@@ -14,6 +14,12 @@ config.default_cursor_style = 'SteadyBar'
 -- background
 config.window_background_opacity = 0.95
 
+-- Custom selection colors
+config.colors = {
+  selection_fg = '#26233a',    -- Dark foreground (can adjust based on your theme)
+  selection_bg = '#ebbcba',    -- Light pinkish highlight (adjust to your preference)
+}
+
 -- ssh domains
 config.ssh_domains = {
   {

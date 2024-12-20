@@ -152,7 +152,7 @@ in
       unstable.comixcursors
       unstable.discord
       barrier
-      deno
+      unstable.deno
       dig
       glibc
       gnaural

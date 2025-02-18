@@ -24,7 +24,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-nord)
+(setq doom-theme 'doom-rose-pine)
 
 ;; doom dashboard configuration
 (defun my-dashboard ()
@@ -182,13 +182,13 @@ Version 2019-11-04"
 
 ;; accept completion from copilot and fallback to company
 (unless (eq system-type 'darwin)
-  (use-package! copilot
-    :hook (prog-mode . copilot-mode)
-    :bind (("C-TAB" . 'copilot-accept-completion-by-word)
-           ("C-<tab>" . 'copilot-accept-completion-by-word)
-           :map copilot-completion-map
-           ("<tab>" . 'copilot-accept-completion)
-           ("TAB" . 'copilot-accept-completion)))
+(use-package! copilot
+  :hook (prog-mode . copilot-mode)
+  :bind (("C-TAB" . 'copilot-accept-completion-by-word)
+         ("C-<tab>" . 'copilot-accept-completion-by-word)
+         :map copilot-completion-map
+         ("<tab>" . 'copilot-accept-completion)
+         ("TAB" . 'copilot-accept-completion)))
   (setq! copilot-node-executable "~/.nix-profile/bin/node"))
 
 ;; kubernetes

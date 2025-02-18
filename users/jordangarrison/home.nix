@@ -55,6 +55,7 @@ in
     [
       # nix utilities
       unstable.nh
+      unstable.devbox
 
       # Apps
       alacritty

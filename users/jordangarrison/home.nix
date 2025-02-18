@@ -60,7 +60,6 @@ in
       # Apps
       alacritty
       arandr
-      element-desktop
       emacs
       emacsPackages.sqlite3
       sqlite

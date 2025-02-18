@@ -131,6 +131,7 @@ in
       unstable.godef
       lua
       nixfmt
+      nixpkgs-fmt
       unstable.nodejs
       # unstable.nodePackages.aws-cdk
       # nodePackages.cdk8s-cli

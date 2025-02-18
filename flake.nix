@@ -20,11 +20,19 @@
           flomac/configuration.nix
           home-manager.darwinModules.home-manager
           {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.users.jordan = import ./users/jordan/home.nix;
+            ids.gids.nixbld = 30000;
+            nixpkgs.config.allowUnfree = true;
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              users."jordan.garrison" = import ./users/jordangarrison/home.nix;
+            };
+            users.users."jordan.garrison" = {
+              home = "/Users/jordan.garrison";
+            };
           }
         ];
+        specialArgs = { inherit inputs; };
       };
     };
   };

@@ -1,13 +1,6 @@
 { config, pkgs, lib, ... }:
 
 let
-  nixpkgs = import <nixpkgs> { };
-  home-manager = import <home-manager> { inherit config lib pkgs; };
-  unstable = import
-    (fetchTarball "https://nixos.org/channels/nixos-unstable/nixexprs.tar.xz")
-    {
-      config = config.nixpkgs.config;
-    };
   vscodeScriptPath = pkgs.writeTextFile {
     name = "vscode";
     text = builtins.readFile ./tools/scripts/vscode.sh;
@@ -21,7 +14,7 @@ in
   imports = [
     # ./tools/nvim/nvim.nix
   ];
-  nixpkgs.config.allowUnfree = true;
+  # nixpkgs.config.allowUnfree = true;
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
   home.username =
@@ -46,16 +39,11 @@ in
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 
-  nix = with pkgs; {
-    package = nixVersions.stable;
-    settings.experimental-features = [ "nix-command" "flakes" ];
-  };
-
   home.packages = with pkgs;
     [
       # nix utilities
-      unstable.nh
-      unstable.devbox
+      nh
+      devbox
 
       # Apps
       alacritty
@@ -63,20 +51,20 @@ in
       emacs
       emacsPackages.sqlite3
       sqlite
-      unstable.wezterm
+      wezterm
       # doom-emacs
 
       # Utilities
       # unstable.aws-sso-cli
-      unstable.exercism
-      unstable.gh
-      unstable.helix
-      unstable.k9s
-      unstable.neovim
-      unstable.nil
-      unstable.tenv
-      unstable.terraform-ls
-      _1password
+      exercism
+      gh
+      helix
+      k9s
+      neovim
+      nil
+      tenv
+      terraform-ls
+      _1password-cli
       amazon-ecr-credential-helper
       asdf-vm
       awscli2
@@ -120,22 +108,19 @@ in
       gnupg
 
       # Language Servers and runtimes
-      unstable.terraform-ls
-      unstable.bun
+      terraform-ls
+      bun
       gcc
-      unstable.gleam
-      unstable.erlang
-      unstable.rebar3
-      unstable.go
-      unstable.gopls
-      unstable.godef
+      gleam
+      erlang
+      rebar3
+      go
+      gopls
+      godef
       lua
-      nixfmt
+      nixfmt-classic
       nixpkgs-fmt
-      unstable.nodejs
-      # unstable.nodePackages.aws-cdk
-      # nodePackages.cdk8s-cli
-      # nodePackages.cdktf-cli
+      nodejs
       nodePackages.bash-language-server
       nodePackages.prettier
       nodePackages.typescript
@@ -149,11 +134,11 @@ in
         devenv
       ]
     else [
-      unstable.aws-sso-cli
-      unstable.comixcursors
-      unstable.discord
+      aws-sso-cli
+      comixcursors
+      discord
       barrier
-      unstable.deno
+      deno
       dig
       glibc
       gnaural

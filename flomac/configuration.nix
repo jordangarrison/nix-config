@@ -8,8 +8,17 @@
     enable = true;
     casks = [
       "brave-browser"
+      "cursor"
+      "dbeaver-community"
+      "ears"
+      "firefox"
+      "firefox-developer-edition"
+      "font-fira-code"
       "ghostty"
+      "jordanbaird-ice"
+      "linearmouse"
       "raycast"
+      "rectangle"
       "wezterm"
     ];
     masApps = {

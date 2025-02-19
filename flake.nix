@@ -34,6 +34,23 @@
         ];
         specialArgs = { inherit inputs; };
       };
+      "Mac" = nix-darwin.lib.darwinSystem {
+        modules = [
+          flomac/configuration.nix
+          home-manager.darwinModules.home-manager
+          {
+            nixpkgs.config.allowUnfree = true;
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              users."jordan.garrison" = import ./users/jordangarrison/home.nix;
+            };
+            users.users."jordan.garrison" = {
+              home = "/Users/jordan.garrison";
+            };
+          }
+        ];
+      };
     };
   };
 }

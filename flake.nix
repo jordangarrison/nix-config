@@ -34,7 +34,7 @@
         ];
         specialArgs = { inherit inputs; };
       };
-      "Mac" = nix-darwin.lib.darwinSystem {
+      "H952L3DPHH" = nix-darwin.lib.darwinSystem {
         modules = [
           flomac/configuration.nix
           home-manager.darwinModules.home-manager

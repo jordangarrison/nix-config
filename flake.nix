@@ -39,6 +39,7 @@
           flomac/configuration.nix
           home-manager.darwinModules.home-manager
           {
+            nix.enable = false;
             nixpkgs.config.allowUnfree = true;
             home-manager = {
               useGlobalPkgs = true;

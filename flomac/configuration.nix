@@ -6,11 +6,17 @@
   programs.zsh.enable = true;
   homebrew = {
     enable = true;
+    brews = [
+      "sharewifi"
+    ];
     casks = [
+      "1password"
+      "1password-cli"
       "brave-browser"
       "cursor"
       "dbeaver-community"
       "ears"
+      "figma"
       "firefox"
       "font-fira-code"
       "ghostty"
@@ -62,15 +68,21 @@
       "Xcode" = 497799835;
     };
   };
-  system.defaults = {
-    dock = {
-      autohide = true;
-      orientation = "bottom";
-      show-process-indicators = false;
+  system = {
+    defaults = {
+      dock = {
+        autohide = true;
+        orientation = "bottom";
+        show-process-indicators = false;
+      };
+      finder = {
+        AppleShowAllExtensions = true;
+        ShowPathbar = true;
+      };
     };
-    finder = {
-      AppleShowAllExtensions = true;
-      ShowPathbar = true;
+    keyboard = {
+      enableKeyMapping = true;
+      remapCapsLockToEscape = true;
     };
   };
   nixpkgs.hostPlatform = "aarch64-darwin";

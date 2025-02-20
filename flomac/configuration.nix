@@ -24,6 +24,7 @@
       "jordanbaird-ice"
       "linearmouse"
       "raycast"
+      "readdle-spark"
       "rectangle"
       "visual-studio-code"
       "wezterm"

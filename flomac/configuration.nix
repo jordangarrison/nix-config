@@ -13,6 +13,7 @@
       "1password"
       "1password-cli"
       "brave-browser"
+      "chatgpt"
       "cursor"
       "dbeaver-community"
       "ears"

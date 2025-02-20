@@ -79,6 +79,9 @@
         AppleShowAllExtensions = true;
         ShowPathbar = true;
       };
+      WindowManager = {
+        GloballyEnabled = true;
+      };
     };
     keyboard = {
       enableKeyMapping = true;

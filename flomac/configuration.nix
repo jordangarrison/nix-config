@@ -12,7 +12,6 @@
       "dbeaver-community"
       "ears"
       "firefox"
-      "firefox-developer-edition"
       "font-fira-code"
       "ghostty"
       "jordanbaird-ice"

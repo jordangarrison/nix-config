@@ -7,7 +7,7 @@
   homebrew = {
     enable = true;
     brews = [
-      "sharewifi"
+      "fzf"
     ];
     casks = [
       "1password"

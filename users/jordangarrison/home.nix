@@ -233,6 +233,9 @@ in
     # Alacritty
     ".config/alacritty/alacritty.yml".source = ./tools/alacritty/alacritty.yml;
 
+    # Ghostty
+    ".config/ghostty/config".source = ./tools/ghostty/config;
+
     # Wezterm
     ".config/wezterm/wezterm.lua".source = ./tools/wezterm/wezterm.lua;
 

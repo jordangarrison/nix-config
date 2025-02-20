@@ -18,6 +18,7 @@
       "linearmouse"
       "raycast"
       "rectangle"
+      "visual-studio-code"
       "wezterm"
     ];
     masApps = {

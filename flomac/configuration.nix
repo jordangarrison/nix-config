@@ -68,6 +68,7 @@
       "Xcode" = 497799835;
     };
   };
+  security.pam.enableSudoTouchIdAuth = true;
   system = {
     defaults = {
       dock = {

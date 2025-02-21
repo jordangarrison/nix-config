@@ -1,11 +1,8 @@
-a-h.templ
 aaron-bond.better-comments
 ahmadalli.vscode-nginx-conf
 alefragnani.project-manager
 amazonwebservices.aws-toolkit-vscode
-anysphere.pyright
 ardenivanov.svelte-intellisense
-arrterian.nix-env-selector
 astro-build.astro-vscode
 bierner.github-markdown-preview
 bierner.markdown-mermaid

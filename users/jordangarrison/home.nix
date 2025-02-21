@@ -249,5 +249,6 @@ in
       source = ./tools/linearmouse/linearmouse.json;
     };
 
+    ".ssh/config".source = ./configs/ssh/config;
   };
 }

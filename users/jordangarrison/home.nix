@@ -55,7 +55,6 @@ in
       # doom-emacs
 
       # Utilities
-      # unstable.aws-sso-cli
       exercism
       gh
       helix

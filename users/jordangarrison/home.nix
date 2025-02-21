@@ -243,5 +243,11 @@ in
     ".local/bin/tmux-cht.sh".source = ./tools/scripts/tmux-cht.sh;
     ".tmux-cht-languages".source = ./tools/scripts/tmux-cht-languages.txt;
     ".tmux-cht-commands".source = ./tools/scripts/tmux-cht-commands.txt;
+
+    # mac only
+    ".config/linearmouse/linearmouse.json" = lib.mkIf pkgs.stdenv.isDarwin {
+      source = ./tools/linearmouse/linearmouse.json;
+    };
+
   };
 }

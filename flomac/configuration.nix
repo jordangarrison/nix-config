@@ -7,6 +7,7 @@
   homebrew = {
     enable = true;
     brews = [
+      "mas"
       "fzf"
     ];
     casks = [

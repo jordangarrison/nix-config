@@ -9,6 +9,11 @@
     brews = [
       "mas"
       "fzf"
+      {
+        name = "ollama";
+        start_service = true;
+        restart_service = true;
+      }
     ];
     casks = [
       "1password"

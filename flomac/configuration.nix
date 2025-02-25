@@ -6,9 +6,15 @@
   programs.zsh.enable = true;
   homebrew = {
     enable = true;
+    onActivation = {
+      cleanup = "zap";
+    };
+    taps = [
+      "homebrew/services"
+    ];
     brews = [
-      "mas"
       "fzf"
+      "mas"
       {
         name = "ollama";
         start_service = true;
@@ -30,6 +36,8 @@
       "ghostty"
       "jordanbaird-ice"
       "linearmouse"
+      "logseq"
+      "orbstack"
       "raycast"
       "readdle-spark"
       "rectangle"

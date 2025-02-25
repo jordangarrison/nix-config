@@ -233,6 +233,14 @@ in
     # Alacritty
     ".config/alacritty/alacritty.yml".source = ./tools/alacritty/alacritty.yml;
 
+    # Espanso
+    ".config/espanso/match/base.yml" = lib.mkIf (!pkgs.stdenv.isDarwin) {
+      source = ./tools/espanso/match/base.yml;
+    };
+    "Library/Application Support/espanso/match/base.yml" = lib.mkIf pkgs.stdenv.isDarwin {
+      source = ./tools/espanso/match/base.yml;
+    };
+
     # Ghostty
     ".config/ghostty/config".source = ./tools/ghostty/config;
 

@@ -21,6 +21,7 @@
       "brave-browser"
       "chatgpt"
       "cursor"
+      "espanso"
       "dbeaver-community"
       "ears"
       "figma"

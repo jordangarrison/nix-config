@@ -29,6 +29,7 @@
       "cursor"
       "espanso"
       "dbeaver-community"
+      "discord"
       "ears"
       "figma"
       "firefox"

@@ -26,6 +26,7 @@
       "1password-cli"
       "brave-browser"
       "chatgpt"
+      "claude"
       "cursor"
       "espanso"
       "dbeaver-community"
@@ -43,6 +44,7 @@
       "readdle-spark"
       "rectangle"
       "visual-studio-code"
+      "warp"
       "wezterm"
     ];
     masApps = {
@@ -98,13 +100,16 @@
         AppleShowAllExtensions = true;
         ShowPathbar = true;
       };
-      WindowManager = {
-        GloballyEnabled = true;
-      };
       NSGlobalDomain = {
         ApplePressAndHoldEnabled = false;
         InitialKeyRepeat = 10;
         KeyRepeat = 1;
+      };
+      trackpad = {
+        Clicking = true;
+      };
+      WindowManager = {
+        GloballyEnabled = true;
       };
     };
     keyboard = {

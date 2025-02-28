@@ -233,6 +233,11 @@ in
     # Alacritty
     ".config/alacritty/alacritty.yml".source = ./tools/alacritty/alacritty.yml;
 
+    # Claude Desktop
+    "Library/Application Support/Claude/claude_desktop_config.json" = lib.mkIf pkgs.stdenv.isDarwin {
+      source = ./tools/claude-desktop/claude_desktop_config.json;
+    };
+
     # Espanso
     ".config/espanso/match/base.yml" = lib.mkIf (!pkgs.stdenv.isDarwin) {
       source = ./tools/espanso/match/base.yml;
@@ -244,6 +249,11 @@ in
     # Ghostty
     ".config/ghostty/config".source = ./tools/ghostty/config;
 
+    # LinearMouse
+    ".config/linearmouse/linearmouse.json" = lib.mkIf pkgs.stdenv.isDarwin {
+      source = ./tools/linearmouse/linearmouse.json;
+    };
+
     # Wezterm
     ".config/wezterm/wezterm.lua".source = ./tools/wezterm/wezterm.lua;
 
@@ -251,11 +261,6 @@ in
     ".local/bin/tmux-cht.sh".source = ./tools/scripts/tmux-cht.sh;
     ".tmux-cht-languages".source = ./tools/scripts/tmux-cht-languages.txt;
     ".tmux-cht-commands".source = ./tools/scripts/tmux-cht-commands.txt;
-
-    # mac only
-    ".config/linearmouse/linearmouse.json" = lib.mkIf pkgs.stdenv.isDarwin {
-      source = ./tools/linearmouse/linearmouse.json;
-    };
 
     ".ssh/config".source = ./configs/ssh/config;
   };

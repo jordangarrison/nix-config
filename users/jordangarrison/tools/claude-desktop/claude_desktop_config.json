@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "/etc/profiles/per-user/jordan.garrison/bin/npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/jordan.garrison/Desktop",
+        "/Users/jordan.garrison/Documents",
+        "/Users/jordan.garrison/Downloads",
+        "/Users/jordan.garrison/dev"
+      ]
+    }
+  }
+}

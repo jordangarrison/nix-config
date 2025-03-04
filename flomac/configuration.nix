@@ -24,6 +24,7 @@
     casks = [
       "1password"
       "1password-cli"
+      "basecamp"
       "brave-browser"
       "chatgpt"
       "claude"
@@ -67,6 +68,7 @@
       "Keynote" = 409183694;
       "Kindle" = 302584613;
       "Notability" = 360593530;
+      "NotePlan - To-Do List & Notes" = 1505432629;
       "Numbers" = 409203825;
       "Okta Extension App" = 1439967473;
       "OmniFocus" = 1542143627;

@@ -127,6 +127,7 @@ in
       nodePackages.vim-language-server
       nodePackages.yaml-language-server
       rust-analyzer
+      uv
       yarn
     ] ++ (if pkgs.stdenv.isDarwin then
       [
@@ -250,9 +251,9 @@ in
     ".config/ghostty/config".source = ./tools/ghostty/config;
 
     # LinearMouse
-    ".config/linearmouse/linearmouse.json" = lib.mkIf pkgs.stdenv.isDarwin {
-      source = ./tools/linearmouse/linearmouse.json;
-    };
+    # ".config/linearmouse/linearmouse.json" = lib.mkIf pkgs.stdenv.isDarwin {
+    #   source = ./tools/linearmouse/linearmouse.json;
+    # };
 
     # Wezterm
     ".config/wezterm/wezterm.lua".source = ./tools/wezterm/wezterm.lua;

@@ -10,6 +10,13 @@
         "/Users/jordan.garrison/Downloads",
         "/Users/jordan.garrison/dev"
       ]
+    },
+    "logseq": {
+      "command": "/etc/profiles/per-user/jordan.garrison/bin/uvx",
+      "args": ["mcp-server-logseq", "--url", "http://localhost:12315"],
+      "env": {
+        "LOGSEQ_API_TOKEN": "jag-copilot"
+      }
     }
   }
 }

@@ -44,6 +44,7 @@
       "raycast"
       "readdle-spark"
       "rectangle"
+      "sigmaos"
       "visual-studio-code"
       "warp"
       "wezterm"

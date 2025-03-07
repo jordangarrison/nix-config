@@ -1,0 +1,38 @@
+Host endeavour
+  HostName 100.71.89.116
+  User jordangarrison
+
+Host rpi
+  HostName 192.168.1.223
+  User pi
+
+Host rpi2
+  HostName 192.168.1.224
+  User pi
+
+Host macbook
+  HostName 192.168.1.111
+  User jgarrison
+  Port 22
+
+Host pizero
+  HostName garrisonsbygrace-pi-zero-1.local
+  User pi
+
+Host router.local
+  HostName 192.168.1.1
+  User garrisonsbygrace
+  Port 7777
+
+Host mgmt
+  HostName mgmt.flocasts.biz
+  User jordan.garrison
+
+Host *.amazonaws.com
+  User jordan.garrison
+
+Host *
+  TCPKeepAlive yes
+  ServerAliveInterval 60
+  ServerAliveCountMax 10
+  Ciphers aes256-gcm@openssh.com

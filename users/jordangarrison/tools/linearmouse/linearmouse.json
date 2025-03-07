@@ -1,0 +1,163 @@
+{
+  "$schema" : "https:\/\/schema.linearmouse.app\/0.10.0",
+  "schemes" : [
+    {
+      "if" : {
+        "device" : {
+          "vendorID" : "0x46d",
+          "productName" : "USB Receiver",
+          "category" : "mouse",
+          "productID" : "0xc52b"
+        }
+      },
+      "scrolling" : {
+        "distance" : {
+          "vertical" : "auto"
+        },
+        "reverse" : {
+          "vertical" : true
+        },
+        "acceleration" : {
+          "vertical" : 1
+        },
+        "speed" : {
+          "vertical" : 5
+        }
+      },
+      "buttons" : {
+        "mappings" : [
+          {
+            "button" : 3,
+            "shift" : false,
+            "option" : false,
+            "action" : "missionControl",
+            "command" : false,
+            "control" : false
+          },
+          {
+            "button" : 4,
+            "action" : {
+              "keyPress" : [
+                "shift",
+                "command",
+                "4"
+              ]
+            },
+            "command" : false,
+            "option" : false,
+            "control" : false,
+            "shift" : false
+          }
+        ]
+      }
+    },
+    {
+      "scrolling" : {
+        "acceleration" : {
+          "vertical" : 1
+        },
+        "speed" : {
+          "vertical" : 5
+        },
+        "reverse" : {
+          "vertical" : true
+        }
+      },
+      "if" : {
+        "device" : {
+          "productName" : "MX Vertical",
+          "vendorID" : "0x46d",
+          "category" : "mouse",
+          "serialNumber" : "19CCC6611E29BEA6",
+          "productID" : "0xb020"
+        }
+      },
+      "buttons" : {
+        "mappings" : [
+          {
+            "action" : "missionControl",
+            "shift" : false,
+            "control" : false,
+            "command" : false,
+            "option" : false,
+            "button" : 3
+          },
+          {
+            "command" : false,
+            "control" : false,
+            "action" : {
+              "keyPress" : [
+                "shift",
+                "command",
+                "5"
+              ]
+            },
+            "option" : false,
+            "button" : 4,
+            "shift" : false
+          }
+        ]
+      }
+    },
+    {
+      "buttons" : {
+        "mappings" : [
+          {
+            "button" : 3,
+            "action" : "missionControl",
+            "command" : false,
+            "shift" : false,
+            "control" : false,
+            "option" : false
+          },
+          {
+            "control" : false,
+            "action" : {
+              "keyPress" : [
+                "shift",
+                "command",
+                "4"
+              ]
+            },
+            "shift" : false,
+            "button" : 4,
+            "option" : false,
+            "command" : false
+          }
+        ]
+      },
+      "if" : {
+        "device" : {
+          "vendorID" : "0x46d",
+          "productID" : "0xc08a",
+          "productName" : "MX Vertical Advanced Ergonomic Mouse",
+          "category" : "mouse",
+          "serialNumber" : "7689CDCA70A94C3D"
+        }
+      },
+      "scrolling" : {
+        "reverse" : {
+          "vertical" : true
+        },
+        "acceleration" : {
+          "vertical" : 1
+        }
+      }
+    },
+    {
+      "scrolling" : {
+        "acceleration" : {
+          "vertical" : 1
+        }
+      },
+      "if" : {
+        "device" : {
+          "productID" : "0x343",
+          "category" : "trackpad",
+          "vendorID" : "0x5ac",
+          "productName" : "Apple Internal Keyboard \/ Trackpad"
+        }
+      }
+    }
+  ]
+}

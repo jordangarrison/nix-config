@@ -7,6 +7,8 @@
   homebrew = {
     enable = true;
     onActivation = {
+      autoUpdate = true;
+      upgrade = true;
       cleanup = "zap";
     };
     taps = [
@@ -90,7 +92,7 @@
       "Xcode" = 497799835;
     };
   };
-  security.pam.enableSudoTouchIdAuth = true;
+  security.pam.services.sudo_local.touchIdAuth = true;
   system = {
     defaults = {
       dock = {

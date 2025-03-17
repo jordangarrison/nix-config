@@ -42,6 +42,7 @@
       "jordanbaird-ice"
       "linearmouse"
       "logseq"
+      "obs"
       "orbstack"
       "raycast"
       "readdle-spark"

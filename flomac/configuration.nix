@@ -26,7 +26,7 @@
     casks = [
       "1password"
       "1password-cli"
-      "basecamp"
+      "aws-vpn-client"
       "brave-browser"
       "chatgpt"
       "claude"
@@ -42,6 +42,7 @@
       "jordanbaird-ice"
       "linearmouse"
       "logseq"
+      "notion-calendar"
       "obs"
       "orbstack"
       "raycast"

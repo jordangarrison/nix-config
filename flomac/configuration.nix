@@ -39,6 +39,7 @@
       "firefox"
       "font-fira-code"
       "ghostty"
+      "google-drive"
       "jordanbaird-ice"
       "linearmouse"
       "logseq"

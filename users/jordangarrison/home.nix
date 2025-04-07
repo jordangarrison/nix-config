@@ -84,6 +84,7 @@ in
       kubectl
       kubernetes-helm-wrapped
       kustomize
+      libheif
       libtool
       # mosh
       nixpacks
@@ -262,6 +263,7 @@ in
     ".local/bin/tmux-cht.sh".source = ./tools/scripts/tmux-cht.sh;
     ".tmux-cht-languages".source = ./tools/scripts/tmux-cht-languages.txt;
     ".tmux-cht-commands".source = ./tools/scripts/tmux-cht-commands.txt;
+    ".local/bin/gen-dynamic-wallpaper".source = ./tools/scripts/gen-dynamic-wallpaper.sh;
 
     ".ssh/config".source = ./configs/ssh/config;
   };

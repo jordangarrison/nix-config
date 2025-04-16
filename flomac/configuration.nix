@@ -45,6 +45,7 @@
       "logseq"
       "notion-calendar"
       "obs"
+      "obsidian"
       "orbstack"
       "raycast"
       "readdle-spark"
@@ -53,6 +54,7 @@
       "visual-studio-code"
       "warp"
       "wezterm"
+      "zoom"
     ];
     masApps = {
       "1Blocker" = 1365531024;

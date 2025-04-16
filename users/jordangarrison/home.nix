@@ -48,13 +48,12 @@ in
       # Apps
       alacritty
       arandr
-      emacs
-      emacsPackages.sqlite3
       sqlite
       wezterm
       # doom-emacs
 
       # Utilities
+      aider-chat
       exercism
       gh
       helix
@@ -136,11 +135,13 @@ in
       ]
     else [
       aws-sso-cli
+      barrier
       comixcursors
       discord
-      barrier
       deno
       dig
+      emacs
+      emacsPackages.sqlite3
       glibc
       gnaural
       grip

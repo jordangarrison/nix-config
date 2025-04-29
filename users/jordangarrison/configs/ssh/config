@@ -27,6 +27,13 @@ Host router.local
 Host mgmt
   HostName mgmt.flocasts.biz
   User jordan.garrison
+  ForwardAgent yes
+
+Host business-reporting
+  HostName business-reporting
+  User jordan.garrison
+  IdentityFile ~/.ssh/id_rsa
+  ProxyJump mgmt
 
 Host *.amazonaws.com
   User jordan.garrison

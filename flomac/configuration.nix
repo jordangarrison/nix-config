@@ -22,6 +22,7 @@
         start_service = true;
         restart_service = true;
       }
+      "wimlib"
     ];
     casks = [
       "1password"
@@ -31,6 +32,7 @@
       "chatgpt"
       "claude"
       "cursor"
+      "emacs"
       "espanso"
       "dbeaver-community"
       "discord"
@@ -51,9 +53,11 @@
       "readdle-spark"
       "rectangle"
       "sigmaos"
+      "superwhisper"
       "visual-studio-code"
       "warp"
       "wezterm"
+      "windows-app"
       "zoom"
     ];
     masApps = {

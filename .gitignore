@@ -4,3 +4,6 @@
 *.backup
 raspberry-pi/img
 .DS_Store
+result
+result/
+.aider*

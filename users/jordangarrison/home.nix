@@ -1,13 +1,6 @@
 { config, pkgs, lib, ... }:
 
 let
-  nixpkgs = import <nixpkgs> { };
-  home-manager = import <home-manager> { inherit config lib pkgs; };
-  unstable = import
-    (fetchTarball "https://nixos.org/channels/nixos-unstable/nixexprs.tar.xz")
-    {
-      config = config.nixpkgs.config;
-    };
   vscodeScriptPath = pkgs.writeTextFile {
     name = "vscode";
     text = builtins.readFile ./tools/scripts/vscode.sh;
@@ -21,7 +14,7 @@ in
   imports = [
     # ./tools/nvim/nvim.nix
   ];
-  nixpkgs.config.allowUnfree = true;
+  # nixpkgs.config.allowUnfree = true;
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
   home.username =
@@ -46,37 +39,30 @@ in
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 
-  nix = with pkgs; {
-    package = nixVersions.stable;
-    settings.experimental-features = [ "nix-command" "flakes" ];
-  };
-
   home.packages = with pkgs;
     [
       # nix utilities
-      unstable.nh
-      unstable.devbox
+      nh
+      devbox
 
       # Apps
       alacritty
       arandr
-      emacs
-      emacsPackages.sqlite3
       sqlite
-      unstable.wezterm
+      wezterm
       # doom-emacs
 
       # Utilities
-      # unstable.aws-sso-cli
-      unstable.exercism
-      unstable.gh
-      unstable.helix
-      unstable.k9s
-      unstable.neovim
-      unstable.nil
-      unstable.tenv
-      unstable.terraform-ls
-      _1password
+      aider-chat
+      exercism
+      gh
+      helix
+      k9s
+      neovim
+      nil
+      tenv
+      terraform-ls
+      _1password-cli
       amazon-ecr-credential-helper
       asdf-vm
       awscli2
@@ -97,6 +83,7 @@ in
       kubectl
       kubernetes-helm-wrapped
       kustomize
+      libheif
       libtool
       # mosh
       nixpacks
@@ -120,22 +107,19 @@ in
       gnupg
 
       # Language Servers and runtimes
-      unstable.terraform-ls
-      unstable.bun
+      terraform-ls
+      bun
       gcc
-      unstable.gleam
-      unstable.erlang
-      unstable.rebar3
-      unstable.go
-      unstable.gopls
-      unstable.godef
+      gleam
+      erlang
+      rebar3
+      go
+      gopls
+      godef
       lua
-      nixfmt
+      nixfmt-classic
       nixpkgs-fmt
-      unstable.nodejs
-      # unstable.nodePackages.aws-cdk
-      # nodePackages.cdk8s-cli
-      # nodePackages.cdktf-cli
+      nodejs
       nodePackages.bash-language-server
       nodePackages.prettier
       nodePackages.typescript
@@ -143,18 +127,21 @@ in
       nodePackages.vim-language-server
       nodePackages.yaml-language-server
       rust-analyzer
+      uv
       yarn
     ] ++ (if pkgs.stdenv.isDarwin then
       [
         devenv
       ]
     else [
-      unstable.aws-sso-cli
-      unstable.comixcursors
-      unstable.discord
+      aws-sso-cli
       barrier
-      unstable.deno
+      comixcursors
+      discord
+      deno
       dig
+      emacs
+      emacsPackages.sqlite3
       glibc
       gnaural
       grip
@@ -189,6 +176,7 @@ in
         if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
             . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
         fi
+        export PATH=/opt/homebrew/bin:$PATH
       fi
       # End Nix
 
@@ -248,6 +236,27 @@ in
     # Alacritty
     ".config/alacritty/alacritty.yml".source = ./tools/alacritty/alacritty.yml;
 
+    # Claude Desktop
+    "Library/Application Support/Claude/claude_desktop_config.json" = lib.mkIf pkgs.stdenv.isDarwin {
+      source = ./tools/claude-desktop/claude_desktop_config.json;
+    };
+
+    # Espanso
+    ".config/espanso/match/base.yml" = lib.mkIf (!pkgs.stdenv.isDarwin) {
+      source = ./tools/espanso/match/base.yml;
+    };
+    "Library/Application Support/espanso/match/base.yml" = lib.mkIf pkgs.stdenv.isDarwin {
+      source = ./tools/espanso/match/base.yml;
+    };
+
+    # Ghostty
+    ".config/ghostty/config".source = ./tools/ghostty/config;
+
+    # LinearMouse
+    # ".config/linearmouse/linearmouse.json" = lib.mkIf pkgs.stdenv.isDarwin {
+    #   source = ./tools/linearmouse/linearmouse.json;
+    # };
+
     # Wezterm
     ".config/wezterm/wezterm.lua".source = ./tools/wezterm/wezterm.lua;
 
@@ -255,5 +264,8 @@ in
     ".local/bin/tmux-cht.sh".source = ./tools/scripts/tmux-cht.sh;
     ".tmux-cht-languages".source = ./tools/scripts/tmux-cht-languages.txt;
     ".tmux-cht-commands".source = ./tools/scripts/tmux-cht-commands.txt;
+    ".local/bin/gen-dynamic-wallpaper".source = ./tools/scripts/gen-dynamic-wallpaper.sh;
+
+    ".ssh/config".source = ./configs/ssh/config;
   };
 }

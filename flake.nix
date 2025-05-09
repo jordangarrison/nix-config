@@ -15,25 +15,6 @@
 
   outputs = inputs@{ self, nixpkgs, nix-darwin, home-manager }: {
     darwinConfigurations = {
-      "JJHJLQ747Q" = nix-darwin.lib.darwinSystem {
-        modules = [
-          flomac/configuration.nix
-          home-manager.darwinModules.home-manager
-          {
-            ids.gids.nixbld = 30000;
-            nixpkgs.config.allowUnfree = true;
-            home-manager = {
-              useGlobalPkgs = true;
-              useUserPackages = true;
-              users."jordan.garrison" = import ./users/jordangarrison/home.nix;
-            };
-            users.users."jordan.garrison" = {
-              home = "/Users/jordan.garrison";
-            };
-          }
-        ];
-        specialArgs = { inherit inputs; };
-      };
       "H952L3DPHH" = nix-darwin.lib.darwinSystem {
         modules = [
           flomac/configuration.nix
@@ -51,6 +32,20 @@
             };
           }
         ];
+      };
+    };
+
+    # Ubuntu/WSL configuration
+    homeConfigurations = {
+      "jordangarrison@normandy" = home-manager.lib.homeManagerConfiguration {
+        pkgs = import nixpkgs {
+          system = "x86_64-linux";
+          config.allowUnfree = true;
+        };
+        modules = [
+          ./users/jordangarrison/home.nix
+        ];
+        extraSpecialArgs = { inherit inputs; };
       };
     };
   };

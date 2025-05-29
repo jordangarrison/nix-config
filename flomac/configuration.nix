@@ -59,6 +59,7 @@
       "todoist"
       "visual-studio-code"
       "warp"
+      "warp@preview"
       "wezterm"
       "windows-app"
       "zoom"

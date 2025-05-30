@@ -14,7 +14,7 @@ in
   imports = [
     # ./tools/nvim/nvim.nix
   ];
-  # nixpkgs.config.allowUnfree = true;
+  nixpkgs.config.allowUnfree = pkgs.stdenv.isLinux;
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
   home.username =

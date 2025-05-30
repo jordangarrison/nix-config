@@ -13,6 +13,7 @@
     };
     taps = [
       "homebrew/services"
+      "deskflow/homebrew-tap"
     ];
     brews = [
       "fzf"
@@ -32,6 +33,8 @@
       "chatgpt"
       "claude"
       "cursor"
+      "deskflow"
+      "docker"
       "emacs"
       "espanso"
       "dbeaver-community"
@@ -48,14 +51,15 @@
       "notion-calendar"
       "obs"
       "obsidian"
-      "orbstack"
+      "openlens"
       "raycast"
       "readdle-spark"
       "rectangle"
-      "sigmaos"
       "superwhisper"
+      "todoist"
       "visual-studio-code"
       "warp"
+      "warp@preview"
       "wezterm"
       "windows-app"
       "zoom"

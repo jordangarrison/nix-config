@@ -54,6 +54,7 @@ in
 
       # Utilities
       aider-chat
+      claude-code
       exercism
       gh
       helix

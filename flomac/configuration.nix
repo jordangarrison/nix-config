@@ -48,7 +48,6 @@
       "jordanbaird-ice"
       "linearmouse"
       "logseq"
-      "notion-calendar"
       "obs"
       "obsidian"
       "openlens"

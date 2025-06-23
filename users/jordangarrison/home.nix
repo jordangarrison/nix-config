@@ -14,7 +14,6 @@ in
   imports = [
     # ./tools/nvim/nvim.nix
   ];
-  nixpkgs.config.allowUnfree = pkgs.stdenv.isLinux;
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
   home.username =
@@ -169,7 +168,7 @@ in
     enable = true;
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
-    initExtra = ''
+    initContent = ''
       source ~/.dotfiles/zshrc
       [[ "$TERM_PROGRAM" == "vscode" ]] && . "$(code --locate-shell-integration-path zsh)"
       # Nix

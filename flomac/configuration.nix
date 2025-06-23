@@ -4,6 +4,7 @@
     pkgs.git
   ];
   programs.zsh.enable = true;
+  # system.primaryUser = "jordan.garrison";
   homebrew = {
     enable = true;
     onActivation = {

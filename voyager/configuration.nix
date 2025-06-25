@@ -95,7 +95,7 @@
     jordan = {
       isNormalUser = true;
       description = "Jordan Garrison";
-      extraGroups = [ "networkmanager" "wheel" ];
+      extraGroups = [ "networkmanager" "wheel" "docker" ];
       shell = pkgs.zsh;
       packages = with pkgs; [
       #  thunderbird
@@ -171,6 +171,9 @@
 
   # Enable flatpaks
   services.flatpak.enable = true;
+
+  # Enable Docker
+  virtualisation.docker.enable = true;
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];

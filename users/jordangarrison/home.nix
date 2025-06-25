@@ -208,7 +208,16 @@ in
     };
   };
 
+  # Disable programs.ssh to avoid symlink permission issues
+  # Using home.file approach with onChange instead
+
   home.file = {
+    # SSH config with proper permissions fix
+    ".ssh/config_source" = {
+      source = ./configs/ssh/config;
+      onChange = ''cat ~/.ssh/config_source > ~/.ssh/config && chmod 600 ~/.ssh/config'';
+    };
+
     # doom emacs
     ".doom.d".source = ./tools/doom.d;
     ".emacs.d/init.el".text = ''
@@ -258,7 +267,5 @@ in
     ".tmux-cht-commands".source = ./tools/scripts/tmux-cht-commands.txt;
     ".local/bin/gen-dynamic-wallpaper".source = ./tools/scripts/gen-dynamic-wallpaper.sh;
     ".local/bin/myip".source = ./tools/scripts/myip.sh;
-
-    ".ssh/config".source = ./configs/ssh/config;
   };
 }

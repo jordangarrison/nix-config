@@ -16,14 +16,9 @@ in
   ];
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
-  home.username =
-    if pkgs.stdenv.isLinux then "jordangarrison" else "jordan.garrison";
+  home.username = "jordan";
   # temporary hack for work
-  home.homeDirectory =
-    if pkgs.stdenv.isLinux then
-      "/home/jordangarrison"
-    else
-      "/Users/jordan.garrison";
+  home.homeDirectory = "/home/jordan";
 
   # This value determines the Home Manager release that your
   # configuration is compatible with. This helps avoid breakage
@@ -48,6 +43,7 @@ in
       alacritty
       arandr
       sqlite
+      warp-terminal
       wezterm
       # doom-emacs
 
@@ -134,9 +130,6 @@ in
         devenv
       ]
     else [
-      aws-sso-cli
-      barrier
-      comixcursors
       discord
       deno
       dig
@@ -145,13 +138,9 @@ in
       glibc
       gnaural
       grip
-      jdk11
-      lens
       obs-studio
       pavucontrol
       pinentry
-      python39Full
-      spotify
       slack
       wally-cli
       xcb-util-cursor
@@ -166,6 +155,9 @@ in
 
   programs.zsh = {
     enable = true;
+    oh-my-zsh = {
+      enable = true;
+    };
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
     initContent = ''

@@ -135,6 +135,12 @@
   programs._1password.enable = true;
   programs.zsh.enable = true;
 
+  # Enable AppImage support
+  programs.appimage = {
+    enable = true;
+    binfmt = true;  # Registers ELF AppImages for direct execution
+  };
+
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 

@@ -200,12 +200,23 @@ in
     '';
   };
 
+  programs.vscode = {
+    enable = true;
+    package = pkgs.code-cursor.fhs;
+  };
+
   programs.direnv = {
     enable = true;
     nix-direnv = {
       enable = true;
       # enableFlakes = true;
     };
+  };
+
+  # GSConnect (KDE Connect for GNOME)
+  programs.gnome-shell = {
+    enable = true;
+    extensions = [{ package = pkgs.gnomeExtensions.gsconnect; }];
   };
 
   # Disable programs.ssh to avoid symlink permission issues

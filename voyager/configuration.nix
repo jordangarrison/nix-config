@@ -8,6 +8,7 @@
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
+      ../modules/nixos/audio/pulseaudio.nix
     ];
 
   # Bootloader.
@@ -46,8 +47,12 @@
   services.xserver.enable = true;
 
   # Enable the GNOME Desktop Environment.
-  services.xserver.displayManager.gdm.enable = true;
-  services.xserver.desktopManager.gnome.enable = true;
+  services.displayManager.gdm.enable = true;
+  services.desktopManager.gnome.enable = true;
+  services.desktopManager.gnome.extraGSettingsOverrides = ''
+    [org.gnome.mutter]
+    experimental-features=['scale-monitor-framebuffer']
+  '';
 
   # Configure keymap in X11
   services.xserver.xkb = {
@@ -71,21 +76,9 @@
   # Enable CUPS to print documents.
   services.printing.enable = true;
 
-  # Enable sound with pipewire.
-  hardware.pulseaudio.enable = false;
+  # Audio configuration now handled by ../modules/nixos/audio/pipewire.nix
+  # Enables rtkit for real-time audio scheduling
   security.rtkit.enable = true;
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    pulse.enable = true;
-    # If you want to use JACK applications, uncomment this
-    #jack.enable = true;
-
-    # use the example session manager (no others are packaged yet so this is enabled by default,
-    # no need to redefine it in your config for now)
-    #media-session.enable = true;
-  };
 
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
@@ -99,6 +92,7 @@
       shell = pkgs.zsh;
       packages = with pkgs; [
       #  thunderbird
+        remmina
         todoist
         todoist-electron
       ];
@@ -181,7 +175,15 @@
   # Enable Docker
   virtualisation.docker.enable = true;
 
+  # Enable Tailscale
+  services.tailscale.enable = true;
+
   # Open ports in the firewall.
+  # GSConnect (KDE Connect for GNOME) firewall rules
+  networking.firewall = rec {
+    allowedTCPPortRanges = [ { from = 1714; to = 1764; } ];
+    allowedUDPPortRanges = allowedTCPPortRanges;
+  };
   # networking.firewall.allowedTCPPorts = [ ... ];
   # networking.firewall.allowedUDPPorts = [ ... ];
   # Or disable the firewall altogether.

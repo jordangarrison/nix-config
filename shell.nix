@@ -8,6 +8,7 @@
     nativeBuildInputs = with pkgs; [
       git
       home-manager
+      neovim
       nix
       nix-direnv
     ];

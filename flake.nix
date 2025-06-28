@@ -3,6 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixos-hardware.url = "github:nixos/nixos-hardware";
     nix-darwin = {
       url = "github:LnL7/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -13,7 +14,30 @@
     };
   };
 
-  outputs = inputs@{ self, nixpkgs, nix-darwin, home-manager }: {
+  outputs = inputs@{ self, nixpkgs, nixos-hardware, nix-darwin, home-manager }: {
+    nixosConfigurations = {
+      "voyager" = nixpkgs.lib.nixosSystem {
+        modules = [
+	  voyager/configuration.nix
+          nixos-hardware.nixosModules.apple-macbook-pro-12-1
+	  home-manager.nixosModules.home-manager
+	  {
+	    home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+
+            users.users.jordan = {
+              isNormalUser = true;
+              extraGroups = [ "wheel" ];
+              home = "/home/jordan";
+            };
+	    home-manager.users = {
+	      jordan = import ./users/jordangarrison/home.nix;
+	    };
+	  }
+	];
+
+      };
+    };
     darwinConfigurations = {
       "H952L3DPHH" = nix-darwin.lib.darwinSystem {
         modules = [

@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, inputs, ... }:
 
 let
   vscodeScriptPath = pkgs.writeTextFile {
@@ -129,11 +129,13 @@ in
       rust-analyzer
       uv
       yarn
-    ] ++ (if pkgs.stdenv.isDarwin then
-      [
-        devenv
-      ]
-    else [
+
+      # AWS Tools from flake inputs
+      inputs.aws-tools.packages.${pkgs.system}.default
+      inputs.aws-use-sso.packages.${pkgs.system}.default
+    ] ++ (if pkgs.stdenv.isDarwin then [
+      devenv
+    ] else [
       aws-sso-cli
       barrier
       comixcursors
@@ -156,9 +158,7 @@ in
       wally-cli
       xcb-util-cursor
       xclip
-    ]
-
-    );
+    ]);
 
   programs.gpg = { enable = pkgs.stdenv.isLinux; };
 

@@ -7,7 +7,7 @@
     onActivation = {
       autoUpdate = true;
       upgrade = true;
-      cleanup = "zap";
+      cleanup = "uninstall";
     };
     taps = [ "homebrew/services" "deskflow/homebrew-tap" ];
     brews = [
@@ -29,8 +29,8 @@
       "claude"
       "cursor"
       "deskflow"
-      "docker"
-      "emacs"
+      "docker-desktop"
+      "emacs-app"
       "espanso"
       "dbeaver-community"
       "discord"
@@ -51,7 +51,7 @@
       "readdle-spark"
       "rectangle"
       "superwhisper"
-      "todoist"
+      "todoist-app"
       "visual-studio-code"
       "warp"
       "warp@preview"

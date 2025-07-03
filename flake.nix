@@ -22,7 +22,7 @@
     };
   };
 
-  outputs = inputs@{ self, nixpkgs, nixos-hardware, nix-darwin, home-manager }: {
+  outputs = inputs@{ self, nixpkgs, nixos-hardware, nix-darwin, home-manager, aws-tools, aws-use-sso }: {
     nixosConfigurations = {
       "endeavour" = nixpkgs.lib.nixosSystem {
         modules = [
@@ -41,6 +41,7 @@
               jordangarrison = import ./users/jordangarrison/home.nix;
             };
             home-manager.extraSpecialArgs = {
+              inherit inputs;
               username = "jordangarrison";
               homeDirectory = "/home/jordangarrison";
             };
@@ -66,6 +67,7 @@
               jordan = import ./users/jordangarrison/home.nix;
             };
             home-manager.extraSpecialArgs = {
+              inherit inputs;
               username = "jordan";
               homeDirectory = "/home/jordan";
             };
@@ -74,7 +76,7 @@
 
       };
     };
-  outputs = inputs@{ self, nixpkgs, nix-darwin, home-manager, aws-tools, aws-use-sso }: {
+
     darwinConfigurations = {
       "H952L3DPHH" = nix-darwin.lib.darwinSystem {
         modules = [
@@ -88,10 +90,10 @@
               useUserPackages = true;
               users."jordan.garrison" = import ./users/jordangarrison/home.nix;
               extraSpecialArgs = {
+                inherit inputs;
                 username = "jordan.garrison";
                 homeDirectory = "/Users/jordan.garrison";
               };
-              extraSpecialArgs = { inherit inputs; };
             };
             users.users."jordan.garrison" = {
               home = "/Users/jordan.garrison";

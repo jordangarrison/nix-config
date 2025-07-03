@@ -1,4 +1,4 @@
-{ config, pkgs, lib, username, homeDirectory, inputs ... }:
+{ config, pkgs, lib, username, homeDirectory, inputs, ... }:
 
 let
   vscodeScriptPath = pkgs.writeTextFile {

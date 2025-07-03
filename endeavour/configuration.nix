@@ -86,10 +86,11 @@
   users.users.jordangarrison = {
     isNormalUser = true;
     description = "Jordan Garrison";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" "docker" ];
     shell = pkgs.zsh;
     packages = with pkgs; [
       deskflow
+      obsidian
       thunderbird
       todoist-electron
     ];

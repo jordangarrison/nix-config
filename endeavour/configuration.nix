@@ -87,6 +87,7 @@
     isNormalUser = true;
     description = "Jordan Garrison";
     extraGroups = [ "networkmanager" "wheel" ];
+    shell = pkgs.zsh;
     packages = with pkgs; [
       deskflow
       thunderbird

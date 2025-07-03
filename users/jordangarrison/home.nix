@@ -141,6 +141,7 @@ in
       obs-studio
       pavucontrol
       pinentry
+      remmina
       slack
       wally-cli
       xcb-util-cursor
@@ -152,6 +153,11 @@ in
   programs.gpg = { enable = pkgs.stdenv.isLinux; };
 
   # services.gpg-agent = { enable = pkgs.stdenv.isLinux; };
+
+  programs.chromium = {
+    enable = true;
+    package = pkgs.brave;
+  };
 
   programs.zsh = {
     enable = true;

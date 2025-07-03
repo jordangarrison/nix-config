@@ -6,7 +6,8 @@
 
 {
   imports =
-    [ # Include the results of the hardware scan.
+    [
+      # Include the results of the hardware scan.
       ./hardware-configuration.nix
       ../modules/nixos/audio/pulseaudio.nix
     ];
@@ -91,9 +92,7 @@
       extraGroups = [ "networkmanager" "wheel" "docker" ];
       shell = pkgs.zsh;
       packages = with pkgs; [
-      #  thunderbird
-        remmina
-        todoist
+        #  thunderbird
         todoist-electron
       ];
     };
@@ -102,7 +101,7 @@
       description = "Mikayla Garrison";
       extraGroups = [ "networkmanager" "wheel" ];
       packages = with pkgs; [
-      #  thunderbird
+        #  thunderbird
       ];
     };
     jane = {
@@ -110,7 +109,7 @@
       description = "Jane Garrison";
       extraGroups = [ "networkmanager" ];
       packages = with pkgs; [
-      #  thunderbird
+        #  thunderbird
       ];
     };
     isla = {
@@ -118,7 +117,7 @@
       description = "Isla Garrison";
       extraGroups = [ "networkmanager" ];
       packages = with pkgs; [
-      #  thunderbird
+        #  thunderbird
       ];
     };
   };
@@ -132,7 +131,7 @@
   # Enable AppImage support
   programs.appimage = {
     enable = true;
-    binfmt = true;  # Registers ELF AppImages for direct execution
+    binfmt = true; # Registers ELF AppImages for direct execution
   };
 
   # Allow unfree packages
@@ -141,8 +140,8 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-  #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-  #  wget
+    #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+    #  wget
     vim
     wget
     curl
@@ -181,7 +180,7 @@
   # Open ports in the firewall.
   # GSConnect (KDE Connect for GNOME) firewall rules
   networking.firewall = rec {
-    allowedTCPPortRanges = [ { from = 1714; to = 1764; } ];
+    allowedTCPPortRanges = [{ from = 1714; to = 1764; }];
     allowedUDPPortRanges = allowedTCPPortRanges;
   };
   # networking.firewall.allowedTCPPorts = [ ... ];

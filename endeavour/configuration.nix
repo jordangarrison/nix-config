@@ -98,8 +98,10 @@
 
   # Install firefox.
   programs.firefox.enable = true;
+
   programs._1password-gui.enable = true;
   programs._1password.enable = true;
+
   programs.zsh.enable = true;
 
   # Enable AppImage support
@@ -122,6 +124,9 @@
     # Gnome
     gnome-tweaks
     gnomeExtensions.clipboard-history
+
+    # Para Gnome
+    shotwell
   ];
 
   services.gnome.core-shell.enable = true;

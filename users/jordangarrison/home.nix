@@ -157,10 +157,26 @@ in
 
   # services.gpg-agent = { enable = pkgs.stdenv.isLinux; };
 
-  programs.chromium = {
-    enable = true;
-    package = pkgs.brave;
-  };
+  # Install brave.
+  programs.brave =
+    if pkgs.stdenv.isLinux then {
+      enable = true;
+      extensions = [
+        "aeblfdkhhhdcdjpifhhbdiojplfjncoa" # 1Password
+        "eimadpbcbfnmbkopoojfekhnkhdbieeh" # Dark Reader
+        "bcjindcccaagfpapjjmafapmmgkkhgoa" # JSON Formatter
+        "cnjifjpddelmedmihgijeibhnjfabmlf" # Obsidian Web Clipper
+        "glnpjglilkicbckjpbgcfkogebgllemb" # Okta Browser Plugin
+        "jjhefcfhmnkfeepcpnilbbkaadhngkbi" # Readwise Highlighter
+        "gmbmikajjgmnabiglmofipeabaddhgne" # Save to Google Drive
+        "micdllihgoppmejpecmkilggmaagfdmb" # Tab Copy
+        "egnjhciaieeiiohknchakcodbpgjnchh" # Tab Wrangler
+        "jldhpllghnbhlbpcmnajkpdmadaolakh" # Todoist for Chrome
+        "clgenfnodoocmhnlnpknojdbjjnmecff" # Todoist for Gmail
+      ];
+    } else {
+      enable = false;
+    };
 
   programs.zsh = {
     enable = true;

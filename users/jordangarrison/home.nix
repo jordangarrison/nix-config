@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, username, homeDirectory, ... }:
 
 let
   vscodeScriptPath = pkgs.writeTextFile {
@@ -16,9 +16,8 @@ in
   ];
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
-  home.username = "jordan";
-  # temporary hack for work
-  home.homeDirectory = "/home/jordan";
+  home.username = username;
+  home.homeDirectory = homeDirectory;
 
   # This value determines the Home Manager release that your
   # configuration is compatible with. This helps avoid breakage
@@ -43,6 +42,7 @@ in
       alacritty
       arandr
       sqlite
+      todoist
       warp-terminal
       wezterm
       # doom-emacs

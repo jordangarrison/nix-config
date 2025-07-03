@@ -16,13 +16,37 @@
 
   outputs = inputs@{ self, nixpkgs, nixos-hardware, nix-darwin, home-manager }: {
     nixosConfigurations = {
+      "endeavour" = nixpkgs.lib.nixosSystem {
+        modules = [
+          endeavour/configuration.nix
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+
+            users.users.jordangarrison = {
+              isNormalUser = true;
+              extraGroups = [ "wheel" ];
+              home = "/home/jordangarrison";
+            };
+            home-manager.users = {
+              jordangarrison = import ./users/jordangarrison/home.nix;
+            };
+            home-manager.extraSpecialArgs = {
+              username = "jordangarrison";
+              homeDirectory = "/home/jordangarrison";
+            };
+          }
+        ];
+
+      };
       "voyager" = nixpkgs.lib.nixosSystem {
         modules = [
-	  voyager/configuration.nix
+          voyager/configuration.nix
           nixos-hardware.nixosModules.apple-macbook-pro-12-1
-	  home-manager.nixosModules.home-manager
-	  {
-	    home-manager.useGlobalPkgs = true;
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
 
             users.users.jordan = {
@@ -30,11 +54,15 @@
               extraGroups = [ "wheel" ];
               home = "/home/jordan";
             };
-	    home-manager.users = {
-	      jordan = import ./users/jordangarrison/home.nix;
-	    };
-	  }
-	];
+            home-manager.users = {
+              jordan = import ./users/jordangarrison/home.nix;
+            };
+            home-manager.extraSpecialArgs = {
+              username = "jordan";
+              homeDirectory = "/home/jordan";
+            };
+          }
+        ];
 
       };
     };
@@ -50,6 +78,10 @@
               useGlobalPkgs = true;
               useUserPackages = true;
               users."jordan.garrison" = import ./users/jordangarrison/home.nix;
+              extraSpecialArgs = {
+                username = "jordan.garrison";
+                homeDirectory = "/Users/jordan.garrison";
+              };
             };
             users.users."jordan.garrison" = {
               home = "/Users/jordan.garrison";
@@ -69,7 +101,11 @@
         modules = [
           ./users/jordangarrison/home.nix
         ];
-        extraSpecialArgs = { inherit inputs; };
+        extraSpecialArgs = {
+          inherit inputs;
+          username = "jordangarrison";
+          homeDirectory = "/home/jordangarrison";
+        };
       };
     };
   };

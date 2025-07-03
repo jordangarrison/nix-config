@@ -78,7 +78,11 @@
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
+  # Enable Logitech Unifying Receiver
+  hardware.logitech.wireless.enable = true;
+  hardware.logitech.wireless.enableGraphical = true;
+
+  # Define a user account. Don't forget to set a password with 'passwd'.
   users.users.jordangarrison = {
     isNormalUser = true;
     description = "Jordan Garrison";

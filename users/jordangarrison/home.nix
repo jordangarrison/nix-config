@@ -48,7 +48,7 @@ in
       # doom-emacs
 
       # Utilities
-      aider-chat
+      # aider-chat  # Temporarily disabled due to texlive build issue
       claude-code
       exercism
       gh
@@ -211,7 +211,8 @@ in
 
   programs.vscode = {
     enable = true;
-    package = pkgs.code-cursor.fhs;
+    # Use cursor without fhs on macOS since .fhs is Linux-only
+    package = if pkgs.stdenv.isDarwin then pkgs.code-cursor else pkgs.code-cursor.fhs;
   };
 
   programs.direnv = {
@@ -223,7 +224,7 @@ in
   };
 
   # GSConnect (KDE Connect for GNOME)
-  programs.gnome-shell = {
+  programs.gnome-shell = lib.mkIf pkgs.stdenv.isLinux {
     enable = true;
     extensions = [{ package = pkgs.gnomeExtensions.gsconnect; }];
   };

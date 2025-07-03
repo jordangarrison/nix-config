@@ -1,7 +1,7 @@
 { pkgs, lib, inputs, ... }: {
   environment.systemPackages = [ pkgs.vim pkgs.git ];
   programs.zsh.enable = true;
-  # system.primaryUser = "jordan.garrison";
+  system.primaryUser = "jordan.garrison";
   homebrew = {
     enable = true;
     onActivation = {

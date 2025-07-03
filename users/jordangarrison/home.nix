@@ -1,4 +1,4 @@
-{ config, pkgs, lib, inputs, ... }:
+{ config, pkgs, lib, username, homeDirectory, inputs, ... }:
 
 let
   vscodeScriptPath = pkgs.writeTextFile {
@@ -16,14 +16,8 @@ in
   ];
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
-  home.username =
-    if pkgs.stdenv.isLinux then "jordangarrison" else "jordan.garrison";
-  # temporary hack for work
-  home.homeDirectory =
-    if pkgs.stdenv.isLinux then
-      "/home/jordangarrison"
-    else
-      "/Users/jordan.garrison";
+  home.username = username;
+  home.homeDirectory = homeDirectory;
 
   # This value determines the Home Manager release that your
   # configuration is compatible with. This helps avoid breakage
@@ -48,11 +42,13 @@ in
       alacritty
       arandr
       sqlite
+      todoist
+      warp-terminal
       wezterm
       # doom-emacs
 
       # Utilities
-      aider-chat
+      # aider-chat  # Temporarily disabled due to texlive build issue
       claude-code
       exercism
       gh
@@ -147,13 +143,10 @@ in
       glibc
       gnaural
       grip
-      jdk11
-      lens
       obs-studio
       pavucontrol
       pinentry
-      python39Full
-      spotify
+      remmina
       slack
       wally-cli
       xcb-util-cursor
@@ -164,8 +157,16 @@ in
 
   # services.gpg-agent = { enable = pkgs.stdenv.isLinux; };
 
+  programs.chromium = {
+    enable = true;
+    package = pkgs.brave;
+  };
+
   programs.zsh = {
     enable = true;
+    oh-my-zsh = {
+      enable = true;
+    };
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
     initContent = ''
@@ -208,6 +209,12 @@ in
     '';
   };
 
+  programs.vscode = {
+    enable = true;
+    # Use cursor without fhs on macOS since .fhs is Linux-only
+    package = if pkgs.stdenv.isDarwin then pkgs.code-cursor else pkgs.code-cursor.fhs;
+  };
+
   programs.direnv = {
     enable = true;
     nix-direnv = {
@@ -216,7 +223,22 @@ in
     };
   };
 
+  # GSConnect (KDE Connect for GNOME)
+  programs.gnome-shell = lib.mkIf pkgs.stdenv.isLinux {
+    enable = true;
+    extensions = [{ package = pkgs.gnomeExtensions.gsconnect; }];
+  };
+
+  # Disable programs.ssh to avoid symlink permission issues
+  # Using home.file approach with onChange instead
+
   home.file = {
+    # SSH config with proper permissions fix
+    ".ssh/config_source" = {
+      source = ./configs/ssh/config;
+      onChange = ''cat ~/.ssh/config_source > ~/.ssh/config && chmod 600 ~/.ssh/config'';
+    };
+
     # doom emacs
     ".doom.d".source = ./tools/doom.d;
     ".emacs.d/init.el".text = ''
@@ -266,7 +288,5 @@ in
     ".tmux-cht-commands".source = ./tools/scripts/tmux-cht-commands.txt;
     ".local/bin/gen-dynamic-wallpaper".source = ./tools/scripts/gen-dynamic-wallpaper.sh;
     ".local/bin/myip".source = ./tools/scripts/myip.sh;
-
-    ".ssh/config".source = ./configs/ssh/config;
   };
 }

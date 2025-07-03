@@ -9,14 +9,13 @@
     [
       # Include the results of the hardware scan.
       ./hardware-configuration.nix
-      ../modules/nixos/audio/pulseaudio.nix
     ];
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  networking.hostName = "voyager"; # Define your hostname.
+  networking.hostName = "endeavour"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   # Configure network proxy if necessary
@@ -50,10 +49,6 @@
   # Enable the GNOME Desktop Environment.
   services.displayManager.gdm.enable = true;
   services.desktopManager.gnome.enable = true;
-  services.desktopManager.gnome.extraGSettingsOverrides = ''
-    [org.gnome.mutter]
-    experimental-features=['scale-monitor-framebuffer']
-  '';
 
   # Configure keymap in X11
   services.xserver.xkb = {
@@ -61,65 +56,43 @@
     variant = "";
   };
 
-  services.interception-tools = {
-    enable = true;
-    plugins = with pkgs; [
-      interception-tools-plugins.caps2esc
-    ];
-    udevmonConfig = ''
-      - JOB: "${pkgs.interception-tools}/bin/intercept -g $DEVNODE | ${pkgs.interception-tools-plugins.caps2esc}/bin/caps2esc | ${pkgs.interception-tools}/bin/uinput -d $DEVNODE"
-        DEVICE:
-          EVENTS:
-            EV_KEY: [KEY_CAPSLOCK, KEY_ESC, KEY_LEFTCTRL]
-    '';
-  };
-
   # Enable CUPS to print documents.
   services.printing.enable = true;
 
-  # Audio configuration now handled by ../modules/nixos/audio/pipewire.nix
-  # Enables rtkit for real-time audio scheduling
+  # Enable sound with pipewire.
+  services.pulseaudio.enable = false;
   security.rtkit.enable = true;
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+    # If you want to use JACK applications, uncomment this
+    #jack.enable = true;
+
+    # use the example session manager (no others are packaged yet so this is enabled by default,
+    # no need to redefine it in your config for now)
+    #media-session.enable = true;
+  };
 
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users = {
-    jordan = {
-      isNormalUser = true;
-      description = "Jordan Garrison";
-      extraGroups = [ "networkmanager" "wheel" "docker" ];
-      shell = pkgs.zsh;
-      packages = with pkgs; [
-        #  thunderbird
-        todoist-electron
-      ];
-    };
-    mikayla = {
-      isNormalUser = true;
-      description = "Mikayla Garrison";
-      extraGroups = [ "networkmanager" "wheel" ];
-      packages = with pkgs; [
-        #  thunderbird
-      ];
-    };
-    jane = {
-      isNormalUser = true;
-      description = "Jane Garrison";
-      extraGroups = [ "networkmanager" ];
-      packages = with pkgs; [
-        #  thunderbird
-      ];
-    };
-    isla = {
-      isNormalUser = true;
-      description = "Isla Garrison";
-      extraGroups = [ "networkmanager" ];
-      packages = with pkgs; [
-        #  thunderbird
-      ];
-    };
+  # Enable Logitech Unifying Receiver
+  hardware.logitech.wireless.enable = true;
+  hardware.logitech.wireless.enableGraphical = true;
+
+  # Define a user account. Don't forget to set a password with 'passwd'.
+  users.users.jordangarrison = {
+    isNormalUser = true;
+    description = "Jordan Garrison";
+    extraGroups = [ "networkmanager" "wheel" ];
+    shell = pkgs.zsh;
+    packages = with pkgs; [
+      deskflow
+      thunderbird
+      todoist-electron
+    ];
   };
 
   # Install firefox.
@@ -140,9 +113,7 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-    #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-    #  wget
-    vim
+    vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     wget
     curl
     brave
@@ -178,27 +149,19 @@
   services.tailscale.enable = true;
 
   # Open ports in the firewall.
-  # GSConnect (KDE Connect for GNOME) firewall rules
-  networking.firewall = rec {
-    allowedTCPPortRanges = [{ from = 1714; to = 1764; }];
-    allowedUDPPortRanges = allowedTCPPortRanges;
-  };
-  # networking.firewall.allowedTCPPorts = [ ... ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
+  # networking.firewall = rec {
+  #   allowedTCPPortRanges = [{ from = 1714; to = 1764; } 24800];
+  #   allowedUDPPortRanges = allowedTCPPortRanges;
+  # };
   # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
-
-  # Power management commands to restart wpa_supplicant on power up
-  powerManagement.powerUpCommands = ''
-    ${pkgs.systemd}/bin/systemctl restart wpa_supplicant.service
-  '';
+  networking.firewall.enable = false;
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
-  # on your system were taken. It's perfectly fine and recommended to leave
+  # on your system were taken. It‘s perfectly fine and recommended to leave
   # this value at the release version of the first install of this system.
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "24.11"; # Did you read the comment?
+  system.stateVersion = "25.05"; # Did you read the comment?
 
 }

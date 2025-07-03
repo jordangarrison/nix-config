@@ -182,13 +182,13 @@ Version 2019-11-04"
 
 ;; accept completion from copilot and fallback to company
 (unless (eq system-type 'darwin)
-(use-package! copilot
-  :hook (prog-mode . copilot-mode)
-  :bind (("C-TAB" . 'copilot-accept-completion-by-word)
-         ("C-<tab>" . 'copilot-accept-completion-by-word)
-         :map copilot-completion-map
-         ("<tab>" . 'copilot-accept-completion)
-         ("TAB" . 'copilot-accept-completion)))
+  (use-package! copilot
+    :hook (prog-mode . copilot-mode)
+    :bind (("C-TAB" . 'copilot-accept-completion-by-word)
+           ("C-<tab>" . 'copilot-accept-completion-by-word)
+           :map copilot-completion-map
+           ("<tab>" . 'copilot-accept-completion)
+           ("TAB" . 'copilot-accept-completion)))
   (setq! copilot-node-executable "~/.nix-profile/bin/node"))
 
 ;; kubernetes
@@ -250,15 +250,15 @@ Version 2019-11-04"
 
 (setq auth-sources '("~/.authinfo"))
 
-(use-package! exercism)
+;; (use-package! exercism)
 
 ;; gleam
-(use-package! gleam-ts-mode
-  :config
-  ;; setup formatter to be used by `SPC c f`
-  (after! apheleia
-    (setf (alist-get 'gleam-ts-mode apheleia-mode-alist) 'gleam)
-    (setf (alist-get 'gleam apheleia-formatters) '("gleam" "format" "--stdin"))))
+;; (use-package! gleam-ts-mode
+;;   :config
+;;   ;; setup formatter to be used by `SPC c f`
+;;   (after! apheleia
+;;     (setf (alist-get 'gleam-ts-mode apheleia-mode-alist) 'gleam)
+;;     (setf (alist-get 'gleam apheleia-formatters) '("gleam" "format" "--stdin"))))
 
 (after! treesit
   (add-to-list 'auto-mode-alist '("\\.gleam$" . gleam-ts-mode)))

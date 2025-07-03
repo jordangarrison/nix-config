@@ -12,6 +12,14 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    aws-tools = {
+      url = "github:jordangarrison/aws-tools";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    aws-use-sso = {
+      url = "github:jordangarrison/aws-use-sso";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs@{ self, nixpkgs, nixos-hardware, nix-darwin, home-manager }: {
@@ -66,6 +74,7 @@
 
       };
     };
+  outputs = inputs@{ self, nixpkgs, nix-darwin, home-manager, aws-tools, aws-use-sso }: {
     darwinConfigurations = {
       "H952L3DPHH" = nix-darwin.lib.darwinSystem {
         modules = [
@@ -82,6 +91,7 @@
                 username = "jordan.garrison";
                 homeDirectory = "/Users/jordan.garrison";
               };
+              extraSpecialArgs = { inherit inputs; };
             };
             users.users."jordan.garrison" = {
               home = "/Users/jordan.garrison";

@@ -1,8 +1,5 @@
 { pkgs, lib, inputs, ... }: {
-  environment.systemPackages = [
-    pkgs.vim
-    pkgs.git
-  ];
+  environment.systemPackages = [ pkgs.vim pkgs.git ];
   programs.zsh.enable = true;
   # system.primaryUser = "jordan.garrison";
   homebrew = {
@@ -10,12 +7,9 @@
     onActivation = {
       autoUpdate = true;
       upgrade = true;
-      cleanup = "zap";
+      cleanup = "uninstall";
     };
-    taps = [
-      "homebrew/services"
-      "deskflow/homebrew-tap"
-    ];
+    taps = [ "homebrew/services" "deskflow/homebrew-tap" ];
     brews = [
       "fzf"
       "mas"
@@ -35,8 +29,8 @@
       "claude"
       "cursor"
       "deskflow"
-      "docker"
-      "emacs"
+      "docker-desktop"
+      "emacs-app"
       "espanso"
       "dbeaver-community"
       "discord"
@@ -47,6 +41,7 @@
       "ghostty"
       "google-drive"
       "jordanbaird-ice"
+      "kdenlive"
       "linearmouse"
       "logseq"
       "obs"
@@ -56,7 +51,7 @@
       "readdle-spark"
       "rectangle"
       "superwhisper"
-      "todoist"
+      "todoist-app"
       "visual-studio-code"
       "warp"
       "warp@preview"
@@ -122,12 +117,8 @@
         InitialKeyRepeat = 10;
         KeyRepeat = 1;
       };
-      trackpad = {
-        Clicking = true;
-      };
-      WindowManager = {
-        GloballyEnabled = true;
-      };
+      trackpad = { Clicking = true; };
+      WindowManager = { GloballyEnabled = true; };
     };
     keyboard = {
       enableKeyMapping = true;

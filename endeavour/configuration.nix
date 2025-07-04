@@ -48,7 +48,25 @@
 
   # Enable the GNOME Desktop Environment.
   services.displayManager.gdm.enable = true;
+  services.displayManager.gdm.autoSuspend = false;
+  services.displayManager.autoLogin.enable = false;
   services.desktopManager.gnome.enable = true;
+  services.gnome.gnome-remote-desktop.enable = true;
+
+  services.xrdp = {
+    enable = true;
+    defaultWindowManager = "gnome-session";
+  };
+
+  services.dbus.enable = true;
+
+  systemd.services."gnome-remote-desktop".wantedBy = [ "graphical.target" ];
+  systemd.targets = {
+    sleep.enable = false;
+    suspend.enable = false;
+    hibernate.enable = false;
+    hybrid-sleep.enable = false;
+  };
 
   # Configure keymap in X11
   services.xserver.xkb = {
@@ -122,6 +140,8 @@
     brave
 
     # Gnome
+    gnome-remote-desktop
+    gnome-session
     gnome-tweaks
     gnomeExtensions.clipboard-history
 

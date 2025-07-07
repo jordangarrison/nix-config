@@ -117,7 +117,10 @@
   # Install firefox.
   programs.firefox.enable = true;
 
-  programs._1password-gui.enable = true;
+  programs._1password-gui = {
+    enable = true;
+    polkitPolicyOwners = [ "jordangarrison" ];
+  };
   programs._1password.enable = true;
 
   programs.zsh.enable = true;

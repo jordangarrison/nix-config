@@ -58,7 +58,6 @@ in
       nil
       tenv
       terraform-ls
-      _1password-cli
       amazon-ecr-credential-helper
       asdf-vm
       awscli2

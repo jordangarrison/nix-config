@@ -240,7 +240,10 @@ in
   # GSConnect (KDE Connect for GNOME)
   programs.gnome-shell = lib.mkIf pkgs.stdenv.isLinux {
     enable = true;
-    extensions = [{ package = pkgs.gnomeExtensions.gsconnect; }];
+    extensions = [
+      { package = pkgs.gnomeExtensions.gsconnect; }
+      { package = pkgs.gnomeExtensions.clipboard-history; }
+    ];
   };
 
   # Disable programs.ssh to avoid symlink permission issues

@@ -14,6 +14,10 @@ in
   imports = [
     # ./tools/nvim/nvim.nix
   ];
+
+  # nix settings
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
   home.username = username;
@@ -51,7 +55,6 @@ in
       # aider-chat  # Temporarily disabled due to texlive build issue
       claude-code
       exercism
-      gh
       helix
       k9s
       neovim
@@ -213,6 +216,17 @@ in
       sync_frequency = "10m";
       inline_height = 20;
     };
+  };
+
+  programs.gh = {
+    enable = true;
+    settings = {
+      git_protocol = "ssh";
+    };
+    extensions = with pkgs; [
+      gh-copilot
+      gh-dash
+    ];
   };
 
   programs.vim = {

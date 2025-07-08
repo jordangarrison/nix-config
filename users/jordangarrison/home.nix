@@ -226,8 +226,7 @@ in
 
   programs.vscode = {
     enable = true;
-    # Use cursor without fhs on macOS since .fhs is Linux-only
-    package = if pkgs.stdenv.isDarwin then pkgs.code-cursor else pkgs.code-cursor.fhs;
+    package = pkgs.code-cursor;
   };
 
   programs.direnv = {

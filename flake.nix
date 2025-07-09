@@ -38,11 +38,26 @@
           ./hosts/endeavour/configuration.nix
           home-manager.nixosModules.home-manager
           {
-            # Configure Jordan Garrison for endeavour
+            # Configure users for endeavour
             users.jordangarrison = {
               enable = true;
               username = "jordangarrison";
               homeDirectory = "/home/jordangarrison";
+            };
+
+            users.mikayla = {
+              enable = true;
+              homeDirectory = "/home/mikayla";
+            };
+
+            users.jane = {
+              enable = true;
+              homeDirectory = "/home/jane";
+            };
+
+            users.isla = {
+              enable = true;
+              homeDirectory = "/home/isla";
             };
 
             home-manager.useGlobalPkgs = true;

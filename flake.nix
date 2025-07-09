@@ -28,11 +28,14 @@
         specialArgs = { inherit inputs; };
         modules = [
           ./modules/nixos/common.nix
-          ./modules/gnome-desktop.nix
+          ./modules/nixos/gnome-desktop.nix
           ./modules/nixos/audio/pipewire.nix
           ./modules/nixos/development.nix
-          ./modules/nixos/users/jordangarrison.nix
-          ./endeavour/configuration.nix
+          ./users/jordangarrison/nixos.nix
+          ./users/mikayla/nixos.nix
+          ./users/jane/nixos.nix
+          ./users/isla/nixos.nix
+          ./hosts/endeavour/configuration.nix
           home-manager.nixosModules.home-manager
           {
             # Configure Jordan Garrison for endeavour
@@ -52,14 +55,14 @@
         specialArgs = { inherit inputs; };
         modules = [
           ./modules/nixos/common.nix
-          ./modules/gnome-desktop.nix
+          ./modules/nixos/gnome-desktop.nix
           ./modules/nixos/audio/pipewire.nix
           ./modules/nixos/development.nix
-          ./modules/nixos/users/jordangarrison.nix
-          ./modules/nixos/users/mikayla.nix
-          ./modules/nixos/users/jane.nix
-          ./modules/nixos/users/isla.nix
-          ./voyager/configuration.nix
+          ./users/jordangarrison/nixos.nix
+          ./users/mikayla/nixos.nix
+          ./users/jane/nixos.nix
+          ./users/isla/nixos.nix
+          ./hosts/voyager/configuration.nix
           nixos-hardware.nixosModules.apple-macbook-pro-12-1
           home-manager.nixosModules.home-manager
           {
@@ -96,7 +99,7 @@
     darwinConfigurations = {
       "H952L3DPHH" = nix-darwin.lib.darwinSystem {
         modules = [
-          flomac/configuration.nix
+          ./hosts/flomac/configuration.nix
           home-manager.darwinModules.home-manager
           {
             nix.enable = false;

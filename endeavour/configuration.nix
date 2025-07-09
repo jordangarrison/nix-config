@@ -43,22 +43,7 @@
   hardware.logitech.wireless.enable = true;
   hardware.logitech.wireless.enableGraphical = true;
 
-  # Define a user account. Don't forget to set a password with 'passwd'.
-  users.users.jordangarrison = {
-    isNormalUser = true;
-    description = "Jordan Garrison";
-    extraGroups = [ "networkmanager" "wheel" "docker" ];
-    shell = pkgs.zsh;
-    packages = with pkgs; [
-      deskflow
-      obsidian
-      thunderbird
-      todoist-electron
-    ];
-  };
-
-  # 1Password policy owners (endeavour-specific)
-  programs._1password-gui.polkitPolicyOwners = [ "jordangarrison" ];
+  # User configuration now handled by user modules in flake.nix
 
   # Endeavour-specific system packages
   environment.systemPackages = with pkgs; [

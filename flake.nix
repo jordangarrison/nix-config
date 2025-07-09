@@ -25,60 +25,68 @@
   outputs = inputs@{ self, nixpkgs, nixos-hardware, nix-darwin, home-manager, aws-tools, aws-use-sso }: {
     nixosConfigurations = {
       "endeavour" = nixpkgs.lib.nixosSystem {
+        specialArgs = { inherit inputs; };
         modules = [
           ./modules/nixos/common.nix
           ./modules/gnome-desktop.nix
           ./modules/nixos/audio/pipewire.nix
           ./modules/nixos/development.nix
+          ./modules/nixos/users/jordangarrison.nix
           ./endeavour/configuration.nix
           home-manager.nixosModules.home-manager
           {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-
-            users.users.jordangarrison = {
-              isNormalUser = true;
-              extraGroups = [ "wheel" ];
-              home = "/home/jordangarrison";
-            };
-            home-manager.users = {
-              jordangarrison = import ./users/jordangarrison/home.nix;
-            };
-            home-manager.extraSpecialArgs = {
-              inherit inputs;
+            # Configure Jordan Garrison for endeavour
+            users.jordangarrison = {
+              enable = true;
               username = "jordangarrison";
               homeDirectory = "/home/jordangarrison";
             };
+
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
           }
         ];
 
       };
       "voyager" = nixpkgs.lib.nixosSystem {
+        specialArgs = { inherit inputs; };
         modules = [
           ./modules/nixos/common.nix
           ./modules/gnome-desktop.nix
           ./modules/nixos/audio/pipewire.nix
           ./modules/nixos/development.nix
+          ./modules/nixos/users/jordangarrison.nix
+          ./modules/nixos/users/mikayla.nix
+          ./modules/nixos/users/jane.nix
+          ./modules/nixos/users/isla.nix
           ./voyager/configuration.nix
           nixos-hardware.nixosModules.apple-macbook-pro-12-1
           home-manager.nixosModules.home-manager
           {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-
-            users.users.jordan = {
-              isNormalUser = true;
-              extraGroups = [ "wheel" ];
-              home = "/home/jordan";
-            };
-            home-manager.users = {
-              jordan = import ./users/jordangarrison/home.nix;
-            };
-            home-manager.extraSpecialArgs = {
-              inherit inputs;
+            # Configure users for voyager
+            users.jordangarrison = {
+              enable = true;
               username = "jordan";
               homeDirectory = "/home/jordan";
             };
+
+            users.mikayla = {
+              enable = true;
+              homeDirectory = "/home/mikayla";
+            };
+
+            users.jane = {
+              enable = true;
+              homeDirectory = "/home/jane";
+            };
+
+            users.isla = {
+              enable = true;
+              homeDirectory = "/home/isla";
+            };
+
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
           }
         ];
 

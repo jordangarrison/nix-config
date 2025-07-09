@@ -36,42 +36,7 @@
     '';
   };
 
-  # Define user accounts specific to voyager
-  users.users = {
-    jordan = {
-      isNormalUser = true;
-      description = "Jordan Garrison";
-      extraGroups = [ "networkmanager" "wheel" "docker" ];
-      shell = pkgs.zsh;
-      packages = with pkgs; [
-        todoist-electron
-      ];
-    };
-    mikayla = {
-      isNormalUser = true;
-      description = "Mikayla Garrison";
-      extraGroups = [ "networkmanager" "wheel" ];
-      packages = with pkgs; [
-        #  thunderbird
-      ];
-    };
-    jane = {
-      isNormalUser = true;
-      description = "Jane Garrison";
-      extraGroups = [ "networkmanager" ];
-      packages = with pkgs; [
-        #  thunderbird
-      ];
-    };
-    isla = {
-      isNormalUser = true;
-      description = "Isla Garrison";
-      extraGroups = [ "networkmanager" ];
-      packages = with pkgs; [
-        #  thunderbird
-      ];
-    };
-  };
+  # User configuration now handled by user modules in flake.nix
 
   # Voyager-specific firewall configuration
   # GSConnect (KDE Connect for GNOME) firewall rules

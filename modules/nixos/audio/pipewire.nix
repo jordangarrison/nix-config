@@ -16,6 +16,7 @@
 
   # Disable legacy PulseAudio service to avoid conflicts
   hardware.pulseaudio.enable = lib.mkForce false;
+  services.pulseaudio.enable = lib.mkForce false;
 
   # Helpful tools / profiles for troubleshooting
   environment.systemPackages = with pkgs; [

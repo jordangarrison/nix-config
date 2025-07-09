@@ -26,7 +26,11 @@
     nixosConfigurations = {
       "endeavour" = nixpkgs.lib.nixosSystem {
         modules = [
-          endeavour/configuration.nix
+          ./modules/nixos/common.nix
+          ./modules/gnome-desktop.nix
+          ./modules/nixos/audio/pipewire.nix
+          ./modules/nixos/development.nix
+          ./endeavour/configuration.nix
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
@@ -51,7 +55,11 @@
       };
       "voyager" = nixpkgs.lib.nixosSystem {
         modules = [
-          voyager/configuration.nix
+          ./modules/nixos/common.nix
+          ./modules/gnome-desktop.nix
+          ./modules/nixos/audio/pipewire.nix
+          ./modules/nixos/development.nix
+          ./voyager/configuration.nix
           nixos-hardware.nixosModules.apple-macbook-pro-12-1
           home-manager.nixosModules.home-manager
           {

@@ -6,16 +6,15 @@
     enable = true;
 
     # Provide ALSA + PulseAudio compatibility
-    alsa.enable  = true;
+    alsa.enable = true;
     pulse.enable = true;
-    jack.enable  = false;
+    jack.enable = false;
 
     # Use WirePlumber session manager (better policy handling)
     wireplumber.enable = true;
   };
 
   # Disable legacy PulseAudio service to avoid conflicts
-  hardware.pulseaudio.enable = lib.mkForce false;
   services.pulseaudio.enable = lib.mkForce false;
 
   # Helpful tools / profiles for troubleshooting
@@ -23,7 +22,7 @@
     pipewire
     wireplumber
     pavucontrol
-    alsa-ucm-conf  # extra UCM profiles (Apple laptops, etc.)
+    alsa-ucm-conf # extra UCM profiles (Apple laptops, etc.)
   ];
 }
 

@@ -1,37 +1,98 @@
 # My Nix Configuration
 
-To set up please do the following:
+Jordan Garrison's NixOS and Home Manager configurations for NixOS and macOS.
 
-1. Clone the repository to your local machine.
-2. Run `git crypt unlock` to unlock secrets folder
-3. Update the `<folder>.example.sed` files with your own values and place them in `.secrets/<folder>.sed`.
-4. Run `./update-config.sh` to update the configuration files.
+## Setup
 
-## Scripts
+### NixOS
 
-### `./update-config.sh`
+1. Clone the repository to your local machine
+2. Build and switch to the configuration:
 
-This is a helper script which will update the configuration files, not used for installation.
+   ```bash
+   sudo nixos-rebuild switch --flake .#<hostname>
+   ```
 
-```sh
-./update-config.sh [[-d]] [folder]
+Available hosts:
+
+- `endeavour` - Main desktop workstation
+- `voyager` - MacBook Pro running NixOS
+
+### macOS (nix-darwin)
+
+1. Clone the repository to your local machine
+2. Build and switch to the configuration:
+
+   ```bash
+   sudo darwin-rebuild switch --flake .#<hostname>
+   ```
+
+Available hosts:
+
+- `H952L3DPHH` - Work MacBook
+
+### Home Manager (WSL/Ubuntu)
+
+1. Clone the repository to your local machine
+2. Build and switch to the configuration:
+
+   ```bash
+   home-manager switch --flake .#<config>
+   ```
+
+Available configurations:
+
+- `jordangarrison@normandy` - WSL/Ubuntu setup
+
+## Structure
+
+```
+├── flake.nix              # Main flake configuration
+├── hosts/                 # Host-specific configurations
+│   ├── endeavour/         # Desktop workstation
+│   ├── voyager/           # MacBook Pro
+│   └── flomac/            # Work MacBook
+├── modules/               # Shared NixOS modules
+│   ├── nixos/             # NixOS-specific modules
+│   └── *.nix              # Standalone modules
+└── users/                 # User configurations
+    ├── jordangarrison/    # Jordan's user config
+    │   ├── nixos.nix      # NixOS user module
+    │   ├── home.nix       # Home Manager config
+    │   ├── configs/       # User-specific configs
+    │   └── tools/         # User-specific tools
+    └── <other-users>/     # Other family members
 ```
 
-- `-d`: Dry run.
-- `folder`: The folder to update /etc/nixos/configuration.nix with.
+## Updates
 
-### `./update-users.sh`
+### Updating Dependencies
 
-This is a helper script which will run home manager for the currently logged in user if they are in the repo.
+Update flake inputs (equivalent to updating channels):
 
-```sh
-./update-users.sh
+```bash
+nix flake update
 ```
 
-### `./update-channels.sh`
+### Rebuilding Systems
 
-This script when run will update the nixos channels.
+After updating, rebuild your system:
 
-### `./update-home-channels.sh`
+```bash
+# NixOS
+sudo nixos-rebuild switch --flake .#<hostname>
 
-This script when run will update the home-manager channels.
+# macOS
+sudo darwin-rebuild switch --flake .#<hostname>
+
+# Home Manager only
+home-manager switch --flake .#<config>
+```
+
+## Features
+
+- **Flake-based configuration** - Reproducible and version-locked
+- **Multi-platform support** - NixOS, macOS, and WSL/Ubuntu
+- **Modular user management** - Each user has their own folder with nixos.nix and home.nix
+- **Host-specific configurations** - Easy to manage different machines
+- **Shared modules** - Common functionality across all hosts

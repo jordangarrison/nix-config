@@ -2,7 +2,6 @@
 .tmp/*.nix
 .tmp.configuration.nix
 *.backup
-raspberry-pi/img
 .DS_Store
 result
 result/

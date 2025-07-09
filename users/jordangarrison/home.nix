@@ -255,8 +255,11 @@ in
   programs.gnome-shell = lib.mkIf pkgs.stdenv.isLinux {
     enable = true;
     extensions = [
-      { package = pkgs.gnomeExtensions.gsconnect; }
+      { package = pkgs.gnomeExtensions.auto-move-windows; }
       { package = pkgs.gnomeExtensions.clipboard-history; }
+      { package = pkgs.gnomeExtensions.fuzzy-app-search; }
+      { package = pkgs.gnomeExtensions.gsconnect; }
+      { package = pkgs.gnomeExtensions.removable-drive-menu; }
     ];
   };
 

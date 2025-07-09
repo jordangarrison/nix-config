@@ -25,52 +25,71 @@
   outputs = inputs@{ self, nixpkgs, nixos-hardware, nix-darwin, home-manager, aws-tools, aws-use-sso }: {
     nixosConfigurations = {
       "endeavour" = nixpkgs.lib.nixosSystem {
+        specialArgs = { inherit inputs; };
         modules = [
-          endeavour/configuration.nix
+          ./modules/nixos/common.nix
+          ./modules/nixos/gnome-desktop.nix
+          ./modules/nixos/audio/pipewire.nix
+          ./modules/nixos/development.nix
+          ./users/jordangarrison/nixos.nix
+          ./users/mikayla/nixos.nix
+          ./users/jane/nixos.nix
+          ./users/isla/nixos.nix
+          ./hosts/endeavour/configuration.nix
           home-manager.nixosModules.home-manager
           {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-
-            users.users.jordangarrison = {
-              isNormalUser = true;
-              extraGroups = [ "wheel" ];
-              home = "/home/jordangarrison";
-            };
-            home-manager.users = {
-              jordangarrison = import ./users/jordangarrison/home.nix;
-            };
-            home-manager.extraSpecialArgs = {
-              inherit inputs;
+            # Configure Jordan Garrison for endeavour
+            users.jordangarrison = {
+              enable = true;
               username = "jordangarrison";
               homeDirectory = "/home/jordangarrison";
             };
+
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
           }
         ];
 
       };
       "voyager" = nixpkgs.lib.nixosSystem {
+        specialArgs = { inherit inputs; };
         modules = [
-          voyager/configuration.nix
+          ./modules/nixos/common.nix
+          ./modules/nixos/gnome-desktop.nix
+          ./modules/nixos/audio/pipewire.nix
+          ./modules/nixos/development.nix
+          ./users/jordangarrison/nixos.nix
+          ./users/mikayla/nixos.nix
+          ./users/jane/nixos.nix
+          ./users/isla/nixos.nix
+          ./hosts/voyager/configuration.nix
           nixos-hardware.nixosModules.apple-macbook-pro-12-1
           home-manager.nixosModules.home-manager
           {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-
-            users.users.jordan = {
-              isNormalUser = true;
-              extraGroups = [ "wheel" ];
-              home = "/home/jordan";
-            };
-            home-manager.users = {
-              jordan = import ./users/jordangarrison/home.nix;
-            };
-            home-manager.extraSpecialArgs = {
-              inherit inputs;
+            # Configure users for voyager
+            users.jordangarrison = {
+              enable = true;
               username = "jordan";
               homeDirectory = "/home/jordan";
             };
+
+            users.mikayla = {
+              enable = true;
+              homeDirectory = "/home/mikayla";
+            };
+
+            users.jane = {
+              enable = true;
+              homeDirectory = "/home/jane";
+            };
+
+            users.isla = {
+              enable = true;
+              homeDirectory = "/home/isla";
+            };
+
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
           }
         ];
 
@@ -80,7 +99,7 @@
     darwinConfigurations = {
       "H952L3DPHH" = nix-darwin.lib.darwinSystem {
         modules = [
-          flomac/configuration.nix
+          ./hosts/flomac/configuration.nix
           home-manager.darwinModules.home-manager
           {
             nix.enable = false;

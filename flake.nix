@@ -31,6 +31,7 @@
           ./modules/nixos/gnome-desktop.nix
           ./modules/nixos/audio/pipewire.nix
           ./modules/nixos/development.nix
+          ./modules/nixos/steam.nix
           ./users/jordangarrison/nixos.nix
           ./users/mikayla/nixos.nix
           ./users/jane/nixos.nix

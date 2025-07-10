@@ -48,7 +48,6 @@
     gnome-tweaks
     gnome-remote-desktop
     gnome-session
-    gnomeExtensions.clipboard-history
 
     # Common desktop applications
     # Can be overridden in individual configs as needed

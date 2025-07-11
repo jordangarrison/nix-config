@@ -188,6 +188,7 @@ in
       name = "ChatGPT"; 
       url = "https://chat.openai.com/"; 
       categories = [ "Development" ];
+      icon = ../../icons/chatgpt.png;
     }
   ];
 

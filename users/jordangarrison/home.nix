@@ -14,6 +14,7 @@ in
   imports = [
     # ./tools/nvim/nvim.nix
     ../../modules/home/brave/apps.nix
+    ../../modules/home/alacritty/apps.nix
   ];
 
   # nix settings
@@ -54,6 +55,7 @@ in
 
       # Utilities
       # aider-chat  # Temporarily disabled due to texlive build issue
+      btop
       claude-code
       exercism
       helix
@@ -186,6 +188,15 @@ in
       name = "ChatGPT"; 
       url = "https://chat.openai.com/"; 
       categories = [ "Development" ];
+    }
+  ];
+
+  alacrittyApps.apps = [
+    {
+      name = "btop";
+      command = "btop";
+      categories = [ "System" ];
+      icon = "utilities-system-monitor";
     }
   ];
 

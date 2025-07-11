@@ -13,6 +13,7 @@ in
 {
   imports = [
     # ./tools/nvim/nvim.nix
+    ../../modules/home/brave/apps.nix
   ];
 
   # nix settings
@@ -179,6 +180,14 @@ in
     } else {
       enable = false;
     };
+
+  braveApps.apps = [
+    { 
+      name = "ChatGPT"; 
+      url = "https://chat.openai.com/"; 
+      categories = [ "Development" ];
+    }
+  ];
 
   programs.zsh = {
     enable = true;

@@ -184,9 +184,9 @@ in
     };
 
   braveApps.apps = [
-    { 
-      name = "ChatGPT"; 
-      url = "https://chat.openai.com/"; 
+    {
+      name = "ChatGPT";
+      url = "https://chat.openai.com/";
       categories = [ "Development" ];
       icon = ../../icons/chatgpt.png;
     }
@@ -197,7 +197,7 @@ in
       name = "btop";
       command = "btop";
       categories = [ "System" ];
-      icon = "utilities-system-monitor";
+      icon = ../../icons/btop.png;
     }
   ];
 

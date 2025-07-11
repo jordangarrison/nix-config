@@ -9,11 +9,15 @@ let
     (app:
       let
         appId = toLower (replaceStrings [ " " ] [ "-" ] app.name);
+        iconName =
+          if (builtins.typeOf app.icon == "path")
+          then appId
+          else app.icon;
       in
       nameValuePair appId {
         name = app.name;
         exec = "${pkgs.alacritty}/bin/alacritty --class ${app.name} --title \"${app.name}\" --command ${app.command}";
-        icon = app.icon or "utilities-terminal";
+        icon = iconName;
         type = "Application";
         categories = app.categories;
         comment = "${app.name} Terminal App";
@@ -42,7 +46,7 @@ in
           description = "Desktop categories for the terminal app.";
         };
         icon = mkOption {
-          type = types.str;
+          type = types.either types.str types.path;
           default = "utilities-terminal";
           description = "Icon name for the desktop entry.";
         };

@@ -12,9 +12,10 @@ let
         appId = toLower (replaceStrings [ " " ] [ "-" ] app.name);
         userDataDir = "${config.home.homeDirectory}/.local/share/brave-apps/${appId}";
         # Use app name as icon name if a custom icon path is provided
-        iconName = if (builtins.typeOf app.icon == "path")
-                   then appId
-                   else app.icon;
+        iconName =
+          if (builtins.typeOf app.icon == "path")
+          then appId
+          else app.icon;
       in
       nameValuePair appId {
         name = app.name;

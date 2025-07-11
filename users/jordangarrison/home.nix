@@ -289,7 +289,7 @@ in
     '';
 
     # Alacritty
-    ".config/alacritty/alacritty.yml".source = ./tools/alacritty/alacritty.yml;
+    ".config/alacritty/alacritty.toml".source = ./tools/alacritty/alacritty.toml;
 
     # Claude Desktop
     "Library/Application Support/Claude/claude_desktop_config.json" = lib.mkIf pkgs.stdenv.isDarwin {

@@ -1,0 +1,56 @@
+
+[colors.bright]
+black = "#5b5f71"
+blue = "#a0b9d8"
+cyan = "#7dc2c7"
+green = "#92c47e"
+magenta = "#c6aed7"
+red = "#fe9f7c"
+white = "#f0ecfe"
+yellow = "#d2b45f"
+
+[colors.normal]
+black = "#2e313d"
+blue = "#8296b0"
+cyan = "#659ea2"
+green = "#76a065"
+magenta = "#a18daf"
+red = "#cf8164"
+white = "#b5b4c9"
+yellow = "#ab924c"
+
+[colors.primary]
+background = "#191c25"
+foreground = "#b5b4c9"
+
+[font]
+size = 10
+
+[font.bold]
+family = "Source Code Pro"
+style = "Bold"
+
+[font.normal]
+family = "Source Code Pro"
+style = "Semibold"
+
+[font.offset]
+x = 0
+y = 5
+
+# [terminal.shell]
+# args = ["-c", "tmux"]
+# program = "zsh"
+
+[window]
+decorations = "none"
+startup_mode = "Maximized"
+
+[window.padding]
+x = 5
+y = 5
+
+[general]
+live_config_reload = true
+
+[terminal]

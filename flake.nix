@@ -37,6 +37,8 @@
           ./users/jane/nixos.nix
           ./users/isla/nixos.nix
           ./hosts/endeavour/configuration.nix
+          nixos-hardware.nixosModules.msi-b550-a-pro
+          nixos-hardware.nixosModules.common-gpu-amd
           home-manager.nixosModules.home-manager
           {
             # Configure users for endeavour

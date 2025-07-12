@@ -112,6 +112,48 @@
         ];
 
       };
+      "discovery" = nixpkgs.lib.nixosSystem {
+        specialArgs = { inherit inputs; };
+        modules = [
+          ./modules/nixos/common.nix
+          ./modules/nixos/gnome-desktop.nix
+          ./modules/nixos/audio/pipewire.nix
+          ./users/jordangarrison/nixos.nix
+          ./users/mikayla/nixos.nix
+          ./users/jane/nixos.nix
+          ./users/isla/nixos.nix
+          ./hosts/discovery/configuration.nix
+          nixos-hardware.nixosModules.common-cpu-amd
+          nixos-hardware.nixosModules.common-pc-ssd
+          home-manager.nixosModules.home-manager
+          {
+            # Configure users for discovery
+            users.jordangarrison = {
+              enable = true;
+              username = "jordangarrison";
+              homeDirectory = "/home/jordangarrison";
+            };
+
+            users.mikayla = {
+              enable = true;
+              homeDirectory = "/home/mikayla";
+            };
+
+            users.jane = {
+              enable = true;
+              homeDirectory = "/home/jane";
+            };
+
+            users.isla = {
+              enable = true;
+              homeDirectory = "/home/isla";
+            };
+
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+          }
+        ];
+      };
     };
 
     darwinConfigurations = {

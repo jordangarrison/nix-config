@@ -26,7 +26,6 @@ in
       description = "Mikayla Garrison";
       extraGroups = [ "networkmanager" "wheel" ];
       shell = pkgs.bash;
-      initialPassword = "changeme";
       home = cfg.homeDirectory;
       packages = with pkgs; [
         # Mikayla's specific packages
@@ -40,6 +39,11 @@ in
         # Mikayla's home packages
       ];
       programs.home-manager.enable = true;
+    };
+    home-manager.extraSpecialArgs = {
+      inherit inputs;
+      username = cfg.username;
+      homeDirectory = cfg.homeDirectory;
     };
   };
 }

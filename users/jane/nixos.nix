@@ -27,7 +27,6 @@ in
       extraGroups = [ "networkmanager" ];
       shell = pkgs.bash;
       home = cfg.homeDirectory;
-      initialPassword = "changeme";
       packages = with pkgs; [
         # Jane's specific packages
       ];
@@ -40,6 +39,11 @@ in
         # Jane's home packages
       ];
       programs.home-manager.enable = true;
+    };
+    home-manager.extraSpecialArgs = {
+      inherit inputs;
+      username = cfg.username;
+      homeDirectory = cfg.homeDirectory;
     };
   };
 }

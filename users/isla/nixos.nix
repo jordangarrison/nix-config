@@ -27,6 +27,7 @@ in
       extraGroups = [ "networkmanager" ];
       shell = pkgs.bash;
       home = cfg.homeDirectory;
+      initialPassword = "changeme";
       packages = with pkgs; [
         # Isla's specific packages
       ];

@@ -26,6 +26,7 @@ in
       description = "Mikayla Garrison";
       extraGroups = [ "networkmanager" "wheel" ];
       shell = pkgs.bash;
+      initialPassword = "changeme";
       home = cfg.homeDirectory;
       packages = with pkgs; [
         # Mikayla's specific packages

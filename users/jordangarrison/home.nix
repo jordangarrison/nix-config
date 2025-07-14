@@ -57,6 +57,7 @@ in
       # aider-chat  # Temporarily disabled due to texlive build issue
       btop
       claude-code
+      copyq
       exercism
       helix
       k9s
@@ -276,6 +277,7 @@ in
   programs.gnome-shell = lib.mkIf pkgs.stdenv.isLinux {
     enable = true;
     extensions = [
+      { package = pkgs.gnomeExtensions.appindicator; }
       { package = pkgs.gnomeExtensions.clipboard-history; }
       { package = pkgs.gnomeExtensions.fuzzy-app-search; }
       { package = pkgs.gnomeExtensions.gsconnect; }

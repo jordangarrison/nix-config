@@ -191,6 +191,12 @@ in
       categories = [ "Development" ];
       icon = ../../icons/chatgpt.png;
     }
+    {
+      name = "YouTube";
+      url = "https://www.youtube.com/";
+      categories = [ "AudioVideo" ];
+      icon = ../../icons/youtube.png;
+    }
   ];
 
   alacrittyApps.apps = [

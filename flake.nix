@@ -167,7 +167,7 @@
             home-manager = {
               useGlobalPkgs = true;
               useUserPackages = true;
-              users."jordan.garrison" = import ./users/jordangarrison/home.nix;
+              users."jordan.garrison" = import ./users/jordangarrison/home-darwin.nix;
               extraSpecialArgs = {
                 inherit inputs;
                 username = "jordan.garrison";

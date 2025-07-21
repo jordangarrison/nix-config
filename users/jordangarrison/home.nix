@@ -13,8 +13,6 @@ in
 {
   imports = [
     # ./tools/nvim/nvim.nix
-    ../../modules/home/brave/apps.nix
-    ../../modules/home/alacritty/apps.nix
   ];
 
   # nix settings
@@ -57,7 +55,6 @@ in
       # aider-chat  # Temporarily disabled due to texlive build issue
       btop
       claude-code
-      copyq
       exercism
       helix
       k9s
@@ -141,6 +138,7 @@ in
       aws-sso-cli
       barrier
       comixcursors
+      copyq
       discord
       deno
       dig
@@ -162,51 +160,6 @@ in
   programs.gpg = { enable = pkgs.stdenv.isLinux; };
 
   # services.gpg-agent = { enable = pkgs.stdenv.isLinux; };
-
-  # Install brave.
-  programs.brave =
-    if pkgs.stdenv.isLinux then {
-      enable = true;
-      extensions = [
-        "aeblfdkhhhdcdjpifhhbdiojplfjncoa" # 1Password
-        "eimadpbcbfnmbkopoojfekhnkhdbieeh" # Dark Reader
-        "bcjindcccaagfpapjjmafapmmgkkhgoa" # JSON Formatter
-        "cnjifjpddelmedmihgijeibhnjfabmlf" # Obsidian Web Clipper
-        "glnpjglilkicbckjpbgcfkogebgllemb" # Okta Browser Plugin
-        "jjhefcfhmnkfeepcpnilbbkaadhngkbi" # Readwise Highlighter
-        "gmbmikajjgmnabiglmofipeabaddhgne" # Save to Google Drive
-        "micdllihgoppmejpecmkilggmaagfdmb" # Tab Copy
-        "egnjhciaieeiiohknchakcodbpgjnchh" # Tab Wrangler
-        "jldhpllghnbhlbpcmnajkpdmadaolakh" # Todoist for Chrome
-        "clgenfnodoocmhnlnpknojdbjjnmecff" # Todoist for Gmail
-      ];
-    } else {
-      enable = false;
-    };
-
-  braveApps.apps = [
-    {
-      name = "ChatGPT";
-      url = "https://chat.openai.com/";
-      categories = [ "Development" ];
-      icon = ../../icons/chatgpt.png;
-    }
-    {
-      name = "YouTube";
-      url = "https://www.youtube.com/";
-      categories = [ "AudioVideo" ];
-      icon = ../../icons/youtube.png;
-    }
-  ];
-
-  alacrittyApps.apps = [
-    {
-      name = "btop";
-      command = "btop";
-      categories = [ "System" ];
-      icon = ../../icons/btop.png;
-    }
-  ];
 
   programs.zsh = {
     enable = true;
@@ -277,18 +230,6 @@ in
       enable = true;
       # enableFlakes = true;
     };
-  };
-
-  # GSConnect (KDE Connect for GNOME)
-  programs.gnome-shell = lib.mkIf pkgs.stdenv.isLinux {
-    enable = true;
-    extensions = [
-      { package = pkgs.gnomeExtensions.appindicator; }
-      { package = pkgs.gnomeExtensions.clipboard-history; }
-      { package = pkgs.gnomeExtensions.fuzzy-app-search; }
-      { package = pkgs.gnomeExtensions.gsconnect; }
-      { package = pkgs.gnomeExtensions.removable-drive-menu; }
-    ];
   };
 
   # Disable programs.ssh to avoid symlink permission issues

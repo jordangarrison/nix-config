@@ -39,7 +39,7 @@ in
     programs._1password-gui.polkitPolicyOwners = [ cfg.username ];
 
     # Home Manager configuration for Jordan
-    home-manager.users.${cfg.username} = import ./home.nix;
+    home-manager.users.${cfg.username} = if pkgs.stdenv.isLinux then import ./home-linux.nix else import ./home-darwin.nix;
     home-manager.extraSpecialArgs = {
       inherit inputs;
       username = cfg.username;

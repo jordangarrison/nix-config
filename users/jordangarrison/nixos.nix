@@ -29,6 +29,7 @@ in
       home = cfg.homeDirectory;
       packages = with pkgs; [
         deskflow
+        hey-mail
         obsidian
         thunderbird
         todoist-electron

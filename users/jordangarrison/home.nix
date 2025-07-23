@@ -9,8 +9,7 @@ let
     name = "borked-ns";
     text = builtins.readFile ./tools/scripts/borked-ns.sh;
   };
-in
-{
+in {
   imports = [
     # ./tools/nvim/nvim.nix
   ];
@@ -132,9 +131,9 @@ in
       # AWS Tools from flake inputs
       inputs.aws-tools.packages.${pkgs.system}.default
       inputs.aws-use-sso.packages.${pkgs.system}.default
-    ] ++ (if pkgs.stdenv.isDarwin then [
-      devenv
-    ] else [
+    ] ++ (if pkgs.stdenv.isDarwin then
+      [ devenv ]
+    else [
       aws-sso-cli
       barrier
       comixcursors
@@ -142,7 +141,7 @@ in
       discord
       deno
       dig
-      emacs
+      # emacs
       emacsPackages.sqlite3
       glibc
       gnaural
@@ -163,9 +162,7 @@ in
 
   programs.zsh = {
     enable = true;
-    oh-my-zsh = {
-      enable = true;
-    };
+    oh-my-zsh = { enable = true; };
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
     initContent = ''
@@ -201,13 +198,8 @@ in
 
   programs.gh = {
     enable = true;
-    settings = {
-      git_protocol = "ssh";
-    };
-    extensions = with pkgs; [
-      gh-copilot
-      gh-dash
-    ];
+    settings = { git_protocol = "ssh"; };
+    extensions = with pkgs; [ gh-copilot gh-dash ];
   };
 
   programs.vim = {
@@ -224,6 +216,8 @@ in
     package = pkgs.code-cursor;
   };
 
+  programs.emacs = { enable = true; };
+
   programs.direnv = {
     enable = true;
     nix-direnv = {
@@ -239,7 +233,8 @@ in
     # SSH config with proper permissions fix
     ".ssh/config_source" = {
       source = ./configs/ssh/config;
-      onChange = ''cat ~/.ssh/config_source > ~/.ssh/config && chmod 600 ~/.ssh/config'';
+      onChange =
+        "cat ~/.ssh/config_source > ~/.ssh/config && chmod 600 ~/.ssh/config";
     };
 
     # doom emacs
@@ -259,20 +254,23 @@ in
     '';
 
     # Alacritty
-    ".config/alacritty/alacritty.toml".source = ./tools/alacritty/alacritty.toml;
+    ".config/alacritty/alacritty.toml".source =
+      ./tools/alacritty/alacritty.toml;
 
     # Claude Desktop
-    "Library/Application Support/Claude/claude_desktop_config.json" = lib.mkIf pkgs.stdenv.isDarwin {
-      source = ./tools/claude-desktop/claude_desktop_config.json;
-    };
+    "Library/Application Support/Claude/claude_desktop_config.json" =
+      lib.mkIf pkgs.stdenv.isDarwin {
+        source = ./tools/claude-desktop/claude_desktop_config.json;
+      };
 
     # Espanso
     ".config/espanso/match/base.yml" = lib.mkIf (!pkgs.stdenv.isDarwin) {
       source = ./tools/espanso/match/base.yml;
     };
-    "Library/Application Support/espanso/match/base.yml" = lib.mkIf pkgs.stdenv.isDarwin {
-      source = ./tools/espanso/match/base.yml;
-    };
+    "Library/Application Support/espanso/match/base.yml" =
+      lib.mkIf pkgs.stdenv.isDarwin {
+        source = ./tools/espanso/match/base.yml;
+      };
 
     # Ghostty
     ".config/ghostty/config".source = ./tools/ghostty/config;
@@ -289,7 +287,8 @@ in
     ".local/bin/tmux-cht.sh".source = ./tools/scripts/tmux-cht.sh;
     ".tmux-cht-languages".source = ./tools/scripts/tmux-cht-languages.txt;
     ".tmux-cht-commands".source = ./tools/scripts/tmux-cht-commands.txt;
-    ".local/bin/gen-dynamic-wallpaper".source = ./tools/scripts/gen-dynamic-wallpaper.sh;
+    ".local/bin/gen-dynamic-wallpaper".source =
+      ./tools/scripts/gen-dynamic-wallpaper.sh;
     ".local/bin/myip".source = ./tools/scripts/myip.sh;
   };
 }

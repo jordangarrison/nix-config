@@ -1,4 +1,7 @@
 { pkgs, lib, inputs, ... }: {
+
+  imports = [ ../../modules/nixos/emacs.nix ];
+
   environment.systemPackages = [ pkgs.vim pkgs.git ];
   programs.zsh.enable = true;
   system.primaryUser = "jordan.garrison";

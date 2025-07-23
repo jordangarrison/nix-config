@@ -229,6 +229,29 @@ in {
   # Disable programs.ssh to avoid symlink permission issues
   # Using home.file approach with onChange instead
 
+  home.shellAliases = {
+    # Emacs Aliases
+    ec = "${pkgs.emacs}/bin/emacsclient -nw";
+    e = "${pkgs.emacs}/bin/emacsclient -nw";
+    ee = "${pkgs.emacs}/bin/emacsclient -nw $(${pkgs.fzf}/bin/fzf)";
+    eg = "${pkgs.emacs}/bin/emacsclient";
+
+    # Shell aliases
+    l = "ls -ltarh";
+    ll = "ls -lh";
+    la = "ls -a";
+
+    # Git aliases
+    c = "git commit -m";
+    gss = "git status --short";
+    pu = "git push -u origin $(git rev-parse --abbrev-ref HEAD)";
+    p = "git pull";
+    gd =
+      "${pkgs.git}/bin/git diff --color | ${pkgs.diff-so-fancy}/bin/diff-so-fancy | less --tabs=4 -RFX";
+    gdca =
+      "${pkgs.git}/bin/git diff --color --cached | ${pkgs.diff-so-fancy}/bin/diff-so-fancy | less --tabs=4 -RFX";
+  };
+
   home.file = {
     # SSH config with proper permissions fix
     ".ssh/config_source" = {

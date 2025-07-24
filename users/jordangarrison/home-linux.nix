@@ -1,4 +1,5 @@
 { config, pkgs, lib, username, homeDirectory, inputs, ... }:
+
 {
   imports = [
     ./home.nix
@@ -7,25 +8,24 @@
   ];
 
   # Install brave.
-  programs.brave =
-    if pkgs.stdenv.isLinux then {
-      enable = true;
-      extensions = [
-        "aeblfdkhhhdcdjpifhhbdiojplfjncoa" # 1Password
-        "eimadpbcbfnmbkopoojfekhnkhdbieeh" # Dark Reader
-        "bcjindcccaagfpapjjmafapmmgkkhgoa" # JSON Formatter
-        "cnjifjpddelmedmihgijeibhnjfabmlf" # Obsidian Web Clipper
-        "glnpjglilkicbckjpbgcfkogebgllemb" # Okta Browser Plugin
-        "jjhefcfhmnkfeepcpnilbbkaadhngkbi" # Readwise Highlighter
-        "gmbmikajjgmnabiglmofipeabaddhgne" # Save to Google Drive
-        "micdllihgoppmejpecmkilggmaagfdmb" # Tab Copy
-        "egnjhciaieeiiohknchakcodbpgjnchh" # Tab Wrangler
-        "jldhpllghnbhlbpcmnajkpdmadaolakh" # Todoist for Chrome
-        "clgenfnodoocmhnlnpknojdbjjnmecff" # Todoist for Gmail
-      ];
-    } else {
-      enable = false;
-    };
+  programs.brave = if pkgs.stdenv.isLinux then {
+    enable = true;
+    extensions = [
+      "aeblfdkhhhdcdjpifhhbdiojplfjncoa" # 1Password
+      "eimadpbcbfnmbkopoojfekhnkhdbieeh" # Dark Reader
+      "bcjindcccaagfpapjjmafapmmgkkhgoa" # JSON Formatter
+      "cnjifjpddelmedmihgijeibhnjfabmlf" # Obsidian Web Clipper
+      "glnpjglilkicbckjpbgcfkogebgllemb" # Okta Browser Plugin
+      "jjhefcfhmnkfeepcpnilbbkaadhngkbi" # Readwise Highlighter
+      "gmbmikajjgmnabiglmofipeabaddhgne" # Save to Google Drive
+      "micdllihgoppmejpecmkilggmaagfdmb" # Tab Copy
+      "egnjhciaieeiiohknchakcodbpgjnchh" # Tab Wrangler
+      "jldhpllghnbhlbpcmnajkpdmadaolakh" # Todoist for Chrome
+      "clgenfnodoocmhnlnpknojdbjjnmecff" # Todoist for Gmail
+    ];
+  } else {
+    enable = false;
+  };
 
   braveApps.apps = [
     {
@@ -35,6 +35,12 @@
       icon = ../../icons/chatgpt.png;
     }
     {
+      name = "Google Meet";
+      url = "https://meet.google.com/";
+      categories = [ "AudioVideo" ];
+      icon = ../../icons/google-meet.png;
+    }
+    {
       name = "YouTube";
       url = "https://www.youtube.com/";
       categories = [ "AudioVideo" ];
@@ -42,14 +48,12 @@
     }
   ];
 
-  alacrittyApps.apps = [
-    {
-      name = "btop";
-      command = "btop";
-      categories = [ "System" ];
-      icon = ../../icons/btop.png;
-    }
-  ];
+  alacrittyApps.apps = [{
+    name = "btop";
+    command = "btop";
+    categories = [ "System" ];
+    icon = ../../icons/btop.png;
+  }];
 
   # GSConnect (KDE Connect for GNOME)
   programs.gnome-shell = lib.mkIf pkgs.stdenv.isLinux {

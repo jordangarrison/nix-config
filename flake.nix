@@ -37,6 +37,7 @@
             ./modules/nixos/development.nix
             ./modules/nixos/steam.nix
             ./modules/nixos/searx.nix
+            ./modules/nixos/n8n.nix
             ./users/jordangarrison/nixos.nix
             ./users/mikayla/nixos.nix
             ./users/jane/nixos.nix

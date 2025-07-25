@@ -57,17 +57,32 @@
       "move-to-workspace-9" = [ "<Shift><Super>9" ];
       "move-to-workspace-10" = [ "<Shift><Super>0" ];
     };
+
+    "org/gnome/shell" = {
+      favorite-apps = [
+        "brave-browser.desktop"
+        "dev.warp.Warp.desktop"
+        "cursor.desktop"
+        "chatgpt.desktop"
+        "todoist.desktop"
+        "obsidian.desktop"
+        "slack.desktop"
+        "discord.desktop"
+        "btop.desktop"
+      ];
+    };
+
     "org/gnome/shell/keybindings" = {
-      "switch-to-application-1" = [ ];
-      "switch-to-application-2" = [ ];
-      "switch-to-application-3" = [ ];
-      "switch-to-application-4" = [ ];
-      "switch-to-application-5" = [ ];
-      "switch-to-application-6" = [ ];
-      "switch-to-application-7" = [ ];
-      "switch-to-application-8" = [ ];
-      "switch-to-application-9" = [ ];
-      "switch-to-application-10" = [ ];
+      "switch-to-application-1" = [ "<Super>b" ];
+      "switch-to-application-2" = [ "<Super>w" ];
+      "switch-to-application-3" = [ "<Super>c" ];
+      "switch-to-application-4" = [ "<Super>g" ];
+      "switch-to-application-5" = [ "<Super>t" ];
+      "switch-to-application-6" = [ "<Super>n" ];
+      "switch-to-application-7" = [ "<Super>u" ];
+      "switch-to-application-8" = [ "<Super>d" ];
+      "switch-to-application-9" = [ "<Super>q" ];
+      "switch-to-application-10" = [ "" ];
     };
 
     "org/gnome/shell".enabled-extensions = [

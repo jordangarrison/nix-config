@@ -9,6 +9,10 @@ let
     name = "borked-ns";
     text = builtins.readFile ./tools/scripts/borked-ns.sh;
   };
+  binauralBeatsScriptPath = pkgs.writeTextFile {
+    name = "binarual-beats";
+    text = builtins.readFile ./tools/scripts/binaural-beats.sh;
+  };
 in {
   imports = [
     # ./tools/nvim/nvim.nix
@@ -124,10 +128,14 @@ in {
       nodePackages.typescript-language-server
       nodePackages.vim-language-server
       nodePackages.yaml-language-server
+
+      #python
       python313Full
       python313Packages.ipython
-      rails-new
+
+      #ruby
       ruby
+      rails-new
       rubyfmt
       ruby-lsp
       rubyPackages.pry

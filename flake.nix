@@ -31,6 +31,7 @@
           modules = [
             ./modules/nixos/common.nix
             ./modules/nixos/gnome-desktop.nix
+            ./modules/nixos/hyprland-desktop.nix
             ./modules/nixos/fonts.nix
             ./modules/nixos/audio/pipewire.nix
             ./modules/nixos/development.nix

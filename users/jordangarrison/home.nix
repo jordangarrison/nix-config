@@ -124,6 +124,16 @@ in {
       nodePackages.typescript-language-server
       nodePackages.vim-language-server
       nodePackages.yaml-language-server
+      python313Full
+      python313Packages.ipython
+      rails-new
+      ruby
+      rubyfmt
+      ruby-lsp
+      rubyPackages.pry
+      rubyPackages.rails
+      rubyPackages.railties
+      rubyPackages.solargraph
       rust-analyzer
       uv
       yarn
@@ -265,6 +275,9 @@ in {
     ".emacs.d/init.el".text = ''
       (load "default.el")
     '';
+
+    # hyprland
+    ".config/hypr".source = ./configs/hypr;
 
     # neovim
     ".config/nvim/init.lua".source = ./tools/nvim/jag.lua;

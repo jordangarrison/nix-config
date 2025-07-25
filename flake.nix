@@ -35,6 +35,7 @@
             ./modules/nixos/audio/pipewire.nix
             ./modules/nixos/development.nix
             ./modules/nixos/steam.nix
+            ./modules/nixos/searx.nix
             ./users/jordangarrison/nixos.nix
             ./users/mikayla/nixos.nix
             ./users/jane/nixos.nix

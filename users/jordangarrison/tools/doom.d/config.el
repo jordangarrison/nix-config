@@ -267,3 +267,7 @@ Version 2019-11-04"
   (unless (treesit-language-available-p 'gleam)
     ;; compile the treesit grammar file the first time
     (gleam-ts-install-grammar)))
+
+;; Prevent Emacs from trying to access X11 clipboard
+(setq x-select-enable-clipboard nil)
+(setq select-enable-clipboard nil)

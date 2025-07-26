@@ -93,6 +93,20 @@
       "drive-menu@gnome-shell-extensions.gcampax.github.com"
       "auto-move-windows@gnome-shell-extensions.gcampax.github.com"
     ];
+
+    "org/gnome/shell/extensions/auto-move-windows" = {
+      application-list = [
+        "brave-browser.desktop:1"
+        "dev.warp.Warp.desktop:2"
+        "cursor.desktop:3"
+        "todoist.desktop:5"
+        "1password.desktop:10"
+        "gnome-control-center.desktop:10"
+        "discord.desktop:7"
+        "slack.desktop:7"
+        "chatgpt.desktop:4"
+      ];
+    };
   };
 
   braveApps.apps = [

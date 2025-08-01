@@ -251,7 +251,8 @@ in {
     # Emacs Aliases
     ec = "${pkgs.emacs}/bin/emacsclient -nw";
     e = "${pkgs.emacs}/bin/emacsclient -nw";
-    ee = "${pkgs.emacs}/bin/emacsclient -nw $(${pkgs.fzf}/bin/fzf)";
+    ee =
+      "${pkgs.emacs}/bin/emacsclient -nw $(${pkgs.fzf}/bin/fzf --preview '${pkgs.bat}/bin/bat --style=numbers --color=always --line-range :500 {}')";
     eg = "${pkgs.emacs}/bin/emacsclient";
 
     # Shell aliases

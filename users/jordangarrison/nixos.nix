@@ -1,9 +1,7 @@
 { config, pkgs, lib, inputs, ... }:
 
-let
-  cfg = config.users.jordangarrison;
-in
-{
+let cfg = config.users.jordangarrison;
+in {
   options.users.jordangarrison = {
     enable = lib.mkEnableOption "Jordan Garrison user account";
 
@@ -40,7 +38,10 @@ in
     programs._1password-gui.polkitPolicyOwners = [ cfg.username ];
 
     # Home Manager configuration for Jordan
-    home-manager.users.${cfg.username} = if pkgs.stdenv.isLinux then import ./home-linux.nix else import ./home-darwin.nix;
+    home-manager.users.${cfg.username} = if pkgs.stdenv.isLinux then
+      import ./home-linux.nix
+    else
+      import ./home-darwin.nix;
     home-manager.extraSpecialArgs = {
       inherit inputs;
       username = cfg.username;

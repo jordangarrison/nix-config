@@ -13,7 +13,8 @@ let
     name = "binarual-beats";
     text = builtins.readFile ./tools/scripts/binaural-beats.sh;
   };
-in {
+in
+{
   imports = [
     # ./tools/nvim/nvim.nix
   ];
@@ -48,6 +49,7 @@ in {
       # Apps
       alacritty
       arandr
+      bibletime
       sqlite
       todoist
       warp-terminal

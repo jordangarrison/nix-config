@@ -49,7 +49,8 @@ in
       # Apps
       alacritty
       arandr
-      bibletime
+      # bibletime
+      # gitbutler
       sqlite
       todoist
       warp-terminal

@@ -23,8 +23,15 @@
     };
   };
 
-  outputs = inputs@{ self, nixpkgs, nixos-hardware, nix-darwin, home-manager
-    , aws-tools, aws-use-sso }: {
+  outputs =
+    inputs@{ self
+    , nixpkgs
+    , nixos-hardware
+    , nix-darwin
+    , home-manager
+    , aws-tools
+    , aws-use-sso
+    }: {
       nixosConfigurations = {
         "endeavour" = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs; };
@@ -78,9 +85,9 @@
         "voyager" = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs; };
           modules = [
+            ./modules/nixos/nix-remote-builders.nix
             ./modules/nixos/common.nix
             ./modules/nixos/gnome-desktop.nix
-            { gbg-config.gnome-tweaks.machine-type = "laptop"; }
             ./modules/nixos/hyprland-desktop.nix
             ./modules/nixos/fonts.nix
             ./modules/nixos/audio/pipewire.nix
@@ -93,6 +100,13 @@
             nixos-hardware.nixosModules.apple-macbook-pro-12-1
             home-manager.nixosModules.home-manager
             {
+              gbg-config = {
+                gnome-tweaks.machine-type = "laptop";
+                remote-builders = {
+                  enable = true;
+                  sshKeyPath = "/home/jordan/.ssh/id_ed25519";
+                };
+              };
               # Configure users for voyager
               users.jordangarrison = {
                 enable = true;

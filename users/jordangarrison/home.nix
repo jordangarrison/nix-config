@@ -13,8 +13,7 @@ let
     name = "binarual-beats";
     text = builtins.readFile ./tools/scripts/binaural-beats.sh;
   };
-in
-{
+in {
   imports = [
     # ./tools/nvim/nvim.nix
   ];
@@ -62,6 +61,7 @@ in
       claude-code
       exercism
       helix
+      jira-cli-go
       k9s
       neovim
       nil
@@ -151,6 +151,10 @@ in
       # AWS Tools from flake inputs
       inputs.aws-tools.packages.${pkgs.system}.default
       inputs.aws-use-sso.packages.${pkgs.system}.default
+
+      # GCP
+      (google-cloud-sdk.withExtraComponents
+        [ google-cloud-sdk.components.gke-gcloud-auth-plugin ])
     ] ++ (if pkgs.stdenv.isDarwin then
       [ devenv ]
     else [

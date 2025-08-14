@@ -26,6 +26,7 @@
       "1password"
       "1password-cli"
       "aws-vpn-client"
+      "basecamp"
       "brave-browser"
       "chatgpt"
       "claude"

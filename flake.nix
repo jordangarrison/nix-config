@@ -126,6 +126,7 @@
           modules = [
             ./modules/nixos/common.nix
             ./modules/nixos/gnome-desktop.nix
+            ./modules/nixos/fonts.nix
             ./modules/nixos/audio/pipewire.nix
             ./users/jordangarrison/nixos.nix
             ./users/mikayla/nixos.nix
@@ -168,6 +169,8 @@
       darwinConfigurations = {
         "H952L3DPHH" = nix-darwin.lib.darwinSystem {
           modules = [
+            ./modules/nixos/emacs.nix
+            ./modules/nixos/fonts.nix
             ./hosts/flomac/configuration.nix
             home-manager.darwinModules.home-manager
             {

@@ -48,7 +48,6 @@ in {
       # Apps
       alacritty
       arandr
-      bibletime
       sqlite
       todoist
       warp-terminal
@@ -138,7 +137,6 @@ in {
       #ruby
       ruby
       rails-new
-      rubyfmt
       ruby-lsp
       rubyPackages.pry
       rubyPackages.rails
@@ -160,6 +158,7 @@ in {
     else [
       aws-sso-cli
       barrier
+      bibletime
       comixcursors
       copyq
       discord
@@ -174,6 +173,7 @@ in {
       pavucontrol
       pinentry
       remmina
+      rubyfmt
       slack
       wally-cli
       xcb-util-cursor

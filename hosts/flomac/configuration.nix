@@ -1,10 +1,9 @@
 { pkgs, lib, inputs, ... }: {
 
-  imports = [ ../../modules/nixos/emacs.nix ];
-
   environment.systemPackages = [ pkgs.vim pkgs.git ];
   programs.zsh.enable = true;
   system.primaryUser = "jordan.garrison";
+
   homebrew = {
     enable = true;
     onActivation = {
@@ -33,7 +32,7 @@
       "cursor"
       "deskflow"
       "docker-desktop"
-      "emacs-app"
+      # "emacs-app"
       "espanso"
       "dbeaver-community"
       "discord"
@@ -103,7 +102,9 @@
       "Xcode" = 497799835;
     };
   };
+
   security.pam.services.sudo_local.touchIdAuth = true;
+
   system = {
     defaults = {
       dock = {

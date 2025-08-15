@@ -82,6 +82,97 @@
 ;;   (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode))
 
 ;;
+;;
+;; Intelligent Ruby LSP Configuration
+;; Automatically detects and uses the best available Ruby LSP server
+;;
+(defun jag/ruby-lsp-server-available-p (server-command)
+  "Check if a Ruby LSP server command is available and working."
+  (let ((cmd (if (listp server-command) server-command (list server-command))))
+    (condition-case nil
+        (and (executable-find (car cmd))
+             ;; Test if the command actually works
+             (zerop (apply #'call-process (car cmd) nil nil nil 
+                          (append (cdr cmd) '("--help")))))
+      (error nil))))
+
+(defun jag/detect-ruby-lsp-server ()
+  "Detect the best available Ruby LSP server for the current project."
+  (cond
+   ;; First try bundle exec solargraph (project-specific)
+   ((and (file-exists-p "Gemfile")
+         (jag/ruby-lsp-server-available-p '("bundle" "exec" "solargraph")))
+    '(bundle-solargraph . ("bundle" "exec" "solargraph" "stdio")))
+   
+   ;; Then try global solargraph
+   ((jag/ruby-lsp-server-available-p "solargraph")
+    '(solargraph . ("solargraph" "stdio")))
+   
+   ;; Try ruby-lsp (if available)
+   ((and (file-exists-p "Gemfile")
+         (jag/ruby-lsp-server-available-p '("bundle" "exec" "ruby-lsp")))
+    '(bundle-ruby-lsp . ("bundle" "exec" "ruby-lsp")))
+   
+   ((jag/ruby-lsp-server-available-p "ruby-lsp")
+    '(ruby-lsp . ("ruby-lsp")))
+   
+   ;; Fall back to typeprof if it's working
+   ((jag/ruby-lsp-server-available-p "typeprof")
+    ;; Test if typeprof can actually start without dependency errors
+    (condition-case nil
+        (progn
+          (call-process "typeprof" nil nil nil "--version")
+          '(typeprof . ("typeprof" "--lsp")))
+      (error nil)))
+   
+   ;; No working LSP server found
+   (t nil)))
+
+(after! lsp-mode
+  ;; Register our intelligent Ruby LSP client
+  (lsp-register-client
+   (make-lsp-client
+    :new-connection (lsp-stdio-connection
+                     (lambda ()
+                       (let ((server-info (jag/detect-ruby-lsp-server)))
+                         (if server-info
+                             (progn
+                               (message "Using Ruby LSP server: %s" (car server-info))
+                               (cdr server-info))
+                           (error "No working Ruby LSP server found")))))
+    :major-modes '(ruby-mode)
+    :priority 30  ; Higher priority than default servers
+    :server-id 'ruby-intelligent
+    :multi-root t
+    :initialization-options
+    (lambda ()
+      (let ((server-info (jag/detect-ruby-lsp-server)))
+        (pcase (car server-info)
+          ('bundle-solargraph
+           (list :diagnostics t :completion t :hover t :formatting t))
+          ('solargraph
+           (list :diagnostics t :completion t :hover t :formatting t))
+          ('bundle-ruby-lsp
+           (list :enabledFeatures ["diagnostics" "formatting" "completion" "hover"]))
+          ('ruby-lsp
+           (list :enabledFeatures ["diagnostics" "formatting" "completion" "hover"]))
+          ('typeprof
+           (list))
+          (_ (list))))))))
+
+;; Configure Ruby mode to use our intelligent LSP and disable problematic ones
+(after! ruby-mode
+  (add-hook 'ruby-mode-hook
+            (lambda ()
+              ;; Disable the default typeprof-ls client to prevent conflicts
+              (setq-local lsp-disabled-clients '(typeprof-ls))
+              ;; Show which LSP server we're using
+              (let ((server-info (jag/detect-ruby-lsp-server)))
+                (if server-info
+                    (message "Ruby LSP: Using %s" (car server-info))
+                  (message "Ruby LSP: No working server found")))
+              (lsp-deferred))))
+
 ;; Just some key bindings
 ;;
 (map! :leader :desc "Expand Region" "e e" #'er/expand-region)

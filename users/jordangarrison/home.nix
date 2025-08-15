@@ -49,10 +49,12 @@ in {
       alacritty
       arandr
       bibletime
+      mailspring
       sqlite
       todoist
       warp-terminal
       wezterm
+      zed-editor
       # doom-emacs
 
       # Utilities
@@ -151,6 +153,7 @@ in {
       # AWS Tools from flake inputs
       inputs.aws-tools.packages.${pkgs.system}.default
       inputs.aws-use-sso.packages.${pkgs.system}.default
+      inputs.hubctl.packages.${pkgs.system}.default
 
       # GCP
       (google-cloud-sdk.withExtraComponents

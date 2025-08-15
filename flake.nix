@@ -21,10 +21,22 @@
       url = "github:jordangarrison/aws-use-sso";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    hubctl = {
+      url = "github:jordangarrison/hubctl";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = inputs@{ self, nixpkgs, nixos-hardware, nix-darwin, home-manager
-    , aws-tools, aws-use-sso }: {
+  outputs =
+    inputs@{ self
+    , nixpkgs
+    , nixos-hardware
+    , nix-darwin
+    , home-manager
+    , aws-tools
+    , aws-use-sso
+    , hubctl
+    }: {
       nixosConfigurations = {
         "endeavour" = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs; };

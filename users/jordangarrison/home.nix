@@ -48,7 +48,6 @@ in {
       # Apps
       alacritty
       arandr
-      bibletime
       mailspring
       sqlite
       todoist

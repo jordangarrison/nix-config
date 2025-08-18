@@ -50,6 +50,7 @@
       "obs"
       "obsidian"
       "openlens"
+      "raspberry-pi-imager"
       "raycast"
       "readdle-spark"
       "rectangle"

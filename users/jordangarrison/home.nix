@@ -53,6 +53,7 @@ in {
       todoist
       warp-terminal
       wezterm
+      vial
       zed-editor
       # doom-emacs
 

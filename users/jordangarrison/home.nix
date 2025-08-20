@@ -13,7 +13,8 @@ let
     name = "binarual-beats";
     text = builtins.readFile ./tools/scripts/binaural-beats.sh;
   };
-in {
+in
+{
   imports = [
     # ./tools/nvim/nvim.nix
   ];
@@ -53,7 +54,6 @@ in {
       todoist
       warp-terminal
       wezterm
-      vial
       zed-editor
       # doom-emacs
 
@@ -179,6 +179,7 @@ in {
       remmina
       rubyfmt
       slack
+      vial
       wally-cli
       xcb-util-cursor
       xclip
@@ -313,10 +314,10 @@ in {
       ./tools/alacritty/alacritty.toml;
 
     # Claude Desktop
-    "Library/Application Support/Claude/claude_desktop_config.json" =
-      lib.mkIf pkgs.stdenv.isDarwin {
-        source = ./tools/claude-desktop/claude_desktop_config.json;
-      };
+    # "Library/Application Support/Claude/claude_desktop_config.json" =
+    #   lib.mkIf pkgs.stdenv.isDarwin {
+    #     source = ./tools/claude-desktop/claude_desktop_config.json;
+    #   };
 
     # Espanso
     ".config/espanso/match/base.yml" = lib.mkIf (!pkgs.stdenv.isDarwin) {

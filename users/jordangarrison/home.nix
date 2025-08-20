@@ -15,7 +15,7 @@ let
   };
 in {
   imports = [
-    # ./tools/nvim/nvim.nix
+    ./tools/nvim/nvf.nix
   ];
 
   # nix settings
@@ -65,7 +65,6 @@ in {
       helix
       jira-cli-go
       k9s
-      neovim
       nil
       tenv
       terraform-ls
@@ -298,8 +297,8 @@ in {
     # hyprland
     ".config/hypr".source = ./configs/hypr;
 
-    # neovim
-    ".config/nvim/init.lua".source = ./tools/nvim/jag.lua;
+    # neovim configuration now handled by nvf
+    # ".config/nvim/init.lua".source = ./tools/nvim/jag.lua;
 
     # Cobra CLI
     ".cobra.yaml".text = ''

@@ -65,6 +65,7 @@ The `flake.nix` serves as the central orchestrator for all configurations:
 - `nixos-hardware`: Hardware-specific configurations
 - `nix-darwin`: macOS system management
 - `home-manager`: User environment management
+- `nvf`: Highly modular Neovim configuration framework
 - Custom flakes: `aws-tools`, `aws-use-sso`, `hubctl` (Jordan's tools)
 
 **Outputs:**
@@ -226,7 +227,11 @@ These are included in the home.nix packages and automatically built from their r
 
 ### Development Tools
 - Emacs with Doom configuration
-- Neovim with custom configuration
+- **Neovim with nvf**: Highly modular, declarative Neovim configuration
+  - Managed via `programs.nvf` in Home Manager
+  - LSP support enabled by default
+  - Minimal configuration for easy customization
+  - See `users/jordangarrison/tools/nvim/README.md` for details
 - VSCode (via code-cursor package)
 - Multiple language servers and runtimes (Go, Node.js, Python, Ruby, Rust)
 - Terraform, Kubernetes, AWS tooling
@@ -252,5 +257,38 @@ These are included in the home.nix packages and automatically built from their r
 - All git commands configured with `--no-pager` flag
 - Diff display enhanced with diff-so-fancy
 - Aliases for common operations (gss, pu, gd, gdca)
+
+### nvf (Neovim Configuration)
+
+**nvf** is a highly modular, configurable, extensible and easy to use Neovim configuration framework in Nix.
+
+**Key Features:**
+- Fully declarative configuration via Nix
+- Modular plugin system
+- Cross-platform support (Linux, macOS, WSL)
+- LSP, completion, and modern Neovim features
+- Easy to extend and customize
+
+**Useful Commands:**
+```bash
+# Print generated Neovim configuration
+nvf-print-config
+
+# Print with syntax highlighting
+nvf-print-config | bat --language=lua
+
+# Get path to generated config
+nvf-print-config-path
+```
+
+**Current Configuration:**
+- Minimal setup with LSP enabled
+- Ready for incremental customization
+- Located in `users/jordangarrison/tools/nvim/nvf.nix`
+
+**Resources:**
+- [nvf Documentation](https://notashelf.github.io/nvf/)
+- [nvf Options Reference](https://notashelf.github.io/nvf/options.html)
+- Local README: `users/jordangarrison/tools/nvim/README.md`
 
 This configuration provides a fully reproducible, declarative system environment across multiple platforms and users, with consistent development tooling and user experience.

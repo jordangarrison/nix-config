@@ -82,6 +82,7 @@ The `flake.nix` orchestrates three types of configurations:
 - `nixos-hardware`: Hardware-specific configurations
 - `home-manager`: User environment management
 - `nix-darwin`: macOS system management
+- `nvf`: Modern Neovim configuration framework
 - Custom flakes: `aws-tools`, `aws-use-sso`, `hubctl` (Jordan's tools)
 
 ### Directory Architecture
@@ -146,7 +147,13 @@ home.packages = with pkgs; [ new-package ];
 4. Commit: `git add flake.lock && git commit -m "Update flake inputs"`
 
 ### Development Environment
-Use `nix develop` to enter shell with: git, home-manager, neovim, nix (with flakes enabled).
+Use `nix develop` to enter shell with: git, home-manager, neovim, nix (with flakes enabled), nix-direnv.
+
+### Initial Setup (Non-NixOS Systems)
+For macOS or other non-NixOS systems, install Nix first using the Determinate Systems installer:
+```bash
+./install-determinant-systems-nix.sh
+```
 
 ## Platform-Specific Features
 

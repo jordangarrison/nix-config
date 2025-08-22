@@ -13,6 +13,10 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nvf = {
+      url = "github:NotAShelf/nvf";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     aws-tools = {
       url = "github:jordangarrison/aws-tools";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -33,6 +37,7 @@
     , nixos-hardware
     , nix-darwin
     , home-manager
+    , nvf
     , aws-tools
     , aws-use-sso
     , hubctl

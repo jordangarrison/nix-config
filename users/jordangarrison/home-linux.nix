@@ -8,26 +8,26 @@
   ];
 
   # Install brave.
-  programs.brave =
-    if pkgs.stdenv.isLinux then {
-      enable = true;
-      extensions = [
-        "aeblfdkhhhdcdjpifhhbdiojplfjncoa" # 1Password
-        "eimadpbcbfnmbkopoojfekhnkhdbieeh" # Dark Reader
-        "bcjindcccaagfpapjjmafapmmgkkhgoa" # JSON Formatter
-        "cnjifjpddelmedmihgijeibhnjfabmlf" # Obsidian Web Clipper
-        "glnpjglilkicbckjpbgcfkogebgllemb" # Okta Browser Plugin
-        "jjhefcfhmnkfeepcpnilbbkaadhngkbi" # Readwise Highlighter
-        "gmbmikajjgmnabiglmofipeabaddhgne" # Save to Google Drive
-        "micdllihgoppmejpecmkilggmaagfdmb" # Tab Copy
-        "egnjhciaieeiiohknchakcodbpgjnchh" # Tab Wrangler
-        "jldhpllghnbhlbpcmnajkpdmadaolakh" # Todoist for Chrome
-        "clgenfnodoocmhnlnpknojdbjjnmecff" # Todoist for Gmail
-        "mdnleldcmiljblolnjhpnblkcekpdkpa" # Requestly
-      ];
-    } else {
-      enable = false;
-    };
+  programs.brave = if pkgs.stdenv.isLinux then {
+    enable = true;
+    extensions = [
+      "aeblfdkhhhdcdjpifhhbdiojplfjncoa" # 1Password
+      "eimadpbcbfnmbkopoojfekhnkhdbieeh" # Dark Reader
+      "bcjindcccaagfpapjjmafapmmgkkhgoa" # JSON Formatter
+      "cnjifjpddelmedmihgijeibhnjfabmlf" # Obsidian Web Clipper
+      "glnpjglilkicbckjpbgcfkogebgllemb" # Okta Browser Plugin
+      "jjhefcfhmnkfeepcpnilbbkaadhngkbi" # Readwise Highlighter
+      "gmbmikajjgmnabiglmofipeabaddhgne" # Save to Google Drive
+      "micdllihgoppmejpecmkilggmaagfdmb" # Tab Copy
+      "egnjhciaieeiiohknchakcodbpgjnchh" # Tab Wrangler
+      "jldhpllghnbhlbpcmnajkpdmadaolakh" # Todoist for Chrome
+      "clgenfnodoocmhnlnpknojdbjjnmecff" # Todoist for Gmail
+      "mdnleldcmiljblolnjhpnblkcekpdkpa" # Requestly
+      "kdfkejelgkdjgfoolngegkhkiecmlflj" # Bionic Reading
+    ];
+  } else {
+    enable = false;
+  };
 
   dconf.settings = {
     # Fixed number of workspaces

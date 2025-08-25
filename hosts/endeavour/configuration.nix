@@ -5,11 +5,10 @@
 { config, pkgs, ... }:
 
 {
-  imports =
-    [
-      # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-    ];
+  imports = [
+    # Include the results of the hardware scan.
+    ./hardware-configuration.nix
+  ];
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
@@ -46,10 +45,11 @@
   # User configuration now handled by user modules in flake.nix
 
   # Endeavour-specific system packages
-  environment.systemPackages = with pkgs; [
-    # Para Gnome
-    shotwell
-  ];
+  environment.systemPackages = with pkgs;
+    [
+      # Para Gnome
+      shotwell
+    ];
 
   # Or disable the firewall altogether.
   networking.firewall.enable = false;

@@ -93,7 +93,7 @@
         (and (executable-find (car cmd))
              ;; Test if the command actually works
              (zerop (apply #'call-process (car cmd) nil nil nil 
-                          (append (cdr cmd) '("--help")))))
+                           (append (cdr cmd) '("--help")))))
       (error nil))))
 
 (defun jag/detect-ruby-lsp-server ()
@@ -360,5 +360,5 @@ Version 2019-11-04"
     (gleam-ts-install-grammar)))
 
 ;; Prevent Emacs from trying to access X11 clipboard
-(setq x-select-enable-clipboard nil)
-(setq select-enable-clipboard nil)
+;; (setq x-select-enable-clipboard nil)
+;; (setq select-enable-clipboard nil)

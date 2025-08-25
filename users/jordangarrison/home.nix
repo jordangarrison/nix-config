@@ -13,11 +13,8 @@ let
     name = "binarual-beats";
     text = builtins.readFile ./tools/scripts/binaural-beats.sh;
   };
-in
-{
-  imports = [
-    ./tools/nvim/nvf.nix
-  ];
+in {
+  imports = [ ./tools/nvim/nvf.nix ];
 
   # nix settings
   nix.settings.experimental-features = [ "nix-command" "flakes" ];

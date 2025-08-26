@@ -19,12 +19,12 @@
 ;;
 ;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
 ;; font string. You generally only need these two:
-(setq doom-font (font-spec :family "FiraCode Nerd Font" :size 14 :weight 'semibold))
+(setq doom-font (font-spec :family "FiraCode Nerd Font" :size 13 :weight 'semibold))
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-rose-pine)
+(setq doom-theme 'doom-ir-black)
 
 ;; doom dashboard configuration
 (defun my-dashboard ()
@@ -309,8 +309,8 @@ Version 2019-11-04"
 ;;
 ;; Toggle themes
 ;;
-(defvar *jag-theme-dark* 'doom-rose-pine)
-(defvar *jag-theme-light* 'doom-rose-pine-dawn)
+(defvar *jag-theme-dark* 'leuven)
+(defvar *jag-theme-light* 'doom-ir-dark)
 (defvar *jag-current-theme* *jag-theme-dark*)
 
 (defadvice load-theme (before theme-dont-propagate activate)

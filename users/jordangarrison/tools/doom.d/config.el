@@ -254,51 +254,12 @@ Version 2019-11-04"
 (setq projectile-git-fd-args "-0 -H --color=never --type file --exclude .git --strip-cwd-prefix")
 
 ;;
-;; Tramp
-;;
-;; (add-to-list 'tramp-connection-properties
-;;              (list (regexp-quote "/ssh:endeavour:")
-;;                    "remote-shell" "/run/current-system/sw/bin/zsh"))
-
-;;
-;; Python Black Formatter
-;;
-;; (use-package! python-black
-;;   :demand t
-;;   :after python)
-;; (add-hook! 'python-mode-hook #'python-black-on-save-mode)
-;; (map! :leader :desc "Blacken Buffer" "m p b" #'python-black-buffer)
-;; (map! :leader :desc "Blacken Region" "m p r" #'python-black-region)
-;; (map! :leader :desc "Blacken Statement" "m p s" #'python-black-statement)
-
-;; accept completion from copilot and fallback to company
-;;(unless (eq system-type 'darwin)
-;;  (use-package! copilot
-;;    :hook (prog-mode . copilot-mode)
-;;    :bind (("C-TAB" . 'copilot-accept-completion-by-word)
-;;           ("C-<tab>" . 'copilot-accept-completion-by-word)
-;;           :map copilot-completion-map
-;;           ("<tab>" . 'copilot-accept-completion)
-;;           ("TAB" . 'copilot-accept-completion)))
-;;  (setq! copilot-node-executable "~/.nix-profile/bin/node"))
-
-;; kubernetes
-;; (use-package! kubernetes)
-;; (use-package! kubernetes-evil
-;;   :after kubernetes)
-
-;;
 ;; JS Prettier mode
 ;;
 (add-hook! 'js2-mode-hook #'prettier-js-mode)
 (add-hook! 'web-mode-hook #'prettier-js-mode)
 (add-hook! 'typescript-mode-hook #'prettier-js-mode)
 (add-hook! 'json-mode-hook #'prettier-js-mode)
-
-;;
-;; Vue JS
-;;
-;; (add-hook! 'vue-mode-hook #'lsp)
 
 ;; Ace
 (map! :leader :desc "Ace select window" "j w" #'ace-select-window)
@@ -310,8 +271,9 @@ Version 2019-11-04"
 ;; Toggle themes
 ;;
 (defvar *jag-theme-dark* 'leuven)
-(defvar *jag-theme-light* 'doom-ir-dark)
+(defvar *jag-theme-light* 'doom-tokyo-night)
 (defvar *jag-current-theme* *jag-theme-dark*)
+(set-frame-parameter (selected-frame) 'alpha 95) ;transparency
 
 (defadvice load-theme (before theme-dont-propagate activate)
   "Disable theme before loading new one."
@@ -330,9 +292,9 @@ Version 2019-11-04"
   (cond ((eq *jag-current-theme* *jag-theme-dark*) (jag/next-theme *jag-theme-light*))
         ((eq *jag-current-theme* *jag-theme-light*) (jag/next-theme *jag-theme-dark*))))
 ;; ((eq *jag-current-theme
-
 (map! :leader :desc "Toggle theme" "j t" #'jag/toggle-theme)
 
+;; Package configurations
 (map! :leader :desc "Format buffer" "m j f" #'cider-format-buffer)
 
 (use-package! chatgpt
@@ -341,16 +303,7 @@ Version 2019-11-04"
 
 (setq auth-sources '("~/.authinfo"))
 
-;; (use-package! exercism)
-
-;; gleam
-;; (use-package! gleam-ts-mode
-;;   :config
-;;   ;; setup formatter to be used by `SPC c f`
-;;   (after! apheleia
-;;     (setf (alist-get 'gleam-ts-mode apheleia-mode-alist) 'gleam)
-;;     (setf (alist-get 'gleam apheleia-formatters) '("gleam" "format" "--stdin"))))
-
+;; Set up Gleam programming language
 (after! treesit
   (add-to-list 'auto-mode-alist '("\\.gleam$" . gleam-ts-mode)))
 
@@ -359,6 +312,21 @@ Version 2019-11-04"
     ;; compile the treesit grammar file the first time
     (gleam-ts-install-grammar)))
 
-;; Prevent Emacs from trying to access X11 clipboard
-;; (setq x-select-enable-clipboard nil)
-;; (setq select-enable-clipboard nil)
+;;
+;; Custom Functions
+;;
+(defun jag/send-to-vterm (text)
+  "Send TEXT to vterm buffer."
+  (interactive "MText to send: ")
+  (let ((vterm-buf (get-buffer text-vterm-buffer-name)))
+    (if vterm-buf
+        (with-current-buffer vterm-buf
+          (vterm-send-string text)))
+    (message "No *vterm* buffer found")))
+
+(defun jag/send-region-to-vterm (start end)
+  "Send the region between START and END to the current vterm buffer."
+  (interactive "r")
+  (let ((text (buffer-substring-no-properties start end)))
+    (send-to-vterm text)))
+(map! :leader :desc "Send code to vterm" "j a t" #'jag/send-region-to-vterm)

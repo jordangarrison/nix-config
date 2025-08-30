@@ -173,6 +173,19 @@
                   (message "Ruby LSP: No working server found")))
               (lsp-deferred))))
 
+;; vterm configuration for macOS compilation
+(after! vterm
+  ;; Fix vterm compilation on macOS with Nix
+  (when (eq system-type 'darwin)
+    (setenv "CC" "clang")
+    (setenv "CXX" "clang++")
+    (setq vterm-module-cmake-args "-DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++")))
+
+;; Set environment variables before vterm loads
+(when (eq system-type 'darwin)
+  (setenv "CC" "clang")
+  (setenv "CXX" "clang++"))
+
 ;; Just some key bindings
 ;;
 (map! :leader :desc "Expand Region" "e e" #'er/expand-region)

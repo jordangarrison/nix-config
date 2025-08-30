@@ -2,5 +2,6 @@
 
 {
   services.emacs = { enable = true; };
-  environment.systemPackages = with pkgs; [ wl-clipboard xclip ];
+  environment.systemPackages = with pkgs;
+    if stdenv.isLinux then [ wl-clipboard xclip ] else [ ];
 }

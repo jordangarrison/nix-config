@@ -154,7 +154,7 @@ in {
       (google-cloud-sdk.withExtraComponents
         [ google-cloud-sdk.components.gke-gcloud-auth-plugin ])
     ] ++ (if pkgs.stdenv.isDarwin then
-      [ devenv ]
+      [ devenv glibtool ]
     else [
       aws-sso-cli
       barrier

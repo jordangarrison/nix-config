@@ -286,7 +286,10 @@ Version 2019-11-04"
 (defvar *jag-theme-dark* 'leuven)
 (defvar *jag-theme-light* 'doom-tokyo-night)
 (defvar *jag-current-theme* *jag-theme-dark*)
-(set-frame-parameter (selected-frame) 'alpha 95) ;transparency
+(set-frame-parameter (selected-frame) 'alpha 90) ;transparency
+(setq default-frame-alist '((undecorated . t)))
+(add-to-list 'default-frame-alist '(drag-internal-border . 1))
+(add-to-list 'default-frame-alist '(internal-border-width . 0))
 
 (defadvice load-theme (before theme-dont-propagate activate)
   "Disable theme before loading new one."
@@ -341,5 +344,6 @@ Version 2019-11-04"
   "Send the region between START and END to the current vterm buffer."
   (interactive "r")
   (let ((text (buffer-substring-no-properties start end)))
-    (send-to-vterm text)))
+    (jag/send-to-vterm text)))
 (map! :leader :desc "Send code to vterm" "j a t" #'jag/send-region-to-vterm)
+

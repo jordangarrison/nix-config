@@ -37,6 +37,15 @@ in {
     # 1Password policy ownership for Jordan
     programs._1password-gui.polkitPolicyOwners = [ cfg.username ];
 
+    # Enable passwordless sudo for Jordan
+    security.sudo.extraRules = [{
+      users = [ cfg.username ];
+      commands = [{
+        command = "ALL";
+        options = [ "NOPASSWD" ];
+      }];
+    }];
+
     # Home Manager configuration for Jordan
     home-manager.users.${cfg.username} = if pkgs.stdenv.isLinux then
       import ./home-linux.nix

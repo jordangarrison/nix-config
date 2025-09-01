@@ -287,9 +287,6 @@ Version 2019-11-04"
 (defvar *jag-theme-light* 'doom-tokyo-night)
 (defvar *jag-current-theme* *jag-theme-dark*)
 (set-frame-parameter (selected-frame) 'alpha 90) ;transparency
-(setq default-frame-alist '((undecorated . t)))
-(add-to-list 'default-frame-alist '(drag-internal-border . 1))
-(add-to-list 'default-frame-alist '(internal-border-width . 0))
 
 (defadvice load-theme (before theme-dont-propagate activate)
   "Disable theme before loading new one."
@@ -334,7 +331,7 @@ Version 2019-11-04"
 (defun jag/send-to-vterm (text)
   "Send TEXT to vterm buffer."
   (interactive "MText to send: ")
-  (let ((vterm-buf (get-buffer text-vterm-buffer-name)))
+  (let ((vterm-buf (get-buffer "*vterm*")))
     (if vterm-buf
         (with-current-buffer vterm-buf
           (vterm-send-string text)))
@@ -347,3 +344,45 @@ Version 2019-11-04"
     (jag/send-to-vterm text)))
 (map! :leader :desc "Send code to vterm" "j a t" #'jag/send-region-to-vterm)
 
+;; Ref: https://stackoverflow.com/questions/23021875/wait-on-shell-command-to-finish-before-executing-another-elisp-command
+(defun jag/nix-emacs-reload ()
+  "Reload the nix emacs setup because home manager sucks with editor config reloads"
+  (interactive)
+  (message "Starting nix reload process...")
+  (let ((buffer-name "*nix-emacs-reload*"))
+    ;; Create and display buffer in vertical split
+    (let ((buf (get-buffer-create buffer-name)))
+      (with-current-buffer buf
+        (setq buffer-read-only nil)
+        (erase-buffer)
+        (insert "Running nix reload...\n")
+        (setq buffer-read-only t))
+      ;; Open in vertical split
+      (split-window-right)
+      (other-window 1)
+      (switch-to-buffer buf)
+      ;; Make buffer dismissable with 'q'
+      (local-set-key (kbd "q") 'delete-window))
+    
+    ;; Start the process
+    (let ((proc (start-process
+                 "nix-emacs-reload"
+                 buffer-name
+                 "bash"
+                 "-c"
+                 "cd ~/dev/jordangarrison/nix-config && nh os test --no-nom . && doom sync")))
+      (set-process-filter proc
+                          (lambda (process output)
+                            (with-current-buffer (process-buffer process)
+                              (let ((inhibit-read-only t))
+                                (goto-char (point-max))
+                                (insert output)))))
+      (set-process-sentinel proc
+                            (lambda (process event)
+                              (when (string-match "finished" event)
+                                (with-current-buffer (process-buffer process)
+                                  (let ((inhibit-read-only t))
+                                    (goto-char (point-max))
+                                    (insert "\nNix reload complete!\n")))
+                                (when (y-or-n-p "Nix reload complete. Restart Emacs? ")
+                                  (doom/restart-and-restore))))))))

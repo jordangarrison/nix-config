@@ -390,19 +390,19 @@ Version 2019-11-04"
   "Build the NixOS configuration without switching."
   (interactive)
   (jag/run-nh-command "nh os build --no-nom ." "nix-os-build"))
-(map! :leader :desc "Run `nh os build .` on config" "j n b" #'jag/nix-os-build)
+(map! :leader :desc "nh os build ." "j n b" #'jag/nix-os-build)
 
 (defun jag/nix-os-test ()
   "Test the NixOS configuration."
   (interactive)
   (jag/run-nh-command "nh os test --no-nom ." "nix-os-test"))
-(map! :leader :desc "Run `nh os test .' on config" "j n t" #'jag/nix-os-test)
+(map! :leader :desc "nh os test ." "j n t" #'jag/nix-os-test)
 
 (defun jag/nix-os-switch ()
   "Switch to the NixOS configuration."
   (interactive)
   (jag/run-nh-command "nh os switch --no-nom ." "nix-os-switch"))
-(map! :leader :desc "Run `nh os switch .' on config" "j n s" #'jag/nix-os-switch)
+(map! :leader :desc "nh os switch ." "j n s" #'jag/nix-os-switch)
 
 (defun jag/nix-emacs-reload ()
   "Reload the nix emacs setup because home manager sucks with editor config reloads"
@@ -414,4 +414,14 @@ Version 2019-11-04"
    (lambda ()
      (when (y-or-n-p "Nix reload complete. Restart Emacs? ")
        (doom/restart-and-restore)))))
-(map! :leader :desc "Run `nh os test .' + sync doom config" "j n e" #'jag/nix-emacs-reload)
+(map! :leader :desc "nh os test . + doom sync" "j n e" #'jag/nix-emacs-reload)
+
+;; Send literal escape to vterm (bypasses evil mode)
+(defun jag/vterm-send-escape ()
+  "Send literal escape key to vterm buffer."
+  (interactive)
+  (when (eq major-mode 'vterm-mode)
+    (vterm-send-key "<escape>")))
+
+(map! :mode vterm-mode
+      :desc "Send escape to vterm" "C-c C-e" #'jag/vterm-send-escape)

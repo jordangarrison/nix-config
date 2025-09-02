@@ -27,9 +27,8 @@ in {
       home = cfg.homeDirectory;
       packages = with pkgs; [
         deskflow
-        hey-mail
+        nextcloud-client
         obsidian
-        thunderbird
         todoist-electron
       ];
     };

@@ -345,17 +345,15 @@ Version 2019-11-04"
 (map! :leader :desc "Send code to vterm" "j a t" #'jag/send-region-to-vterm)
 
 ;; Ref: https://stackoverflow.com/questions/23021875/wait-on-shell-command-to-finish-before-executing-another-elisp-command
-(defun jag/nix-emacs-reload ()
-  "Reload the nix emacs setup because home manager sucks with editor config reloads"
-  (interactive)
-  (message "Starting nix reload process...")
-  (let ((buffer-name "*nix-emacs-reload*"))
+(defun jag/run-nh-command (command description &optional on-success)
+  "Run an nh command with output buffer display and optional success callback."
+  (let ((buffer-name (format "*%s*" description)))
     ;; Create and display buffer in vertical split
     (let ((buf (get-buffer-create buffer-name)))
       (with-current-buffer buf
         (setq buffer-read-only nil)
         (erase-buffer)
-        (insert "Running nix reload...\n")
+        (insert (format "Running %s...\n" description))
         (setq buffer-read-only t))
       ;; Open in vertical split
       (split-window-right)
@@ -366,23 +364,54 @@ Version 2019-11-04"
     
     ;; Start the process
     (let ((proc (start-process
-                 "nix-emacs-reload"
+                 description
                  buffer-name
                  "bash"
                  "-c"
-                 "cd ~/dev/jordangarrison/nix-config && nh os test --no-nom . && doom sync")))
+                 (format "cd ~/dev/jordangarrison/nix-config && %s" command))))
       (set-process-filter proc
                           (lambda (process output)
                             (with-current-buffer (process-buffer process)
                               (let ((inhibit-read-only t))
                                 (goto-char (point-max))
-                                (insert output)))))
+                                ;; Apply ANSI color codes
+                                (insert (ansi-color-apply output))))))
       (set-process-sentinel proc
                             (lambda (process event)
                               (when (string-match "finished" event)
                                 (with-current-buffer (process-buffer process)
                                   (let ((inhibit-read-only t))
                                     (goto-char (point-max))
-                                    (insert "\nNix reload complete!\n")))
-                                (when (y-or-n-p "Nix reload complete. Restart Emacs? ")
-                                  (doom/restart-and-restore))))))))
+                                    (insert (format "\n%s complete!\n" description))))
+                                (when on-success
+                                  (funcall on-success))))))))
+
+(defun jag/nix-os-build ()
+  "Build the NixOS configuration without switching."
+  (interactive)
+  (jag/run-nh-command "nh os build --no-nom ." "nix-os-build"))
+(map! :leader :desc "Run `nh os build .` on config" "j n b" #'jag/nix-os-build)
+
+(defun jag/nix-os-test ()
+  "Test the NixOS configuration."
+  (interactive)
+  (jag/run-nh-command "nh os test --no-nom ." "nix-os-test"))
+(map! :leader :desc "Run `nh os test .' on config" "j n t" #'jag/nix-os-test)
+
+(defun jag/nix-os-switch ()
+  "Switch to the NixOS configuration."
+  (interactive)
+  (jag/run-nh-command "nh os switch --no-nom ." "nix-os-switch"))
+(map! :leader :desc "Run `nh os switch .' on config" "j n s" #'jag/nix-os-switch)
+
+(defun jag/nix-emacs-reload ()
+  "Reload the nix emacs setup because home manager sucks with editor config reloads"
+  (interactive)
+  (message "Starting nix reload process...")
+  (jag/run-nh-command 
+   "nh os test --no-nom . && doom sync" 
+   "nix-emacs-reload"
+   (lambda ()
+     (when (y-or-n-p "Nix reload complete. Restart Emacs? ")
+       (doom/restart-and-restore)))))
+(map! :leader :desc "Run `nh os test .' + sync doom config" "j n e" #'jag/nix-emacs-reload)

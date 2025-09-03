@@ -31,17 +31,8 @@
     };
   };
 
-  outputs =
-    inputs@{ self
-    , nixpkgs
-    , nixos-hardware
-    , nix-darwin
-    , home-manager
-    , nvf
-    , aws-tools
-    , aws-use-sso
-    , hubctl
-    }: {
+  outputs = inputs@{ self, nixpkgs, nixos-hardware, nix-darwin, home-manager
+    , nvf, aws-tools, aws-use-sso, hubctl }: {
       nixosConfigurations = {
         "endeavour" = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs; };
@@ -65,6 +56,51 @@
             home-manager.nixosModules.home-manager
             {
               # Configure users for endeavour
+              users.jordangarrison = {
+                enable = true;
+                username = "jordangarrison";
+                homeDirectory = "/home/jordangarrison";
+              };
+
+              users.mikayla = {
+                enable = true;
+                homeDirectory = "/home/mikayla";
+              };
+
+              users.jane = {
+                enable = true;
+                homeDirectory = "/home/jane";
+              };
+
+              users.isla = {
+                enable = true;
+                homeDirectory = "/home/isla";
+              };
+
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+            }
+          ];
+
+        };
+        "opportunity" = nixpkgs.lib.nixosSystem {
+          specialArgs = { inherit inputs; };
+          modules = [
+            ./modules/nixos/common.nix
+            ./modules/nixos/gnome-desktop.nix
+            { gbg-config.gnome-tweaks.machine-type = "laptop"; }
+            ./modules/nixos/fonts.nix
+            ./modules/nixos/audio/pipewire.nix
+            ./modules/nixos/development.nix
+            ./users/jordangarrison/nixos.nix
+            ./users/mikayla/nixos.nix
+            ./users/jane/nixos.nix
+            ./users/isla/nixos.nix
+            ./hosts/opportunity/configuration.nix
+            nixos-hardware.nixosModules.framework-12th-gen-intel
+            home-manager.nixosModules.home-manager
+            {
+              # Configure users for voyager
               users.jordangarrison = {
                 enable = true;
                 username = "jordangarrison";

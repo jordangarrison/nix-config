@@ -425,3 +425,6 @@ Version 2019-11-04"
 
 (map! :mode vterm-mode
       :desc "Send escape to vterm" "C-c C-e" #'jag/vterm-send-escape)
+
+;; More LLM stuffs
+(gptel-make-gh-copilot "Copilot")

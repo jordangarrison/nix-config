@@ -20,7 +20,8 @@
        ;;japanese
 
        :completion
-       company           ; the ultimate code completion backend
+       ;; company           ; the ultimate code completion backend
+       (corfu +orderless)
        ;;helm              ; the *other* search engine for love and life
        ;;ido               ; the other *other* search engine...
        ;; ivy               ; a search engine for love and life
@@ -104,6 +105,7 @@
        upload            ; map local to remote projects via ssh/ftp
        tree-sitter
        lsp
+       llm
 
        :lang
        (yaml +lsp +tree-sitter)
@@ -166,6 +168,7 @@
 
        :os
        ;; (:if IS-MAC macos)
+       (:if (featurep :system 'macos) macos)
        (tty +osc)         ; improve the terminal experience
 
        :email

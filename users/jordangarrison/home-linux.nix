@@ -139,7 +139,6 @@
     icon = ../../icons/btop.png;
   }];
 
-  # GSConnect (KDE Connect for GNOME)
   programs.gnome-shell = lib.mkIf pkgs.stdenv.isLinux {
     enable = true;
     extensions = [
@@ -148,6 +147,7 @@
       { package = pkgs.gnomeExtensions.clipboard-history; }
       { package = pkgs.gnomeExtensions.fuzzy-app-search; }
       { package = pkgs.gnomeExtensions.gsconnect; }
+      { package = pkgs.gnomeExtensions.no-title-bar; }
       { package = pkgs.gnomeExtensions.removable-drive-menu; }
     ];
   };

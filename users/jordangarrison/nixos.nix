@@ -29,7 +29,11 @@ in {
         deskflow
         nextcloud-client
         obsidian
+        rnote
+        session-desktop
+        signal-desktop
         todoist-electron
+        xournalpp
       ];
     };
 

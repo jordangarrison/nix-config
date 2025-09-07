@@ -147,8 +147,8 @@
       { package = pkgs.gnomeExtensions.clipboard-history; }
       { package = pkgs.gnomeExtensions.fuzzy-app-search; }
       { package = pkgs.gnomeExtensions.gsconnect; }
-      { package = pkgs.gnomeExtensions.no-title-bar; }
       { package = pkgs.gnomeExtensions.removable-drive-menu; }
+      { package = pkgs.gnomeExtensions.unite; }
     ];
   };
 

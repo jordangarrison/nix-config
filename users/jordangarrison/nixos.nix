@@ -26,6 +26,7 @@ in {
       shell = pkgs.zsh;
       home = cfg.homeDirectory;
       packages = with pkgs; [
+        calibre
         deskflow
         nextcloud-client
         obsidian

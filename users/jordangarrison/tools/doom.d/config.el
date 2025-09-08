@@ -286,12 +286,9 @@ Version 2019-11-04"
 (defvar *jag-theme-dark* 'leuven)
 (defvar *jag-theme-light* 'doom-tokyo-night)
 (defvar *jag-current-theme* *jag-theme-dark*)
-(set-frame-parameter (selected-frame) 'alpha 90) ;transparency
-
 (defadvice load-theme (before theme-dont-propagate activate)
   "Disable theme before loading new one."
   (mapc #'disable-theme custom-enabled-themes))
-
 
 (defun jag/next-theme (theme)
   (if (eq theme 'default)
@@ -306,6 +303,23 @@ Version 2019-11-04"
         ((eq *jag-current-theme* *jag-theme-light*) (jag/next-theme *jag-theme-dark*))))
 ;; ((eq *jag-current-theme
 (map! :leader :desc "Toggle theme" "j t" #'jag/toggle-theme)
+
+;; Transparency
+(defun jag/set-frame-transparency (arg)
+  "Set frame transparency. VALUE should be b
+With no prefix arg: set to 90% (default)
+With C-u: prompt for value
+With C-u followed by number: use that number directly"
+  (interactive "P")
+  (let ((alpha (cond
+                ((null arg) 90) ; No prefix defaults to 90%
+                ((consp arg) (read-number "Transparency (0-100): " 90)) ; C-u but no number prompts for the number
+                ((numberp arg) arg) ; C-u number: use number
+                (t 90)))) ; fallback
+    (set-frame-parameter (selected-frame) 'alpha alpha)
+    (message "Frame transparency set to %d%%" alpha)))
+(map! :leader :desc "Enable frame transparency" "j f t" #'jag/set-frame-transparency)
+
 
 ;; Package configurations
 (map! :leader :desc "Format buffer" "m j f" #'cider-format-buffer)

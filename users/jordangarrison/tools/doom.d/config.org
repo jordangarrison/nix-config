@@ -1,0 +1,558 @@
+#+TITLE: Jordan Garrison's Literate Doom Emacs Configuration
+#+AUTHOR: Jordan Garrison
+#+EMAIL: jordan@jordangarrison.dev
+#+STARTUP: overview
+#+PROPERTY: header-args:emacs-lisp :tangle yes :comments both
+
+* Table of Contents :TOC:
+- [[#personal-information][Personal Information]]
+- [[#authentication-and-external-services][Authentication and External Services]]
+- [[#theme-and-appearance][Theme and Appearance]]
+  - [[#base-theme][Base Theme]]
+  - [[#font-configuration][Font Configuration]]
+  - [[#line-numbers-and-visual-elements][Line Numbers and Visual Elements]]
+  - [[#mouse-and-clipboard-integration][Mouse and Clipboard Integration]]
+  - [[#theme-management][Theme Management]]
+  - [[#dashboard-configuration][Dashboard Configuration]]
+- [[#editor-behavior][Editor Behavior]]
+  - [[#shell-prompt-recognition][Shell Prompt Recognition]]
+  - [[#projectile-configuration][Projectile Configuration]]
+- [[#terminal-configuration][Terminal Configuration]]
+  - [[#vterm-setup-for-macos][VTerm Setup for macOS]]
+  - [[#vterm-escape-key-binding][VTerm Escape Key Binding]]
+- [[#key-bindings][Key Bindings]]
+  - [[#general-navigation-and-editing][General Navigation and Editing]]
+  - [[#ace-window-management][Ace Window Management]]
+  - [[#utility-bindings][Utility Bindings]]
+- [[#development-tools][Development Tools]]
+  - [[#dotfile-synchronization][Dotfile Synchronization]]
+  - [[#javascripttypescript-formatting][JavaScript/TypeScript Formatting]]
+  - [[#ruby-language-server-configuration][Ruby Language Server Configuration]]
+  - [[#gleam-programming-language-support][Gleam Programming Language Support]]
+  - [[#clojure-development][Clojure Development]]
+- [[#custom-functions][Custom Functions]]
+  - [[#external-application-integration][External Application Integration]]
+- [[#nixos-integration][NixOS Integration]]
+  - [[#base-nh-command-runner][Base NH Command Runner]]
+  - [[#nixos-operations][NixOS Operations]]
+  - [[#nixos-key-bindings][NixOS Key Bindings]]
+- [[#aillm-integration][AI/LLM Integration]]
+  - [[#integration-with-various-ai-and-language-model-services-for-enhanced-development-capabilities][Integration with various AI and language model services for enhanced development capabilities.]]
+  - [[#vterm-integration][VTerm Integration]]
+  - [[#chatgpt-integration][ChatGPT Integration]]
+
+* Personal Information
+Basic user information used by various Emacs features like GPG, email clients, and file templates.
+
+#+begin_src emacs-lisp
+(setq user-full-name "Jordan Garrison"
+      user-mail-address "jordan@jordangarrison.dev")
+#+end_src
+
+* Authentication and External Services
+
+#+begin_src emacs-lisp
+(setq auth-sources '("~/.authinfo"))
+#+end_src
+
+* Theme and Appearance
+
+** Base Theme
+Setting the default theme to Tokyo Night for a modern dark appearance.
+
+#+begin_src emacs-lisp
+(setq doom-theme 'doom-tokyo-night)
+#+end_src
+
+** Font Configuration
+
+Using FiraCode Nerd Font for programming with ligatures and icon support.
+
+#+begin_src emacs-lisp
+(setq doom-font (font-spec :family "FiraCode Nerd Font" :size 13 :weight 'semibold))
+#+end_src
+
+** Line Numbers and Visual Elements
+Enabling absolute line numbers and configuring visual spacing.
+
+#+begin_src emacs-lisp
+(setq display-line-numbers-type t)
+(setq-default line-spacing 3)
+#+end_src
+
+** Mouse and Clipboard Integration
+Enabling mouse support in terminal and system clipboard integration.
+
+#+begin_src emacs-lisp
+(xterm-mouse-mode 1)
+(xclip-mode 1)
+#+end_src
+
+** Theme Management
+
+Dynamic theme switching system with support for light and dark themes.
+
+*** Theme Variables and Setup
+
+#+begin_src emacs-lisp
+(defvar *jag-theme-dark* 'leuven)
+(defvar *jag-theme-light* 'doom-tokyo-night)
+(defvar *jag-current-theme* *jag-theme-dark*)
+
+(defadvice load-theme (before theme-dont-propagate activate)
+  "Disable theme before loading new one."
+  (mapc #'disable-theme custom-enabled-themes))
+#+end_src
+
+*** Theme Switching Functions
+
+#+begin_src emacs-lisp
+(defun jag/next-theme (theme)
+  (if (eq theme 'default)
+      (disable-theme *jag-current-theme*)
+    (progn
+      (load-theme theme t)))
+  (setq *jag-current-theme* theme))
+
+(defun jag/toggle-theme ()
+  (interactive)
+  (cond ((eq *jag-current-theme* *jag-theme-dark*) (jag/next-theme *jag-theme-light*))
+        ((eq *jag-current-theme* *jag-theme-light*) (jag/next-theme *jag-theme-dark*))))
+
+(map! :leader :desc "Toggle theme" "j t" #'jag/toggle-theme)
+#+end_src
+
+*** Frame Transparency
+
+Dynamic frame transparency control with multiple input methods.
+
+#+begin_src emacs-lisp
+(defun jag/set-frame-transparency (arg)
+  "Set frame transparency. VALUE should be b
+With no prefix arg: set to 90% (default)
+With C-u: prompt for value
+With C-u followed by number: use that number directly"
+  (interactive "P")
+  (let ((alpha (cond
+                ((null arg) 90) ; No prefix defaults to 90%
+                ((consp arg) (read-number "Transparency (0-100): " 90)) ; C-u but no number prompts for the number
+                ((numberp arg) arg) ; C-u number: use number
+                (t 90)))) ; fallback
+    (set-frame-parameter (selected-frame) 'alpha alpha)
+    (message "Frame transparency set to %d%%" alpha)))
+
+(map! :leader :desc "Enable frame transparency" "j f t" #'jag/set-frame-transparency)
+#+end_src
+
+** Dashboard Configuration
+
+Custom dashboard with a minimalist "Emacs" banner instead of the default ASCII art.
+
+#+begin_src emacs-lisp
+(defun my-dashboard ()
+  (let* ((banner '("Emacs"))
+         (longest-line (apply #'max (mapcar #'length banner))))
+    (put-text-property
+     (point)
+     (dolist (line banner (point))
+       (insert (+doom-dashboard--center
+                +doom-dashboard--width
+                (concat line (make-string (max 0 (- longest-line (length line))) 32)))
+               "\n"))
+     'face 'doom-dashboard-banner)))
+
+(setq +doom-dashboard-ascii-banner-fn #'my-dashboard)
+#+end_src
+
+* Editor Behavior
+** Shell Prompt Recognition
+Configuring Emacs to properly recognize shell prompts for better shell integration.
+
+#+begin_src emacs-lisp
+(setq shell-prompt-pattern '"^[^#$%>\n]*~?[#$%>] *")
+#+end_src
+
+** Projectile Configuration
+Setting up project management with Projectile, focused on the development directory.
+
+#+begin_src emacs-lisp
+(setq projectile-project-search-path '("~/dev"))
+(setq projectile-git-fd-args "-0 -H --color=never --type file --exclude .git --strip-cwd-prefix")
+#+end_src
+
+* Terminal Configuration
+
+** VTerm Setup for macOS
+Special configuration for vterm compilation on macOS with Nix, ensuring proper compiler settings.
+
+#+begin_src emacs-lisp
+(after! vterm
+  ;; Fix vterm compilation on macOS with Nix
+  (when (eq system-type 'darwin)
+    (setenv "CC" "clang")
+    (setenv "CXX" "clang++")
+    (setq vterm-module-cmake-args "-DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++")))
+
+;; Set environment variables before vterm loads
+(when (eq system-type 'darwin)
+  (setenv "CC" "clang")
+  (setenv "CXX" "clang++"))
+#+end_src
+
+** VTerm Escape Key Binding
+Special function to send literal escape to vterm, bypassing Evil mode.
+
+#+begin_src emacs-lisp
+(defun jag/vterm-send-escape ()
+  "Send literal escape key to vterm buffer."
+  (interactive)
+  (when (eq major-mode 'vterm-mode)
+    (vterm-send-key "<escape>")))
+
+(map! :mode vterm-mode
+      :desc "Send escape to vterm" "C-c C-e" #'jag/vterm-send-escape)
+#+end_src
+
+* Key Bindings
+** General Navigation and Editing
+
+#+begin_src emacs-lisp
+(map! :leader :desc "Expand Region" "e e" #'er/expand-region)
+(map! :leader :desc "Find File Other Window" "f o " #'find-file-other-window)
+(map! :leader :desc "Switch other Frame" "w f" #'other-frame)
+(map! :leader :desc "Maximize Frame" "w m f" #'toggle-frame-maximized)
+(map! :leader :desc "Maximize Frame" "w m v" #'toggle-frame-fullscreen)
+(map! :leader :desc "Shell command" "j s" #'shell-command)
+(map! :leader :desc "Comment line" "j /" #'comment-line)
+#+end_src
+
+** Ace Window Management
+Quick window operations using Ace for visual selection.
+
+#+begin_src emacs-lisp
+(map! :leader :desc "Ace select window" "j w" #'ace-select-window)
+(map! :leader :desc "Ace swap window" "j s" #'ace-swap-window)
+(map! :leader :desc "Ace delete windows" "j d" #'ace-delete-window)
+(map! :leader :desc "Ace delete other windows" "j D" #'ace-delete-other-windows)
+#+end_src
+
+** Utility Bindings
+
+#+begin_src emacs-lisp
+(map! :leader :desc "Kill buffer and delete window" "d d" #'kill-buffer-and-window)
+(map! :leader :desc "Open in external app" "o o" #'open-in-external-app)
+#+end_src
+
+* Development Tools
+** Dotfile Synchronization
+Custom function to sync dotfiles with a git repository.
+
+#+begin_src emacs-lisp
+(defun jag/dotfile-sync (&optional commit-message)
+  (interactive "sCommit Message: ")
+  (message
+   (shell-command-to-string
+    (concat "~/.dotfiles/scripts/dotfile-sync "
+            (shell-quote-argument commit-message)))))
+
+(map! :leader :desc "Sync the dotfiles" "j j" 'jag/dotfile-sync)
+#+end_src
+
+** JavaScript/TypeScript Formatting
+Automatically enabling Prettier for JavaScript-related modes.
+
+#+begin_src emacs-lisp
+(add-hook! 'js2-mode-hook #'prettier-js-mode)
+(add-hook! 'web-mode-hook #'prettier-js-mode)
+(add-hook! 'typescript-mode-hook #'prettier-js-mode)
+(add-hook! 'json-mode-hook #'prettier-js-mode)
+#+end_src
+
+** Ruby Language Server Configuration
+An intelligent Ruby LSP configuration that automatically detects and uses the best available Ruby language server for each project.
+
+*** Helper Functions
+
+#+begin_src emacs-lisp
+(defun jag/ruby-lsp-server-available-p (server-command)
+  "Check if a Ruby LSP server command is available and working."
+  (let ((cmd (if (listp server-command) server-command (list server-command))))
+    (condition-case nil
+        (and (executable-find (car cmd))
+             ;; Test if the command actually works
+             (zerop (apply #'call-process (car cmd) nil nil nil
+                           (append (cdr cmd) '("--help")))))
+      (error nil))))
+
+(defun jag/detect-ruby-lsp-server ()
+  "Detect the best available Ruby LSP server for the current project."
+  (cond
+   ;; First try bundle exec solargraph (project-specific)
+   ((and (file-exists-p "Gemfile")
+         (jag/ruby-lsp-server-available-p '("bundle" "exec" "solargraph")))
+    '(bundle-solargraph . ("bundle" "exec" "solargraph" "stdio")))
+
+   ;; Then try global solargraph
+   ((jag/ruby-lsp-server-available-p "solargraph")
+    '(solargraph . ("solargraph" "stdio")))
+
+   ;; Try ruby-lsp (if available)
+   ((and (file-exists-p "Gemfile")
+         (jag/ruby-lsp-server-available-p '("bundle" "exec" "ruby-lsp")))
+    '(bundle-ruby-lsp . ("bundle" "exec" "ruby-lsp")))
+
+   ((jag/ruby-lsp-server-available-p "ruby-lsp")
+    '(ruby-lsp . ("ruby-lsp")))
+
+   ;; Fall back to typeprof if it's working
+   ((jag/ruby-lsp-server-available-p "typeprof")
+    ;; Test if typeprof can actually start without dependency errors
+    (condition-case nil
+        (progn
+          (call-process "typeprof" nil nil nil "--version")
+          '(typeprof . ("typeprof" "--lsp")))
+      (error nil)))
+
+   ;; No working LSP server found
+   (t nil)))
+#+end_src
+
+*** LSP Client Registration
+
+#+begin_src emacs-lisp
+(after! lsp-mode
+  ;; Register our intelligent Ruby LSP client
+  (lsp-register-client
+   (make-lsp-client
+    :new-connection (lsp-stdio-connection
+                     (lambda ()
+                       (let ((server-info (jag/detect-ruby-lsp-server)))
+                         (if server-info
+                             (progn
+                               (message "Using Ruby LSP server: %s" (car server-info))
+                               (cdr server-info))
+                           (error "No working Ruby LSP server found")))))
+    :major-modes '(ruby-mode)
+    :priority 30  ; Higher priority than default servers
+    :server-id 'ruby-intelligent
+    :multi-root t
+    :initialization-options
+    (lambda ()
+      (let ((server-info (jag/detect-ruby-lsp-server)))
+        (pcase (car server-info)
+          ('bundle-solargraph
+           (list :diagnostics t :completion t :hover t :formatting t))
+          ('solargraph
+           (list :diagnostics t :completion t :hover t :formatting t))
+          ('bundle-ruby-lsp
+           (list :enabledFeatures ["diagnostics" "formatting" "completion" "hover"]))
+          ('ruby-lsp
+           (list :enabledFeatures ["diagnostics" "formatting" "completion" "hover"]))
+          ('typeprof
+           (list))
+          (_ (list))))))))
+#+end_src
+
+*** Ruby Mode Configuration
+
+#+begin_src emacs-lisp
+(after! ruby-mode
+  (add-hook 'ruby-mode-hook
+            (lambda ()
+              ;; Disable the default typeprof-ls client to prevent conflicts
+              (setq-local lsp-disabled-clients '(typeprof-ls))
+              ;; Show which LSP server we're using
+              (let ((server-info (jag/detect-ruby-lsp-server)))
+                (if server-info
+                    (message "Ruby LSP: Using %s" (car server-info))
+                  (message "Ruby LSP: No working server found")))
+              (lsp-deferred))))
+#+end_src
+
+** Gleam Programming Language Support
+
+#+begin_src emacs-lisp
+(after! treesit
+  (add-to-list 'auto-mode-alist '("\\.gleam$" . gleam-ts-mode)))
+
+(after! gleam-ts-mode
+  (unless (treesit-language-available-p 'gleam)
+    ;; compile the treesit grammar file the first time
+    (gleam-ts-install-grammar)))
+#+end_src
+
+** Clojure Development
+
+#+begin_src emacs-lisp
+(map! :leader :desc "Format buffer" "m j f" #'cider-format-buffer)
+#+end_src
+
+* Custom Functions
+
+This section contains various utility functions that enhance the development workflow.
+
+** External Application Integration
+Function to open files in their default external applications from within Emacs.
+
+#+begin_src emacs-lisp
+(defun open-in-external-app (&optional @fname)
+  "Open the current file or dired marked files in external app.
+The app is chosen from your OS's preference.
+
+When called in emacs lisp, if @fname is given, open that.
+
+URL `http://ergoemacs.org/emacs/emacs_dired_open_file_in_ext_apps.html'
+Version 2019-11-04"
+  (interactive)
+  (let* (
+         ($file-list
+          (if @fname
+              (progn (list @fname))
+            (if (string-equal major-mode "dired-mode")
+                (dired-get-marked-files)
+              (list (buffer-file-name)))))
+         ($do-it-p (if (<= (length $file-list) 5)
+                       t
+                     (y-or-n-p "Open more than 5 files? "))))
+    (when $do-it-p
+      (cond
+       ((string-equal system-type "windows-nt")
+        (mapc
+         (lambda ($fpath)
+           (w32-shell-execute "open" $fpath)) $file-list))
+       ((string-equal system-type "darwin")
+        (mapc
+         (lambda ($fpath)
+           (shell-command
+            (concat "open " (shell-quote-argument $fpath))))  $file-list))
+       ((string-equal system-type "gnu/linux")
+        (mapc
+         (lambda ($fpath) (let ((process-connection-type nil))
+                            (start-process "" nil "xdg-open" $fpath))) $file-list))))))
+#+end_src
+
+* NixOS Integration
+
+Custom functions for managing NixOS configurations directly from Emacs, providing a seamless development experience.
+
+** Base NH Command Runner
+
+#+begin_src emacs-lisp
+(defun jag/run-nh-command (command description &optional on-success)
+  "Run an nh command with output buffer display and optional success callback."
+  (let ((buffer-name (format "*%s*" description)))
+    ;; Create and display buffer in vertical split
+    (let ((buf (get-buffer-create buffer-name)))
+      (with-current-buffer buf
+        (setq buffer-read-only nil)
+        (erase-buffer)
+        (insert (format "Running %s...\n" description))
+        (setq buffer-read-only t))
+      ;; Open in vertical split
+      (split-window-right)
+      (other-window 1)
+      (switch-to-buffer buf)
+      ;; Make buffer dismissable with 'q'
+      (local-set-key (kbd "q") 'delete-window))
+
+    ;; Start the process
+    (let ((proc (start-process
+                 description
+                 buffer-name
+                 "bash"
+                 "-c"
+                 (format "cd ~/dev/jordangarrison/nix-config && %s" command))))
+      (set-process-filter proc
+                          (lambda (process output)
+                            (with-current-buffer (process-buffer process)
+                              (let ((inhibit-read-only t))
+                                (goto-char (point-max))
+                                ;; Apply ANSI color codes
+                                (insert (ansi-color-apply output))))))
+      (set-process-sentinel proc
+                            (lambda (process event)
+                              (when (string-match "finished" event)
+                                (with-current-buffer (process-buffer process)
+                                  (let ((inhibit-read-only t))
+                                    (goto-char (point-max))
+                                    (insert (format "\n%s complete!\n" description))))
+                                (when on-success
+                                  (funcall on-success))))))))
+#+end_src
+
+** NixOS Operations
+
+#+begin_src emacs-lisp
+(defun jag/nix-os-build ()
+  "Build the NixOS configuration without switching."
+  (interactive)
+  (jag/run-nh-command "nh os build --no-nom ." "nix-os-build"))
+
+(defun jag/nix-os-test ()
+  "Test the NixOS configuration."
+  (interactive)
+  (jag/run-nh-command "nh os test --no-nom ." "nix-os-test"))
+
+(defun jag/nix-os-switch ()
+  "Switch to the NixOS configuration."
+  (interactive)
+  (jag/run-nh-command "nh os switch --no-nom ." "nix-os-switch"))
+
+(defun jag/nix-emacs-reload ()
+  "Reload the nix emacs setup because home manager sucks with editor config reloads"
+  (interactive)
+  (message "Starting nix reload process...")
+  (jag/run-nh-command
+   "nh os test --no-nom . && doom sync"
+   "nix-emacs-reload"
+   (lambda ()
+     (when (y-or-n-p "Nix reload complete. Restart Emacs? ")
+       (doom/restart-and-restore)))))
+#+end_src
+
+** NixOS Key Bindings
+
+#+begin_src emacs-lisp
+(map! :leader :desc "nh os build ." "j n b" #'jag/nix-os-build)
+(map! :leader :desc "nh os test ." "j n t" #'jag/nix-os-test)
+(map! :leader :desc "nh os switch ." "j n s" #'jag/nix-os-switch)
+(map! :leader :desc "nh os test . + doom sync" "j n e" #'jag/nix-emacs-reload)
+#+end_src
+
+* AI/LLM Integration
+
+** Integration with various AI and language model services for enhanced development capabilities.
+
+#+begin_src emacs-lisp
+(gptel-make-gh-copilot "Copilot")
+#+end_src
+
+** VTerm Integration
+Functions to send code regions to vterm for quick execution.
+
+#+begin_src emacs-lisp
+(defun jag/send-to-vterm (text)
+  "Send TEXT to vterm buffer."
+  (interactive "MText to send: ")
+  (let ((vterm-buf (get-buffer "*vterm*")))
+    (if vterm-buf
+        (with-current-buffer vterm-buf
+          (vterm-send-string text)))
+    (message "No *vterm* buffer found")))
+
+(defun jag/send-region-to-vterm (start end)
+  "Send the region between START and END to the current vterm buffer."
+  (interactive "r")
+  (let ((text (buffer-substring-no-properties start end)))
+    (jag/send-to-vterm text)))
+
+(map! :leader :desc "Send code to vterm" "j a t" #'jag/send-region-to-vterm)
+#+end_src
+
+** ChatGPT Integration
+
+#+begin_src emacs-lisp
+(use-package! chatgpt
+  :defer t
+  :bind ("C-c q" . chatgpt-query))
+#+end_src

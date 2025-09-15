@@ -94,7 +94,7 @@ in {
       ripgrep
       sqlite
       starship
-      terraform-docs
+      # terraform-docs # temporarily disabled due to build failure
       tree
       up
 
@@ -130,7 +130,7 @@ in {
       nodePackages.yaml-language-server
 
       #python
-      python313Full
+      python313
       python313Packages.ipython
 
       #ruby

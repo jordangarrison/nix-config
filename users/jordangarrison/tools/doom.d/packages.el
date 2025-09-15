@@ -22,7 +22,7 @@
 ;; To install SOME-PACKAGE from MELPA, ELPA or emacsmirror:
                                         ;(package! some-package)
 ;; (package! elfeed)
-;;(package! puppet-mode)
+;; (package! puppet-mode)
 ;; (package! flymake-puppet)
 ;; (add-to-list 'auto-mode-alist '("\\.pp$" . puppet-mode))
 ;; (add-hook! 'puppet-mode-hook #'(lambda () (flymake-puppet-load)))
@@ -31,14 +31,12 @@
 ;; (package! kubernetes-evil)
 ;; (package! python-black)
 ;; (package! org-jira)
-(package! prettier-js)
 ;; (package! nvm)
 ;; (package! vue-mode)
+(package! prettier-js)
 (package! xclip)
-
-;; Tree sitter
-;; (package! tree-sitter)
-;; (package! tree-sitter-langs)
+(package! sqlite3)
+(package! vcl-mode)
 
 ;; To install a package directly from a particular repo, you'll need to specify
 ;; a `:recipe'. You'll find documentation on what `:recipe' accepts here:
@@ -68,31 +66,14 @@
 ;; our package manager can't deal with; see raxod502/straight.el#279)
                                         ;(package! builtin-package :recipe (:branch "develop"))
 
-;; (unless (eq system-type 'darwin)
-;;   (package! copilot
-;;     :recipe (:host github :repo "copilot-emacs/copilot.el" :files ("*.el"))))
-
-
 (package! git-link
-  :recipe (:host github :repo "sshaw/git-link"))
-
-
-;; (package! projectile :pin "d24b8173223fd0e10ecd4b5e0cfa676dfc3b90c4")
-
-(package! chatgpt
-  :recipe (:host github :repo "joshcho/ChatGPT.el" :files ("dist" "*.el")))
+  :recipe (:host github
+           :repo "sshaw/git-link"))
 
 (package! org-readwise
-  :recipe (:type git :host sourcehut :repo "gloatingfiddle/org-readwise" :files ("*.el") :branch "main"))
+  :recipe (:type git
+           :host sourcehut
+           :repo "gloatingfiddle/org-readwise"
+           :files ("*.el")
+           :branch "main"))
 
-(package! sqlite3)
-
-(package! vcl-mode)
-
-;; (package! exercism)
-
-;; (package! gleam-ts-mode
-;;   :recipe (:host github
-;;            :repo "gleam-lang/gleam-mode"
-;;            :branch "main"
-;;            :files ("gleam-ts-*.el")))

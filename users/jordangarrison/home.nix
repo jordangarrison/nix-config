@@ -287,7 +287,10 @@ in {
     };
 
     # doom emacs
-    ".doom.d".source = ./tools/doom.d;
+    # ".doom.d".source = ./tools/doom.d;
+    ".doom.d/init.el".source =  tools/doom.d/init.el;
+    ".doom.d/packages.el".source =  tools/doom.d/packages.el;
+    ".doom.d/config.org".source =  tools/doom.d/config.org;
     ".emacs.d/init.el".text = ''
       (load "default.el")
     '';

@@ -9,15 +9,15 @@
 - [[#authentication-and-external-services][Authentication and External Services]]
 - [[#theme-and-appearance][Theme and Appearance]]
   - [[#base-theme][Base Theme]]
+  - [[#theme-management][Theme Management]]
   - [[#font-configuration][Font Configuration]]
   - [[#line-numbers-and-visual-elements][Line Numbers and Visual Elements]]
-  - [[#mouse-and-clipboard-integration][Mouse and Clipboard Integration]]
-  - [[#theme-management][Theme Management]]
   - [[#dashboard-configuration][Dashboard Configuration]]
 - [[#editor-behavior][Editor Behavior]]
   - [[#shell-prompt-recognition][Shell Prompt Recognition]]
   - [[#projectile-configuration][Projectile Configuration]]
 - [[#terminal-configuration][Terminal Configuration]]
+  - [[#mouse-and-clipboard-integration][Mouse and Clipboard Integration]]
   - [[#vterm-setup-for-macos][VTerm Setup for macOS]]
   - [[#vterm-escape-key-binding][VTerm Escape Key Binding]]
 - [[#key-bindings][Key Bindings]]
@@ -56,36 +56,11 @@ Basic user information used by various Emacs features like GPG, email clients, a
 #+end_src
 
 * Theme and Appearance
-
 ** Base Theme
 Setting the default theme to Tokyo Night for a modern dark appearance.
 
 #+begin_src emacs-lisp
 (setq doom-theme 'doom-tokyo-night)
-#+end_src
-
-** Font Configuration
-
-Using FiraCode Nerd Font for programming with ligatures and icon support.
-
-#+begin_src emacs-lisp
-(setq doom-font (font-spec :family "FiraCode Nerd Font" :size 13 :weight 'semibold))
-#+end_src
-
-** Line Numbers and Visual Elements
-Enabling absolute line numbers and configuring visual spacing.
-
-#+begin_src emacs-lisp
-(setq display-line-numbers-type t)
-(setq-default line-spacing 3)
-#+end_src
-
-** Mouse and Clipboard Integration
-Enabling mouse support in terminal and system clipboard integration.
-
-#+begin_src emacs-lisp
-(xterm-mouse-mode 1)
-(xclip-mode 1)
 #+end_src
 
 ** Theme Management
@@ -144,6 +119,22 @@ With C-u followed by number: use that number directly"
 (map! :leader :desc "Enable frame transparency" "j f t" #'jag/set-frame-transparency)
 #+end_src
 
+** Font Configuration
+
+Using FiraCode Nerd Font for programming with ligatures and icon support.
+
+#+begin_src emacs-lisp
+(setq doom-font (font-spec :family "FiraCode Nerd Font" :size 13 :weight 'semibold))
+#+end_src
+
+** Line Numbers and Visual Elements
+Enabling absolute line numbers and configuring visual spacing.
+
+#+begin_src emacs-lisp
+(setq display-line-numbers-type t)
+(setq-default line-spacing 3)
+#+end_src
+
 ** Dashboard Configuration
 
 Custom dashboard with a minimalist "Emacs" banner instead of the default ASCII art.
@@ -181,6 +172,13 @@ Setting up project management with Projectile, focused on the development direct
 #+end_src
 
 * Terminal Configuration
+** Mouse and Clipboard Integration
+Enabling mouse support in terminal and system clipboard integration.
+
+#+begin_src emacs-lisp
+(xterm-mouse-mode 1)
+(xclip-mode 1)
+#+end_src
 
 ** VTerm Setup for macOS
 Special configuration for vterm compilation on macOS with Nix, ensuring proper compiler settings.

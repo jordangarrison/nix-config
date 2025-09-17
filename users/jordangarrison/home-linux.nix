@@ -5,6 +5,7 @@
     ./home.nix
     ../../modules/home/brave/apps.nix
     ../../modules/home/alacritty/apps.nix
+    ../../modules/home/virt-manager/config.nix
   ];
 
   # Install brave.
@@ -138,6 +139,12 @@
     categories = [ "System" ];
     icon = ../../icons/btop.png;
   }];
+
+  # Enable virt-manager configuration
+  virtManager = {
+    enable = true;
+    workspaceAssignment = 8;  # Assign to workspace 8
+  };
 
   programs.gnome-shell = lib.mkIf pkgs.stdenv.isLinux {
     enable = true;

@@ -56,6 +56,7 @@
             ./modules/nixos/steam.nix
             ./modules/nixos/searx.nix
             ./modules/nixos/n8n.nix
+            ./modules/nixos/virtualization.nix
             ./users/jordangarrison/nixos.nix
             ./users/mikayla/nixos.nix
             ./users/jane/nixos.nix
@@ -87,6 +88,12 @@
                 homeDirectory = "/home/isla";
               };
 
+              # Enable virtualization with virt-manager
+              virtualization.virt-manager = {
+                enable = true;
+                users = [ "jordangarrison" ];
+              };
+
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
             }
@@ -102,6 +109,7 @@
             ./modules/nixos/fonts.nix
             ./modules/nixos/audio/pipewire.nix
             ./modules/nixos/development.nix
+            ./modules/nixos/virtualization.nix
             ./users/jordangarrison/nixos.nix
             ./users/mikayla/nixos.nix
             ./users/jane/nixos.nix
@@ -130,6 +138,12 @@
               users.isla = {
                 enable = true;
                 homeDirectory = "/home/isla";
+              };
+
+              # Enable virtualization with virt-manager
+              virtualization.virt-manager = {
+                enable = true;
+                users = [ "jordangarrison" ];
               };
 
               home-manager.useGlobalPkgs = true;

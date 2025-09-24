@@ -17,9 +17,11 @@
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
   # Swap configuration
-  swapDevices = [
-    { device = "/swapfile"; size = 48 * 1024; } # 48 GiB to match RAM
-  ];
+  swapDevices = [{
+    device = "/swapfile";
+    size = 48 * 1024;
+  } # 48 GiB to match RAM
+    ];
 
   networking.hostName = "opportunity"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.

@@ -29,10 +29,11 @@
       url = "github:jordangarrison/hubctl";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    claude-code.url = "github:sadjow/claude-code-nix";
   };
 
   outputs = inputs@{ self, nixpkgs, nixos-hardware, nix-darwin, home-manager
-    , nvf, aws-tools, aws-use-sso, hubctl, }: {
+    , nvf, aws-tools, aws-use-sso, hubctl, claude-code, }: {
       nixosConfigurations = {
         "endeavour" = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs; };

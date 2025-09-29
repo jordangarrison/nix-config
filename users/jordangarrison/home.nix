@@ -14,7 +14,9 @@ let
     text = builtins.readFile ./tools/scripts/binaural-beats.sh;
   };
 in {
-  imports = [ ./tools/nvim/nvf.nix ];
+  imports = [ 
+    ./tools/nvim/nvf.nix
+  ];
 
   # nix settings
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
@@ -37,6 +39,12 @@ in {
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 
+  # Enable claude-code from the claude-code-nix flake
+  programs.claude-code = {
+    enable = true;
+    package = inputs.claude-code.packages.${pkgs.system}.default;
+  };
+
   home.packages = with pkgs;
     [
       # nix utilities
@@ -57,7 +65,6 @@ in {
       # Utilities
       # aider-chat  # Temporarily disabled due to texlive build issue
       btop
-      claude-code
       exercism
       helix
       jira-cli-go

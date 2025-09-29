@@ -21,22 +21,6 @@
 
 ;; To install SOME-PACKAGE from MELPA, ELPA or emacsmirror:
                                         ;(package! some-package)
-;; (package! elfeed)
-;; (package! puppet-mode)
-;; (package! flymake-puppet)
-;; (add-to-list 'auto-mode-alist '("\\.pp$" . puppet-mode))
-;; (add-hook! 'puppet-mode-hook #'(lambda () (flymake-puppet-load)))
-;; (package! org-super-agenda)
-;; (package! kubernetes)
-;; (package! kubernetes-evil)
-;; (package! python-black)
-;; (package! org-jira)
-;; (package! nvm)
-;; (package! vue-mode)
-(package! prettier-js)
-(package! xclip)
-(package! sqlite3)
-(package! vcl-mode)
 
 ;; To install a package directly from a particular repo, you'll need to specify
 ;; a `:recipe'. You'll find documentation on what `:recipe' accepts here:
@@ -66,14 +50,20 @@
 ;; our package manager can't deal with; see raxod502/straight.el#279)
                                         ;(package! builtin-package :recipe (:branch "develop"))
 
+;; Standard Packages
+(package! prettier-js)
+(package! xclip)
+(package! sqlite3)
+(package! vcl-mode)
+
+;; Special installs
 (package! git-link
   :recipe (:host github
            :repo "sshaw/git-link"))
-
 (package! org-readwise
   :recipe (:type git
-           :host sourcehut
-           :repo "gloatingfiddle/org-readwise"
+           :host github
+           :repo "CountGreven/org-readwise"
            :files ("*.el")
            :branch "main"))
 

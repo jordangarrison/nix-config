@@ -139,7 +139,7 @@ in {
       ruby-lsp
       rubyPackages.pry
       rubyPackages.rails
-      rubyPackages.railties
+      # rubyPackages.railties # Broken in latest update
       rubyPackages.solargraph
       rust-analyzer
       uv
@@ -153,9 +153,10 @@ in {
       # GCP
       (google-cloud-sdk.withExtraComponents
         [ google-cloud-sdk.components.gke-gcloud-auth-plugin ])
-    ] ++ (if pkgs.stdenv.isDarwin then
-      [ devenv glibtool ]
-    else [
+    ] ++ (if pkgs.stdenv.isDarwin then [
+      devenv
+      glibtool
+    ] else [
       aws-sso-cli
       barrier
       bibletime
@@ -288,9 +289,9 @@ in {
 
     # doom emacs
     # ".doom.d".source = ./tools/doom.d;
-    ".doom.d/init.el".source =  tools/doom.d/init.el;
-    ".doom.d/packages.el".source =  tools/doom.d/packages.el;
-    ".doom.d/config.org".source =  tools/doom.d/config.org;
+    ".doom.d/init.el".source = tools/doom.d/init.el;
+    ".doom.d/packages.el".source = tools/doom.d/packages.el;
+    ".doom.d/config.org".source = tools/doom.d/config.org;
     ".emacs.d/init.el".text = ''
       (load "default.el")
     '';

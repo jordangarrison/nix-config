@@ -40,6 +40,8 @@
   - [[#integration-with-various-ai-and-language-model-services-for-enhanced-development-capabilities][Integration with various AI and language model services for enhanced development capabilities.]]
   - [[#vterm-integration][VTerm Integration]]
   - [[#chatgpt-integration][ChatGPT Integration]]
+- [[#org-mode][Org Mode]]
+  - [[#readwise][Readwise]]
 
 * Personal Information
 Basic user information used by various Emacs features like GPG, email clients, and file templates.
@@ -553,4 +555,11 @@ Functions to send code regions to vterm for quick execution.
 (use-package! chatgpt
   :defer t
   :bind ("C-c q" . chatgpt-query))
+#+end_src
+* Org Mode
+** Readwise
+#+begin_src emacs-lisp
+(setq org-readwise-output-location "~/org/readwise-highlights.org")
+(setq org-readwise-debug-level 1)
+(map! :leader :desc "Sync readwise highlights" "j o r" #'org-readwise-sync)
 #+end_src

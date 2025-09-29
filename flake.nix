@@ -1,5 +1,6 @@
 {
-  description = "Jordan Garrison's NixOS and Home Manager configurations for NixOS and MacOS";
+  description =
+    "Jordan Garrison's NixOS and Home Manager configurations for NixOS and MacOS";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
@@ -30,19 +31,8 @@
     };
   };
 
-  outputs =
-    inputs@{
-      self,
-      nixpkgs,
-      nixos-hardware,
-      nix-darwin,
-      home-manager,
-      nvf,
-      aws-tools,
-      aws-use-sso,
-      hubctl,
-    }:
-    {
+  outputs = inputs@{ self, nixpkgs, nixos-hardware, nix-darwin, home-manager
+    , nvf, aws-tools, aws-use-sso, hubctl, }: {
       nixosConfigurations = {
         "endeavour" = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs; };
@@ -256,7 +246,8 @@
               home-manager = {
                 useGlobalPkgs = true;
                 useUserPackages = true;
-                users."jordan.garrison" = import ./users/jordangarrison/home-darwin.nix;
+                users."jordan.garrison" =
+                  import ./users/jordangarrison/home-darwin.nix;
                 extraSpecialArgs = {
                   inherit inputs;
                   username = "jordan.garrison";

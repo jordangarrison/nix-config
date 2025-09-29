@@ -559,7 +559,11 @@ Functions to send code regions to vterm for quick execution.
 * Org Mode
 ** Readwise
 #+begin_src emacs-lisp
-(setq org-readwise-output-location "~/org/readwise-highlights.org")
-(setq org-readwise-debug-level 1)
+(use-package! org-readwise
+  :config
+  ;; Set the output location for your highlights (buffer or file)
+  (setq org-readwise-output-location "~/org/readwise-highlights.org")
+  ;; Optionally set the debug level (0 = no debug, 1 = basic debug, 2 = detailed debug)
+  (setq org-readwise-debug-level 1))
 (map! :leader :desc "Sync readwise highlights" "j o r" #'org-readwise-sync)
 #+end_src

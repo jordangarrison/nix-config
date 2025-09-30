@@ -14,9 +14,7 @@ let
     text = builtins.readFile ./tools/scripts/binaural-beats.sh;
   };
 in {
-  imports = [ 
-    ./tools/nvim/nvf.nix
-  ];
+  imports = [ ./tools/nvim/nvf.nix ];
 
   # nix settings
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
@@ -187,6 +185,9 @@ in {
       wally-cli
       xcb-util-cursor
       xclip
+
+      # Flake input packages
+      inputs.warp-preview.packages.${pkgs.system}.default
     ]);
 
   programs.gpg = { enable = pkgs.stdenv.isLinux; };

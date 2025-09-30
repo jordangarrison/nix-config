@@ -30,10 +30,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     claude-code.url = "github:sadjow/claude-code-nix";
+    warp-preview.url = "github:jordangarrison/warp-preview-flake";
   };
 
   outputs = inputs@{ self, nixpkgs, nixos-hardware, nix-darwin, home-manager
-    , nvf, aws-tools, aws-use-sso, hubctl, claude-code, }: {
+    , nvf, aws-tools, aws-use-sso, hubctl, claude-code, warp-preview, }: {
       nixosConfigurations = {
         "endeavour" = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs; };

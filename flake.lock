@@ -294,6 +294,22 @@
         "type": "github"
       }
     },
+    "nixpkgs_3": {
+      "locked": {
+        "lastModified": 1759036355,
+        "narHash": "sha256-0m27AKv6ka+q270dw48KflE0LwQYrO7Fm4/2//KCVWg=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "e9f00bd893984bc8ce46c895c3bf7cac95331127",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nvf": {
       "inputs": {
         "flake-compat": "flake-compat",
@@ -328,7 +344,8 @@
         "nix-darwin": "nix-darwin",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_2",
-        "nvf": "nvf"
+        "nvf": "nvf",
+        "warp-preview": "warp-preview"
       }
     },
     "systems": {
@@ -403,6 +420,24 @@
       "original": {
         "owner": "nix-systems",
         "repo": "default",
+        "type": "github"
+      }
+    },
+    "warp-preview": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_3"
+      },
+      "locked": {
+        "lastModified": 1759207484,
+        "narHash": "sha256-jk3E3QNDPXrgUKgacWdM0a+FKM/nA2ujrMg9KtpzuyA=",
+        "owner": "jordangarrison",
+        "repo": "warp-preview-flake",
+        "rev": "01034baa83c3ebb1f68b612b86363c4c703c1156",
+        "type": "github"
+      },
+      "original": {
+        "owner": "jordangarrison",
+        "repo": "warp-preview-flake",
         "type": "github"
       }
     }

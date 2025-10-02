@@ -2,8 +2,18 @@
 
 {
   fonts = {
-    packages = [ pkgs.nerd-fonts.fira-code ];
+    packages = [
+      pkgs.nerd-fonts.fira-code
+      pkgs.noto-fonts-emoji
+      pkgs.noto-fonts
+    ];
   } // lib.optionalAttrs pkgs.stdenv.isLinux {
     enableDefaultPackages = true;
+    fontconfig = {
+      defaultFonts = {
+        emoji = [ "Noto Color Emoji" ];
+        monospace = [ "FiraCode Nerd Font" "Noto Color Emoji" ];
+      };
+    };
   };
 }

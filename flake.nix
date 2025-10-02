@@ -30,7 +30,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     claude-code.url = "github:sadjow/claude-code-nix";
-    warp-preview.url = "github:jordangarrison/warp-preview-flake";
+    warp-preview = {
+      url = "github:jordangarrison/warp-preview-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs@{ self, nixpkgs, nixos-hardware, nix-darwin, home-manager

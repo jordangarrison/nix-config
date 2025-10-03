@@ -163,7 +163,6 @@ in {
       glibtool
     ] else [
       aws-sso-cli
-      barrier
       bibletime
       comixcursors
       copyq

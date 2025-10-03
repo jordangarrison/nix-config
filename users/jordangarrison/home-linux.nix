@@ -133,12 +133,21 @@
     }
   ];
 
-  alacrittyApps.apps = [{
-    name = "btop";
-    command = "btop";
-    categories = [ "System" ];
-    icon = ../../icons/btop.png;
-  }];
+  alacrittyApps.apps = [
+    {
+      name = "btop";
+      command = "btop";
+      categories = [ "System" ];
+      icon = ../../icons/btop.png;
+    }
+    {
+      name = "sshemacs endeavour";
+      command = "ssh -t endeavour 'emacsclient -nw .'";
+      categories = [ "System" ];
+      icon = ../../icons/btop.png;
+    }
+  ];
+
 
   # Enable virt-manager configuration
   virtManager = {

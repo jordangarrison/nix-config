@@ -5,6 +5,20 @@ with lib;
 let
   cfg = config.alacrittyApps;
 
+  # Create wrapper scripts for each app
+  wrapperScripts = listToAttrs (map
+    (app:
+      let
+        appId = toLower (replaceStrings [ " " ] [ "-" ] app.name);
+        scriptName = "alacritty-${appId}";
+        script = pkgs.writeShellScript scriptName ''
+          exec ${pkgs.alacritty}/bin/alacritty --class "${app.name}" --title "${app.name}" -e sh -c ${escapeShellArg app.command}
+        '';
+      in
+      nameValuePair appId script
+    )
+    cfg.apps);
+
   apps = listToAttrs (map
     (app:
       let
@@ -13,10 +27,11 @@ let
           if (builtins.typeOf app.icon == "path")
           then appId
           else app.icon;
+        script = wrapperScripts.${appId};
       in
       nameValuePair appId {
         name = app.name;
-        exec = "${pkgs.alacritty}/bin/alacritty --class ${app.name} --title \"${app.name}\" --command ${app.command}";
+        exec = "${script}";
         icon = iconName;
         type = "Application";
         categories = app.categories;

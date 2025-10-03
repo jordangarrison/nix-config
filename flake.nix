@@ -52,6 +52,7 @@
             ./modules/nixos/searx.nix
             ./modules/nixos/n8n.nix
             ./modules/nixos/virtualization.nix
+            ./modules/nixos/podman.nix
             ./users/jordangarrison/nixos.nix
             ./users/mikayla/nixos.nix
             ./users/jane/nixos.nix

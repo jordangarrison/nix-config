@@ -45,6 +45,7 @@ y = 5
 [window]
 decorations = "none"
 startup_mode = "Maximized"
+opacity = 0.80
 
 [window.padding]
 x = 5

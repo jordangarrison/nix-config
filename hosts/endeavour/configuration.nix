@@ -14,8 +14,22 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
+  # Intel WiFi AX200 stability improvements
+  # Disables problematic WiFi 6 features and power saving that cause disconnections
+  boot.extraModprobeConfig = ''
+    options iwlwifi 11n_disable=8 power_save=0 swcrypto=1
+  '';
+
   networking.hostName = "endeavour"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+
+  # NetworkManager WiFi stability settings
+  networking.networkmanager.wifi = {
+    # Disable power saving on WiFi interfaces
+    powersave = false;
+    # Prefer 5GHz networks when available
+    scanRandMacAddress = false;
+  };
 
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";

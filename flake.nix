@@ -53,6 +53,7 @@
             ./modules/nixos/n8n.nix
             ./modules/nixos/virtualization.nix
             ./modules/nixos/podman.nix
+            ./modules/nixos/freerdp.nix
             ./users/jordangarrison/nixos.nix
             ./users/mikayla/nixos.nix
             ./users/jane/nixos.nix
@@ -89,6 +90,9 @@
                 enable = true;
                 users = [ "jordangarrison" ];
               };
+
+              # Enable FreeRDP
+              services.freerdp.enable = true;
 
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;

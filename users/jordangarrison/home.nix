@@ -150,6 +150,13 @@ in {
       uv
       yarn
 
+      # Get lazy
+      lazycli
+      lazydocker
+      lazygit
+      lazyjournal
+      lazysql
+
       # AWS Tools from flake inputs
       inputs.aws-tools.packages.${pkgs.system}.default
       inputs.aws-use-sso.packages.${pkgs.system}.default

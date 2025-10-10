@@ -64,8 +64,8 @@
     "org/gnome/shell" = {
       favorite-apps = [
         "brave-browser.desktop"
-        "dev.warp.Warp.desktop"
-        "cursor.desktop"
+        "dev.warp.WarpPreview.desktop"
+        "emacsclient.desktop"
         "chatgpt.desktop"
         "todoist.desktop"
         "obsidian.desktop"
@@ -100,14 +100,13 @@
     "org/gnome/shell/extensions/auto-move-windows" = {
       application-list = [
         "brave-browser.desktop:1"
-        "dev.warp.Warp.desktop:2"
-        "cursor.desktop:3"
+        "dev.warp.WarpPreview.desktop:2"
+        "emacsclient.desktop:3"
         "todoist.desktop:5"
         "1password.desktop:10"
         "gnome-control-center.desktop:10"
         "discord.desktop:7"
         "slack.desktop:7"
-        "chatgpt.desktop:4"
       ];
     };
   };
@@ -148,11 +147,10 @@
     }
   ];
 
-
   # Enable virt-manager configuration
   virtManager = {
     enable = true;
-    workspaceAssignment = 8;  # Assign to workspace 8
+    workspaceAssignment = 8; # Assign to workspace 8
   };
 
   programs.gnome-shell = lib.mkIf pkgs.stdenv.isLinux {

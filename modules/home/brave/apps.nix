@@ -16,6 +16,11 @@ let
           if (builtins.typeOf app.icon == "path")
           then appId
           else app.icon;
+        # Extract hostname from URL for WM_CLASS
+        # Brave uses pattern: brave-{hostname}__-Default
+        urlMatch = builtins.match "https?://([^/]+).*" app.url;
+        hostname = if urlMatch != null then builtins.head urlMatch else app.name;
+        wmClass = "brave-${hostname}__-Default";
       in
       nameValuePair appId {
         name = app.name;
@@ -25,7 +30,7 @@ let
         categories = app.categories;
         comment = "${app.name} Web App";
         settings = {
-          StartupWMClass = app.name;
+          StartupWMClass = wmClass;
         };
       }
     )

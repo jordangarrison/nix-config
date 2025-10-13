@@ -40,6 +40,7 @@
   - [[#integration-with-various-ai-and-language-model-services-for-enhanced-development-capabilities][Integration with various AI and language model services for enhanced development capabilities.]]
   - [[#vterm-integration][VTerm Integration]]
   - [[#chatgpt-integration][ChatGPT Integration]]
+  - [[#claude-code-ide][Claude Code IDE]]
 - [[#org-mode][Org Mode]]
   - [[#readwise][Readwise]]
 
@@ -126,7 +127,7 @@ With C-u followed by number: use that number directly"
 Using FiraCode Nerd Font for programming with ligatures and icon support.
 
 #+begin_src emacs-lisp
-(setq doom-font (font-spec :family "FiraCode Nerd Font" :size 13 :weight 'semibold))
+(setq doom-font (font-spec :family "Source Code Pro" :size 13 :weight 'semibold))
 #+end_src
 
 ** Line Numbers and Visual Elements
@@ -556,6 +557,15 @@ Functions to send code regions to vterm for quick execution.
   :defer t
   :bind ("C-c q" . chatgpt-query))
 #+end_src
+** Claude Code IDE
+#+begin_src emacs-lisp
+(use-package! claude-code-ide
+  :bind ("C-c C-'" . claude-code-ide-menu) ; Set your favorite keybinding
+  :config
+  (claude-code-ide-emacs-tools-setup)) ; Optionally enable Emacs MCP tools
+(map! :leader :desc "Claude Code" "j c" #'claude-code-ide-menu)
+#+end_src
+
 * Org Mode
 ** Readwise
 #+begin_src emacs-lisp

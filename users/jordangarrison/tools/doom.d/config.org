@@ -558,6 +558,7 @@ Functions to send code regions to vterm for quick execution.
   :bind ("C-c q" . chatgpt-query))
 #+end_src
 ** Claude Code IDE
+Set up Claude Code for agentic development in emacs
 #+begin_src emacs-lisp
 (use-package! claude-code-ide
   :bind ("C-c C-'" . claude-code-ide-menu) ; Set your favorite keybinding

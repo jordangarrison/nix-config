@@ -24,8 +24,6 @@ in
     virtualisation.libvirtd = {
       enable = true;
       qemu = {
-        # Enable UEFI support for VMs
-        ovmf.enable = true;
         # Enable TPM emulation (useful for Windows 11 VMs)
         swtpm.enable = true;
         # Run as unprivileged user

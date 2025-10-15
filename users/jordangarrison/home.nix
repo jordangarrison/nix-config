@@ -242,6 +242,8 @@ in {
     extensions = with pkgs; [ gh-copilot gh-dash ];
   };
 
+  programs.tmux = { enable = true; };
+
   programs.vim = {
     enable = true;
     plugins = with pkgs.vimPlugins; [ vim-airline ];

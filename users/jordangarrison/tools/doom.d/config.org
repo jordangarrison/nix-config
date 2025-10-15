@@ -73,7 +73,7 @@ Dynamic theme switching system with support for light and dark themes.
 *** Theme Variables and Setup
 
 #+begin_src emacs-lisp
-(defvar *jag-theme-dark* 'leuven)
+(defvar *jag-theme-dark* 'doom-earl-grey)
 (defvar *jag-theme-light* 'doom-tokyo-night)
 (defvar *jag-current-theme* *jag-theme-dark*)
 

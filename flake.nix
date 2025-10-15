@@ -27,7 +27,7 @@
     };
     hubctl = {
       url = "github:jordangarrison/hubctl";
-      inputs.nixpkgs.follows = "nixpkgs";
+      # inputs.nixpkgs.follows = "nixpkgs";
     };
     claude-code.url = "github:sadjow/claude-code-nix";
     warp-preview = {

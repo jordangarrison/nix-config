@@ -160,7 +160,6 @@ in {
       # AWS Tools from flake inputs
       inputs.aws-tools.packages.${pkgs.system}.default
       inputs.aws-use-sso.packages.${pkgs.system}.default
-      inputs.hubctl.packages.${pkgs.system}.default
 
       # GCP
       (google-cloud-sdk.withExtraComponents
@@ -193,6 +192,7 @@ in {
       xclip
 
       # Flake input packages
+      inputs.hubctl.packages.${pkgs.system}.default
       inputs.warp-preview.packages.${pkgs.system}.default
     ]);
 

@@ -41,7 +41,7 @@
           markdown.enable = true;
           nix.enable = true;
           python.enable = true;
-          ruby.enable = true;
+          ruby.enable = pkgs.stdenv.isLinux;
           svelte.enable = true;
           tailwind.enable = true;
           ts.enable = true;

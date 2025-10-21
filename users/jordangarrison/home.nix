@@ -138,14 +138,6 @@ in {
       python313
       python313Packages.ipython
 
-      #ruby
-      ruby
-      rails-new
-      ruby-lsp
-      rubyPackages.pry
-      rubyPackages.rails
-      # rubyPackages.railties # Broken in latest update
-      rubyPackages.solargraph
       rust-analyzer
       uv
       yarn
@@ -184,7 +176,15 @@ in {
       pavucontrol
       pinentry
       remmina
+      #ruby
+      ruby
+      rails-new
       rubyfmt
+      ruby-lsp
+      rubyPackages.pry
+      rubyPackages.rails
+      # rubyPackages.railties # Broken in latest update
+      rubyPackages.solargraph
       slack
       vial
       wally-cli

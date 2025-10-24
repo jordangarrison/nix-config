@@ -40,7 +40,7 @@
 
   # Enable remote desktop services
   services.xrdp = {
-    enable = true;
+    enable = false;
     defaultWindowManager = "gnome-session";
   };
 
@@ -63,6 +63,9 @@
     [
       # Para Gnome
       shotwell
+
+      # Windows virtualized
+      winboat
     ];
 
   # Or disable the firewall altogether.

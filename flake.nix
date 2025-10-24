@@ -4,6 +4,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.05";
     nixos-hardware.url = "github:nixos/nixos-hardware";
     nix-darwin = {
       url = "github:LnL7/nix-darwin/master";
@@ -36,12 +37,13 @@
     };
   };
 
-  outputs = inputs@{ self, nixpkgs, nixos-hardware, nix-darwin, home-manager
+  outputs = inputs@{ self, nixpkgs, nixpkgs-stable, nixos-hardware, nix-darwin, home-manager
     , nvf, aws-tools, aws-use-sso, hubctl, claude-code, warp-preview, }: {
       nixosConfigurations = {
         "endeavour" = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs; };
           modules = [
+            ./modules/stable-overlay.nix
             ./modules/nixos/common.nix
             ./modules/nixos/gnome-desktop.nix
             ./modules/nixos/hyprland-desktop.nix
@@ -103,6 +105,7 @@
         "opportunity" = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs; };
           modules = [
+            ./modules/stable-overlay.nix
             ./modules/nixos/common.nix
             ./modules/nixos/gnome-desktop.nix
             { gbg-config.gnome-tweaks.machine-type = "laptop"; }
@@ -155,6 +158,7 @@
         "voyager" = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs; };
           modules = [
+            ./modules/stable-overlay.nix
             ./modules/nixos/common.nix
             ./modules/nixos/gnome-desktop.nix
             { gbg-config.gnome-tweaks.machine-type = "laptop"; }
@@ -201,6 +205,7 @@
         "discovery" = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs; };
           modules = [
+            ./modules/stable-overlay.nix
             ./modules/nixos/common.nix
             ./modules/nixos/gnome-desktop.nix
             ./modules/nixos/fonts.nix
@@ -245,7 +250,9 @@
 
       darwinConfigurations = {
         "H952L3DPHH" = nix-darwin.lib.darwinSystem {
+          specialArgs = { inherit inputs; };
           modules = [
+            ./modules/stable-overlay.nix
             ./modules/nixos/emacs.nix
             ./modules/nixos/fonts.nix
             ./hosts/flomac/configuration.nix
@@ -279,7 +286,10 @@
             system = "x86_64-linux";
             config.allowUnfree = true;
           };
-          modules = [ ./users/jordangarrison/home.nix ];
+          modules = [
+            ./modules/stable-overlay.nix
+            ./users/jordangarrison/home.nix
+          ];
           extraSpecialArgs = {
             inherit inputs;
             username = "jordangarrison";

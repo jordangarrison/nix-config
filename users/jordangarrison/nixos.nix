@@ -26,9 +26,9 @@ in {
       shell = pkgs.zsh;
       home = cfg.homeDirectory;
       packages = with pkgs; [
-        calibre
+        stable.calibre # Broken in nix-unstable - Qt6 GuiPrivate component missing
         deskflow
-        nextcloud-client
+        stable.nextcloud-client # Broken in nix-unstable - Qt6 GuiPrivate component missing
         obsidian
         rnote
         session-desktop

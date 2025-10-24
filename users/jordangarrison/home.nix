@@ -163,7 +163,7 @@ in {
       aws-sso-cli
       bibletime
       comixcursors
-      copyq
+      stable.copyq # Broken in latest nix-unstable
       discord
       deno
       dig

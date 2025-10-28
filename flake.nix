@@ -110,6 +110,8 @@
           modules = [
             ./modules/stable-overlay.nix
             ./modules/nixos/common.nix
+            ./modules/nixos/brother-printer.nix
+            ./modules/nixos/lan.nix
             ./modules/nixos/gnome-desktop.nix
             { gbg-config.gnome-tweaks.machine-type = "laptop"; }
             ./modules/nixos/fonts.nix
@@ -163,6 +165,8 @@
           modules = [
             ./modules/stable-overlay.nix
             ./modules/nixos/common.nix
+            ./modules/nixos/brother-printer.nix
+            ./modules/nixos/lan.nix
             ./modules/nixos/gnome-desktop.nix
             { gbg-config.gnome-tweaks.machine-type = "laptop"; }
             ./modules/nixos/hyprland-desktop.nix
@@ -210,6 +214,8 @@
           modules = [
             ./modules/stable-overlay.nix
             ./modules/nixos/common.nix
+            ./modules/nixos/brother-printer.nix
+            ./modules/nixos/lan.nix
             ./modules/nixos/gnome-desktop.nix
             ./modules/nixos/fonts.nix
             ./modules/nixos/audio/pipewire.nix

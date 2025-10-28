@@ -37,14 +37,17 @@
     };
   };
 
-  outputs = inputs@{ self, nixpkgs, nixpkgs-stable, nixos-hardware, nix-darwin, home-manager
-    , nvf, aws-tools, aws-use-sso, hubctl, claude-code, warp-preview, }: {
+  outputs = inputs@{ self, nixpkgs, nixpkgs-stable, nixos-hardware, nix-darwin
+    , home-manager, nvf, aws-tools, aws-use-sso, hubctl, claude-code
+    , warp-preview, }: {
       nixosConfigurations = {
         "endeavour" = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs; };
           modules = [
             ./modules/stable-overlay.nix
             ./modules/nixos/common.nix
+            ./modules/nixos/brother-printer.nix
+            ./modules/nixos/lan.nix
             ./modules/nixos/gnome-desktop.nix
             ./modules/nixos/hyprland-desktop.nix
             ./modules/nixos/fonts.nix
@@ -286,10 +289,8 @@
             system = "x86_64-linux";
             config.allowUnfree = true;
           };
-          modules = [
-            ./modules/stable-overlay.nix
-            ./users/jordangarrison/home.nix
-          ];
+          modules =
+            [ ./modules/stable-overlay.nix ./users/jordangarrison/home.nix ];
           extraSpecialArgs = {
             inherit inputs;
             username = "jordangarrison";

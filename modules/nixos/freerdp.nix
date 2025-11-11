@@ -19,8 +19,7 @@ in
   config = mkIf cfg.enable {
     # Install FreeRDP client packages
     environment.systemPackages = with pkgs; [
-      freerdp      # FreeRDP 2.x
-      freerdp3     # FreeRDP 3.x
+      freerdp      # FreeRDP (includes latest version)
     ];
 
     # Optional: Server configuration (if enableServer is true)

@@ -4,7 +4,7 @@
   fonts = {
     packages = [
       pkgs.nerd-fonts.fira-code
-      pkgs.noto-fonts-emoji
+      pkgs.noto-fonts-color-emoji
       pkgs.noto-fonts
     ];
   } // lib.optionalAttrs pkgs.stdenv.isLinux {

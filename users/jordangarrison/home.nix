@@ -175,7 +175,7 @@ in {
       grip
       obs-studio
       pavucontrol
-      pinentry
+      pinentry-gnome3
       remmina
       #ruby
       ruby

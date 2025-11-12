@@ -29,6 +29,7 @@
       "basecamp"
       "brave-browser"
       "chatgpt"
+      "chatgpt-atlas"
       "claude"
       "cursor"
       "deskflow"

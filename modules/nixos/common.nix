@@ -45,6 +45,7 @@
     wget
     curl
     brave
+    tuxpaint
   ];
 
   # Enable OpenSSH daemon

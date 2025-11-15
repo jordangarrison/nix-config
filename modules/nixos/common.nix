@@ -39,14 +39,11 @@
   # Enable dconf for GNOME settings
   programs.dconf.enable = true;
 
+  # Localsend for transferring files
+  programs.localsend.enable = true;
+
   # Common system packages that should be available everywhere
-  environment.systemPackages = with pkgs; [
-    vim
-    wget
-    curl
-    brave
-    tuxpaint
-  ];
+  environment.systemPackages = with pkgs; [ vim wget curl brave ];
 
   # Enable OpenSSH daemon
   services.openssh.enable = true;

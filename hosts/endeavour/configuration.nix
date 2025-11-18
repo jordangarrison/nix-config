@@ -65,7 +65,7 @@
       shotwell
 
       # Windows virtualized
-      winboat
+      # winboat # 2025-11-18 Currently broken
     ];
 
   # Or disable the firewall altogether.

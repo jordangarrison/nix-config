@@ -5,6 +5,7 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.05";
+    nixpkgs-master.url = "github:nixos/nixpkgs/master";
     nixos-hardware.url = "github:nixos/nixos-hardware";
     nix-darwin = {
       url = "github:LnL7/nix-darwin/master";
@@ -37,14 +38,15 @@
     };
   };
 
-  outputs = inputs@{ self, nixpkgs, nixpkgs-stable, nixos-hardware, nix-darwin
-    , home-manager, nvf, aws-tools, aws-use-sso, hubctl, claude-code
-    , warp-preview, }: {
+  outputs = inputs@{ self, nixpkgs, nixpkgs-stable, nixpkgs-master
+    , nixos-hardware, nix-darwin, home-manager, nvf, aws-tools, aws-use-sso
+    , hubctl, claude-code, warp-preview, }: {
       nixosConfigurations = {
         "endeavour" = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs; };
           modules = [
             ./modules/stable-overlay.nix
+            ./modules/master-overlay.nix
             ./modules/nixos/common.nix
             ./modules/nixos/brother-printer.nix
             ./modules/nixos/lan.nix
@@ -109,6 +111,7 @@
           specialArgs = { inherit inputs; };
           modules = [
             ./modules/stable-overlay.nix
+            ./modules/master-overlay.nix
             ./modules/nixos/common.nix
             ./modules/nixos/brother-printer.nix
             ./modules/nixos/lan.nix
@@ -164,6 +167,7 @@
           specialArgs = { inherit inputs; };
           modules = [
             ./modules/stable-overlay.nix
+            ./modules/master-overlay.nix
             ./modules/nixos/common.nix
             ./modules/nixos/brother-printer.nix
             ./modules/nixos/lan.nix
@@ -213,6 +217,7 @@
           specialArgs = { inherit inputs; };
           modules = [
             ./modules/stable-overlay.nix
+            ./modules/master-overlay.nix
             ./modules/nixos/common.nix
             ./modules/nixos/brother-printer.nix
             ./modules/nixos/lan.nix
@@ -262,6 +267,7 @@
           specialArgs = { inherit inputs; };
           modules = [
             ./modules/stable-overlay.nix
+            ./modules/master-overlay.nix
             ./modules/nixos/emacs.nix
             ./modules/nixos/fonts.nix
             ./hosts/flomac/configuration.nix
@@ -295,8 +301,11 @@
             system = "x86_64-linux";
             config.allowUnfree = true;
           };
-          modules =
-            [ ./modules/stable-overlay.nix ./users/jordangarrison/home.nix ];
+          modules = [
+            ./modules/stable-overlay.nix
+            ./modules/master-overlay.nix
+            ./users/jordangarrison/home.nix
+          ];
           extraSpecialArgs = {
             inherit inputs;
             username = "jordangarrison";

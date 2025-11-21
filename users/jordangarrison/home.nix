@@ -161,6 +161,7 @@ in {
       devenv
       glibtool
     ] else [
+      master.antigravity
       aws-sso-cli
       bibletime
       comixcursors

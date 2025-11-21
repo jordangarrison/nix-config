@@ -57,6 +57,8 @@
             ./modules/nixos/development.nix
             ./modules/nixos/steam.nix
             ./modules/nixos/searx.nix
+            ./modules/nixos/metabase.nix
+            ./modules/nixos/postgres.nix
             ./modules/nixos/n8n.nix
             ./modules/nixos/virtualization.nix
             ./modules/nixos/podman.nix

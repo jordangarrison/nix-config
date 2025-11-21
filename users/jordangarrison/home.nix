@@ -55,7 +55,7 @@ in {
       mailspring
       sqlite
       todoist
-      warp-terminal
+      master.warp-terminal
       wezterm
       zed-editor
       # doom-emacs

@@ -42,6 +42,7 @@
       "figma"
       "firefox"
       "font-fira-code"
+      "freelens"
       "ghostty"
       "google-drive"
       "jordanbaird-ice"

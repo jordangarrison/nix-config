@@ -171,6 +171,7 @@ in {
       dig
       # emacs
       emacsPackages.sqlite3
+      freelens-bin
       glibc
       gnaural
       grip

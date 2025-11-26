@@ -267,6 +267,48 @@ in {
     extensions = with pkgs; [ gh-copilot gh-dash ];
   };
 
+  programs.git = {
+    enable = true;
+    lfs.enable = true;
+    settings = {
+      user = {
+        name = "Jordan Garrison";
+        email = "jordangarrison@users.noreply.github.com";
+      };
+      init.defaultBranch = "main";
+      pull.ff = "only";
+      merge.tool = "vimdiff";
+      core.editor = "emacsclient";
+      url."git@github.com:".insteadOf = "https://github.com/";
+      github.user = "jordangarrison";
+      gitlab.user = "jordan.andrew.garrison";
+      alias = {
+        co = "checkout";
+        cob = "checkout -b";
+        f = "fetch -p";
+        c = "commit -m";
+        p = "pull";
+        pu = "!git push -u origin $(git rev-parse --abbrev-ref HEAD)";
+        ba = "branch -a";
+        bd = "branch -d";
+        bD = "branch -D";
+        dc = "diff --cached";
+        dh = "diff ORIG_HEAD HEAD";
+        dp = "diff HEAD^ HEAD";
+        dop = "diff ORIG_HEAD^ ORIG_HEAD";
+        st = "status -sb";
+        a = "add -p";
+        aa = "add --all";
+        plog = "log --graph --pretty='format:%C(red)%d%C(reset) %C(yellow)%h%C(reset) %ar %C(green)%aN%C(reset) %s'";
+        lg = "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit";
+        tlog = "log --stat --since='1 Day Ago' --graph --pretty=oneline --abbrev-commit --date=relative";
+        rank = "shortlog -sn --no-merges";
+        bdm = "!git branch --merged | grep -v '*' | xargs -n 1 git branch -d";
+        aliases = "!git config --list | grep alias";
+      };
+    };
+  };
+
   programs.tmux = { enable = true; };
 
   programs.vim = {

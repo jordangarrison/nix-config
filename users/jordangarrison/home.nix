@@ -35,17 +35,14 @@ in {
   home.stateVersion = "21.11";
 
   # PATH management
-  home.sessionPath = [
-    "$HOME/.local/bin"
-    "$HOME/.emacs.d/bin"
-    "$HOME/.cargo/bin"
-  ] ++ lib.optionals pkgs.stdenv.isDarwin [
-    "/opt/homebrew/bin"
-  ];
+  home.sessionPath =
+    [ "$HOME/.local/bin" "$HOME/.emacs.d/bin" "$HOME/.cargo/bin" ]
+    ++ lib.optionals pkgs.stdenv.isDarwin [ "/opt/homebrew/bin" ];
 
   # Environment variables
   home.sessionVariables = {
     DEV_PATH = "$HOME/dev";
+    EDITOR = "${pkgs.neovim}/bin/nvim";
   };
 
   # Let Home Manager install and manage itself.
@@ -299,9 +296,12 @@ in {
         st = "status -sb";
         a = "add -p";
         aa = "add --all";
-        plog = "log --graph --pretty='format:%C(red)%d%C(reset) %C(yellow)%h%C(reset) %ar %C(green)%aN%C(reset) %s'";
-        lg = "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit";
-        tlog = "log --stat --since='1 Day Ago' --graph --pretty=oneline --abbrev-commit --date=relative";
+        plog =
+          "log --graph --pretty='format:%C(red)%d%C(reset) %C(yellow)%h%C(reset) %ar %C(green)%aN%C(reset) %s'";
+        lg =
+          "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit";
+        tlog =
+          "log --stat --since='1 Day Ago' --graph --pretty=oneline --abbrev-commit --date=relative";
         rank = "shortlog -sn --no-merges";
         bdm = "!git branch --merged | grep -v '*' | xargs -n 1 git branch -d";
         aliases = "!git config --list | grep alias";
@@ -342,7 +342,8 @@ in {
     defaultCommand = "fd --type f";
     defaultOptions = [ "--height 40%" "--border" ];
     fileWidgetCommand = "fd --type f";
-    fileWidgetOptions = [ "--preview 'bat --style=numbers --color=always --line-range :500 {}'" ];
+    fileWidgetOptions =
+      [ "--preview 'bat --style=numbers --color=always --line-range :500 {}'" ];
     changeDirWidgetCommand = "fd --type d";
   };
 
@@ -368,7 +369,8 @@ in {
     # Editors
     ec = "${pkgs.emacs}/bin/emacsclient -nw";
     e = "${pkgs.emacs}/bin/emacsclient -nw";
-    ee = "${pkgs.emacs}/bin/emacsclient -nw $(${pkgs.fd}/bin/fd --type f | ${pkgs.fzf}/bin/fzf --preview '${pkgs.bat}/bin/bat --style=numbers --color=always --line-range :500 {}')";
+    ee =
+      "${pkgs.emacs}/bin/emacsclient -nw $(${pkgs.fd}/bin/fd --type f | ${pkgs.fzf}/bin/fzf --preview '${pkgs.bat}/bin/bat --style=numbers --color=always --line-range :500 {}')";
     eg = "${pkgs.emacs}/bin/emacsclient";
     n = "nvim";
     view = "vim -R";
@@ -386,8 +388,10 @@ in {
     gss = "git status --short";
     pu = "git push -u origin $(git rev-parse --abbrev-ref HEAD)";
     p = "git pull";
-    gd = "${pkgs.git}/bin/git diff --color | ${pkgs.diff-so-fancy}/bin/diff-so-fancy | less --tabs=4 -RFX";
-    gdca = "${pkgs.git}/bin/git diff --color --cached | ${pkgs.diff-so-fancy}/bin/diff-so-fancy | less --tabs=4 -RFX";
+    gd =
+      "${pkgs.git}/bin/git diff --color | ${pkgs.diff-so-fancy}/bin/diff-so-fancy | less --tabs=4 -RFX";
+    gdca =
+      "${pkgs.git}/bin/git diff --color --cached | ${pkgs.diff-so-fancy}/bin/diff-so-fancy | less --tabs=4 -RFX";
 
     # Kubernetes
     k = "kubectl";

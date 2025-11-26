@@ -34,6 +34,20 @@ in {
   # changes in each release.
   home.stateVersion = "21.11";
 
+  # PATH management
+  home.sessionPath = [
+    "$HOME/.local/bin"
+    "$HOME/.emacs.d/bin"
+    "$HOME/.cargo/bin"
+  ] ++ lib.optionals pkgs.stdenv.isDarwin [
+    "/opt/homebrew/bin"
+  ];
+
+  # Environment variables
+  home.sessionVariables = {
+    DEV_PATH = "$HOME/dev";
+  };
+
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 
@@ -79,12 +93,10 @@ in {
       cmake
       diff-so-fancy
       fd
-      fzf
       git
       gnumake
       gnutls
       # gptcommit
-      hstr
       httpie
       jq
       kubectl
@@ -99,7 +111,6 @@ in {
       pandoc
       ripgrep
       sqlite
-      starship
       # terraform-docs # temporarily disabled due to build failure
       tree
       up
@@ -205,26 +216,30 @@ in {
 
   programs.zsh = {
     enable = true;
-    oh-my-zsh = { enable = true; };
+    oh-my-zsh = {
+      enable = true;
+      plugins = [ "git" ];
+      theme = "";
+    };
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
+    enableCompletion = true;
     initContent = ''
-      source ~/.dotfiles/zshrc
-      [[ "$TERM_PROGRAM" == "vscode" ]] && . "$(code --locate-shell-integration-path zsh)"
-      # Nix
-      if [[ "$(uname -s)" == "Darwin" ]] ; then
-        if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
-            . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
-        fi
-        export PATH=/opt/homebrew/bin:$PATH
+      # Dumb terminal handling (Emacs TRAMP)
+      if [[ $TERM = dumb ]]; then
+        unset zle_bracketed_paste
+        return
       fi
-      # End Nix
+
+      # VSCode shell integration
+      [[ "$TERM_PROGRAM" == "vscode" ]] && . "$(code --locate-shell-integration-path zsh)"
+
+      # Nix daemon (Darwin only)
+      if [[ "$(uname -s)" == "Darwin" ]] && [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+        . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+      fi
 
       alias fd="fd --color=never"
-      # dumb TERM
-      # [[ $TERM == dumb ]] && unsetopt zle && PS1='$ ' && return
-
-      eval "$(atuin init zsh)"
 
       source ${vscodeScriptPath}
       source ${borkedNsScriptPath}
@@ -239,6 +254,7 @@ in {
 
   programs.atuin = {
     enable = true;
+    enableZshIntegration = true;
     settings = {
       sync_frequency = "10m";
       inline_height = 20;
@@ -277,31 +293,74 @@ in {
     };
   };
 
+  # FZF - fuzzy finder with shell integration
+  programs.fzf = {
+    enable = true;
+    enableZshIntegration = true;
+    defaultCommand = "fd --type f";
+    defaultOptions = [ "--height 40%" "--border" ];
+    fileWidgetCommand = "fd --type f";
+    fileWidgetOptions = [ "--preview 'bat --style=numbers --color=always --line-range :500 {}'" ];
+    changeDirWidgetCommand = "fd --type d";
+  };
+
+  # Starship prompt
+  programs.starship = {
+    enable = true;
+    enableZshIntegration = true;
+    settings = {
+      character = {
+        success_symbol = "[➜](bold green) ";
+        error_symbol = "[✗](bold red) ";
+      };
+      kubernetes.disabled = false;
+      aws.symbol = "AWS ";
+      gcloud.symbol = "GCP ";
+    };
+  };
+
   # Disable programs.ssh to avoid symlink permission issues
   # Using home.file approach with onChange instead
 
   home.shellAliases = {
-    # Emacs Aliases
+    # Editors
     ec = "${pkgs.emacs}/bin/emacsclient -nw";
     e = "${pkgs.emacs}/bin/emacsclient -nw";
-    ee =
-      "${pkgs.emacs}/bin/emacsclient -nw $(${pkgs.fd}/bin/fd --type f | ${pkgs.fzf}/bin/fzf --preview '${pkgs.bat}/bin/bat --style=numbers --color=always --line-range :500 {}')";
+    ee = "${pkgs.emacs}/bin/emacsclient -nw $(${pkgs.fd}/bin/fd --type f | ${pkgs.fzf}/bin/fzf --preview '${pkgs.bat}/bin/bat --style=numbers --color=always --line-range :500 {}')";
     eg = "${pkgs.emacs}/bin/emacsclient";
+    n = "nvim";
+    view = "vim -R";
 
-    # Shell aliases
+    # Shell/Navigation
     l = "ls -ltarh";
     ll = "ls -lh";
     la = "ls -a";
+    lt = "ls -ltrh";
+    dev = "cd $DEV_PATH";
+    gogroot = "cd $(git rev-parse --show-toplevel)";
 
-    # Git aliases
+    # Git (OMZ git plugin provides gst, gco, gp, gl, gaa, etc.)
     c = "git commit -m";
     gss = "git status --short";
     pu = "git push -u origin $(git rev-parse --abbrev-ref HEAD)";
     p = "git pull";
-    gd =
-      "${pkgs.git}/bin/git diff --color | ${pkgs.diff-so-fancy}/bin/diff-so-fancy | less --tabs=4 -RFX";
-    gdca =
-      "${pkgs.git}/bin/git diff --color --cached | ${pkgs.diff-so-fancy}/bin/diff-so-fancy | less --tabs=4 -RFX";
+    gd = "${pkgs.git}/bin/git diff --color | ${pkgs.diff-so-fancy}/bin/diff-so-fancy | less --tabs=4 -RFX";
+    gdca = "${pkgs.git}/bin/git diff --color --cached | ${pkgs.diff-so-fancy}/bin/diff-so-fancy | less --tabs=4 -RFX";
+
+    # Kubernetes
+    k = "kubectl";
+    kubeconfig = "$EDITOR ~/.kube/config";
+
+    # AWS
+    awsconfig = "$EDITOR ~/.aws/config";
+
+    # Config editing
+    zshconfig = "$EDITOR ~/.zshrc";
+    sshconfig = "$EDITOR ~/.ssh/config";
+    gitconfig = "$EDITOR ~/.gitconfig";
+
+    # Utilities
+    icanhazip = "curl -s https://api.ipify.org";
   };
 
   home.file = {
@@ -365,11 +424,27 @@ in {
     ".config/wezterm/wezterm.lua".source = ./tools/wezterm/wezterm.lua;
 
     # Scripts
-    ".local/bin/tmux-cht.sh".source = ./tools/scripts/tmux-cht.sh;
+    ".local/bin/tmux-cht.sh" = {
+      source = ./tools/scripts/tmux-cht.sh;
+      executable = true;
+    };
     ".tmux-cht-languages".source = ./tools/scripts/tmux-cht-languages.txt;
     ".tmux-cht-commands".source = ./tools/scripts/tmux-cht-commands.txt;
-    ".local/bin/gen-dynamic-wallpaper".source =
-      ./tools/scripts/gen-dynamic-wallpaper.sh;
-    ".local/bin/myip".source = ./tools/scripts/myip.sh;
+    ".local/bin/gen-dynamic-wallpaper" = {
+      source = ./tools/scripts/gen-dynamic-wallpaper.sh;
+      executable = true;
+    };
+    ".local/bin/myip" = {
+      source = ./tools/scripts/myip.sh;
+      executable = true;
+    };
+    ".local/bin/ksn" = {
+      source = ./tools/scripts/ksn.sh;
+      executable = true;
+    };
+    ".local/bin/gi" = {
+      source = ./tools/scripts/gi.sh;
+      executable = true;
+    };
   };
 }

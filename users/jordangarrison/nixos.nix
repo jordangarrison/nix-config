@@ -16,6 +16,12 @@ in {
       default = "/home/${cfg.username}";
       description = "Home directory path for Jordan";
     };
+
+    swapSuperAlt = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Swap Super and Alt keys in GNOME";
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -59,6 +65,7 @@ in {
       inherit inputs;
       username = cfg.username;
       homeDirectory = cfg.homeDirectory;
+      swapSuperAlt = cfg.swapSuperAlt;
     };
   };
 }

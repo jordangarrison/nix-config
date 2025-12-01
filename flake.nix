@@ -136,6 +136,7 @@
                 enable = true;
                 username = "jordangarrison";
                 homeDirectory = "/home/jordangarrison";
+                swapSuperAlt = true;
               };
 
               users.mikayla = {

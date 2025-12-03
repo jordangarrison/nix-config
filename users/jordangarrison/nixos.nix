@@ -41,6 +41,7 @@ in {
         signal-desktop
         todoist-electron
         xournalpp
+        zoom-us
       ];
     };
 

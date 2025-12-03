@@ -1,4 +1,4 @@
-{ config, pkgs, lib, username, homeDirectory, inputs, ... }:
+{ config, pkgs, lib, username, homeDirectory, inputs, swapSuperAlt ? false, ... }:
 
 {
   imports = [
@@ -31,6 +31,14 @@
   };
 
   dconf.settings = {
+    # Keyboard layout options
+    "org/gnome/desktop/input-sources" = {
+      xkb-options = if swapSuperAlt then
+        [ "altwin:swap_alt_win" "lv3:ralt_switch" ]
+      else
+        [ "lv3:ralt_switch" ];
+    };
+
     # Fixed number of workspaces
     "org/gnome/mutter" = { dynamic-workspaces = false; };
     "org/gnome/desktop/wm/preferences" = { num-workspaces = 10; };

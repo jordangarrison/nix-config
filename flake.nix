@@ -60,6 +60,7 @@
             ./modules/nixos/metabase.nix
             ./modules/nixos/postgres.nix
             ./modules/nixos/n8n.nix
+            ./modules/nixos/jellyfin.nix
             ./modules/nixos/virtualization.nix
             ./modules/nixos/podman.nix
             ./modules/nixos/freerdp.nix
@@ -136,6 +137,7 @@
                 enable = true;
                 username = "jordangarrison";
                 homeDirectory = "/home/jordangarrison";
+                swapSuperAlt = true;
               };
 
               users.mikayla = {

@@ -95,7 +95,7 @@ in {
       # mosh
       nixpacks
       nmap
-      opencode
+      master.opencode
       pandoc
       ripgrep
       sqlite

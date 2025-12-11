@@ -7,9 +7,7 @@
 }:
 {
   # Import the nvf Home Manager module
-  imports = [
-    inputs.nvf.homeManagerModules.default
-  ];
+  imports = [ inputs.nvf.homeManagerModules.default ];
 
   programs.nvf = {
     enable = true;
@@ -17,6 +15,17 @@
     # most settings are documented in the appendix
     settings = {
       vim = {
+        # Suppress lspconfig deprecation warning until nvf migrates to vim.lsp.config
+        # See: https://github.com/NotAShelf/nvf/issues/1225
+        luaConfigPre = ''
+          local notify = vim.notify
+          vim.notify = function(msg, ...)
+            if msg:match("The `require%(.*lspconfig.*)` \"framework\" is deprecated") then
+              return
+            end
+            notify(msg, ...)
+          end
+        '';
         assistant = {
           copilot.enable = true;
         };
@@ -41,7 +50,6 @@
           markdown.enable = true;
           nix.enable = true;
           python.enable = true;
-          ruby.enable = pkgs.stdenv.isLinux;
           svelte.enable = true;
           tailwind.enable = true;
           ts.enable = true;
@@ -70,7 +78,7 @@
           name = "tokyonight";
           style = "night";
         };
-        viAlias = false;
+        viAlias = true;
         vimAlias = true;
       };
     };

@@ -497,11 +497,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1765550474,
-        "narHash": "sha256-Or8w5tebyZ2nl3R+TuwJj+xxraFtaNTltqSHXCj5xk4=",
+        "lastModified": 1765551216,
+        "narHash": "sha256-h9PKujyuE+t+W1CP9O0IVKFIYqDzoKM6QWFNMxXvhJA=",
         "owner": "jordangarrison",
         "repo": "warp-preview-flake",
-        "rev": "1bf336c4890eb677bb8186fd159c97d3fcdafae7",
+        "rev": "b116b37f92fb8bb1bd9964ac4b6f137cf06a5e77",
         "type": "github"
       },
       "original": {

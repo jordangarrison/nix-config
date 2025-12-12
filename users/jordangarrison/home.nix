@@ -196,7 +196,7 @@ in {
       rubyPackages.rails
       # rubyPackages.railties # Broken in latest update
       rubyPackages.solargraph
-      slack
+      stable.slack
       vial
       wally-cli
       xcb-util-cursor

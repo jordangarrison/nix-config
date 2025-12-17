@@ -418,11 +418,10 @@ in {
         "cat ~/.ssh/config_source > ~/.ssh/config && chmod 600 ~/.ssh/config";
     };
 
-    # doom emacs
-    # ".doom.d".source = ./tools/doom.d;
-    ".doom.d/init.el".source = tools/doom.d/init.el;
-    ".doom.d/packages.el".source = tools/doom.d/packages.el;
-    ".doom.d/config.org".source = tools/doom.d/config.org;
+    # doom emacs (linked directly to repo, not via Nix store)
+    ".doom.d/init.el".source = config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/tools/doom.d/init.el";
+    ".doom.d/packages.el".source = config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/tools/doom.d/packages.el";
+    ".doom.d/config.org".source = config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/tools/doom.d/config.org";
     ".emacs.d/init.el".text = ''
       (load "default.el")
     '';

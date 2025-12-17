@@ -48,6 +48,13 @@ if wezterm.target_triple:find('darwin') then
   -- macOS: CMD+[ / CMD+] for tab switching
   table.insert(config.keys, { key = '[', mods = 'CMD', action = act.ActivateTabRelative(-1) })
   table.insert(config.keys, { key = ']', mods = 'CMD', action = act.ActivateTabRelative(1) })
+  -- macOS: CMD+SHIFT+H/J/K/L for pane resizing
+  table.insert(config.keys, { key = 'h', mods = 'CMD|SHIFT', action = act.AdjustPaneSize { 'Left', 5 } })
+  table.insert(config.keys, { key = 'j', mods = 'CMD|SHIFT', action = act.AdjustPaneSize { 'Down', 5 } })
+  table.insert(config.keys, { key = 'k', mods = 'CMD|SHIFT', action = act.AdjustPaneSize { 'Up', 5 } })
+  table.insert(config.keys, { key = 'l', mods = 'CMD|SHIFT', action = act.AdjustPaneSize { 'Right', 5 } })
+  -- macOS: CMD+Z to toggle pane zoom
+  table.insert(config.keys, { key = 'z', mods = 'CMD', action = act.TogglePaneZoomState })
 else
   -- Linux: CTRL+SHIFT+D for right, CTRL+SHIFT+E for below
   table.insert(config.keys, { key = 'd', mods = 'CTRL|SHIFT', action = act.SplitHorizontal { domain = 'CurrentPaneDomain' } })
@@ -60,6 +67,13 @@ else
   -- Linux: SUPER+[ / SUPER+] for tab switching
   table.insert(config.keys, { key = '[', mods = 'SUPER', action = act.ActivateTabRelative(-1) })
   table.insert(config.keys, { key = ']', mods = 'SUPER', action = act.ActivateTabRelative(1) })
+  -- Linux: SUPER+SHIFT+H/J/K/L for pane resizing
+  table.insert(config.keys, { key = 'h', mods = 'SUPER|SHIFT', action = act.AdjustPaneSize { 'Left', 5 } })
+  table.insert(config.keys, { key = 'j', mods = 'SUPER|SHIFT', action = act.AdjustPaneSize { 'Down', 5 } })
+  table.insert(config.keys, { key = 'k', mods = 'SUPER|SHIFT', action = act.AdjustPaneSize { 'Up', 5 } })
+  table.insert(config.keys, { key = 'l', mods = 'SUPER|SHIFT', action = act.AdjustPaneSize { 'Right', 5 } })
+  -- Linux: SUPER+Z to toggle pane zoom
+  table.insert(config.keys, { key = 'z', mods = 'SUPER', action = act.TogglePaneZoomState })
 end
 
 -- initialize

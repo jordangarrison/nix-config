@@ -16,7 +16,8 @@ let
 in {
   imports = [ ./tools/nvim/nvf.nix ];
 
-  # nix settings
+  # Nix settings (required for standalone Home Manager on non-NixOS systems)
+  nix.package = pkgs.nix;
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   # Home Manager needs a bit of information about you and the
@@ -466,8 +467,8 @@ in {
     #   source = ./tools/linearmouse/linearmouse.json;
     # };
 
-    # Wezterm
-    ".config/wezterm/wezterm.lua".source = ./tools/wezterm/wezterm.lua;
+    # Wezterm (linked directly to repo, not via Nix store)
+    ".config/wezterm/wezterm.lua".source = config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/tools/wezterm/wezterm.lua";
 
     # Scripts
     ".local/bin/tmux-cht.sh" = {

@@ -17,7 +17,8 @@ in {
   imports = [ ./tools/nvim/nvf.nix ];
 
   # Nix settings (required for standalone Home Manager on non-NixOS systems)
-  nix.package = pkgs.nix;
+  # Use mkDefault so NixOS Home Manager module can override with system's nix package
+  nix.package = lib.mkDefault pkgs.nix;
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   # Home Manager needs a bit of information about you and the

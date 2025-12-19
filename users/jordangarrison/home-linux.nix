@@ -43,8 +43,17 @@
     "org/gnome/mutter" = { dynamic-workspaces = false; };
     "org/gnome/desktop/wm/preferences" = { num-workspaces = 10; };
 
+    # Disable Super+H (minimize) to free it for WezTerm pane navigation
+    # Change lock screen from Super+L to Ctrl+Alt+Super+L
+    "org/gnome/settings-daemon/plugins/media-keys" = {
+      screensaver = [ "<Ctrl><Alt><Super>l" ];
+    };
+
     # Keybindings to switch to workspace
     "org/gnome/desktop/wm/keybindings" = {
+      # Disable minimize to free Super+H for WezTerm
+      minimize = [ ];
+
       "switch-to-workspace-1" = [ "<Super>1" ];
       "switch-to-workspace-2" = [ "<Super>2" ];
       "switch-to-workspace-3" = [ "<Super>3" ];

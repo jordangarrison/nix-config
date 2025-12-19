@@ -81,7 +81,7 @@
     "org/gnome/shell" = {
       favorite-apps = [
         "brave-browser.desktop"
-        "dev.warp.WarpPreview.desktop"
+        "org.wezfurlong.wezterm.desktop"
         "emacsclient.desktop"
         "chatgpt.desktop"
         "todoist.desktop"
@@ -117,7 +117,7 @@
     "org/gnome/shell/extensions/auto-move-windows" = {
       application-list = [
         "brave-browser.desktop:1"
-        "dev.warp.WarpPreview.desktop:2"
+        "org.wezfurlong.wezterm.desktop:2"
         "emacsclient.desktop:3"
         "todoist.desktop:5"
         "1password.desktop:10"

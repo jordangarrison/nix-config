@@ -235,7 +235,7 @@ For macOS or other non-NixOS systems, install Nix first using the Determinate Sy
 ### GNOME Configuration
 - Workspaces 1-10 mapped to Super+1-0
 - Super+Shift+number moves windows to workspaces  
-- Application shortcuts: Super+B (Brave), Super+W (Warp), Super+C (Cursor), etc.
+- Application shortcuts: Super+B (Brave), Super+W (WezTerm), Super+C (Cursor), etc.
 - Auto-move-windows extension places applications on specific workspaces
 
 ### Development Tools

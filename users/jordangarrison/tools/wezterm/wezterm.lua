@@ -37,6 +37,8 @@ config.keys = {
 }
 
 if wezterm.target_triple:find('darwin') then
+  -- macOS: tiny font fix
+  config.font_size = 13
   -- macOS: CMD+D for right, CMD+SHIFT+D for below
   table.insert(config.keys, { key = 'd', mods = 'CMD', action = act.SplitHorizontal { domain = 'CurrentPaneDomain' } })
   table.insert(config.keys, { key = 'd', mods = 'CMD|SHIFT', action = act.SplitVertical { domain = 'CurrentPaneDomain' } })

@@ -1,54 +1,43 @@
 # Walker Configuration
-# Application launcher for Hyprland
+# Based on Omarchy's walker config
 
-[search]
-placeholder = "Search..."
-delay = 0
-history = true
-max_entries = 50
+force_keyboard_focus = true
+selection_wrap = true
+hide_action_hints = true
 
-[list]
-max_entries = 50
-show_initial_entries = true
-single_click = true
+[placeholders]
+"default" = { input = " Search...", list = "No Results" }
 
-[activation_mode]
-disabled = false
-use_f_keys = false
-use_alt = false
+[keybinds]
+quick_activate = []
 
-[scrollbar]
-policy = "automatic"
+[providers]
+max_results = 256
+default = [
+  "desktopapplications",
+  "websearch",
+]
 
-[clipboard]
-max_entries = 100
+[[providers.prefixes]]
+prefix = "/"
+provider = "providerlist"
 
-[runner]
-generic_entry = true
+[[providers.prefixes]]
+prefix = "."
+provider = "files"
 
-[ai]
-enabled = false
+[[providers.prefixes]]
+prefix = ":"
+provider = "symbols"
 
-[websearch]
-prefix = "?"
-engines = ["google", "duckduckgo"]
+[[providers.prefixes]]
+prefix = "="
+provider = "calc"
 
-[[plugins]]
-name = "applications"
-switcher_only = false
+[[providers.prefixes]]
+prefix = "@"
+provider = "websearch"
 
-[[plugins]]
-name = "runner"
-switcher_only = false
-
-[[plugins]]
-name = "websearch"
-switcher_only = false
-
-[[plugins]]
-name = "clipboard"
-switcher_only = true
-
-[[plugins]]
-name = "emojis"
-switcher_only = true
+[[providers.prefixes]]
+prefix = "$"
+provider = "clipboard"

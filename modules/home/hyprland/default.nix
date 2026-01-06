@@ -30,7 +30,9 @@ in
     # Clipboard
     wl-clipboard
     cliphist
-    fuzzel
+
+    # Rofi launcher
+    rofi
 
     # File manager (terminal)
     yazi
@@ -86,6 +88,10 @@ in
 
     # Walker launcher
     "walker/config.toml".source = config.lib.file.mkOutOfStoreSymlink "${hyprConfigPath}/walker/config.toml";
+
+    # Rofi launcher
+    "rofi/config.rasi".source = config.lib.file.mkOutOfStoreSymlink "${hyprConfigPath}/rofi/config.rasi";
+    "rofi/theme.rasi".source = config.lib.file.mkOutOfStoreSymlink "${hyprConfigPath}/rofi/theme.rasi";
   };
 
   # GTK/Qt theming for visual consistency

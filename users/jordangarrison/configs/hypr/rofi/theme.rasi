@@ -1,0 +1,108 @@
+/* Clean dark theme for Rofi */
+
+* {
+    bg: #1e1e2e;
+    bg-alt: #313244;
+    bg-selected: #45475a;
+    fg: #cdd6f4;
+    fg-alt: #a6adc8;
+    border: #89b4fa;
+    accent: #89b4fa;
+    urgent: #f38ba8;
+
+    background-color: transparent;
+    text-color: @fg;
+    margin: 0;
+    padding: 0;
+    spacing: 0;
+}
+
+window {
+    width: 600px;
+    background-color: @bg;
+    border: 2px solid;
+    border-color: @border;
+    border-radius: 12px;
+    padding: 16px;
+}
+
+mainbox {
+    children: [inputbar, message, listview];
+    spacing: 16px;
+}
+
+inputbar {
+    children: [prompt, entry];
+    background-color: @bg-alt;
+    border-radius: 8px;
+    padding: 12px;
+}
+
+prompt {
+    enabled: true;
+    padding: 0 8px 0 0;
+    text-color: @accent;
+}
+
+entry {
+    placeholder: "Search...";
+    placeholder-color: @fg-alt;
+}
+
+message {
+    border-radius: 8px;
+    background-color: @bg-alt;
+    padding: 8px;
+}
+
+textbox {
+    text-color: @fg;
+}
+
+listview {
+    lines: 10;
+    columns: 1;
+    fixed-height: false;
+    scrollbar: false;
+}
+
+element {
+    padding: 10px 12px;
+    border-radius: 8px;
+    spacing: 12px;
+}
+
+element normal.normal {
+    background-color: transparent;
+}
+
+element normal.urgent {
+    background-color: @urgent;
+}
+
+element normal.active {
+    background-color: @bg-selected;
+}
+
+element selected.normal {
+    background-color: @bg-selected;
+    text-color: @fg;
+}
+
+element selected.urgent {
+    background-color: @urgent;
+}
+
+element selected.active {
+    background-color: @accent;
+    text-color: @bg;
+}
+
+element-icon {
+    size: 24px;
+}
+
+element-text {
+    vertical-align: 0.5;
+    text-color: inherit;
+}

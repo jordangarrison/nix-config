@@ -14,6 +14,9 @@ config.default_cursor_style = 'SteadyBar'
 -- background
 config.window_background_opacity = 0.85
 
+-- Tab bar: hide when only one tab
+config.hide_tab_bar_if_only_one_tab = true
+
 -- Custom selection colors
 config.colors = {
   selection_fg = '#26233a',    -- Dark foreground (can adjust based on your theme)

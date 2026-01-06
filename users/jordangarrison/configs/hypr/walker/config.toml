@@ -1,0 +1,54 @@
+# Walker Configuration
+# Application launcher for Hyprland
+
+[search]
+placeholder = "Search..."
+delay = 0
+history = true
+max_entries = 50
+
+[list]
+max_entries = 50
+show_initial_entries = true
+single_click = true
+
+[activation_mode]
+disabled = false
+use_f_keys = false
+use_alt = false
+
+[scrollbar]
+policy = "automatic"
+
+[clipboard]
+max_entries = 100
+
+[runner]
+generic_entry = true
+
+[ai]
+enabled = false
+
+[websearch]
+prefix = "?"
+engines = ["google", "duckduckgo"]
+
+[[plugins]]
+name = "applications"
+switcher_only = false
+
+[[plugins]]
+name = "runner"
+switcher_only = false
+
+[[plugins]]
+name = "websearch"
+switcher_only = false
+
+[[plugins]]
+name = "clipboard"
+switcher_only = true
+
+[[plugins]]
+name = "emojis"
+switcher_only = true

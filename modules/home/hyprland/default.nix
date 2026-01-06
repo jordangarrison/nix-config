@@ -30,6 +30,7 @@ in
     # Clipboard
     wl-clipboard
     cliphist
+    fuzzel
 
     # File manager (terminal)
     yazi
@@ -82,6 +83,9 @@ in
 
     # Satty screenshot tool
     "satty/config.toml".source = config.lib.file.mkOutOfStoreSymlink "${hyprConfigPath}/satty/config.toml";
+
+    # Walker launcher
+    "walker/config.toml".source = config.lib.file.mkOutOfStoreSymlink "${hyprConfigPath}/walker/config.toml";
   };
 
   # GTK/Qt theming for visual consistency

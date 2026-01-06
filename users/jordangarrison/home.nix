@@ -462,8 +462,8 @@ in
       (load "default.el")
     '';
 
-    # hyprland
-    ".config/hypr".source = ./configs/hypr;
+    # hyprland - now managed by configs/hypr/hyprland-home.nix module
+    # Individual config files are symlinked via mkOutOfStoreSymlink for live editing
 
     # neovim configuration now handled by nvf
     # ".config/nvim/init.lua".source = ./tools/nvim/jag.lua;

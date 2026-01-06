@@ -1,0 +1,163 @@
+/* Waybar Style - Rose Pine Theme */
+
+/* Rose Pine Colors */
+@define-color base #191724;
+@define-color surface #1f1d2e;
+@define-color overlay #26233a;
+@define-color muted #6e6a86;
+@define-color subtle #908caa;
+@define-color text #e0def4;
+@define-color love #eb6f92;
+@define-color gold #f6c177;
+@define-color rose #ebbcba;
+@define-color pine #31748f;
+@define-color foam #9ccfd8;
+@define-color iris #c4a7e7;
+
+* {
+    font-family: "FiraCode Nerd Font", "Font Awesome 6 Free", sans-serif;
+    font-size: 13px;
+    border: none;
+    border-radius: 0;
+    min-height: 0;
+}
+
+window#waybar {
+    background: alpha(@base, 0.85);
+    border-radius: 12px;
+    color: @text;
+}
+
+window#waybar.hidden {
+    opacity: 0.2;
+}
+
+/* Module styling */
+#workspaces,
+#window,
+#clock,
+#tray,
+#pulseaudio,
+#network,
+#battery,
+#custom-power {
+    padding: 0 12px;
+    margin: 4px 2px;
+    background: alpha(@surface, 0.6);
+    border-radius: 8px;
+}
+
+/* Workspaces */
+#workspaces button {
+    padding: 0 6px;
+    color: @muted;
+    background: transparent;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+#workspaces button:hover {
+    color: @text;
+    background: alpha(@overlay, 0.8);
+}
+
+#workspaces button.active {
+    color: @iris;
+    background: alpha(@overlay, 0.8);
+}
+
+#workspaces button.urgent {
+    color: @love;
+    background: alpha(@love, 0.2);
+}
+
+/* Window title */
+#window {
+    color: @subtle;
+}
+
+/* Clock */
+#clock {
+    color: @foam;
+    font-weight: bold;
+}
+
+/* Tray */
+#tray {
+    padding: 0 8px;
+}
+
+#tray > .passive {
+    -gtk-icon-effect: dim;
+}
+
+#tray > .needs-attention {
+    -gtk-icon-effect: highlight;
+    background-color: alpha(@love, 0.3);
+}
+
+/* Pulseaudio */
+#pulseaudio {
+    color: @iris;
+}
+
+#pulseaudio.muted {
+    color: @muted;
+}
+
+/* Network */
+#network {
+    color: @foam;
+}
+
+#network.disconnected {
+    color: @love;
+}
+
+/* Battery */
+#battery {
+    color: @pine;
+}
+
+#battery.charging,
+#battery.plugged {
+    color: @foam;
+}
+
+#battery.warning:not(.charging) {
+    color: @gold;
+}
+
+#battery.critical:not(.charging) {
+    color: @love;
+    animation: blink 0.5s linear infinite alternate;
+}
+
+@keyframes blink {
+    to {
+        color: @text;
+        background-color: alpha(@love, 0.3);
+    }
+}
+
+/* Power button */
+#custom-power {
+    color: @love;
+    padding: 0 10px;
+}
+
+#custom-power:hover {
+    background: alpha(@love, 0.3);
+}
+
+/* Tooltips */
+tooltip {
+    background: @surface;
+    border: 2px solid @overlay;
+    border-radius: 8px;
+}
+
+tooltip label {
+    color: @text;
+    padding: 4px 8px;
+}

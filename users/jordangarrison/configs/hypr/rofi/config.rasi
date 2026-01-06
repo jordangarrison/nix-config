@@ -11,4 +11,4 @@ configuration {
     sidebar-mode: false;
 }
 
-@theme "~/.config/hypr/rofi/theme.rasi"
+@theme "~/.config/rofi/theme.rasi"

@@ -1,0 +1,36 @@
+# Satty Screenshot Annotation Tool Configuration
+
+[general]
+# Start in fullscreen mode
+fullscreen = true
+
+# Exit after saving/copying
+early-exit = true
+
+# Initial tool - crop for selecting area
+initial-tool = "crop"
+
+# Copy command for clipboard
+copy-command = "wl-copy"
+
+# Output format
+output-filename = "~/Pictures/Screenshots/screenshot-%Y%m%d-%H%M%S.png"
+
+# Annotation size factor (for HiDPI displays)
+annotation-size-factor = 2
+
+[font]
+# Font for text annotations
+family = "FiraCode Nerd Font"
+style = "Regular"
+
+[color]
+# Default annotation colors (Rose Pine palette)
+# These are the colors available in the color picker
+
+# Primary colors for annotations
+first = "#c4a7e7"   # iris
+second = "#eb6f92"  # love
+third = "#9ccfd8"   # foam
+fourth = "#f6c177"  # gold
+fifth = "#31748f"   # pine

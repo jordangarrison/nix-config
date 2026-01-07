@@ -1,0 +1,67 @@
+# Mako Notification Configuration
+# Rose Pine themed
+
+# Position and anchor
+anchor=top-right
+layer=overlay
+
+# Appearance
+font=FiraCode Nerd Font 11
+background-color=#191724ee
+text-color=#e0def4
+border-color=#6e6a86
+border-size=2
+border-radius=8
+padding=12
+margin=8
+
+# Icon settings
+icon-path=/usr/share/icons/Adwaita
+max-icon-size=48
+icons=1
+
+# Behavior
+default-timeout=5000
+max-visible=5
+sort=-time
+group-by=app-name
+
+# Actions
+on-button-left=dismiss
+on-button-middle=none
+on-button-right=dismiss-all
+on-touch=dismiss
+
+# Format
+format=<b>%s</b>\n%b
+max-history=100
+
+# Urgency-specific styling
+[urgency=low]
+background-color=#1f1d2eee
+border-color=#6e6a86
+default-timeout=3000
+
+[urgency=normal]
+background-color=#191724ee
+border-color=#c4a7e7
+default-timeout=5000
+
+[urgency=critical]
+background-color=#191724ee
+border-color=#eb6f92
+text-color=#eb6f92
+default-timeout=0
+
+# App-specific rules
+[app-name=Spotify]
+default-timeout=3000
+border-color=#31748f
+
+[app-name="Volume"]
+default-timeout=1500
+group-by=app-name
+
+[app-name="Brightness"]
+default-timeout=1500
+group-by=app-name

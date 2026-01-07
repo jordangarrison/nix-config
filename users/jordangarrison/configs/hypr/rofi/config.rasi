@@ -1,0 +1,14 @@
+/* Rofi Configuration */
+configuration {
+    modi: "drun,run,window,filebrowser";
+    show-icons: true;
+    icon-theme: "Adwaita";
+    terminal: "wezterm";
+    drun-display-format: "{name}";
+    location: 0;
+    disable-history: false;
+    hide-scrollbar: true;
+    sidebar-mode: false;
+}
+
+@theme "~/.config/rofi/theme.rasi"

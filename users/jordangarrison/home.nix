@@ -21,6 +21,8 @@ let
     name = "binarual-beats";
     text = builtins.readFile ./tools/scripts/binaural-beats.sh;
   };
+  # Use pgtk variant on Linux for native Wayland support
+  emacsPackage = if pkgs.stdenv.isLinux then pkgs.emacs-pgtk else pkgs.emacs;
 in
 {
   imports = [ ./tools/nvim/nvf.nix ];
@@ -361,6 +363,8 @@ in
 
   programs.emacs = {
     enable = true;
+    # Use pgtk variant on Linux for native Wayland support (fixes blurry text with fractional scaling)
+    package = emacsPackage;
   };
 
   programs.direnv = {
@@ -404,11 +408,11 @@ in
   # Using home.file approach with onChange instead
 
   home.shellAliases = {
-    # Editors
-    ec = "${pkgs.emacs}/bin/emacsclient -nw";
-    e = "${pkgs.emacs}/bin/emacsclient -nw";
-    ee = "${pkgs.emacs}/bin/emacsclient -nw $(${pkgs.fd}/bin/fd --type f | ${pkgs.fzf}/bin/fzf --preview '${pkgs.bat}/bin/bat --style=numbers --color=always --line-range :500 {}')";
-    eg = "${pkgs.emacs}/bin/emacsclient";
+    # Editors (use emacs-pgtk on Linux for native Wayland support)
+    ec = "${emacsPackage}/bin/emacsclient -nw";
+    e = "${emacsPackage}/bin/emacsclient -nw";
+    ee = "${emacsPackage}/bin/emacsclient -nw $(${pkgs.fd}/bin/fd --type f | ${pkgs.fzf}/bin/fzf --preview '${pkgs.bat}/bin/bat --style=numbers --color=always --line-range :500 {}')";
+    eg = "${emacsPackage}/bin/emacsclient";
     n = "nvim";
     view = "vim -R";
 
@@ -462,8 +466,8 @@ in
       (load "default.el")
     '';
 
-    # hyprland
-    ".config/hypr".source = ./configs/hypr;
+    # hyprland - now managed by configs/hypr/hyprland-home.nix module
+    # Individual config files are symlinked via mkOutOfStoreSymlink for live editing
 
     # neovim configuration now handled by nvf
     # ".config/nvim/init.lua".source = ./tools/nvim/jag.lua;

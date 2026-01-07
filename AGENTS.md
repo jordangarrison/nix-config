@@ -234,9 +234,26 @@ For macOS or other non-NixOS systems, install Nix first using the Determinate Sy
 
 ### GNOME Configuration
 - Workspaces 1-10 mapped to Super+1-0
-- Super+Shift+number moves windows to workspaces  
+- Super+Shift+number moves windows to workspaces
 - Application shortcuts: Super+B (Brave), Super+W (WezTerm), Super+C (Cursor), etc.
 - Auto-move-windows extension places applications on specific workspaces
+
+### Hyprland Configuration
+- Wallpapers managed via hyprpaper
+- Wallpaper files stored in `users/jordangarrison/wallpapers/`
+- Monitor configurations:
+  - endeavour (desktop): DP-3, DP-4
+  - opportunity (laptop): eDP-1
+
+**Set Wallpaper:**
+```bash
+# Apply wallpaper immediately
+./users/jordangarrison/configs/hypr/scripts/set-wallpaper.sh /path/to/wallpaper.jpg
+```
+
+**Configuration Files:**
+- `users/jordangarrison/configs/hypr/hyprpaper.conf`: Wallpaper daemon config
+- `users/jordangarrison/configs/hypr/autostart.conf`: Startup commands including wallpaper
 
 ### Development Tools
 - **Emacs with Doom configuration**: Primary editor with literate configuration

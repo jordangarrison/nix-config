@@ -3,6 +3,7 @@
 let
   homeDirectory = config.home.homeDirectory;
   hyprConfigPath = "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/hypr";
+  wallpapersPath = "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/wallpapers";
 in
 {
   home.packages = with pkgs; [
@@ -93,6 +94,9 @@ in
     "rofi/config.rasi".source = config.lib.file.mkOutOfStoreSymlink "${hyprConfigPath}/rofi/config.rasi";
     "rofi/theme.rasi".source = config.lib.file.mkOutOfStoreSymlink "${hyprConfigPath}/rofi/theme.rasi";
   };
+
+  # Wallpapers directory symlink
+  home.file."Pictures/Wallpapers/wallpaper.png".source = config.lib.file.mkOutOfStoreSymlink "${wallpapersPath}/wallpaper.png";
 
   # GTK/Qt theming for visual consistency
   gtk = {

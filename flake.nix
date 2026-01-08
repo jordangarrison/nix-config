@@ -37,11 +37,15 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     niri.url = "github:sodiboo/niri-flake";
+    noctalia = {
+      url = "github:noctalia-dev/noctalia-shell";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs@{ self, nixpkgs, nixpkgs-stable, nixpkgs-master
     , nixos-hardware, nix-darwin, home-manager, nvf, aws-tools, aws-use-sso
-    , hubctl, claude-code, warp-preview, niri, }: {
+    , hubctl, claude-code, warp-preview, niri, noctalia, }: {
       nixosConfigurations = {
         "endeavour" = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs; };

@@ -1,4 +1,4 @@
-{ config, pkgs, lib, osConfig ? null, ... }:
+{ config, pkgs, lib, inputs, osConfig ? null, ... }:
 
 let
   homeDirectory = config.home.homeDirectory;
@@ -12,15 +12,11 @@ let
 in {
   # Packages needed for niri desktop environment
   home.packages = with pkgs; [
-    # Status bar
-    waybar
+    # Noctalia shell (unified bar, notifications, launcher, lock screen, power menu)
+    inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default
 
-    # Notification daemon
-    mako
+    # Notification tools (for notify-send compatibility)
     libnotify
-
-    # Application launcher
-    walker
 
     # Screenshot tools
     grim
@@ -30,9 +26,6 @@ in {
     # Clipboard
     wl-clipboard
     cliphist
-
-    # Rofi launcher (backup)
-    rofi
 
     # File manager (terminal)
     yazi
@@ -48,9 +41,6 @@ in {
 
     # Authentication
     polkit_gnome
-
-    # Logout menu
-    wlogout
   ];
 
   # Niri configuration via programs.niri.settings
@@ -112,7 +102,7 @@ in {
 
     # Layout configuration
     layout = {
-      gaps = 8;
+      gaps = 12;
 
       # Column widths that can be cycled through
       preset-column-widths = [
@@ -139,24 +129,25 @@ in {
       # Shadows
       shadow = { enable = true; };
 
-      # Center focused column when there's extra space
-      center-focused-column = "never";
+      # Center focused column on screen
+      center-focused-column = "always";
     };
 
     # Spawn programs at startup
     spawn-at-startup = [
       # Wallpaper
       {
-        command =
-          [ "swaybg" "-i" "${wallpapersPath}/wallpaper.png" "-m" "fill" ];
+        command = [
+          "swaybg"
+          "-i"
+          "${wallpapersPath}/a_mountain_range_with_snow_on_top.jpeg"
+          "-m"
+          "fill"
+        ];
       }
-      # Status bar
+      # Noctalia shell (bar, notifications, launcher, lock screen, power menu)
       {
-        command = [ "waybar" ];
-      }
-      # Notification daemon
-      {
-        command = [ "mako" ];
+        command = [ "noctalia-shell" ];
       }
       # Clipboard manager
       {
@@ -186,18 +177,19 @@ in {
       XDG_CURRENT_DESKTOP = "niri";
     };
 
-    # Workspaces
+    # Workspaces - all named workspaces on primary monitor (DP-3)
+    # Secondary monitor (DP-4) gets dynamic workspaces only
     workspaces = {
-      "1" = { };
-      "2" = { };
-      "3" = { };
-      "4" = { };
-      "5" = { };
-      "6" = { };
-      "7" = { };
-      "8" = { open-on-output = "DP-4"; };
-      "9" = { open-on-output = "DP-4"; };
-      "10" = { open-on-output = "DP-4"; };
+      "1" = { open-on-output = "DP-3"; };
+      "2" = { open-on-output = "DP-3"; };
+      "3" = { open-on-output = "DP-3"; };
+      "4" = { open-on-output = "DP-3"; };
+      "5" = { open-on-output = "DP-3"; };
+      "6" = { open-on-output = "DP-3"; };
+      "7" = { open-on-output = "DP-3"; };
+      "8" = { open-on-output = "DP-3"; };
+      "9" = { open-on-output = "DP-3"; };
+      "10" = { open-on-output = "DP-3"; };
     };
 
     # Window rules
@@ -240,8 +232,9 @@ in {
       "Mod+N".action.spawn = "obsidian";
       "Mod+F".action.spawn = [ "wezterm" "start" "--" "yazi" ];
       "Mod+Shift+F".action.spawn = "nautilus";
-      "Mod+Space".action.spawn = "walker";
-      "Mod+Semicolon".action.spawn = [ "walker" "--modules" "emojis" ];
+      "Mod+Space".action.spawn =
+        [ "noctalia-shell" "ipc" "call" "launcher" "toggle" ];
+      # Note: Noctalia doesn't have a built-in emoji picker, removed for now
 
       # ================
       # WINDOW CONTROLS
@@ -399,7 +392,8 @@ in {
       # ================
       # SYSTEM
       # ================
-      "Mod+Ctrl+Alt+L".action.spawn = "swaylock";
+      "Mod+Ctrl+Alt+L".action.spawn =
+        [ "noctalia-shell" "ipc" "call" "lock" "lock" ];
       "Mod+C".action.spawn = [ "sh" "-c" "${scriptsPath}/clipboard.sh" ];
       "Mod+Shift+C".action.spawn = [ "niri" "msg" "action" "reload-config" ];
       "Mod+Shift+Q".action.quit = [ ];

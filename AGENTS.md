@@ -58,7 +58,7 @@ All git commands in this repository are configured to disable pager output by de
 
 ### NixOS Hosts
 - **endeavour**: Main desktop workstation (MSI B550-A Pro, AMD GPU)
-  - Full desktop environment (GNOME + Hyprland)
+  - Full desktop environment (GNOME + Hyprland + Niri)
   - Gaming setup (Steam)
   - Development tools
   - Remote desktop enabled
@@ -93,6 +93,8 @@ The `flake.nix` serves as the central orchestrator for all configurations:
 - `nix-darwin`: macOS system management
 - `home-manager`: User environment management
 - `nvf`: Highly modular Neovim configuration framework
+- `niri`: Scrollable-tiling Wayland compositor
+- `noctalia`: Unified desktop shell (bar, notifications, launcher, lock screen)
 - Custom flakes: `aws-tools`, `aws-use-sso`, `hubctl` (Jordan's tools)
 
 **Outputs:**
@@ -135,9 +137,11 @@ Each system configuration follows a consistent pattern:
 │   │   ├── common.nix      # Base system configuration
 │   │   ├── gnome-desktop.nix
 │   │   ├── hyprland-desktop.nix
+│   │   ├── niri-desktop.nix # Niri compositor (system-level)
 │   │   ├── development.nix # Docker, Emacs, dev tools
 │   │   └── fonts.nix
 │   └── home/               # Home Manager modules
+│       ├── niri/           # Niri configuration (Home Manager)
 │       ├── brave/apps.nix  # Brave browser app integration
 │       └── alacritty/apps.nix # Terminal app shortcuts
 └── shell.nix              # Development shell
@@ -254,6 +258,35 @@ For macOS or other non-NixOS systems, install Nix first using the Determinate Sy
 **Configuration Files:**
 - `users/jordangarrison/configs/hypr/hyprpaper.conf`: Wallpaper daemon config
 - `users/jordangarrison/configs/hypr/autostart.conf`: Startup commands including wallpaper
+
+### Niri Configuration
+Niri is a scrollable-tiling Wayland compositor. Configuration is fully declarative via `programs.niri.settings`.
+
+**Key Features:**
+- Scrollable tiling: windows tile in columns that scroll horizontally
+- Build-time config validation (errors caught during `nh os build`)
+- Noctalia shell: unified bar, notifications, launcher, lock screen
+- Keybindings similar to Hyprland (Mod+H/J/K/L for navigation)
+
+**Shell Components (noctalia-shell):**
+- Status bar (replaces waybar)
+- Notifications (replaces mako)
+- Application launcher: `Mod+Space`
+- Lock screen: `Mod+Ctrl+Alt+L`
+
+**Monitor Setup (endeavour):**
+- DP-3: 3840x2160 @ 60Hz, scale 1.5 (primary, workspaces 1-10)
+- DP-4: 2560x1440 @ 165Hz, portrait (dynamic workspaces)
+
+**Configuration Files:**
+- `modules/nixos/niri-desktop.nix`: System-level niri setup
+- `modules/home/niri/default.nix`: Full declarative config (keybindings, layout, animations)
+- `modules/home/niri/CLAUDE.md`: Detailed keybinding reference and troubleshooting
+
+**Resources:**
+- [niri GitHub](https://github.com/YaLTeR/niri)
+- [niri-flake](https://github.com/sodiboo/niri-flake)
+- [noctalia-shell](https://github.com/noctalia-dev/noctalia-shell)
 
 ### Development Tools
 - **Emacs with Doom configuration**: Primary editor with literate configuration

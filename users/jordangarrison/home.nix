@@ -364,7 +364,7 @@ in
   programs.emacs = {
     enable = true;
     # Use pgtk variant on Linux for native Wayland support (fixes blurry text with fractional scaling)
-    package = emacsPackage;
+    package = if pkgs.stdenv.isLinux then pkgs.emacs-pgtk else pkgs.emacs;
   };
 
   programs.direnv = {
@@ -462,6 +462,8 @@ in
       config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/tools/doom.d/packages.el";
     ".doom.d/config.org".source =
       config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/tools/doom.d/config.org";
+    ".doom.d/themes".source =
+      config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/tools/doom.d/themes";
     ".emacs.d/init.el".text = ''
       (load "default.el")
     '';

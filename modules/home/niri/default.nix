@@ -115,12 +115,12 @@ in {
       # Default column width
       default-column-width = { proportion = 1.0 / 2.0; };
 
-      # Focus ring (drawn outside windows)
+      # Focus ring (drawn outside windows) - Rose Pine theme
       focus-ring = {
         enable = true;
         width = 2;
-        active.color = "#7aa2f7";
-        inactive.color = "#565f89";
+        active.color = "#9ccfd8"; # Foam (cyan)
+        inactive.color = "#6e6a86"; # Muted
       };
 
       # Border (drawn inside windows)
@@ -129,8 +129,9 @@ in {
       # Shadows
       shadow = { enable = true; };
 
-      # Center focused column on screen
-      center-focused-column = "always";
+      # Center focused column only when it doesn't fit with the previous column
+      # Use Mod+G to manually center when desired
+      center-focused-column = "on-overflow";
     };
 
     # Spawn programs at startup
@@ -339,6 +340,7 @@ in {
       "Mod+Ctrl+H".action.consume-window-into-column = [ ];
       "Mod+Ctrl+L".action.expel-window-from-column = [ ];
       "Mod+T".action.toggle-column-tabbed-display = [ ];
+      "Mod+G".action.center-column = [ ]; # Center current column on screen
 
       # ================
       # SCREENSHOTS

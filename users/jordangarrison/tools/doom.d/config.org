@@ -60,10 +60,13 @@ Basic user information used by various Emacs features like GPG, email clients, a
 
 * Theme and Appearance
 ** Base Theme
-Setting the default theme to Tokyo Night for a modern dark appearance.
+Setting the default theme to Rose Pine for a modern dark appearance with custom themes from the themes directory.
 
 #+begin_src emacs-lisp
-(setq doom-theme 'doom-tokyo-night)
+;; Add custom themes directory to load path
+(add-to-list 'custom-theme-load-path (expand-file-name "themes" doom-user-dir))
+
+(setq doom-theme 'doom-rose-pine)
 #+end_src
 
 ** Theme Management
@@ -73,8 +76,8 @@ Dynamic theme switching system with support for light and dark themes.
 *** Theme Variables and Setup
 
 #+begin_src emacs-lisp
-(defvar *jag-theme-dark* 'doom-earl-grey)
-(defvar *jag-theme-light* 'doom-tokyo-night)
+(defvar *jag-theme-dark* 'doom-rose-pine)
+(defvar *jag-theme-light* 'doom-rose-pine-dawn)
 (defvar *jag-current-theme* *jag-theme-dark*)
 
 (defadvice load-theme (before theme-dont-propagate activate)
@@ -127,7 +130,9 @@ With C-u followed by number: use that number directly"
 Using FiraCode Nerd Font for programming with ligatures and icon support.
 
 #+begin_src emacs-lisp
-(setq doom-font (font-spec :family "Fira Code" :size 13 :weight 'semibold))
+(setq doom-font (font-spec :family "Fira Code"
+                           :size (if (string= (system-name) "endeavour") 20 13)
+                           :weight 'semibold))
 #+end_src
 
 ** Line Numbers and Visual Elements
@@ -136,6 +141,32 @@ Enabling absolute line numbers and configuring visual spacing.
 #+begin_src emacs-lisp
 (setq display-line-numbers-type t)
 (setq-default line-spacing 3)
+#+end_src
+
+** Frame Size Configuration
+Host-specific frame sizing for HiDPI displays with fractional scaling.
+Uses a frame creation hook to handle emacsclient frames properly when running as a daemon.
+
+#+begin_src emacs-lisp
+(when (string= (system-name) "endeavour")
+  ;; Set defaults for new frames (works with emacsclient)
+  (add-to-list 'default-frame-alist '(width . 200))
+  (add-to-list 'default-frame-alist '(height . 60))
+
+  ;; Hook to ensure frame settings apply to emacsclient frames
+  (defun jag/setup-frame (&optional frame)
+    "Configure frame for HiDPI display."
+    (when frame
+      (select-frame frame))
+    (when (display-graphic-p)
+      (set-frame-parameter nil 'fullscreen 'maximized)))
+
+  ;; Apply to new frames created by emacsclient
+  (add-hook 'after-make-frame-functions #'jag/setup-frame)
+
+  ;; Apply to current frame if not running as daemon
+  (unless (daemonp)
+    (jag/setup-frame)))
 #+end_src
 
 ** Dashboard Configuration

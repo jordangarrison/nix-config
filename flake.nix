@@ -36,11 +36,12 @@
       url = "github:jordangarrison/warp-preview-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    niri.url = "github:sodiboo/niri-flake";
   };
 
   outputs = inputs@{ self, nixpkgs, nixpkgs-stable, nixpkgs-master
     , nixos-hardware, nix-darwin, home-manager, nvf, aws-tools, aws-use-sso
-    , hubctl, claude-code, warp-preview, }: {
+    , hubctl, claude-code, warp-preview, niri, }: {
       nixosConfigurations = {
         "endeavour" = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs; };
@@ -52,6 +53,7 @@
             ./modules/nixos/lan.nix
             ./modules/nixos/gnome-desktop.nix
             ./modules/nixos/hyprland-desktop.nix
+            ./modules/nixos/niri-desktop.nix
             ./modules/nixos/fonts.nix
             ./modules/nixos/audio/pipewire.nix
             ./modules/nixos/development.nix
@@ -104,6 +106,10 @@
 
               # Enable FreeRDP
               services.freerdp.enable = true;
+
+              # Import niri home module for jordangarrison on endeavour
+              home-manager.users.jordangarrison.imports =
+                [ ./modules/home/niri ];
             }
           ];
 

@@ -1,9 +1,12 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, osConfig ? null, ... }:
 
 let
   homeDirectory = config.home.homeDirectory;
   hyprConfigPath = "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/hypr";
   wallpapersPath = "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/wallpapers";
+
+  # Get hostname from osConfig if available (NixOS), otherwise use null
+  hostname = if osConfig != null then osConfig.networking.hostName else null;
 in
 {
   home.packages = with pkgs; [
@@ -76,6 +79,13 @@ in
 
     # Wallpaper
     "hypr/hyprpaper.conf".source = config.lib.file.mkOutOfStoreSymlink "${hyprConfigPath}/hyprpaper.conf";
+
+    # Monitor configurations directory
+    "hypr/monitors".source = config.lib.file.mkOutOfStoreSymlink "${hyprConfigPath}/monitors";
+
+    # Host-specific monitor configuration symlink
+    "hypr/monitors.conf".source = lib.mkIf (hostname != null)
+      (config.lib.file.mkOutOfStoreSymlink "${hyprConfigPath}/monitors/${hostname}.conf");
 
     # Waybar
     "waybar/config.jsonc".source = config.lib.file.mkOutOfStoreSymlink "${hyprConfigPath}/waybar/config.jsonc";

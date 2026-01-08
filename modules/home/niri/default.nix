@@ -102,7 +102,7 @@ in {
 
     # Layout configuration
     layout = {
-      gaps = 12;
+      gaps = 8;
 
       # Column widths that can be cycled through
       preset-column-widths = [
@@ -194,6 +194,17 @@ in {
 
     # Window rules
     window-rules = [
+      # Default rule for all windows: rounded corners
+      {
+        geometry-corner-radius = let r = 8.0;
+        in {
+          top-left = r;
+          top-right = r;
+          bottom-left = r;
+          bottom-right = r;
+        };
+        clip-to-geometry = true;
+      }
       # Float authentication dialogs
       {
         matches = [{ app-id = "^polkit-gnome-authentication-agent-1$"; }];
@@ -405,10 +416,9 @@ in {
       slowdown = 1.0;
 
       workspace-switch.kind = {
-        spring = {
-          damping-ratio = 1.0;
-          stiffness = 1000;
-          epsilon = 1.0e-4;
+        easing = {
+          duration-ms = 50;
+          curve = "ease-out-quad";
         };
       };
 

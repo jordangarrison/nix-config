@@ -72,6 +72,7 @@
             nixos-hardware.nixosModules.msi-b550-a-pro
             nixos-hardware.nixosModules.common-gpu-amd
             home-manager.nixosModules.home-manager
+            ./modules/home/defaults.nix
             {
               # Configure users for endeavour
               users.jordangarrison = {
@@ -103,9 +104,6 @@
 
               # Enable FreeRDP
               services.freerdp.enable = true;
-
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
             }
           ];
 
@@ -132,6 +130,7 @@
             ./hosts/opportunity/configuration.nix
             nixos-hardware.nixosModules.framework-12-13th-gen-intel
             home-manager.nixosModules.home-manager
+            ./modules/home/defaults.nix
             {
               # Configure users for voyager
               users.jordangarrison = {
@@ -161,9 +160,6 @@
                 enable = true;
                 users = [ "jordangarrison" ];
               };
-
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
             }
           ];
 
@@ -189,6 +185,7 @@
             ./hosts/voyager/configuration.nix
             nixos-hardware.nixosModules.apple-macbook-pro-12-1
             home-manager.nixosModules.home-manager
+            ./modules/home/defaults.nix
             {
               # Configure users for voyager
               users.jordangarrison = {
@@ -211,9 +208,6 @@
                 enable = true;
                 homeDirectory = "/home/isla";
               };
-
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
             }
           ];
 
@@ -237,6 +231,7 @@
             nixos-hardware.nixosModules.common-cpu-amd
             nixos-hardware.nixosModules.common-pc-ssd
             home-manager.nixosModules.home-manager
+            ./modules/home/defaults.nix
             {
               # Configure users for discovery
               users.jordangarrison = {
@@ -259,9 +254,6 @@
                 enable = true;
                 homeDirectory = "/home/isla";
               };
-
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
             }
           ];
         };
@@ -277,12 +269,11 @@
             ./modules/nixos/fonts.nix
             ./hosts/flomac/configuration.nix
             home-manager.darwinModules.home-manager
+            ./modules/home/defaults.nix
             {
               nix.enable = false;
               nixpkgs.config.allowUnfree = true;
               home-manager = {
-                useGlobalPkgs = true;
-                useUserPackages = true;
                 users."jordan.garrison" =
                   import ./users/jordangarrison/home-darwin.nix;
                 extraSpecialArgs = {

@@ -36,6 +36,7 @@ Wallpaper is managed separately via **swaybg**.
 | `Mod+F` | Yazi file manager (in terminal) |
 | `Mod+Shift+F` | Nautilus file manager |
 | `Mod+Space` | Noctalia launcher |
+| `Mod+;` | Emoji picker (rofimoji) |
 
 ### Window Controls
 | Keybinding | Action |
@@ -75,7 +76,8 @@ Wallpaper is managed separately via **swaybg**.
 | `Mod+C` | Clipboard history |
 | `Mod+Shift+C` | Reload niri config |
 | `Mod+Shift+Q` | Quit niri |
-| `Mod+Shift+/` | Show hotkey overlay |
+| `Mod+/` | Show keybindings help (rofi) |
+| `Mod+Shift+/` | Show niri hotkey overlay (basic) |
 
 ### Screenshots
 | Keybinding | Action |
@@ -126,6 +128,13 @@ binds = {
 };
 ```
 
+**IMPORTANT:** When adding or modifying keybindings, you MUST also update the keybindings help script:
+- **Script location:** `users/jordangarrison/configs/hypr/scripts/niri-keybinds-help.sh`
+- **Why:** Niri doesn't expose keybindings via IPC (unlike Hyprland), so the help script maintains a static list
+- **Trigger:** `Mod+/` shows the help via rofi
+
+Keep both files in sync to ensure users can discover all available keybindings.
+
 ## Testing Changes
 
 ```bash
@@ -162,6 +171,7 @@ Check if noctalia-shell is in spawn-at-startup and the package is installed from
 
 - `modules/nixos/niri-desktop.nix` - System-level niri configuration
 - `flake.nix` - Niri and noctalia flake inputs
+- `users/jordangarrison/configs/hypr/scripts/niri-keybinds-help.sh` - Keybindings help script (keep in sync!)
 - `docs/adr/003-add-niri-scrolling-compositor.md` - Architecture decision record
 
 ## Resources

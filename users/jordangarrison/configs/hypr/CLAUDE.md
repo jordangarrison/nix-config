@@ -104,6 +104,7 @@ Main modifier: `SUPER` (Meta/Windows key)
 |---------|--------|
 | `Super+Return` | Terminal (WezTerm) |
 | `Super+Space` | App launcher (Walker) |
+| `Super+;` | Emoji picker (rofimoji) |
 | `Super+B` | Browser (Brave) |
 | `Super+E` | Editor (Emacs) |
 | `Super+N` | Notes (Obsidian) |

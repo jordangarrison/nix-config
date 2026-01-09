@@ -9,6 +9,9 @@ let
   hostname = if osConfig != null then osConfig.networking.hostName else null;
 in
 {
+  # Import shared desktop tools (satty, screenshot tools, clipboard, etc.)
+  imports = [ ../desktop-tools ];
+
   home.packages = with pkgs; [
     # Core Hyprland tools
     hyprpaper
@@ -21,30 +24,15 @@ in
 
     # Notification daemon
     mako
-    libnotify
 
     # Application launcher
     walker
-
-    # Screenshot tools
-    grim
-    slurp
-    satty
-
-    # Clipboard
-    wl-clipboard
-    cliphist
 
     # Rofi launcher
     rofi
 
     # File manager (terminal)
     yazi
-
-    # Utilities
-    brightnessctl
-    playerctl
-    pamixer
 
     # System tray applets
     networkmanagerapplet
@@ -99,9 +87,6 @@ in
 
     # Mako notifications
     "mako/config".source = config.lib.file.mkOutOfStoreSymlink "${hyprConfigPath}/mako/config";
-
-    # Satty screenshot tool
-    "satty/config.toml".source = config.lib.file.mkOutOfStoreSymlink "${hyprConfigPath}/satty/config.toml";
 
     # Walker launcher
     "walker/config.toml".source = config.lib.file.mkOutOfStoreSymlink "${hyprConfigPath}/walker/config.toml";

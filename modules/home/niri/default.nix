@@ -10,30 +10,16 @@ let
   # Get hostname from osConfig if available (NixOS), otherwise use null
   hostname = if osConfig != null then osConfig.networking.hostName else null;
 in {
+  # Import shared desktop tools (satty, screenshot tools, clipboard, etc.)
+  imports = [ ../desktop-tools ];
+
   # Packages needed for niri desktop environment
   home.packages = with pkgs; [
     # Noctalia shell (unified bar, notifications, launcher, lock screen, power menu)
     inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default
 
-    # Notification tools (for notify-send compatibility)
-    libnotify
-
-    # Screenshot tools
-    grim
-    slurp
-    satty
-
-    # Clipboard
-    wl-clipboard
-    cliphist
-
     # File manager (terminal)
     yazi
-
-    # Utilities
-    brightnessctl
-    playerctl
-    pamixer
 
     # System tray applets
     networkmanagerapplet
@@ -280,7 +266,7 @@ in {
       "Mod+Shift+F".action.spawn = "nautilus";
       "Mod+Space".action.spawn =
         [ "noctalia-shell" "ipc" "call" "launcher" "toggle" ];
-      # Note: Noctalia doesn't have a built-in emoji picker, removed for now
+      "Mod+Semicolon".action.spawn = "rofimoji";
 
       # ================
       # WINDOW CONTROLS
@@ -445,6 +431,8 @@ in {
       "Mod+Shift+C".action.spawn = [ "niri" "msg" "action" "reload-config" ];
       "Mod+Shift+Q".action.quit = [ ];
       "Mod+Shift+Slash".action.show-hotkey-overlay = [ ];
+      "Mod+Slash".action.spawn =
+        [ "sh" "-c" "${scriptsPath}/niri-keybinds-help.sh" ];
     };
 
     # Animations
@@ -486,9 +474,6 @@ in {
     screenshot-path =
       "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png";
   };
-
-  # Ensure screenshots directory exists
-  home.file."Pictures/Screenshots/.keep".text = "";
 
   # Noctalia-shell configuration (quickshell-based)
   # Symlink to repo for live editing and version control

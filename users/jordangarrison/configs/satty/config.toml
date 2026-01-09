@@ -24,13 +24,9 @@ annotation-size-factor = 2
 family = "FiraCode Nerd Font"
 style = "Regular"
 
-[color]
-# Default annotation colors (Rose Pine palette)
-# These are the colors available in the color picker
-
-# Primary colors for annotations
-first = "#c4a7e7"   # iris
-second = "#eb6f92"  # love
-third = "#9ccfd8"   # foam
-fourth = "#f6c177"  # gold
-fifth = "#31748f"   # pine
+# Color palette format changed in newer satty versions
+# Using default palette for now
+# Custom palette can be added with:
+# [color-palette]
+# palette = "..."
+# custom = { first = "#...", second = "#...", ... }

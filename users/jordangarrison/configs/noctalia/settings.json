@@ -95,33 +95,9 @@
                     "showApplications": false,
                     "showLabelsOnlyWhenOccupied": true,
                     "unfocusedIconsOpacity": 1
-                },
-                {
-                    "colorizeIcons": false,
-                    "hideMode": "hidden",
-                    "id": "ActiveWindow",
-                    "maxWidth": 180,
-                    "scrollingMode": "hover",
-                    "showIcon": true,
-                    "useFixedWidth": false
                 }
             ],
             "right": [
-                {
-                    "compactMode": true,
-                    "diskPath": "/",
-                    "id": "SystemMonitor",
-                    "showCpuTemp": true,
-                    "showCpuUsage": true,
-                    "showDiskUsage": false,
-                    "showGpuTemp": false,
-                    "showLoadAverage": false,
-                    "showMemoryAsPercent": false,
-                    "showMemoryUsage": true,
-                    "showNetworkStats": false,
-                    "useMonospaceFont": true,
-                    "usePrimaryColor": false
-                },
                 {
                     "id": "ScreenRecorder"
                 },

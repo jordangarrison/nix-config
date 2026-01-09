@@ -131,7 +131,7 @@ Using FiraCode Nerd Font for programming with ligatures and icon support.
 
 #+begin_src emacs-lisp
 (setq doom-font (font-spec :family "Fira Code"
-                           :size (if (string= (system-name) "endeavour") 20 13)
+                           :size (if (member (system-name) '("endeavour" "opportunity")) 20 13)
                            :weight 'semibold))
 #+end_src
 

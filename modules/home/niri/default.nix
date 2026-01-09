@@ -71,34 +71,49 @@ in {
       };
     };
 
-    # Output (monitor) configuration for endeavour
-    outputs = lib.mkIf (hostname == "endeavour") {
-      "DP-3" = {
-        mode = {
-          width = 3840;
-          height = 2160;
-          refresh = 60.0;
+    # Output (monitor) configuration
+    outputs = lib.mkMerge [
+      # endeavour: dual monitor desktop setup
+      (lib.mkIf (hostname == "endeavour") {
+        "DP-3" = {
+          mode = {
+            width = 3840;
+            height = 2160;
+            refresh = 60.0;
+          };
+          scale = 1.5;
+          position = {
+            x = 0;
+            y = 0;
+          };
         };
-        scale = 1.5;
-        position = {
-          x = 0;
-          y = 0;
+        "DP-4" = {
+          mode = {
+            width = 2560;
+            height = 1440;
+            refresh = 60.0;
+          };
+          scale = 1.333;
+          position = {
+            x = 2560;
+            y = 0;
+          };
+          transform.rotation = 270; # Portrait rotation
         };
-      };
-      "DP-4" = {
-        mode = {
-          width = 2560;
-          height = 1440;
-          refresh = 60.0;
+      })
+      # opportunity: Framework 12 Laptop with single eDP-1 display
+      (lib.mkIf (hostname == "opportunity") {
+        "eDP-1" = {
+          # Framework 12 internal display: 2256x1504@60Hz
+          # Using auto-detection for resolution
+          scale = 1.5; # Good balance for high-DPI laptop display
+          position = {
+            x = 0;
+            y = 0;
+          };
         };
-        scale = 1.333;
-        position = {
-          x = 2560;
-          y = 0;
-        };
-        transform.rotation = 270; # Portrait rotation
-      };
-    };
+      })
+    ];
 
     # Layout configuration
     layout = {
@@ -178,19 +193,29 @@ in {
       XDG_CURRENT_DESKTOP = "niri";
     };
 
-    # Workspaces - all named workspaces on primary monitor (DP-3)
-    # Secondary monitor (DP-4) gets dynamic workspaces only
-    workspaces = {
-      "1" = { open-on-output = "DP-3"; };
-      "2" = { open-on-output = "DP-3"; };
-      "3" = { open-on-output = "DP-3"; };
-      "4" = { open-on-output = "DP-3"; };
-      "5" = { open-on-output = "DP-3"; };
-      "6" = { open-on-output = "DP-3"; };
-      "7" = { open-on-output = "DP-3"; };
-      "8" = { open-on-output = "DP-3"; };
-      "9" = { open-on-output = "DP-3"; };
-      "10" = { open-on-output = "DP-3"; };
+    # Workspaces configuration - hostname-aware
+    # endeavour: all named workspaces on primary monitor (DP-3), DP-4 gets dynamic workspaces
+    # opportunity: all named workspaces on eDP-1 (Framework internal display)
+    workspaces = let
+      # Determine primary output based on hostname
+      primaryOutput =
+        if hostname == "endeavour" then
+          "DP-3"
+        else if hostname == "opportunity" then
+          "eDP-1"
+        else
+          "eDP-1"; # fallback
+    in {
+      "1" = { open-on-output = primaryOutput; };
+      "2" = { open-on-output = primaryOutput; };
+      "3" = { open-on-output = primaryOutput; };
+      "4" = { open-on-output = primaryOutput; };
+      "5" = { open-on-output = primaryOutput; };
+      "6" = { open-on-output = primaryOutput; };
+      "7" = { open-on-output = primaryOutput; };
+      "8" = { open-on-output = primaryOutput; };
+      "9" = { open-on-output = primaryOutput; };
+      "10" = { open-on-output = primaryOutput; };
     };
 
     # Window rules
@@ -455,4 +480,29 @@ in {
 
   # Ensure screenshots directory exists
   home.file."Pictures/Screenshots/.keep".text = "";
+
+  # Noctalia-shell configuration (quickshell-based)
+  # Symlink to repo for live editing and version control
+  xdg.configFile = {
+    "noctalia/settings.json".source =
+      config.lib.file.mkOutOfStoreSymlink
+        "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/noctalia/settings.json";
+
+    "noctalia/colors.json".source =
+      config.lib.file.mkOutOfStoreSymlink
+        "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/noctalia/colors.json";
+
+    "noctalia/plugins.json".source =
+      config.lib.file.mkOutOfStoreSymlink
+        "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/noctalia/plugins.json";
+
+    # Directories for custom colorschemes and plugins
+    "noctalia/colorschemes".source =
+      config.lib.file.mkOutOfStoreSymlink
+        "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/noctalia/colorschemes";
+
+    "noctalia/plugins".source =
+      config.lib.file.mkOutOfStoreSymlink
+        "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/noctalia/plugins";
+  };
 }

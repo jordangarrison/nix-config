@@ -57,6 +57,12 @@ in
     wlogout
   ];
 
+  # Disable mako systemd service - let desktop autostart handle it
+  # This prevents conflicts when running multiple desktops (Hyprland/Niri)
+  systemd.user.services.mako = {
+    Install.WantedBy = lib.mkForce [ ];
+  };
+
   # Yazi file manager configuration
   programs.yazi = {
     enable = true;

@@ -9,6 +9,12 @@
     ../../modules/home/virt-manager/config.nix
   ];
 
+  # KDE Connect for Hyprland/Niri (GSConnect handles GNOME)
+  services.kdeconnect = {
+    enable = true;
+    indicator = true;
+  };
+
   # Install brave.
   programs.brave = if pkgs.stdenv.isLinux then {
     enable = true;

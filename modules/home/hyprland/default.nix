@@ -28,8 +28,8 @@ in
     # Application launcher
     walker
 
-    # Rofi launcher
-    rofi
+    # Emoji picker (Hyprland-specific, Niri uses noctalia)
+    rofimoji
 
     # File manager (terminal)
     yazi
@@ -91,9 +91,7 @@ in
     # Walker launcher
     "walker/config.toml".source = config.lib.file.mkOutOfStoreSymlink "${hyprConfigPath}/walker/config.toml";
 
-    # Rofi launcher
-    "rofi/config.rasi".source = config.lib.file.mkOutOfStoreSymlink "${hyprConfigPath}/rofi/config.rasi";
-    "rofi/theme.rasi".source = config.lib.file.mkOutOfStoreSymlink "${hyprConfigPath}/rofi/theme.rasi";
+    # Note: rofi config now handled by shared rofi module (via desktop-tools)
   };
 
   # Wallpapers directory symlink

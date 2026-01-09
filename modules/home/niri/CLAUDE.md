@@ -19,8 +19,12 @@ Currently using **noctalia-shell** for unified desktop shell:
 - Status bar (replaces waybar)
 - Notifications (replaces mako)
 - Application launcher (replaces walker/rofi)
+- Emoji picker (replaces rofimoji)
+- Clipboard history (replaces rofi+cliphist script)
 - Lock screen (replaces swaylock)
 - Power menu (replaces wlogout)
+
+**Note:** Rofi is only used for keybindings help display (`Mod+/`).
 
 Wallpaper is managed separately via **swaybg**.
 
@@ -36,7 +40,7 @@ Wallpaper is managed separately via **swaybg**.
 | `Mod+F` | Yazi file manager (in terminal) |
 | `Mod+Shift+F` | Nautilus file manager |
 | `Mod+Space` | Noctalia launcher |
-| `Mod+;` | Emoji picker (rofimoji) |
+| `Mod+;` | Emoji picker (noctalia) |
 
 ### Window Controls
 | Keybinding | Action |
@@ -73,7 +77,7 @@ Wallpaper is managed separately via **swaybg**.
 | Keybinding | Action |
 |------------|--------|
 | `Mod+Ctrl+Alt+L` | Lock screen (noctalia) |
-| `Mod+C` | Clipboard history |
+| `Mod+C` | Clipboard history (noctalia) |
 | `Mod+Shift+C` | Reload niri config |
 | `Mod+Shift+Q` | Quit niri |
 | `Mod+/` | Show keybindings help (rofi) |
@@ -123,8 +127,10 @@ binds = {
   # Niri actions (empty list for no-arg actions)
   "Mod+Z".action.close-window = [ ];
 
-  # Noctalia IPC
+  # Noctalia IPC commands
   "Mod+Space".action.spawn = [ "noctalia-shell" "ipc" "call" "launcher" "toggle" ];
+  "Mod+Semicolon".action.spawn = [ "noctalia-shell" "ipc" "call" "launcher" "emoji" ];
+  "Mod+C".action.spawn = [ "noctalia-shell" "ipc" "call" "launcher" "clipboard" ];
 };
 ```
 

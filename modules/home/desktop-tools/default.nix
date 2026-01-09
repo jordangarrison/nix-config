@@ -6,6 +6,10 @@ let
 in {
   # Shared desktop tools for Wayland compositors (Hyprland, Niri, etc.)
 
+  imports = [
+    ../rofi  # Minimal rofi for dmenu-style selection (keybinds help, etc.)
+  ];
+
   home.packages = with pkgs; [
     # Screenshot tools
     grim
@@ -16,8 +20,7 @@ in {
     wl-clipboard
     cliphist
 
-    # Emoji picker
-    rofimoji
+    # Note: rofimoji removed - Niri uses noctalia emoji, Hyprland adds it separately
 
     # Notifications (for notify-send compatibility)
     libnotify

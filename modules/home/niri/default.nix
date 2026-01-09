@@ -266,7 +266,8 @@ in {
       "Mod+Shift+F".action.spawn = "nautilus";
       "Mod+Space".action.spawn =
         [ "noctalia-shell" "ipc" "call" "launcher" "toggle" ];
-      "Mod+Semicolon".action.spawn = "rofimoji";
+      "Mod+Semicolon".action.spawn =
+        [ "noctalia-shell" "ipc" "call" "launcher" "emoji" ];
 
       # ================
       # WINDOW CONTROLS
@@ -427,7 +428,8 @@ in {
       # ================
       "Mod+Ctrl+Alt+L".action.spawn =
         [ "noctalia-shell" "ipc" "call" "lock" "lock" ];
-      "Mod+C".action.spawn = [ "sh" "-c" "${scriptsPath}/clipboard.sh" ];
+      "Mod+C".action.spawn =
+        [ "noctalia-shell" "ipc" "call" "launcher" "clipboard" ];
       "Mod+Shift+C".action.spawn = [ "niri" "msg" "action" "reload-config" ];
       "Mod+Shift+Q".action.quit = [ ];
       "Mod+Shift+Slash".action.show-hotkey-overlay = [ ];

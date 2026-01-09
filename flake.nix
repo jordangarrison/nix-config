@@ -128,6 +128,7 @@
             ./modules/nixos/lan.nix
             ./modules/nixos/gnome-desktop.nix
             ./modules/nixos/hyprland-desktop.nix
+            ./modules/nixos/niri-desktop.nix
             { gbg-config.gnome-tweaks.machine-type = "laptop"; }
             ./modules/nixos/fonts.nix
             ./modules/nixos/audio/pipewire.nix
@@ -164,6 +165,10 @@
                 enable = true;
                 homeDirectory = "/home/isla";
               };
+
+              # Import niri home module for jordangarrison on opportunity
+              home-manager.users.jordangarrison.imports =
+                [ ./modules/home/niri ];
 
               # Enable virtualization with virt-manager
               virtualization.virt-manager = {

@@ -42,6 +42,9 @@
   # Localsend for transferring files
   programs.localsend.enable = true;
 
+  # KDE Connect for device connectivity (works with GSConnect on GNOME)
+  programs.kdeconnect.enable = true;
+
   # Common system packages that should be available everywhere
   environment.systemPackages = with pkgs; [ vim wget curl brave ];
 

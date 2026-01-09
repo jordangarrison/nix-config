@@ -21,5 +21,19 @@
     swayidle # Idle management
   ];
 
-  # XDG portal is handled by niri-flake (uses xdg-desktop-portal-gnome)
+  # XDG portal configuration for screen sharing support
+  # Based on niri's recommended niri-portals.conf
+  xdg.portal = {
+    enable = true;
+    extraPortals = [
+      pkgs.xdg-desktop-portal-gnome
+      pkgs.xdg-desktop-portal-gtk
+    ];
+    config = {
+      niri = {
+        default = [ "gnome" "gtk" ];
+        "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
+      };
+    };
+  };
 }

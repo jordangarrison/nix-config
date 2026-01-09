@@ -1,4 +1,4 @@
-{ config, pkgs, lib, inputs, osConfig ? null, ... }:
+{ config, pkgs, lib, inputs, osConfig ? null, swapSuperAlt ? false, ... }:
 
 let
   homeDirectory = config.home.homeDirectory;
@@ -51,7 +51,13 @@ in {
     # Input configuration
     input = {
       keyboard = {
-        xkb = { layout = "us"; };
+        xkb = {
+          layout = "us";
+          options = if swapSuperAlt then
+            "altwin:swap_alt_win,lv3:ralt_switch"
+          else
+            "lv3:ralt_switch";
+        };
         repeat-delay = 300;
         repeat-rate = 50;
       };

@@ -162,8 +162,11 @@ in {
         ];
       }
       # Noctalia shell (bar, notifications, launcher, lock screen, power menu)
+      # Only starts when running Niri (for multi-desktop support)
       {
-        command = [ "noctalia-shell" ];
+        command = [
+          "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/tools/scripts/start-noctalia-if-niri.sh"
+        ];
       }
       # Clipboard manager
       {

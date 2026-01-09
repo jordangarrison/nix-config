@@ -30,29 +30,29 @@
     },
     "bar": {
         "backgroundOpacity": 0,
-        "capsuleOpacity": 0,
+        "capsuleOpacity": 1,
         "density": "default",
         "exclusive": true,
-        "floating": false,
+        "floating": true,
         "marginHorizontal": 0.25,
         "marginVertical": 0.25,
         "monitors": [
         ],
         "outerCorners": true,
         "position": "top",
-        "showCapsule": true,
+        "showCapsule": false,
         "showOutline": false,
-        "useSeparateOpacity": true,
+        "useSeparateOpacity": false,
         "widgets": {
             "center": [
                 {
                     "colorizeDistroLogo": false,
-                    "colorizeSystemIcon": "none",
+                    "colorizeSystemIcon": "primary",
                     "customIconPath": "",
                     "enableColorization": false,
-                    "icon": "settings",
+                    "icon": "components",
                     "id": "ControlCenter",
-                    "useDistroLogo": true
+                    "useDistroLogo": false
                 },
                 {
                     "customFont": "",
@@ -117,12 +117,11 @@
                     "showUnreadBadge": true
                 },
                 {
-                    "deviceNativePath": "",
                     "displayMode": "onhover",
                     "hideIfNotDetected": true,
                     "id": "Battery",
-                    "showNoctaliaPerformance": false,
-                    "showPowerProfiles": false,
+                    "showNoctaliaPerformance": true,
+                    "showPowerProfiles": true,
                     "warningThreshold": 30
                 },
                 {
@@ -138,7 +137,7 @@
     },
     "brightness": {
         "brightnessStep": 5,
-        "enableDdcSupport": false,
+        "enableDdcSupport": true,
         "enforceMinimum": true
     },
     "calendar": {
@@ -162,12 +161,12 @@
         ]
     },
     "colorSchemes": {
-        "darkMode": false,
+        "darkMode": true,
         "manualSunrise": "06:30",
         "manualSunset": "18:30",
         "matugenSchemeType": "scheme-fruit-salad",
         "predefinedScheme": "Rose Pine",
-        "schedulingMode": "location",
+        "schedulingMode": "off",
         "useWallpaperColors": false
     },
     "controlCenter": {
@@ -211,7 +210,7 @@
                     "id": "ScreenRecorder"
                 },
                 {
-                    "id": "WallpaperSelector"
+                    "id": "DarkMode"
                 }
             ],
             "right": [
@@ -246,7 +245,7 @@
         "backgroundOpacity": 1,
         "colorizeIcons": false,
         "deadOpacity": 0.6,
-        "displayMode": "auto_hide",
+        "displayMode": "always_visible",
         "enabled": false,
         "floatingRatio": 1,
         "inactiveIndicators": false,
@@ -254,14 +253,19 @@
         ],
         "onlySameOutput": true,
         "pinnedApps": [
+            "todoist",
+            "emacsclient",
+            "btop",
+            "org.gnome.Calculator",
+            "1password"
         ],
         "pinnedStatic": false,
         "size": 1
     },
     "general": {
-        "allowPanelsOnScreenWithoutBar": true,
+        "allowPanelsOnScreenWithoutBar": false,
         "animationDisabled": false,
-        "animationSpeed": 1,
+        "animationSpeed": 1.5,
         "avatarImage": "/home/jordangarrison/.face",
         "boxRadiusRatio": 1,
         "compactLockScreen": false,
@@ -323,15 +327,15 @@
         "nightTemp": "4015"
     },
     "notifications": {
-        "backgroundOpacity": 0.6,
-        "criticalUrgencyDuration": 15,
+        "backgroundOpacity": 0.4,
+        "criticalUrgencyDuration": 8,
         "enableKeyboardLayoutToast": true,
         "enabled": true,
         "location": "top_right",
-        "lowUrgencyDuration": 3,
+        "lowUrgencyDuration": 2,
         "monitors": [
         ],
-        "normalUrgencyDuration": 8,
+        "normalUrgencyDuration": 4,
         "overlayLayer": true,
         "respectExpireTimeout": false,
         "saveToHistory": {
@@ -366,10 +370,10 @@
     },
     "screenRecorder": {
         "audioCodec": "opus",
-        "audioSource": "default_output",
+        "audioSource": "both",
         "colorRange": "limited",
         "copyToClipboard": false,
-        "directory": "/home/jordangarrison/Videos",
+        "directory": "/home/jordangarrison/Videos/Screencasts",
         "frameRate": 60,
         "quality": "very_high",
         "showCursor": true,
@@ -516,7 +520,7 @@
         "wallhavenCategories": "111",
         "wallhavenOrder": "desc",
         "wallhavenPurity": "100",
-        "wallhavenQuery": "mountain snow top",
+        "wallhavenQuery": "dark mountain",
         "wallhavenRatios": "",
         "wallhavenResolutionHeight": "",
         "wallhavenResolutionMode": "atleast",

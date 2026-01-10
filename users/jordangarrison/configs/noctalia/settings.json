@@ -257,7 +257,11 @@
             "emacsclient",
             "btop",
             "org.gnome.Calculator",
-            "1password"
+            "1password",
+            "com.github.xournalpp.xournalpp",
+            "yazi",
+            "Session",
+            "brave-browser"
         ],
         "pinnedStatic": false,
         "size": 1

@@ -1,12 +1,4 @@
-{
-  config,
-  pkgs,
-  lib,
-  username,
-  homeDirectory,
-  inputs,
-  ...
-}:
+{ config, pkgs, lib, username, homeDirectory, inputs, ... }:
 
 let
   vscodeScriptPath = pkgs.writeTextFile {
@@ -23,17 +15,13 @@ let
   };
   # Use pgtk variant on Linux for native Wayland support
   emacsPackage = if pkgs.stdenv.isLinux then pkgs.emacs-pgtk else pkgs.emacs;
-in
-{
+in {
   imports = [ ./tools/nvim/nvf.nix ];
 
   # Nix settings (required for standalone Home Manager on non-NixOS systems)
   # Use mkDefault so NixOS Home Manager module can override with system's nix package
   nix.package = lib.mkDefault pkgs.nix;
-  nix.settings.experimental-features = [
-    "nix-command"
-    "flakes"
-  ];
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
@@ -51,12 +39,9 @@ in
   home.stateVersion = "21.11";
 
   # PATH management
-  home.sessionPath = [
-    "$HOME/.local/bin"
-    "$HOME/.emacs.d/bin"
-    "$HOME/.cargo/bin"
-  ]
-  ++ lib.optionals pkgs.stdenv.isDarwin [ "/opt/homebrew/bin" ];
+  home.sessionPath =
+    [ "$HOME/.local/bin" "$HOME/.emacs.d/bin" "$HOME/.cargo/bin" ]
+    ++ lib.optionals pkgs.stdenv.isDarwin [ "/opt/homebrew/bin" ];
 
   # Environment variables
   home.sessionVariables = {
@@ -73,8 +58,7 @@ in
     package = inputs.claude-code.packages.${pkgs.system}.default;
   };
 
-  home.packages =
-    with pkgs;
+  home.packages = with pkgs;
     [
       # nix utilities
       nh
@@ -89,7 +73,6 @@ in
       todoist
       master.warp-terminal
       wezterm
-      zed-editor
       # doom-emacs
 
       # Utilities
@@ -184,60 +167,51 @@ in
       inputs.aws-use-sso.packages.${pkgs.system}.default
 
       # GCP - using stable due to tkinter dependency issue in unstable
-      (stable.google-cloud-sdk.withExtraComponents [
-        stable.google-cloud-sdk.components.gke-gcloud-auth-plugin
-      ])
-    ]
-    ++ (
-      if pkgs.stdenv.isDarwin then
-        [
-          devenv
-          glibtool
-        ]
-      else
-        [
-          master.antigravity
-          aws-sso-cli
-          bibletime
-          comixcursors
-          stable.copyq # Broken in latest nix-unstable
-          discord
-          deno
-          dig
-          # emacs
-          emacsPackages.sqlite3
-          freelens-bin
-          glibc
-          gnaural
-          grip
-          obs-studio
-          pavucontrol
-          pinentry-gnome3
-          remmina
-          #ruby
-          ruby
-          rails-new
-          rubyfmt
-          ruby-lsp
-          rubyPackages.pry
-          rubyPackages.rails
-          # rubyPackages.railties # Broken in latest update
-          rubyPackages.solargraph
-          stable.slack
-          vial
-          wally-cli
-          xcb-util-cursor
-          xclip
+      (stable.google-cloud-sdk.withExtraComponents
+        [ stable.google-cloud-sdk.components.gke-gcloud-auth-plugin ])
+    ] ++ (if pkgs.stdenv.isDarwin then [
+      devenv
+      glibtool
+    ] else [
+      master.antigravity
+      aws-sso-cli
+      bibletime
+      comixcursors
+      stable.copyq # Broken in latest nix-unstable
+      discord
+      deno
+      dig
+      # emacs
+      emacsPackages.sqlite3
+      freelens-bin
+      glibc
+      gnaural
+      grip
+      obs-studio
+      pavucontrol
+      pinentry-gnome3
+      remmina
+      #ruby
+      ruby
+      rails-new
+      rubyfmt
+      ruby-lsp
+      rubyPackages.pry
+      rubyPackages.rails
+      # rubyPackages.railties # Broken in latest update
+      rubyPackages.solargraph
+      stable.slack
+      vial
+      wally-cli
+      xcb-util-cursor
+      xclip
 
-          # Flake input packages
-          inputs.hubctl.packages.${pkgs.system}.default
-          inputs.warp-preview.packages.${pkgs.system}.default
-        ]
-    );
+      # Flake input packages
+      inputs.hubctl.packages.${pkgs.system}.default
+      inputs.warp-preview.packages.${pkgs.system}.default
+    ]);
 
-  programs.gpg = {
-    enable = pkgs.stdenv.isLinux;
-  };
+  programs.gpg = { enable = pkgs.stdenv.isLinux; };
 
   # services.gpg-agent = { enable = pkgs.stdenv.isLinux; };
 
@@ -290,13 +264,8 @@ in
 
   programs.gh = {
     enable = true;
-    settings = {
-      git_protocol = "ssh";
-    };
-    extensions = with pkgs; [
-      gh-copilot
-      gh-dash
-    ];
+    settings = { git_protocol = "ssh"; };
+    extensions = with pkgs; [ gh-copilot gh-dash ];
   };
 
   programs.git = {
@@ -331,9 +300,12 @@ in
         st = "status -sb";
         a = "add -p";
         aa = "add --all";
-        plog = "log --graph --pretty='format:%C(red)%d%C(reset) %C(yellow)%h%C(reset) %ar %C(green)%aN%C(reset) %s'";
-        lg = "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit";
-        tlog = "log --stat --since='1 Day Ago' --graph --pretty=oneline --abbrev-commit --date=relative";
+        plog =
+          "log --graph --pretty='format:%C(red)%d%C(reset) %C(yellow)%h%C(reset) %ar %C(green)%aN%C(reset) %s'";
+        lg =
+          "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit";
+        tlog =
+          "log --stat --since='1 Day Ago' --graph --pretty=oneline --abbrev-commit --date=relative";
         rank = "shortlog -sn --no-merges";
         bdm = "!git branch --merged | grep -v '*' | xargs -n 1 git branch -d";
         aliases = "!git config --list | grep alias";
@@ -341,16 +313,12 @@ in
     };
   };
 
-  programs.tmux = {
-    enable = true;
-  };
+  programs.tmux = { enable = true; };
 
   programs.vim = {
     enable = true;
     plugins = with pkgs.vimPlugins; [ vim-airline ];
-    settings = {
-      ignorecase = true;
-    };
+    settings = { ignorecase = true; };
     extraConfig = ''
       set mouse=a
     '';
@@ -380,12 +348,10 @@ in
     enable = true;
     enableZshIntegration = true;
     defaultCommand = "fd --type f";
-    defaultOptions = [
-      "--height 40%"
-      "--border"
-    ];
+    defaultOptions = [ "--height 40%" "--border" ];
     fileWidgetCommand = "fd --type f";
-    fileWidgetOptions = [ "--preview 'bat --style=numbers --color=always --line-range :500 {}'" ];
+    fileWidgetOptions =
+      [ "--preview 'bat --style=numbers --color=always --line-range :500 {}'" ];
     changeDirWidgetCommand = "fd --type d";
   };
 
@@ -411,7 +377,8 @@ in
     # Editors (use emacs-pgtk on Linux for native Wayland support)
     ec = "${emacsPackage}/bin/emacsclient -nw";
     e = "${emacsPackage}/bin/emacsclient -nw";
-    ee = "${emacsPackage}/bin/emacsclient -nw $(${pkgs.fd}/bin/fd --type f | ${pkgs.fzf}/bin/fzf --preview '${pkgs.bat}/bin/bat --style=numbers --color=always --line-range :500 {}')";
+    ee =
+      "${emacsPackage}/bin/emacsclient -nw $(${pkgs.fd}/bin/fd --type f | ${pkgs.fzf}/bin/fzf --preview '${pkgs.bat}/bin/bat --style=numbers --color=always --line-range :500 {}')";
     eg = "${emacsPackage}/bin/emacsclient";
     n = "nvim";
     view = "vim -R";
@@ -429,8 +396,10 @@ in
     gss = "git status --short";
     pu = "git push -u origin $(git rev-parse --abbrev-ref HEAD)";
     p = "git pull";
-    gd = "${pkgs.git}/bin/git diff --color | ${pkgs.diff-so-fancy}/bin/diff-so-fancy | less --tabs=4 -RFX";
-    gdca = "${pkgs.git}/bin/git diff --color --cached | ${pkgs.diff-so-fancy}/bin/diff-so-fancy | less --tabs=4 -RFX";
+    gd =
+      "${pkgs.git}/bin/git diff --color | ${pkgs.diff-so-fancy}/bin/diff-so-fancy | less --tabs=4 -RFX";
+    gdca =
+      "${pkgs.git}/bin/git diff --color --cached | ${pkgs.diff-so-fancy}/bin/diff-so-fancy | less --tabs=4 -RFX";
 
     # Kubernetes
     k = "kubectl";
@@ -452,18 +421,19 @@ in
     # SSH config with proper permissions fix
     ".ssh/config_source" = {
       source = ./configs/ssh/config;
-      onChange = "cat ~/.ssh/config_source > ~/.ssh/config && chmod 600 ~/.ssh/config";
+      onChange =
+        "cat ~/.ssh/config_source > ~/.ssh/config && chmod 600 ~/.ssh/config";
     };
 
     # doom emacs (linked directly to repo, not via Nix store)
-    ".doom.d/init.el".source =
-      config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/tools/doom.d/init.el";
-    ".doom.d/packages.el".source =
-      config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/tools/doom.d/packages.el";
-    ".doom.d/config.org".source =
-      config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/tools/doom.d/config.org";
-    ".doom.d/themes".source =
-      config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/tools/doom.d/themes";
+    ".doom.d/init.el".source = config.lib.file.mkOutOfStoreSymlink
+      "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/tools/doom.d/init.el";
+    ".doom.d/packages.el".source = config.lib.file.mkOutOfStoreSymlink
+      "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/tools/doom.d/packages.el";
+    ".doom.d/config.org".source = config.lib.file.mkOutOfStoreSymlink
+      "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/tools/doom.d/config.org";
+    ".doom.d/themes".source = config.lib.file.mkOutOfStoreSymlink
+      "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/tools/doom.d/themes";
     ".emacs.d/init.el".text = ''
       (load "default.el")
     '';
@@ -482,7 +452,8 @@ in
     '';
 
     # Alacritty
-    ".config/alacritty/alacritty.toml".source = ./tools/alacritty/alacritty.toml;
+    ".config/alacritty/alacritty.toml".source =
+      ./tools/alacritty/alacritty.toml;
 
     # Claude Desktop
     # "Library/Application Support/Claude/claude_desktop_config.json" =
@@ -494,9 +465,10 @@ in
     ".config/espanso/match/base.yml" = lib.mkIf (!pkgs.stdenv.isDarwin) {
       source = ./tools/espanso/match/base.yml;
     };
-    "Library/Application Support/espanso/match/base.yml" = lib.mkIf pkgs.stdenv.isDarwin {
-      source = ./tools/espanso/match/base.yml;
-    };
+    "Library/Application Support/espanso/match/base.yml" =
+      lib.mkIf pkgs.stdenv.isDarwin {
+        source = ./tools/espanso/match/base.yml;
+      };
 
     # Ghostty
     ".config/ghostty/config".source = ./tools/ghostty/config;
@@ -507,8 +479,8 @@ in
     # };
 
     # Wezterm (linked directly to repo, not via Nix store)
-    ".config/wezterm/wezterm.lua".source =
-      config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/tools/wezterm/wezterm.lua";
+    ".config/wezterm/wezterm.lua".source = config.lib.file.mkOutOfStoreSymlink
+      "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/tools/wezterm/wezterm.lua";
 
     # Scripts
     ".local/bin/tmux-cht.sh" = {

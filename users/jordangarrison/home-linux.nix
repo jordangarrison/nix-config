@@ -5,8 +5,9 @@
     ./home.nix
     ../../modules/home/hyprland
     ../../modules/home/brave/apps.nix
-    ../../modules/home/alacritty/apps.nix
+    ../../modules/home/wezterm
     ../../modules/home/virt-manager/config.nix
+    ../../modules/home/languages
   ];
 
   # KDE Connect for Hyprland/Niri (GSConnect handles GNOME)
@@ -156,7 +157,7 @@
     }
   ];
 
-  alacrittyApps.apps = [
+  weztermApps.apps = [
     {
       name = "btop";
       command = "btop";
@@ -164,8 +165,8 @@
       icon = ../../icons/btop.png;
     }
     {
-      name = "sshemacs endeavour";
-      command = "ssh -t endeavour 'emacsclient -nw .'";
+      name = "SSH Endeavour";
+      sshHost = "endeavour";
       categories = [ "System" ];
       icon = ../../icons/btop.png;
     }

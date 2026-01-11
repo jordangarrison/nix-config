@@ -259,6 +259,7 @@ in {
       # PROGRAM LAUNCHERS
       # ==================
       "Mod+Return".action.spawn = "wezterm";
+      "Mod+Shift+Return".action.spawn = [ "wezterm" "ssh" "endeavour" ];
       "Mod+B".action.spawn = "brave";
       "Mod+E".action.spawn = [ "emacsclient" "-c" ];
       "Mod+N".action.spawn = "obsidian";

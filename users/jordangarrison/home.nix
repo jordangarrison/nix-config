@@ -65,13 +65,9 @@ in {
       devbox
 
       # Apps
-      alacritty
       arandr
-      mailspring
       spotify
-      sqlite
       todoist
-      master.warp-terminal
       wezterm
       # doom-emacs
 
@@ -94,11 +90,8 @@ in {
       cmake
       diff-so-fancy
       fd
-      git
       gnumake
       gnutls
-      # gptcommit
-      httpie
       jq
       kubectl
       kubernetes-helm-wrapped
@@ -127,17 +120,12 @@ in {
       gnupg
 
       # Language Servers and runtimes
-      terraform-ls
       bun
       gcc
-      gleam
-      erlang
-      rebar3
       go
       gopls
       godef
       lua
-      nixfmt-classic
       nixpkgs-fmt
       nodejs
       nodePackages.bash-language-server
@@ -146,14 +134,14 @@ in {
       nodePackages.typescript-language-server
       nodePackages.vim-language-server
       nodePackages.yaml-language-server
+      yarn
 
       #python
       python313
       python313Packages.ipython
+      uv
 
       rust-analyzer
-      uv
-      yarn
 
       # Get lazy
       lazycli
@@ -173,11 +161,9 @@ in {
       devenv
       glibtool
     ] else [
-      master.antigravity
       aws-sso-cli
       bibletime
       comixcursors
-      stable.copyq # Broken in latest nix-unstable
       discord
       deno
       dig
@@ -191,15 +177,6 @@ in {
       pavucontrol
       pinentry-gnome3
       remmina
-      #ruby
-      ruby
-      rails-new
-      rubyfmt
-      ruby-lsp
-      rubyPackages.pry
-      rubyPackages.rails
-      # rubyPackages.railties # Broken in latest update
-      rubyPackages.solargraph
       stable.slack
       vial
       wally-cli
@@ -208,7 +185,6 @@ in {
 
       # Flake input packages
       inputs.hubctl.packages.${pkgs.system}.default
-      inputs.warp-preview.packages.${pkgs.system}.default
     ]);
 
   programs.gpg = { enable = pkgs.stdenv.isLinux; };

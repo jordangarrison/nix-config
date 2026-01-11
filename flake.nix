@@ -32,10 +32,6 @@
       # inputs.nixpkgs.follows = "nixpkgs";
     };
     claude-code.url = "github:sadjow/claude-code-nix";
-    warp-preview = {
-      url = "github:jordangarrison/warp-preview-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     niri.url = "github:sodiboo/niri-flake";
     noctalia = {
       url = "github:noctalia-dev/noctalia-shell";
@@ -45,7 +41,7 @@
 
   outputs = inputs@{ self, nixpkgs, nixpkgs-stable, nixpkgs-master
     , nixos-hardware, nix-darwin, home-manager, nvf, aws-tools, aws-use-sso
-    , hubctl, claude-code, warp-preview, niri, noctalia, }: {
+    , hubctl, claude-code, niri, noctalia, }: {
       nixosConfigurations = {
         "endeavour" = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs; };
@@ -68,7 +64,6 @@
             ./modules/nixos/n8n.nix
             ./modules/nixos/jellyfin.nix
             ./modules/nixos/virtualization.nix
-            ./modules/nixos/podman.nix
             ./modules/nixos/freerdp.nix
             ./users/jordangarrison/nixos.nix
             ./users/mikayla/nixos.nix

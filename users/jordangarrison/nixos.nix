@@ -36,9 +36,7 @@ in {
         deskflow
         stable.nextcloud-client # Broken in nix-unstable - Qt6 GuiPrivate component missing
         obsidian
-        rnote
         session-desktop
-        signal-desktop
         todoist-electron
         xournalpp
         zoom-us

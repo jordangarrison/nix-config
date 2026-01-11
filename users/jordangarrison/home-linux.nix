@@ -3,7 +3,6 @@
 {
   imports = [
     ./home.nix
-    ../../modules/home/hyprland
     ../../modules/home/brave/apps.nix
     ../../modules/home/wezterm
     ../../modules/home/virt-manager/config.nix

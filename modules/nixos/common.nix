@@ -39,6 +39,10 @@
   # Enable dconf for GNOME settings
   programs.dconf.enable = true;
 
+  # Use dbus-broker for better performance
+  # Keep this enabled to prevent D-Bus implementation changes on system switches
+  services.dbus.implementation = "broker";
+
   # Localsend for transferring files
   programs.localsend.enable = true;
 

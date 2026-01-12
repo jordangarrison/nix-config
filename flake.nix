@@ -129,6 +129,7 @@
             ./modules/nixos/audio/pipewire.nix
             ./modules/nixos/development.nix
             ./modules/nixos/virtualization.nix
+            ./modules/nixos/tablet-mode.nix
             ./users/jordangarrison/nixos.nix
             ./users/mikayla/nixos.nix
             ./users/jane/nixos.nix
@@ -161,15 +162,20 @@
                 homeDirectory = "/home/isla";
               };
 
-              # Import niri home module for jordangarrison on opportunity
-              home-manager.users.jordangarrison.imports =
-                [ ./modules/home/niri ];
+              # Import niri and tablet-mode home modules for jordangarrison on opportunity
+              home-manager.users.jordangarrison.imports = [
+                ./modules/home/niri
+                ./modules/home/tablet-mode
+              ];
 
               # Enable virtualization with virt-manager
               virtualization.virt-manager = {
                 enable = true;
                 users = [ "jordangarrison" ];
               };
+
+              # Enable tablet mode for Framework 12 touchscreen
+              tablet-mode.enable = true;
             }
           ];
 

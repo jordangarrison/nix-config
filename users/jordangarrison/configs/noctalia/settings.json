@@ -46,7 +46,7 @@
     },
     "bar": {
         "backgroundOpacity": 0,
-        "capsuleOpacity": 1,
+        "capsuleOpacity": 0.4,
         "density": "default",
         "exclusive": true,
         "floating": true,
@@ -56,9 +56,9 @@
         ],
         "outerCorners": true,
         "position": "top",
-        "showCapsule": false,
+        "showCapsule": true,
         "showOutline": false,
-        "useSeparateOpacity": false,
+        "useSeparateOpacity": true,
         "widgets": {
             "center": [
                 {
@@ -168,10 +168,6 @@
             },
             {
                 "enabled": true,
-                "id": "timer-card"
-            },
-            {
-                "enabled": true,
                 "id": "weather-card"
             }
         ]
@@ -196,7 +192,7 @@
                 "id": "shortcuts-card"
             },
             {
-                "enabled": true,
+                "enabled": false,
                 "id": "audio-card"
             },
             {
@@ -208,7 +204,7 @@
                 "id": "weather-card"
             },
             {
-                "enabled": true,
+                "enabled": false,
                 "id": "media-sysmon-card"
             }
         ],
@@ -255,13 +251,13 @@
     },
     "dock": {
         "animationSpeed": 1,
-        "backgroundOpacity": 1,
-        "colorizeIcons": false,
+        "backgroundOpacity": 0.4,
+        "colorizeIcons": true,
         "deadOpacity": 0.6,
         "displayMode": "always_visible",
         "enabled": false,
         "floatingRatio": 1,
-        "inactiveIndicators": false,
+        "inactiveIndicators": true,
         "monitors": [
         ],
         "onlySameOutput": true,
@@ -289,7 +285,7 @@
         "compactLockScreen": false,
         "dimmerOpacity": 0,
         "enableShadows": true,
-        "forceBlackScreenCorners": false,
+        "forceBlackScreenCorners": true,
         "iRadiusRatio": 1,
         "language": "",
         "lockOnSuspend": true,
@@ -301,7 +297,7 @@
         "shadowOffsetY": 3,
         "showChangelogOnStartup": true,
         "showHibernateOnLockScreen": false,
-        "showScreenCorners": false,
+        "showScreenCorners": true,
         "showSessionButtonsOnLockScreen": true
     },
     "hooks": {
@@ -317,7 +313,7 @@
         "analogClockInCalendar": false,
         "firstDayOfWeek": -1,
         "hideWeatherCityName": false,
-        "hideWeatherTimezone": false,
+        "hideWeatherTimezone": true,
         "name": "Round Rock, TX",
         "showCalendarEvents": true,
         "showCalendarWeather": true,
@@ -442,7 +438,7 @@
         "diskCriticalThreshold": 90,
         "diskPollingInterval": 3000,
         "diskWarningThreshold": 80,
-        "enableDgpuMonitoring": true,
+        "enableDgpuMonitoring": false,
         "externalMonitor": "resources || missioncenter || jdsystemmonitor || corestats || system-monitoring-center || gnome-system-monitor || plasma-systemmonitor || mate-system-monitor || ukui-system-monitor || deepin-system-monitor || pantheon-system-monitor",
         "gpuCriticalThreshold": 90,
         "gpuPollingInterval": 3000,
@@ -496,8 +492,8 @@
         "fontFixedScale": 1,
         "networkPanelView": "wifi",
         "panelBackgroundOpacity": 0.4,
-        "panelsAttachedToBar": true,
-        "settingsPanelMode": "attached",
+        "panelsAttachedToBar": false,
+        "settingsPanelMode": "centered",
         "tooltipsEnabled": true,
         "wifiDetailsViewMode": "grid"
     },

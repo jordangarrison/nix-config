@@ -1,7 +1,7 @@
 {
     "sources": [
         {
-            "enabled": true,
+            "enabled": false,
             "name": "Official Noctalia Plugins",
             "url": "https://github.com/noctalia-dev/noctalia-plugins"
         }

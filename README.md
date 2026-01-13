@@ -20,7 +20,7 @@ nh os switch .#<hostname>
 | Host | Hardware | Description |
 |------|----------|-------------|
 | `endeavour` | MSI B550-A Pro, AMD GPU | Main desktop workstation with GNOME, Hyprland, and Niri |
-| `opportunity` | Framework 13 (13th Gen Intel) | Laptop with GNOME and Hyprland |
+| `opportunity` | Framework 12 (13th Gen Intel) | Laptop with GNOME, Hyprland, and Niri. **Tablet mode enabled** (touchscreen gestures, auto-rotation, OSK) |
 | `voyager` | MacBook Pro 12,1 | MacBook Pro running NixOS |
 | `discovery` | AMD-based system | Minimal GNOME setup |
 
@@ -64,11 +64,13 @@ nh home switch .#<config>
 │   │   ├── gnome-desktop.nix # GNOME desktop environment
 │   │   ├── hyprland-desktop.nix # Hyprland compositor
 │   │   ├── niri-desktop.nix  # Niri scrollable compositor
+│   │   ├── tablet-mode.nix   # Tablet mode (hardware sensors)
 │   │   ├── development.nix   # Docker, Emacs, dev tools
 │   │   └── audio/            # Audio configurations
 │   └── home/                 # Home Manager modules
 │       ├── niri/             # Niri user configuration
 │       ├── hyprland/         # Hyprland user configuration
+│       ├── tablet-mode/      # Tablet gestures and OSK
 │       ├── brave/            # Browser app integration
 │       └── alacritty/        # Terminal configuration
 ├── users/                    # User configurations
@@ -146,6 +148,7 @@ nix develop
 - **Multi-platform** - NixOS, macOS, and WSL/Ubuntu support
 - **Multi-user** - Family members have individual configurations
 - **Multiple DEs** - GNOME, Hyprland, and Niri available
+- **Tablet mode** - Touchscreen gestures, auto-rotation, and on-screen keyboard (opportunity)
 - **Modular** - Shared modules for common functionality
 - **Development ready** - Emacs (Doom), Neovim (nvf), Docker, and more
 

@@ -1,9 +1,16 @@
 { config, lib, pkgs, osConfig ? null, ... }:
 
 let
-  # Toggle OSK script - sends SIGUSR2 to show/hide, or starts if not running
-  toggleOsk = pkgs.writeShellScript "toggle-osk" ''
-    ${pkgs.procps}/bin/pkill -USR2 wvkbd-mobintl || ${pkgs.wvkbd}/bin/wvkbd-mobintl &
+  # Show OSK script - starts wvkbd if not running
+  showOsk = pkgs.writeShellScript "show-osk" ''
+    if ! ${pkgs.procps}/bin/pgrep -x wvkbd-mobintl > /dev/null; then
+      ${pkgs.wvkbd}/bin/wvkbd-mobintl &
+    fi
+  '';
+
+  # Hide OSK script - kills wvkbd to hide it completely
+  hideOsk = pkgs.writeShellScript "hide-osk" ''
+    ${pkgs.procps}/bin/pkill wvkbd-mobintl
   '';
 
   # Gesture definitions for lisgd
@@ -25,8 +32,11 @@ let
     # 3-finger swipe down from top: close window
     "-g '3,UD,T,*,R,niri msg action close-window'"
 
-    # 1-finger swipe up from bottom edge (short distance): toggle OSK
-    "-g '1,DU,B,S,R,${toggleOsk}'"
+    # 1-finger swipe up from bottom edge (short distance): show OSK
+    "-g '1,DU,B,S,R,${showOsk}'"
+
+    # 2-finger swipe down from top: hide OSK (easier to dismiss when keyboard visible)
+    "-g '2,UD,T,*,R,${hideOsk}'"
 
     # 2-finger swipe left/right: browser back/forward navigation
     "-g '2,LR,*,*,R,${pkgs.wtype}/bin/wtype -M alt -k Right -m alt'"
@@ -50,7 +60,7 @@ in {
     };
     Service = {
       Type = "simple";
-      ExecStart = "${pkgs.lisgd}/bin/lisgd ${lib.concatStringsSep " " gestures}";
+      ExecStart = "${pkgs.lisgd}/bin/lisgd -d /dev/input/by-path/pci-0000:00:15.0-platform-i2c_designware.0-event ${lib.concatStringsSep " " gestures}";
       Restart = "on-failure";
       RestartSec = 3;
     };

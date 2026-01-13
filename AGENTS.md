@@ -62,11 +62,17 @@ All git commands in this repository are configured to disable pager output by de
   - Gaming setup (Steam)
   - Development tools
   - Remote desktop enabled
-  
+
+- **opportunity**: Framework 12 laptop (13th Gen Intel)
+  - Desktop environments (GNOME + Hyprland + Niri)
+  - Tablet mode enabled (touchscreen gestures, auto-rotation, OSK)
+  - Development tools
+  - Virtualization enabled
+
 - **voyager**: MacBook Pro running NixOS (Apple hardware profile)
   - Laptop-optimized GNOME configuration
   - Development environment
-  
+
 - **discovery**: AMD-based system
   - Minimal GNOME setup
   - Standard development tools
@@ -287,6 +293,102 @@ Niri is a scrollable-tiling Wayland compositor. Configuration is fully declarati
 - [niri GitHub](https://github.com/YaLTeR/niri)
 - [niri-flake](https://github.com/sodiboo/niri-flake)
 - [noctalia-shell](https://github.com/noctalia-dev/noctalia-shell)
+
+### Tablet Mode Configuration
+
+Tablet mode provides touchscreen gesture support, auto-rotation, and on-screen keyboard for touchscreen devices (currently enabled on **opportunity** - Framework 12 laptop).
+
+**System Requirements:**
+- User must be in the `input` group for touchscreen access
+- Hardware sensor support (`hardware.sensor.iio.enable`) for auto-rotation
+- Touchscreen device with stable `/dev/input/by-path/` identifier
+
+**Components:**
+
+1. **lisgd** - Touchscreen gesture daemon
+   - Detects multi-finger swipe gestures on touchscreen
+   - Configured via systemd user service
+   - Device path: `/dev/input/by-path/pci-0000:00:15.0-platform-i2c_designware.0-event`
+
+2. **iio-niri** - Auto-rotation daemon
+   - Monitors accelerometer via iio-sensor-proxy
+   - Automatically rotates display based on device orientation
+   - Integrated with niri compositor
+
+3. **wvkbd** - Wayland virtual keyboard
+   - On-screen keyboard for touch input
+   - Shows/hides on gesture or can be started manually
+
+**Touch Gestures:**
+
+| Gesture | Action |
+|---------|--------|
+| 3-finger swipe left | Switch to previous workspace |
+| 3-finger swipe right | Switch to next workspace |
+| 3-finger swipe up from bottom | Toggle application launcher |
+| 3-finger swipe down from top | Close current window |
+| 1-finger swipe up from bottom (short) | Show on-screen keyboard |
+| 2-finger swipe down from top | Hide on-screen keyboard |
+| 2-finger swipe left | Browser back navigation (Alt+Left) |
+| 2-finger swipe right | Browser forward navigation (Alt+Right) |
+
+**Configuration Files:**
+- `modules/nixos/tablet-mode.nix`: System-level tablet mode module (hardware sensor support)
+- `modules/home/tablet-mode/default.nix`: Gesture definitions and user services
+- `users/jordangarrison/nixos.nix`: User must have `"input"` in extraGroups
+
+**Enabling Tablet Mode:**
+
+In `flake.nix` for a specific host:
+```nix
+{
+  # System-level: import tablet-mode module
+  imports = [
+    ./modules/nixos/tablet-mode.nix
+  ];
+
+  # Enable tablet mode
+  tablet-mode.enable = true;
+
+  # Home Manager: import tablet-mode home module
+  home-manager.users.jordangarrison.imports = [
+    ./modules/home/tablet-mode
+  ];
+}
+```
+
+Ensure user has input group access in `users/<username>/nixos.nix`:
+```nix
+extraGroups = [ "networkmanager" "wheel" "docker" "input" ];
+```
+
+**Troubleshooting:**
+
+Check service status:
+```bash
+systemctl --user status lisgd
+systemctl --user status iio-niri
+journalctl --user -u lisgd -f
+```
+
+Verify permissions:
+```bash
+groups  # Should include 'input'
+ls -la /dev/input/event*  # Should show group 'input'
+```
+
+Find touchscreen device:
+```bash
+for dev in /dev/input/event*; do
+  name=$(cat /sys/class/input/$(basename $dev)/device/name 2>/dev/null || echo "unknown")
+  echo "$dev: $name"
+done
+```
+
+**Known Issues:**
+- Group membership changes require logout/login to take effect
+- Device path may vary on different hardware; update `modules/home/tablet-mode/default.nix` if needed
+- Gestures from bottom edge may not work when OSK is visible (use top-edge gestures instead)
 
 ### Development Tools
 - **Emacs with Doom configuration**: Primary editor with literate configuration

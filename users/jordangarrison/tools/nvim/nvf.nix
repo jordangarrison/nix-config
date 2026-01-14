@@ -62,7 +62,7 @@
         };
         statusline.lualine = {
           enable = true;
-          theme = "tokyonight";
+          theme = "auto";
         };
         telescope = {
           enable = true;
@@ -75,8 +75,9 @@
         };
         theme = {
           enable = true;
-          name = "tokyonight";
-          style = "night";
+          name = "rose-pine";
+          style = "main";
+          transparent = true;
         };
         viAlias = true;
         vimAlias = true;

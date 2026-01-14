@@ -98,7 +98,7 @@ in {
         "eDP-1" = {
           # Framework 12 internal display: 2256x1504@60Hz
           # Using auto-detection for resolution
-          scale = 1.5; # Good balance for high-DPI laptop display
+          scale = 1.33; # Good balance for high-DPI laptop display
           position = {
             x = 0;
             y = 0;

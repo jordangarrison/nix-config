@@ -71,6 +71,9 @@ in {
       wezterm
       # doom-emacs
 
+      # Tree-sitter grammars for Emacs
+      emacsPackages.treesit-grammars.with-all-grammars
+
       # Utilities
       # aider-chat  # Temporarily disabled due to texlive build issue
       btop

@@ -14,6 +14,7 @@ Super + F                 → File manager (Yazi)
 Super + Shift + F         → File manager (Nautilus)
 Super + Space             → App launcher (Noctalia)
 Super + Semicolon         → Emoji picker (rofimoji)
+Super + Shift + D         → Voice dictation (Sweet Nothings)
 
 [WINDOW CONTROLS]
 Super + Q                 → Close window

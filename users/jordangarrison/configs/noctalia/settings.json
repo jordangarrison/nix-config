@@ -298,7 +298,8 @@
         "showChangelogOnStartup": true,
         "showHibernateOnLockScreen": false,
         "showScreenCorners": true,
-        "showSessionButtonsOnLockScreen": true
+        "showSessionButtonsOnLockScreen": true,
+        "telemetryEnabled": true
     },
     "hooks": {
         "darkModeChange": "",
@@ -455,7 +456,7 @@
         "warningColor": "#31748f"
     },
     "templates": {
-        "alacritty": false,
+        "alacritty": true,
         "cava": false,
         "code": false,
         "discord": false,

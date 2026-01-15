@@ -13,6 +13,20 @@ in {
   # Import shared desktop tools (satty, screenshot tools, clipboard, etc.)
   imports = [ ../desktop-tools ];
 
+  # Clipboard services via Home Manager (systemd-managed)
+  services.cliphist = {
+    enable = true;
+    allowImages = true;
+    systemdTargets = [ "graphical-session.target" ];
+  };
+
+  # Clipboard persistence - fixes focus-change paste issue
+  services.wl-clip-persist = {
+    enable = true;
+    clipboardType = "regular";
+    systemdTargets = [ "graphical-session.target" ];
+  };
+
   # Packages needed for niri desktop environment
   home.packages = with pkgs; [
     # Noctalia shell (unified bar, notifications, launcher, lock screen, power menu)
@@ -158,10 +172,6 @@ in {
       }
       # Noctalia shell (bar, notifications, launcher, lock screen, power menu)
       { command = [ "noctalia-shell" ]; }
-      # Clipboard manager
-      {
-        command = [ "wl-paste" "--watch" "cliphist" "store" ];
-      }
       # Authentication agent
       {
         command = [
@@ -249,6 +259,12 @@ in {
         matches = [{ app-id = "^nm-connection-editor$"; }];
         open-floating = true;
       }
+      # Alacritty - disable border background to prevent focus ring color bleeding
+      # into transparent window (niri issue #1823)
+      {
+        matches = [{ app-id = "^Alacritty$"; }];
+        draw-border-with-background = false;
+      }
       # Float Sweet Nothings dictation window
       {
         matches = [{ app-id = "^sweet-nothings$"; }];
@@ -262,12 +278,13 @@ in {
       # ==================
       # PROGRAM LAUNCHERS
       # ==================
-      "Mod+Return".action.spawn = "wezterm";
+      "Mod+Return".action.spawn = "alacritty";
+      # Keep wezterm for SSH - has built-in session persistence without needing tmux
       "Mod+Shift+Return".action.spawn = [ "wezterm" "ssh" "endeavour" ];
       "Mod+B".action.spawn = "brave";
       "Mod+E".action.spawn = [ "emacsclient" "-c" ];
       "Mod+N".action.spawn = "obsidian";
-      "Mod+F".action.spawn = [ "wezterm" "start" "--" "yazi" ];
+      "Mod+F".action.spawn = [ "alacritty" "-e" "yazi" ];
       "Mod+Shift+F".action.spawn = "nautilus";
       "Mod+Space".action.spawn =
         [ "noctalia-shell" "ipc" "call" "launcher" "toggle" ];

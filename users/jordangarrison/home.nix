@@ -322,6 +322,28 @@ in {
     };
   };
 
+  # Alacritty - lightweight terminal that works well with tiling WMs and Niri clipboard
+  programs.alacritty = {
+    enable = true;
+    settings = {
+      general.live_config_reload = true;
+
+      window = {
+        decorations = "none";
+        startup_mode = "Windowed";
+        opacity = 0.80;
+        padding = { x = 5; y = 5; };
+      };
+
+      font = {
+        size = 10;
+        normal = { family = "Source Code Pro"; style = "Semibold"; };
+        bold = { family = "Source Code Pro"; style = "Bold"; };
+        offset = { x = 0; y = 5; };
+      };
+    };
+  };
+
   # FZF - fuzzy finder with shell integration
   programs.fzf = {
     enable = true;
@@ -430,10 +452,6 @@ in {
       useViper: true
     '';
 
-    # Alacritty
-    ".config/alacritty/alacritty.toml".source =
-      ./tools/alacritty/alacritty.toml;
-
     # Claude Desktop
     # "Library/Application Support/Claude/claude_desktop_config.json" =
     #   lib.mkIf pkgs.stdenv.isDarwin {
@@ -448,9 +466,6 @@ in {
       lib.mkIf pkgs.stdenv.isDarwin {
         source = ./tools/espanso/match/base.yml;
       };
-
-    # Ghostty
-    ".config/ghostty/config".source = ./tools/ghostty/config;
 
     # LinearMouse
     # ".config/linearmouse/linearmouse.json" = lib.mkIf pkgs.stdenv.isDarwin {

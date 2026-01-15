@@ -37,11 +37,15 @@
       url = "github:noctalia-dev/noctalia-shell";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    sweet-nothings = {
+      url = "github:jordangarrison/sweet-nothings";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs@{ self, nixpkgs, nixpkgs-stable, nixpkgs-master
     , nixos-hardware, nix-darwin, home-manager, nvf, aws-tools, aws-use-sso
-    , hubctl, claude-code, niri, noctalia, }: {
+    , hubctl, claude-code, niri, noctalia, sweet-nothings, }: {
       nixosConfigurations = {
         "endeavour" = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs; };

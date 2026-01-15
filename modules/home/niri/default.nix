@@ -18,6 +18,9 @@ in {
     # Noctalia shell (unified bar, notifications, launcher, lock screen, power menu)
     inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default
 
+    # Sweet Nothings - voice dictation tool
+    inputs.sweet-nothings.packages.${pkgs.stdenv.hostPlatform.system}.default
+
     # File manager (terminal)
     yazi
 
@@ -246,6 +249,12 @@ in {
         matches = [{ app-id = "^nm-connection-editor$"; }];
         open-floating = true;
       }
+      # Float Sweet Nothings dictation window
+      {
+        matches = [{ app-id = "^sweet-nothings$"; }];
+        open-floating = true;
+        default-column-width = { fixed = 400; };
+      }
     ];
 
     # Keybindings (matching Hyprland setup)
@@ -264,6 +273,10 @@ in {
         [ "noctalia-shell" "ipc" "call" "launcher" "toggle" ];
       "Mod+Semicolon".action.spawn =
         [ "noctalia-shell" "ipc" "call" "launcher" "emoji" ];
+
+      # Sweet Nothings - Voice dictation (D for dictation)
+      "Mod+Shift+D".action.spawn =
+        [ "wezterm" "start" "--class" "sweet-nothings" "--" "sweet-nothings" "--paste" ];
 
       # ================
       # WINDOW CONTROLS

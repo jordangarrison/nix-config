@@ -223,7 +223,7 @@ in {
 
     # Window rules
     window-rules = [
-      # Default rule for all windows: rounded corners
+      # Default rule for all windows: rounded corners, no border background
       {
         geometry-corner-radius = let r = 8.0;
         in {
@@ -233,6 +233,9 @@ in {
           bottom-right = r;
         };
         clip-to-geometry = true;
+        # Disable border background to prevent focus ring color bleeding
+        # into transparent windows (niri issue #1823)
+        draw-border-with-background = false;
       }
       # Float authentication dialogs
       {
@@ -258,12 +261,6 @@ in {
       {
         matches = [{ app-id = "^nm-connection-editor$"; }];
         open-floating = true;
-      }
-      # Alacritty - disable border background to prevent focus ring color bleeding
-      # into transparent window (niri issue #1823)
-      {
-        matches = [{ app-id = "^Alacritty$"; }];
-        draw-border-with-background = false;
       }
       # Float Sweet Nothings dictation window
       {
@@ -293,7 +290,7 @@ in {
 
       # Sweet Nothings - Voice dictation (D for dictation)
       "Mod+Shift+D".action.spawn =
-        [ "wezterm" "start" "--class" "sweet-nothings" "--" "sweet-nothings" "--paste" ];
+        [ "alacritty" "--class" "sweet-nothings" "--title" "Sweet Nothings" "-e" "sweet-nothings" "--paste" ];
 
       # ================
       # WINDOW CONTROLS

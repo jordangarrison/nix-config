@@ -4,7 +4,8 @@
   imports = [
     ./home.nix
     ../../modules/home/brave/apps.nix
-    ../../modules/home/wezterm
+    ../../modules/home/alacritty/apps.nix
+    ../../modules/home/wezterm  # Keep for SSH apps only
     ../../modules/home/virt-manager/config.nix
     ../../modules/home/languages
   ];
@@ -50,7 +51,7 @@
     "org/gnome/mutter" = { dynamic-workspaces = false; };
     "org/gnome/desktop/wm/preferences" = { num-workspaces = 10; };
 
-    # Disable Super+H (minimize) to free it for WezTerm pane navigation
+    # Disable Super+H (minimize) to free it for terminal pane navigation
     # Change lock screen from Super+L to Ctrl+Alt+Super+L
     "org/gnome/settings-daemon/plugins/media-keys" = {
       screensaver = [ "<Ctrl><Alt><Super>l" ];
@@ -58,7 +59,7 @@
 
     # Keybindings to switch to workspace
     "org/gnome/desktop/wm/keybindings" = {
-      # Disable minimize to free Super+H for WezTerm
+      # Disable minimize to free Super+H for terminal navigation
       minimize = [ ];
 
       "switch-to-workspace-1" = [ "<Super>1" ];
@@ -88,7 +89,7 @@
     "org/gnome/shell" = {
       favorite-apps = [
         "brave-browser.desktop"
-        "org.wezfurlong.wezterm.desktop"
+        "Alacritty.desktop"
         "emacsclient.desktop"
         "chatgpt.desktop"
         "todoist.desktop"
@@ -124,7 +125,7 @@
     "org/gnome/shell/extensions/auto-move-windows" = {
       application-list = [
         "brave-browser.desktop:1"
-        "org.wezfurlong.wezterm.desktop:2"
+        "Alacritty.desktop:2"
         "emacsclient.desktop:3"
         "todoist.desktop:5"
         "1password.desktop:10"
@@ -156,13 +157,18 @@
     }
   ];
 
-  weztermApps.apps = [
+  # Regular terminal apps use Alacritty
+  alacrittyApps.apps = [
     {
       name = "btop";
       command = "btop";
       categories = [ "System" ];
       icon = ../../icons/btop.png;
     }
+  ];
+
+  # SSH apps use WezTerm for built-in session persistence
+  weztermApps.apps = [
     {
       name = "SSH Endeavour";
       sshHost = "endeavour";

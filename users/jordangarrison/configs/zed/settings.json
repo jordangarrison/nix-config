@@ -1,6 +1,6 @@
 {
   "features": {
-    "edit_prediction_provider": "copilot"
+    "edit_prediction_provider": "copilot",
   },
   "vim_mode": true,
   "theme": {
@@ -8,7 +8,7 @@
     "dark": "Rosé Pine",
     "light": "Rosé Pine Dawn",
   },
-  "buffer_font_family": "FiraCode Nerd Font",
+  "buffer_font_family": "Source Code Pro",
   "buffer_font_size": 14,
   "ui_font_family": "FiraCode Nerd Font",
   "ui_font_size": 14,
@@ -17,7 +17,7 @@
   "relative_line_numbers": "disabled",
   "show_wrap_guides": true,
   "terminal": {
-    "font_family": "FiraCode Nerd Font",
+    "font_family": "Source Code Pro",
     "font_size": 13,
   },
   "git": {

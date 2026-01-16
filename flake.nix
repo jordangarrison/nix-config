@@ -41,17 +41,22 @@
       url = "github:jordangarrison/sweet-nothings";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-zed-extensions = {
+      url = "github:DuskSystems/nix-zed-extensions";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs@{ self, nixpkgs, nixpkgs-stable, nixpkgs-master
     , nixos-hardware, nix-darwin, home-manager, nvf, aws-tools, aws-use-sso
-    , hubctl, claude-code, niri, noctalia, sweet-nothings, }: {
+    , hubctl, claude-code, niri, noctalia, sweet-nothings, nix-zed-extensions, }: {
       nixosConfigurations = {
         "endeavour" = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs; };
           modules = [
             ./modules/stable-overlay.nix
             ./modules/master-overlay.nix
+            ./modules/zed-extensions-overlay.nix
             ./modules/nixos/common.nix
             ./modules/nixos/brother-printer.nix
             ./modules/nixos/lan.nix
@@ -122,6 +127,7 @@
           modules = [
             ./modules/stable-overlay.nix
             ./modules/master-overlay.nix
+            ./modules/zed-extensions-overlay.nix
             ./modules/nixos/common.nix
             ./modules/nixos/brother-printer.nix
             ./modules/nixos/lan.nix

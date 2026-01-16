@@ -1,12 +1,12 @@
 {
   "features": {
-    "edit_prediction_provider": "copilot",
+    "edit_prediction_provider": "copilot"
   },
   "vim_mode": true,
   "theme": {
     "mode": "system",
     "dark": "Rosé Pine",
-    "light": "Rosé Pine Dawn",
+    "light": "Rosé Pine Dawn"
   },
   "buffer_font_family": "Source Code Pro",
   "buffer_font_size": 14,
@@ -18,16 +18,16 @@
   "show_wrap_guides": true,
   "terminal": {
     "font_family": "Source Code Pro",
-    "font_size": 13,
+    "font_size": 13
   },
   "git": {
-    "git_gutter": "tracked_files",
+    "git_gutter": "tracked_files"
   },
   "auto_install_extensions": {
     "dockerfile": true,
     "git-firefly": true,
     "html": true,
     "nix": true,
-    "toml": true,
-  },
+    "toml": true
+  }
 }

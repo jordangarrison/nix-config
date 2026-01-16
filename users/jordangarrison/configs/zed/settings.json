@@ -1,0 +1,33 @@
+{
+  "features": {
+    "edit_prediction_provider": "copilot"
+  },
+  "vim_mode": true,
+  "theme": {
+    "mode": "system",
+    "dark": "Rosé Pine",
+    "light": "Rosé Pine Dawn",
+  },
+  "buffer_font_family": "FiraCode Nerd Font",
+  "buffer_font_size": 14,
+  "ui_font_family": "FiraCode Nerd Font",
+  "ui_font_size": 14,
+  "tab_size": 2,
+  "format_on_save": "on",
+  "relative_line_numbers": "disabled",
+  "show_wrap_guides": true,
+  "terminal": {
+    "font_family": "FiraCode Nerd Font",
+    "font_size": 13,
+  },
+  "git": {
+    "git_gutter": "tracked_files",
+  },
+  "auto_install_extensions": {
+    "dockerfile": true,
+    "git-firefly": true,
+    "html": true,
+    "nix": true,
+    "toml": true,
+  },
+}

@@ -456,7 +456,7 @@
         "warningColor": "#31748f"
     },
     "templates": {
-        "alacritty": true,
+        "alacritty": false,
         "cava": false,
         "code": false,
         "discord": false,

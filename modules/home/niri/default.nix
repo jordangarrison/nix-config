@@ -1,15 +1,51 @@
-{ config, pkgs, lib, inputs, osConfig ? null, swapSuperAlt ? false, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  inputs,
+  osConfig ? null,
+  swapSuperAlt ? false,
+  ...
+}:
 
 let
   homeDirectory = config.home.homeDirectory;
-  wallpapersPath =
-    "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/wallpapers";
-  scriptsPath =
-    "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/hypr/scripts";
+  wallpapersPath = "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/wallpapers";
+  scriptsPath = "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/hypr/scripts";
 
   # Get hostname from osConfig if available (NixOS), otherwise use null
   hostname = if osConfig != null then osConfig.networking.hostName else null;
-in {
+
+  # Determine if this is a laptop using the shared machine type config
+  isLaptop = osConfig != null && osConfig.gbg-config.machine.type == "laptop";
+
+  # swayidle command - laptops can suspend, desktops only turn off monitors
+  swayidleCommand = [
+    "swayidle"
+    "-w"
+    "timeout"
+    "300"
+    "noctalia-shell ipc call lockScreen lock"
+    "timeout"
+    "600"
+    "niri msg action power-off-monitors"
+    "resume"
+    "niri msg action power-on-monitors"
+    "before-sleep"
+    "noctalia-shell ipc call lockScreen lock"
+  ]
+  ++ (
+    if isLaptop then
+      [
+        "timeout"
+        "1800"
+        "systemctl suspend"
+      ]
+    else
+      [ ]
+  );
+in
+{
   # Import shared desktop tools (satty, screenshot tools, clipboard, etc.)
   imports = [ ../desktop-tools ];
 
@@ -56,10 +92,7 @@ in {
       keyboard = {
         xkb = {
           layout = "us";
-          options = if swapSuperAlt then
-            "altwin:swap_alt_win,lv3:ralt_switch"
-          else
-            "lv3:ralt_switch";
+          options = if swapSuperAlt then "altwin:swap_alt_win,lv3:ralt_switch" else "lv3:ralt_switch";
         };
         repeat-delay = 300;
         repeat-rate = 50;
@@ -71,7 +104,9 @@ in {
         dwt = true; # Disable while typing
       };
 
-      mouse = { accel-profile = "flat"; };
+      mouse = {
+        accel-profile = "flat";
+      };
 
       # Focus follows mouse but don't scroll
       focus-follows-mouse = {
@@ -137,7 +172,9 @@ in {
       ];
 
       # Default column width
-      default-column-width = { proportion = 1.0 / 2.0; };
+      default-column-width = {
+        proportion = 1.0 / 2.0;
+      };
 
       # Focus ring (drawn outside windows) - Rose Pine theme
       focus-ring = {
@@ -148,10 +185,14 @@ in {
       };
 
       # Border (drawn inside windows)
-      border = { enable = false; };
+      border = {
+        enable = false;
+      };
 
       # Shadows
-      shadow = { enable = true; };
+      shadow = {
+        enable = true;
+      };
 
       # Center focused column only when it doesn't fit with the previous column
       # Use Mod+G to manually center when desired
@@ -180,10 +221,15 @@ in {
       }
       # Network manager applet
       {
-        command = [ "nm-applet" "--indicator" ];
+        command = [
+          "nm-applet"
+          "--indicator"
+        ];
       }
       # Bluetooth applet
       { command = [ "blueman-applet" ]; }
+      # Idle management (lock screen, monitor power, suspend on laptops)
+      { command = swayidleCommand; }
     ];
 
     # Environment variables
@@ -199,39 +245,64 @@ in {
     # Workspaces configuration - hostname-aware
     # endeavour: all named workspaces on primary monitor (DP-3), DP-4 gets dynamic workspaces
     # opportunity: all named workspaces on eDP-1 (Framework internal display)
-    workspaces = let
-      # Determine primary output based on hostname
-      primaryOutput =
-        if hostname == "endeavour" then
-          "DP-3"
-        else if hostname == "opportunity" then
-          "eDP-1"
-        else
-          "eDP-1"; # fallback
-    in {
-      "1" = { open-on-output = primaryOutput; };
-      "2" = { open-on-output = primaryOutput; };
-      "3" = { open-on-output = primaryOutput; };
-      "4" = { open-on-output = primaryOutput; };
-      "5" = { open-on-output = primaryOutput; };
-      "6" = { open-on-output = primaryOutput; };
-      "7" = { open-on-output = primaryOutput; };
-      "8" = { open-on-output = primaryOutput; };
-      "9" = { open-on-output = primaryOutput; };
-      "10" = { open-on-output = primaryOutput; };
-    };
+    workspaces =
+      let
+        # Determine primary output based on hostname
+        primaryOutput =
+          if hostname == "endeavour" then
+            "DP-3"
+          else if hostname == "opportunity" then
+            "eDP-1"
+          else
+            "eDP-1"; # fallback
+      in
+      {
+        "1" = {
+          open-on-output = primaryOutput;
+        };
+        "2" = {
+          open-on-output = primaryOutput;
+        };
+        "3" = {
+          open-on-output = primaryOutput;
+        };
+        "4" = {
+          open-on-output = primaryOutput;
+        };
+        "5" = {
+          open-on-output = primaryOutput;
+        };
+        "6" = {
+          open-on-output = primaryOutput;
+        };
+        "7" = {
+          open-on-output = primaryOutput;
+        };
+        "8" = {
+          open-on-output = primaryOutput;
+        };
+        "9" = {
+          open-on-output = primaryOutput;
+        };
+        "10" = {
+          open-on-output = primaryOutput;
+        };
+      };
 
     # Window rules
     window-rules = [
       # Default rule for all windows: rounded corners, no border background
       {
-        geometry-corner-radius = let r = 8.0;
-        in {
-          top-left = r;
-          top-right = r;
-          bottom-left = r;
-          bottom-right = r;
-        };
+        geometry-corner-radius =
+          let
+            r = 8.0;
+          in
+          {
+            top-left = r;
+            top-right = r;
+            bottom-left = r;
+            bottom-right = r;
+          };
         clip-to-geometry = true;
         # Disable border background to prevent focus ring color bleeding
         # into transparent windows (niri issue #1823)
@@ -239,34 +310,36 @@ in {
       }
       # Float authentication dialogs
       {
-        matches = [{ app-id = "^polkit-gnome-authentication-agent-1$"; }];
+        matches = [ { app-id = "^polkit-gnome-authentication-agent-1$"; } ];
         open-floating = true;
       }
       # Float file picker dialogs
       {
-        matches = [{ app-id = "^xdg-desktop-portal.*$"; }];
+        matches = [ { app-id = "^xdg-desktop-portal.*$"; } ];
         open-floating = true;
       }
       # Float pavucontrol
       {
-        matches = [{ app-id = "^pavucontrol$"; }];
+        matches = [ { app-id = "^pavucontrol$"; } ];
         open-floating = true;
       }
       # Float blueman
       {
-        matches = [{ app-id = "^blueman-manager$"; }];
+        matches = [ { app-id = "^blueman-manager$"; } ];
         open-floating = true;
       }
       # Float nm-connection-editor
       {
-        matches = [{ app-id = "^nm-connection-editor$"; }];
+        matches = [ { app-id = "^nm-connection-editor$"; } ];
         open-floating = true;
       }
       # Float Sweet Nothings dictation window
       {
-        matches = [{ app-id = "^sweet-nothings$"; }];
+        matches = [ { app-id = "^sweet-nothings$"; } ];
         open-floating = true;
-        default-column-width = { fixed = 400; };
+        default-column-width = {
+          fixed = 400;
+        };
       }
     ];
 
@@ -277,20 +350,49 @@ in {
       # ==================
       "Mod+Return".action.spawn = "alacritty";
       # Keep wezterm for SSH - has built-in session persistence without needing tmux
-      "Mod+Shift+Return".action.spawn = [ "wezterm" "ssh" "endeavour" ];
+      "Mod+Shift+Return".action.spawn = [
+        "wezterm"
+        "ssh"
+        "endeavour"
+      ];
       "Mod+B".action.spawn = "brave";
-      "Mod+E".action.spawn = [ "emacsclient" "-c" ];
+      "Mod+E".action.spawn = [
+        "emacsclient"
+        "-c"
+      ];
       "Mod+N".action.spawn = "obsidian";
-      "Mod+F".action.spawn = [ "alacritty" "-e" "yazi" ];
+      "Mod+F".action.spawn = [
+        "alacritty"
+        "-e"
+        "yazi"
+      ];
       "Mod+Shift+F".action.spawn = "nautilus";
-      "Mod+Space".action.spawn =
-        [ "noctalia-shell" "ipc" "call" "launcher" "toggle" ];
-      "Mod+Semicolon".action.spawn =
-        [ "noctalia-shell" "ipc" "call" "launcher" "emoji" ];
+      "Mod+Space".action.spawn = [
+        "noctalia-shell"
+        "ipc"
+        "call"
+        "launcher"
+        "toggle"
+      ];
+      "Mod+Semicolon".action.spawn = [
+        "noctalia-shell"
+        "ipc"
+        "call"
+        "launcher"
+        "emoji"
+      ];
 
       # Sweet Nothings - Voice dictation (D for dictation)
-      "Mod+Shift+D".action.spawn =
-        [ "alacritty" "--class" "sweet-nothings" "--title" "Sweet Nothings" "-e" "sweet-nothings" "--paste" ];
+      "Mod+Shift+D".action.spawn = [
+        "alacritty"
+        "--class"
+        "sweet-nothings"
+        "--title"
+        "Sweet Nothings"
+        "-e"
+        "sweet-nothings"
+        "--paste"
+      ];
 
       # ================
       # WINDOW CONTROLS
@@ -390,17 +492,29 @@ in {
       # SCREENSHOTS
       # ================
       # Region select with Satty annotation
-      "Mod+Alt+S".action.spawn =
-        [ "sh" "-c" "${scriptsPath}/screenshot-region-satty.sh" ];
+      "Mod+Alt+S".action.spawn = [
+        "sh"
+        "-c"
+        "${scriptsPath}/screenshot-region-satty.sh"
+      ];
       # Full screen with Satty annotation
-      "Mod+Alt+A".action.spawn =
-        [ "sh" "-c" "${scriptsPath}/screenshot-full-satty.sh" ];
+      "Mod+Alt+A".action.spawn = [
+        "sh"
+        "-c"
+        "${scriptsPath}/screenshot-full-satty.sh"
+      ];
       # Quick region to clipboard
-      "Mod+Alt+C".action.spawn =
-        [ "sh" "-c" "${scriptsPath}/screenshot-region-clipboard.sh" ];
+      "Mod+Alt+C".action.spawn = [
+        "sh"
+        "-c"
+        "${scriptsPath}/screenshot-region-clipboard.sh"
+      ];
       # Full screen to clipboard
-      "Mod+Alt+F".action.spawn =
-        [ "sh" "-c" "${scriptsPath}/screenshot-full-clipboard.sh" ];
+      "Mod+Alt+F".action.spawn = [
+        "sh"
+        "-c"
+        "${scriptsPath}/screenshot-full-clipboard.sh"
+      ];
       # Niri's built-in screenshot
       "Print".action.screenshot = [ ];
       "Shift+Print".action.screenshot-window = [ ];
@@ -410,54 +524,114 @@ in {
       # ================
       "XF86AudioRaiseVolume" = {
         allow-when-locked = true;
-        action.spawn =
-          [ "wpctl" "set-volume" "-l" "1.0" "@DEFAULT_AUDIO_SINK@" "5%+" ];
+        action.spawn = [
+          "wpctl"
+          "set-volume"
+          "-l"
+          "1.0"
+          "@DEFAULT_AUDIO_SINK@"
+          "5%+"
+        ];
       };
       "XF86AudioLowerVolume" = {
         allow-when-locked = true;
-        action.spawn = [ "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-" ];
+        action.spawn = [
+          "wpctl"
+          "set-volume"
+          "@DEFAULT_AUDIO_SINK@"
+          "5%-"
+        ];
       };
       "XF86AudioMute" = {
         allow-when-locked = true;
-        action.spawn = [ "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle" ];
+        action.spawn = [
+          "wpctl"
+          "set-mute"
+          "@DEFAULT_AUDIO_SINK@"
+          "toggle"
+        ];
       };
       "XF86AudioMicMute" = {
         allow-when-locked = true;
-        action.spawn = [ "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle" ];
+        action.spawn = [
+          "wpctl"
+          "set-mute"
+          "@DEFAULT_AUDIO_SOURCE@"
+          "toggle"
+        ];
       };
       "XF86MonBrightnessUp" = {
         allow-when-locked = true;
-        action.spawn = [ "brightnessctl" "-e4" "-n2" "set" "5%+" ];
+        action.spawn = [
+          "brightnessctl"
+          "-e4"
+          "-n2"
+          "set"
+          "5%+"
+        ];
       };
       "XF86MonBrightnessDown" = {
         allow-when-locked = true;
-        action.spawn = [ "brightnessctl" "-e4" "-n2" "set" "5%-" ];
+        action.spawn = [
+          "brightnessctl"
+          "-e4"
+          "-n2"
+          "set"
+          "5%-"
+        ];
       };
       "XF86AudioNext" = {
         allow-when-locked = true;
-        action.spawn = [ "playerctl" "next" ];
+        action.spawn = [
+          "playerctl"
+          "next"
+        ];
       };
       "XF86AudioPrev" = {
         allow-when-locked = true;
-        action.spawn = [ "playerctl" "previous" ];
+        action.spawn = [
+          "playerctl"
+          "previous"
+        ];
       };
       "XF86AudioPlay" = {
         allow-when-locked = true;
-        action.spawn = [ "playerctl" "play-pause" ];
+        action.spawn = [
+          "playerctl"
+          "play-pause"
+        ];
       };
 
       # ================
       # SYSTEM
       # ================
-      "Mod+Ctrl+Alt+L".action.spawn =
-        [ "noctalia-shell" "ipc" "call" "lock" "lock" ];
-      "Mod+C".action.spawn =
-        [ "noctalia-shell" "ipc" "call" "launcher" "clipboard" ];
-      "Mod+Shift+C".action.spawn = [ "niri" "msg" "action" "reload-config" ];
+      "Mod+Ctrl+Alt+L".action.spawn = [
+        "noctalia-shell"
+        "ipc"
+        "call"
+        "lockScreen"
+        "lock"
+      ];
+      "Mod+C".action.spawn = [
+        "noctalia-shell"
+        "ipc"
+        "call"
+        "launcher"
+        "clipboard"
+      ];
+      "Mod+Shift+C".action.spawn = [
+        "niri"
+        "msg"
+        "action"
+        "reload-config"
+      ];
       "Mod+Shift+Q".action.quit = [ ];
       "Mod+Shift+Slash".action.show-hotkey-overlay = [ ];
-      "Mod+Slash".action.spawn =
-        [ "sh" "-c" "${scriptsPath}/niri-keybinds-help.sh" ];
+      "Mod+Slash".action.spawn = [
+        "sh"
+        "-c"
+        "${scriptsPath}/niri-keybinds-help.sh"
+      ];
     };
 
     # Animations
@@ -493,35 +667,31 @@ in {
     };
 
     # Hotkey overlay settings
-    hotkey-overlay = { skip-at-startup = true; };
+    hotkey-overlay = {
+      skip-at-startup = true;
+    };
 
     # Screenshot configuration
-    screenshot-path =
-      "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png";
+    screenshot-path = "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png";
   };
 
   # Noctalia-shell configuration (quickshell-based)
   # Symlink to repo for live editing and version control
   xdg.configFile = {
     "noctalia/settings.json".source =
-      config.lib.file.mkOutOfStoreSymlink
-        "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/noctalia/settings.json";
+      config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/noctalia/settings.json";
 
     "noctalia/colors.json".source =
-      config.lib.file.mkOutOfStoreSymlink
-        "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/noctalia/colors.json";
+      config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/noctalia/colors.json";
 
     "noctalia/plugins.json".source =
-      config.lib.file.mkOutOfStoreSymlink
-        "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/noctalia/plugins.json";
+      config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/noctalia/plugins.json";
 
     # Directories for custom colorschemes and plugins
     "noctalia/colorschemes".source =
-      config.lib.file.mkOutOfStoreSymlink
-        "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/noctalia/colorschemes";
+      config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/noctalia/colorschemes";
 
     "noctalia/plugins".source =
-      config.lib.file.mkOutOfStoreSymlink
-        "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/noctalia/plugins";
+      config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/noctalia/plugins";
   };
 }

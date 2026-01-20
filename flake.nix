@@ -1,6 +1,5 @@
 {
-  description =
-    "Jordan Garrison's NixOS and Home Manager configurations for NixOS and MacOS";
+  description = "Jordan Garrison's NixOS and Home Manager configurations for NixOS and MacOS";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
@@ -47,9 +46,26 @@
     };
   };
 
-  outputs = inputs@{ self, nixpkgs, nixpkgs-stable, nixpkgs-master
-    , nixos-hardware, nix-darwin, home-manager, nvf, aws-tools, aws-use-sso
-    , hubctl, claude-code, niri, noctalia, sweet-nothings, nix-zed-extensions, }: {
+  outputs =
+    inputs@{
+      self,
+      nixpkgs,
+      nixpkgs-stable,
+      nixpkgs-master,
+      nixos-hardware,
+      nix-darwin,
+      home-manager,
+      nvf,
+      aws-tools,
+      aws-use-sso,
+      hubctl,
+      claude-code,
+      niri,
+      noctalia,
+      sweet-nothings,
+      nix-zed-extensions,
+    }:
+    {
       nixosConfigurations = {
         "endeavour" = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs; };
@@ -116,8 +132,7 @@
               services.freerdp.enable = true;
 
               # Import niri home module for jordangarrison on endeavour
-              home-manager.users.jordangarrison.imports =
-                [ ./modules/home/niri ];
+              home-manager.users.jordangarrison.imports = [ ./modules/home/niri ];
             }
           ];
 
@@ -134,7 +149,7 @@
             ./modules/nixos/gnome-desktop.nix
             # ./modules/nixos/hyprland-desktop.nix  # Disabled in favor of Niri
             ./modules/nixos/niri-desktop.nix
-            { gbg-config.gnome-tweaks.machine-type = "laptop"; }
+            { gbg-config.machine.type = "laptop"; }
             ./modules/nixos/fonts.nix
             ./modules/nixos/audio/pipewire.nix
             ./modules/nixos/development.nix
@@ -199,7 +214,7 @@
             ./modules/nixos/brother-printer.nix
             ./modules/nixos/lan.nix
             ./modules/nixos/gnome-desktop.nix
-            { gbg-config.gnome-tweaks.machine-type = "laptop"; }
+            { gbg-config.machine.type = "laptop"; }
             # ./modules/nixos/hyprland-desktop.nix  # Disabled - voyager uses GNOME only
             ./modules/nixos/fonts.nix
             ./modules/nixos/audio/pipewire.nix
@@ -300,8 +315,7 @@
               nix.enable = false;
               nixpkgs.config.allowUnfree = true;
               home-manager = {
-                users."jordan.garrison" =
-                  import ./users/jordangarrison/home-darwin.nix;
+                users."jordan.garrison" = import ./users/jordangarrison/home-darwin.nix;
                 extraSpecialArgs = {
                   inherit inputs;
                   username = "jordan.garrison";

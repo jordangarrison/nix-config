@@ -1,17 +1,17 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 
 with lib;
 
 {
-  options.gbg-config.gnome-tweaks.machine-type = mkOption {
-    type = types.enum [ "laptop" "desktop" ];
-    default = "desktop";
-    description = "The type of machine this is.";
-  };
-
   config = {
     # If the machine is a desktop, disable suspend
-    systemd.sleep = mkIf (config.gbg-config.gnome-tweaks.machine-type == "desktop") {
+    # Uses gbg-config.machine.type from common.nix
+    systemd.sleep = mkIf (config.gbg-config.machine.type == "desktop") {
       extraConfig = ''
         AllowSuspend=no
         AllowHibernation=no
@@ -37,7 +37,7 @@ with lib;
     # Enable the GDM display manager
     services.displayManager.gdm = {
       enable = true;
-      autoSuspend = config.gbg-config.gnome-tweaks.machine-type == "laptop";
+      autoSuspend = config.gbg-config.machine.type == "laptop";
     };
 
     # Enable GNOME services

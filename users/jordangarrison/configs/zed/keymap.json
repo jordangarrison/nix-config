@@ -71,12 +71,12 @@
 
       "space j k": "editor::Hover",
       "space j t": "theme_selector::Toggle",
-      "space j /": "editor::ToggleComments"
-    }
+      "space j /": "editor::ToggleComments",
+    },
   },
   {
     "bindings": {
-      "ctrl-`": "terminal_panel::ToggleFocus"
-    }
-  }
+      "ctrl-`": "terminal_panel::ToggleFocus",
+    },
+  },
 ]

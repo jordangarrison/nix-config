@@ -79,6 +79,9 @@ in
         bunBinName = "claude";
       })
 
+      # Ralph - iterative AI loop utility
+      ralph
+
       # Apps
       arandr
       spotify

@@ -14,6 +14,7 @@ DEFAULT_DELAY=2
 AGENT="${RALPH_AGENT:-$DEFAULT_AGENT}"
 MAX_ITERATIONS="$DEFAULT_MAX_ITERATIONS"
 COMPLETION_PHRASE="$DEFAULT_COMPLETION"
+COMPLETION_PHRASE_SPECIFIED=false
 DELAY="$DEFAULT_DELAY"
 VERBOSE=false
 PROMPT_FILE=""
@@ -66,6 +67,7 @@ while [[ $# -gt 0 ]]; do
         -c|--completion)
             [[ -n "${2:-}" ]] || die "--completion requires an argument"
             COMPLETION_PHRASE="$2"
+            COMPLETION_PHRASE_SPECIFIED=true
             shift 2
             ;;
         -d|--delay)
@@ -119,6 +121,13 @@ if [[ -n "$INLINE_PROMPT" ]]; then
     PROMPT="$INLINE_PROMPT"
 else
     PROMPT="$(cat "$PROMPT_FILE")"
+fi
+
+# Append completion phrase instruction if not specified by user
+if ! $COMPLETION_PHRASE_SPECIFIED; then
+    PROMPT="$PROMPT
+
+When you have completed the task, output exactly: $COMPLETION_PHRASE"
 fi
 
 # Print header

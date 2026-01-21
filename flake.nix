@@ -73,6 +73,7 @@
             ./modules/stable-overlay.nix
             ./modules/master-overlay.nix
             ./modules/zed-extensions-overlay.nix
+            ./modules/ralph-overlay.nix
             ./modules/nixos/common.nix
             ./modules/nixos/brother-printer.nix
             ./modules/nixos/lan.nix
@@ -143,6 +144,7 @@
             ./modules/stable-overlay.nix
             ./modules/master-overlay.nix
             ./modules/zed-extensions-overlay.nix
+            ./modules/ralph-overlay.nix
             ./modules/nixos/common.nix
             ./modules/nixos/brother-printer.nix
             ./modules/nixos/lan.nix
@@ -210,6 +212,7 @@
           modules = [
             ./modules/stable-overlay.nix
             ./modules/master-overlay.nix
+            ./modules/ralph-overlay.nix
             ./modules/nixos/common.nix
             ./modules/nixos/brother-printer.nix
             ./modules/nixos/lan.nix
@@ -258,6 +261,7 @@
           modules = [
             ./modules/stable-overlay.nix
             ./modules/master-overlay.nix
+            ./modules/ralph-overlay.nix
             ./modules/nixos/common.nix
             ./modules/nixos/brother-printer.nix
             ./modules/nixos/lan.nix
@@ -306,6 +310,7 @@
           modules = [
             ./modules/stable-overlay.nix
             ./modules/master-overlay.nix
+            ./modules/ralph-overlay.nix
             ./modules/nixos/emacs.nix
             ./modules/nixos/fonts.nix
             ./hosts/flomac/configuration.nix
@@ -340,6 +345,7 @@
           modules = [
             ./modules/stable-overlay.nix
             ./modules/master-overlay.nix
+            ./modules/ralph-overlay.nix
             ./users/jordangarrison/home.nix
           ];
           extraSpecialArgs = {

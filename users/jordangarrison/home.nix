@@ -82,6 +82,12 @@ in
       # Ralph - iterative AI loop utility
       ralph
 
+      # Script packages (wrapped with dependencies)
+      myip    # Public IP with geolocation
+      gi      # gitignore template fetcher
+      tmux-cht # Cheat sheet lookup in tmux
+      ksn     # kubectl namespace switcher
+
       # Apps
       arandr
       spotify
@@ -610,27 +616,13 @@ in
     ".config/wezterm/wezterm.lua".source =
       config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/tools/wezterm/wezterm.lua";
 
-    # Scripts
-    ".local/bin/tmux-cht.sh" = {
-      source = ./tools/scripts/tmux-cht.sh;
-      executable = true;
-    };
+    # tmux-cht data files (script hardcodes ~/.tmux-cht-* paths)
     ".tmux-cht-languages".source = ./tools/scripts/tmux-cht-languages.txt;
     ".tmux-cht-commands".source = ./tools/scripts/tmux-cht-commands.txt;
+
+    # gen-dynamic-wallpaper (macOS-specific, not packaged yet)
     ".local/bin/gen-dynamic-wallpaper" = {
       source = ./tools/scripts/gen-dynamic-wallpaper.sh;
-      executable = true;
-    };
-    ".local/bin/myip" = {
-      source = ./tools/scripts/myip.sh;
-      executable = true;
-    };
-    ".local/bin/ksn" = {
-      source = ./tools/scripts/ksn.sh;
-      executable = true;
-    };
-    ".local/bin/gi" = {
-      source = ./tools/scripts/gi.sh;
       executable = true;
     };
   };

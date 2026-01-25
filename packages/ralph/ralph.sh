@@ -127,7 +127,8 @@ fi
 if ! $COMPLETION_PHRASE_SPECIFIED; then
     PROMPT="$PROMPT
 
-When you have completed the task, output exactly: $COMPLETION_PHRASE"
+IMPORTANT: When you have completed ALL tasks in this prompt and there is nothing left to do, output exactly: $COMPLETION_PHRASE
+Do NOT output this phrase until every single task is fully complete. Only output it once at the very end."
 fi
 
 # Print header

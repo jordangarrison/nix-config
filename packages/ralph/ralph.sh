@@ -150,7 +150,8 @@ while [[ $iteration -le $MAX_ITERATIONS ]]; do
     set +e
     if $VERBOSE; then
         # Show output in real-time and capture it
-        $AGENT "$PROMPT" 2>&1 | tee "$output_file"
+        # Use stdbuf to disable buffering so output streams immediately
+        stdbuf -oL -eL $AGENT "$PROMPT" 2>&1 | tee "$output_file"
         exit_code=${PIPESTATUS[0]}
     else
         # Capture output silently

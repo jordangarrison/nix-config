@@ -100,6 +100,11 @@
             ],
             "left": [
                 {
+                    "icon": "rocket",
+                    "id": "Launcher",
+                    "usePrimaryColor": false
+                },
+                {
                     "characterCount": 2,
                     "colorizeIcons": false,
                     "enableScrollWheel": true,

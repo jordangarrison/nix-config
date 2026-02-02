@@ -33,7 +33,7 @@
       "claude"
       "cursor"
       "deskflow"
-      "docker-desktop"
+      "orbstack"
       # "emacs-app"
       "espanso"
       "dbeaver-community"

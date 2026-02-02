@@ -74,10 +74,9 @@ in
       nh
       devbox
 
-      # Claude Code with Bun runtime (faster startup, lower memory)
-      (inputs.claude-code.packages.${pkgs.system}.claude-code-bun.override {
-        bunBinName = "claude";
-      })
+      # Claude Code (available via overlay as pkgs.claude-code)
+      # Also available: pkgs.claude-code-node, pkgs.claude-code-bun
+      claude-code
 
       # Ralph - iterative AI loop utility
       ralph

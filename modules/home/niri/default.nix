@@ -219,6 +219,14 @@ in
           "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"
         ];
       }
+      # GNOME Keyring (for secrets/passwords - needed by Signal, etc.)
+      {
+        command = [
+          "gnome-keyring-daemon"
+          "--start"
+          "--components=secrets"
+        ];
+      }
       # Network manager applet
       {
         command = [

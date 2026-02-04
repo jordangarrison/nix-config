@@ -197,6 +197,16 @@ in
           bibletime
           comixcursors
           discord
+          # Signal Desktop wrapped to use gnome-keyring for secrets storage
+          (pkgs.symlinkJoin {
+            name = "signal-desktop";
+            paths = [ pkgs.signal-desktop ];
+            buildInputs = [ pkgs.makeWrapper ];
+            postBuild = ''
+              wrapProgram $out/bin/signal-desktop \
+                --add-flags "--password-store=gnome-libsecret"
+            '';
+          })
           deno
           dig
           # emacs

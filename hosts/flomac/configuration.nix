@@ -56,6 +56,7 @@
       "raycast"
       "readdle-spark"
       "rectangle"
+      "signal"
       "slack"
       "superwhisper"
       "todoist-app"

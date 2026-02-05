@@ -33,6 +33,13 @@
         deps = with final; [ kubectl ];
         description = "Switch kubectl namespace";
       };
+
+      claude-switch = mkScript {
+        name = "claude-switch";
+        script = ../packages/claude-switch/claude-switch.sh;
+        deps = with final; [ coreutils gnused ];
+        description = "Switch between Claude Code credential profiles";
+      };
     })
   ];
 }

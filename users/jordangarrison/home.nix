@@ -86,6 +86,7 @@ in
       gi      # gitignore template fetcher
       tmux-cht # Cheat sheet lookup in tmux
       ksn     # kubectl namespace switcher
+      claude-switch # Claude Code credential profile switcher
 
       # Apps
       arandr

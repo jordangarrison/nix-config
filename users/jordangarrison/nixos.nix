@@ -36,7 +36,17 @@ in {
         deskflow
         stable.nextcloud-client # Broken in nix-unstable - Qt6 GuiPrivate component missing
         obsidian
-        session-desktop
+        # session-desktop: clear executable stack flag on better-sqlite3
+        # glibc 2.41+ rejects dlopen of shared libraries with RWE GNU_STACK
+        (session-desktop.overrideAttrs (old: {
+          postFixup = (old.postFixup or "") + ''
+            for f in $(find $out -name "*.node" -type f); do
+              if ${prelink}/bin/execstack -q "$f" 2>/dev/null | grep -q '^X'; then
+                ${prelink}/bin/execstack -c "$f"
+              fi
+            done
+          '';
+        }))
         todoist-electron
         xournalpp
         zoom-us

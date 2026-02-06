@@ -74,9 +74,10 @@ in
       nh
       devbox
 
-      # Claude Code (available via overlay as pkgs.claude-code)
-      # Also available: pkgs.claude-code-node, pkgs.claude-code-bun
-      claude-code
+      # LLM Agents (available via overlay as pkgs.llm-agents.*)
+      llm-agents.claude-code
+      llm-agents.codex
+      llm-agents.opencode
 
       # Ralph - iterative AI loop utility
       ralph
@@ -129,7 +130,6 @@ in
       # mosh
       nixpacks
       nmap
-      master.opencode
       pandoc
       ripgrep
       sqlite

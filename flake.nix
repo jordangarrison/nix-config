@@ -30,7 +30,7 @@
       url = "github:jordangarrison/hubctl";
       # inputs.nixpkgs.follows = "nixpkgs";
     };
-    claude-code.url = "github:sadjow/claude-code-nix";
+    llm-agents.url = "github:numtide/llm-agents.nix";
     niri.url = "github:sodiboo/niri-flake";
     noctalia = {
       url = "github:noctalia-dev/noctalia-shell";
@@ -59,7 +59,7 @@
       aws-tools,
       aws-use-sso,
       hubctl,
-      claude-code,
+      llm-agents,
       niri,
       noctalia,
       sweet-nothings,
@@ -75,7 +75,7 @@
             ./modules/zed-extensions-overlay.nix
             ./modules/ralph-overlay.nix
             ./modules/scripts-overlay.nix
-            ./modules/claude-code-overlay.nix
+            ./modules/llm-agents-overlay.nix
             ./modules/nixos/common.nix
             ./modules/nixos/brother-printer.nix
             ./modules/nixos/lan.nix
@@ -144,7 +144,7 @@
             ./modules/zed-extensions-overlay.nix
             ./modules/ralph-overlay.nix
             ./modules/scripts-overlay.nix
-            ./modules/claude-code-overlay.nix
+            ./modules/llm-agents-overlay.nix
             ./modules/nixos/common.nix
             ./modules/nixos/brother-printer.nix
             ./modules/nixos/lan.nix
@@ -214,7 +214,7 @@
             ./modules/master-overlay.nix
             ./modules/ralph-overlay.nix
             ./modules/scripts-overlay.nix
-            ./modules/claude-code-overlay.nix
+            ./modules/llm-agents-overlay.nix
             ./modules/nixos/common.nix
             ./modules/nixos/brother-printer.nix
             ./modules/nixos/lan.nix
@@ -265,7 +265,7 @@
             ./modules/master-overlay.nix
             ./modules/ralph-overlay.nix
             ./modules/scripts-overlay.nix
-            ./modules/claude-code-overlay.nix
+            ./modules/llm-agents-overlay.nix
             ./modules/nixos/common.nix
             ./modules/nixos/brother-printer.nix
             ./modules/nixos/lan.nix
@@ -316,7 +316,7 @@
             ./modules/master-overlay.nix
             ./modules/ralph-overlay.nix
             ./modules/scripts-overlay.nix
-            ./modules/claude-code-overlay.nix
+            ./modules/llm-agents-overlay.nix
             ./modules/nixos/emacs.nix
             ./modules/nixos/fonts.nix
             ./hosts/flomac/configuration.nix
@@ -353,7 +353,7 @@
             ./modules/master-overlay.nix
             ./modules/ralph-overlay.nix
             ./modules/scripts-overlay.nix
-            ./modules/claude-code-overlay.nix
+            ./modules/llm-agents-overlay.nix
             ./users/jordangarrison/home.nix
           ];
           extraSpecialArgs = {

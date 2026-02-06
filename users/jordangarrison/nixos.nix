@@ -38,6 +38,7 @@ in {
         obsidian
         # session-desktop: clear executable stack flag on better-sqlite3
         # glibc 2.41+ rejects dlopen of shared libraries with RWE GNU_STACK
+        # https://github.com/NixOS/nixpkgs/issues/487524
         (session-desktop.overrideAttrs (old: {
           postFixup = (old.postFixup or "") + ''
             for f in $(find $out -name "*.node" -type f); do

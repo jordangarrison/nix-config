@@ -29,11 +29,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1746567748,
-        "narHash": "sha256-KvQ6x/T3Afdwh110S196TRw9Lj1HK1NOHnxmjN116X0=",
+        "lastModified": 1770331886,
+        "narHash": "sha256-kMg+4F88ZNZdw1xVkl4vSsFdzzhoGaUOFTPhWd/T/dI=",
         "owner": "jordangarrison",
         "repo": "aws-use-sso",
-        "rev": "a2d2ef0fdc82a505aef65535b481eb71ce9d8860",
+        "rev": "3cc2121cfc7ae9d8fb4c70ef695847af4b20859a",
         "type": "github"
       },
       "original": {

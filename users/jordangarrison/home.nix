@@ -82,10 +82,10 @@ in
       ralph
 
       # Script packages (wrapped with dependencies)
-      myip    # Public IP with geolocation
-      gi      # gitignore template fetcher
+      myip # Public IP with geolocation
+      gi # gitignore template fetcher
       tmux-cht # Cheat sheet lookup in tmux
-      ksn     # kubectl namespace switcher
+      ksn # kubectl namespace switcher
       claude-switch # Claude Code credential profile switcher
 
       # Apps
@@ -117,6 +117,7 @@ in
       cmake
       diff-so-fancy
       fd
+      github-copilot-cli
       gnumake
       gnutls
       jq
@@ -293,7 +294,6 @@ in
       git_protocol = "ssh";
     };
     extensions = with pkgs; [
-      gh-copilot
       gh-dash
     ];
   };

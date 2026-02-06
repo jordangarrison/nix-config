@@ -80,16 +80,12 @@
             ./modules/nixos/brother-printer.nix
             ./modules/nixos/lan.nix
             ./modules/nixos/gnome-desktop.nix
-            # ./modules/nixos/hyprland-desktop.nix  # Disabled in favor of Niri
             ./modules/nixos/niri-desktop.nix
             ./modules/nixos/fonts.nix
             ./modules/nixos/audio/pipewire.nix
             ./modules/nixos/development.nix
-            ./modules/nixos/steam.nix
             ./modules/nixos/searx.nix
-            ./modules/nixos/metabase.nix
             ./modules/nixos/postgres.nix
-            ./modules/nixos/n8n.nix
             ./modules/nixos/jellyfin.nix
             ./modules/nixos/virtualization.nix
             ./modules/nixos/freerdp.nix

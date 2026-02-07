@@ -219,11 +219,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1770349810,
-        "narHash": "sha256-rB4d4zBQlhm1J1CxsIIstyRZzuODVeJCAxutWBmt35w=",
+        "lastModified": 1770435437,
+        "narHash": "sha256-QGFHw3wc08DgAt2GllBgrOnCcgXTMwOsokdfMDHVprI=",
         "owner": "numtide",
         "repo": "llm-agents.nix",
-        "rev": "398181e94b91ad081fad17d9b5eab140411d6a29",
+        "rev": "36fb71277896585b319e56e8a98c265f24813e30",
         "type": "github"
       },
       "original": {
@@ -279,11 +279,11 @@
         "xwayland-satellite-unstable": "xwayland-satellite-unstable"
       },
       "locked": {
-        "lastModified": 1770271466,
-        "narHash": "sha256-Pyc3p/V7ruQplnU31r+umLSNlSGwOOoHzhWfzfLmiiw=",
+        "lastModified": 1770400632,
+        "narHash": "sha256-TsOt49sYfzmxSTj2wKHKK2ZToCByLJLxPbwbu1brDt0=",
         "owner": "sodiboo",
         "repo": "niri-flake",
-        "rev": "76e1d271485b00a5d98aeb1dd76408594741c039",
+        "rev": "652dbeb0ac2c481dee5b57be972c6fd6feb38adc",
         "type": "github"
       },
       "original": {
@@ -312,11 +312,11 @@
     "niri-unstable": {
       "flake": false,
       "locked": {
-        "lastModified": 1770092965,
-        "narHash": "sha256-++K1ftjwPqMJzIO8t2GsdkYQzC2LLA5A1w21Uo+SLz4=",
+        "lastModified": 1770394936,
+        "narHash": "sha256-Pa0fkyLYUR+pZh7phPENDUo4mJIweaAm0uV83iUUlX8=",
         "owner": "YaLTeR",
         "repo": "niri",
-        "rev": "189917c93329c86ac2ddd89f459c26a028d590ba",
+        "rev": "549148d27779d024255a84535b42b947f1c2a113",
         "type": "github"
       },
       "original": {
@@ -355,11 +355,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1770263493,
-        "narHash": "sha256-YeXj0qsqGofl1L/BnPtxsMTlgKuorLH9W2QoPkFSDyg=",
+        "lastModified": 1770349838,
+        "narHash": "sha256-dsTgRwt5juflvpQ2X51VRKw1VmORBE35pHcRDo0Fi0o=",
         "owner": "DuskSystems",
         "repo": "nix-zed-extensions",
-        "rev": "65e499275d3b87c49697b4ab25dc27a32759711e",
+        "rev": "e7d1f8336050eff693fcb25f51ad1ac19c30c29d",
         "type": "github"
       },
       "original": {
@@ -401,11 +401,11 @@
     },
     "nixpkgs-master": {
       "locked": {
-        "lastModified": 1770347267,
-        "narHash": "sha256-vRGiXGrij8M4+NbfotPuSAkJI1Tpqrx9cPbYQFkJp84=",
+        "lastModified": 1770458467,
+        "narHash": "sha256-+DLNUIlEztWNrpczUUyGeuc2YJYt6UdylFE0DNkcRFs=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "f8debdc0eb13ef36fdd350bea6c5d24d8a5396e5",
+        "rev": "792f31d532ff6da1aa20f6cb207d1c060c470528",
         "type": "github"
       },
       "original": {
@@ -534,11 +534,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1770344037,
-        "narHash": "sha256-YTKkdEnTe2pSGVoU3u33EjZNtvyw7qlYd9nHL4pS1ZQ=",
+        "lastModified": 1770458444,
+        "narHash": "sha256-ZUh8eoJSkA/NVj451Y4onrRjv0XRfNyTMZhfrY71FoU=",
         "owner": "noctalia-dev",
         "repo": "noctalia-shell",
-        "rev": "953f757f1b84a5c95cf90147b88facb5c0e339ce",
+        "rev": "b56f3bd363e5a582bf0cfab4d00faaf0e5fc5d0b",
         "type": "github"
       },
       "original": {

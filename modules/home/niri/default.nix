@@ -405,6 +405,9 @@ in
         "--paste"
       ];
 
+      # Which-key menu (D for discover)
+      "Mod+D".action.spawn = "wlr-which-key-menu";
+
       # ================
       # WINDOW CONTROLS
       # ================
@@ -502,30 +505,6 @@ in
       # ================
       # SCREENSHOTS
       # ================
-      # Region select with Satty annotation
-      "Mod+Alt+S".action.spawn = [
-        "sh"
-        "-c"
-        "${scriptsPath}/screenshot-region-satty.sh"
-      ];
-      # Full screen with Satty annotation
-      "Mod+Alt+A".action.spawn = [
-        "sh"
-        "-c"
-        "${scriptsPath}/screenshot-full-satty.sh"
-      ];
-      # Quick region to clipboard
-      "Mod+Alt+C".action.spawn = [
-        "sh"
-        "-c"
-        "${scriptsPath}/screenshot-region-clipboard.sh"
-      ];
-      # Full screen to clipboard
-      "Mod+Alt+F".action.spawn = [
-        "sh"
-        "-c"
-        "${scriptsPath}/screenshot-full-clipboard.sh"
-      ];
       # Niri's built-in screenshot
       "Print".action.screenshot = [ ];
       "Shift+Print".action.screenshot-window = [ ];

@@ -60,13 +60,26 @@ Super + Period            → Focus monitor right
 Super + Shift + Comma     → Move window to monitor left
 Super + Shift + Period    → Move window to monitor right
 
-[SCREENSHOTS]
+[WHICH-KEY MENU (Super + D)]
+Super + D                 → Open which-key menu
+  p                       → Power (suspend/reboot/shutdown/lock)
+  s                       → Screenshots (region/screen/window + annotate/clipboard)
+  a                       → Apps (AI tools, system tools, media)
+  w                       → Web (mail, GitHub, Jira, Calendar, Meet)
+  m                       → Media (headphones/speakers/mic mute)
+  x                       → Session (reload config, quit, hotkey overlay)
+  d                       → Display (monitor focus/move)
+
+[SCREENSHOTS (via Super + D → s)]
+s then r                  → Region select + Satty annotation
+s then s                  → Focused screen + Satty annotation
+s then w                  → Window + Satty annotation
+s then c                  → Region to clipboard
+s then f                  → Focused screen to clipboard
+s then a                  → All monitors + Satty annotation
+s then A                  → All monitors to clipboard
 Print                     → Screenshot (niri built-in)
-Shift + Print             → Screenshot window
-Super + Alt + S           → Region + Satty annotation
-Super + Alt + A           → Full screen + Satty
-Super + Alt + C           → Region to clipboard
-Super + Alt + F           → Full screen to clipboard
+Shift + Print             → Screenshot window (niri built-in)
 
 [SYSTEM]
 Super + C                 → Clipboard history

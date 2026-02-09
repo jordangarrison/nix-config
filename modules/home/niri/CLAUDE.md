@@ -86,11 +86,30 @@ Wallpaper is managed separately via **swaybg**.
 | `Mod+Shift+/` | Show niri hotkey overlay (basic) |
 
 ### Screenshots
+Screenshots are accessed via the which-key menu (`Mod+D → s`). Niri built-in screenshot binds remain:
+
 | Keybinding | Action |
 |------------|--------|
-| `Print` | Screenshot area (satty) |
-| `Mod+Print` | Screenshot window |
-| `Mod+Shift+Print` | Screenshot screen |
+| `Print` | Screenshot (niri built-in) |
+| `Shift+Print` | Screenshot window (niri built-in) |
+
+### Which-Key Menu (Mod+D)
+
+Interactive hierarchical command menu powered by `wlr-which-key`. Press `Mod+D` to open.
+
+| Submenu | Key | Contents |
+|---------|-----|----------|
+| Power | p | Suspend, Reboot, Shutdown, Lock Screen |
+| Screenshots | s | Region/Screen/Window capture with Annotate or Clipboard |
+| Apps | a | AI Tools (Claude, ChatGPT, Gemini), System (btop, nmtui), Media (OBS) |
+| Web | w | Mail, GitHub repos, Jira, Calendar, Meet |
+| Media | m | Headphone/Speaker switching, Mic mute |
+| Session | x | Reload config, Quit niri, Hotkey overlay |
+| Display | d | Monitor focus/move |
+
+**Configuration:** `modules/home/wlr-which-key/default.nix`
+
+**Note:** Screenshots were moved from `Mod+Alt+S/A/C/F` keybinds into the which-key menu (`Mod+D → s`). The niri built-in `Print` and `Shift+Print` screenshot binds remain.
 
 ## Monitor Configuration
 

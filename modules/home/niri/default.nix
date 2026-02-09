@@ -47,7 +47,10 @@ let
 in
 {
   # Import shared desktop tools (satty, screenshot tools, clipboard, etc.)
-  imports = [ ../desktop-tools ];
+  imports = [
+    ../desktop-tools
+    ../wlr-which-key
+  ];
 
   # Clipboard services via Home Manager (systemd-managed)
   services.cliphist = {

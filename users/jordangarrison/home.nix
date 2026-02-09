@@ -103,7 +103,6 @@ in
       # aider-chat  # Temporarily disabled due to texlive build issue
       btop
       exercism
-      helix
       jira-cli-go
       k9s
       nil
@@ -337,6 +336,65 @@ in
         bdm = "!git branch --merged | grep -v '*' | xargs -n 1 git branch -d";
         aliases = "!git config --list | grep alias";
       };
+    };
+  };
+
+  programs.helix = {
+    enable = true;
+    extraPackages = with pkgs; [
+      gopls
+      gotools # goimports
+      nodePackages.typescript-language-server
+      rust-analyzer
+      elixir-ls
+      nil # nix LSP
+      nixfmt-rfc-style # or nixfmt-classic
+      marksman # markdown
+    ];
+    settings = {
+      theme = "noctalia";
+      editor = {
+        cursor-shape = {
+          normal = "block";
+          insert = "bar";
+          select = "underline";
+        };
+        file-picker = {
+          hidden = false;
+        };
+        indent-guides = {
+          render = true;
+        };
+        line-number = "relative";
+        lsp = {
+          display-messages = true;
+        };
+      };
+    };
+    languages = {
+      language = [
+        {
+          name = "nix";
+          auto-format = true;
+          formatter.command = "nixfmt";
+        }
+        {
+          name = "go";
+          auto-format = true; # Runs goimports + gofmt on save via gopls
+        }
+        {
+          name = "typescript";
+          auto-format = true; # Format on save via typescript-language-server
+        }
+        {
+          name = "rust";
+          auto-format = true; # Runs rustfmt on save via rust-analyzer
+        }
+        {
+          name = "elixir";
+          auto-format = true; # Runs mix format on save via elixir-ls
+        }
+      ];
     };
   };
 

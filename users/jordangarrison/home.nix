@@ -89,6 +89,9 @@ in
       ksn # kubectl namespace switcher
       claude-switch # Claude Code credential profile switcher
 
+      # Okta CLI
+      okta-cli-client
+
       # Apps
       arandr
       spotify
@@ -629,6 +632,9 @@ in
   };
 
   home.file = {
+    # Pin ~/.local/bin/claude to the Nix-managed version to prevent auto-updater overwrites
+    ".local/bin/claude".source = "${pkgs.llm-agents.claude-code}/bin/claude";
+
     # SSH config with proper permissions fix
     ".ssh/config_source" = {
       source = ./configs/ssh/config;

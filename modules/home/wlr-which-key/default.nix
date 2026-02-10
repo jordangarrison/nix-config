@@ -83,7 +83,7 @@ let
         ])
         (entry "j" "Jira Board" "brave https://flocasts.atlassian.net/jira/software/c/projects/INFRA/boards/166")
         (entry "c" "Calendar" "brave https://calendar.google.com/calendar/u/1/r/week")
-        (entry "t" "Meet" "brave --app=https://meet.google.com")
+        (entry "t" "Meet" "brave --app=https://meet.google.com/landing?authuser=1")
       ])
 
       # [m] Media

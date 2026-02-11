@@ -92,6 +92,10 @@ in
       # Okta CLI
       okta-cli-client
 
+      # Sidecar - TUI companion for CLI coding agents
+      sidecar
+      td
+
       # Apps
       arandr
       spotify

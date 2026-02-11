@@ -77,6 +77,7 @@
             ./modules/scripts-overlay.nix
             ./modules/llm-agents-overlay.nix
             ./modules/okta-cli-client-overlay.nix
+            ./modules/sidecar-overlay.nix
             ./modules/nixos/common.nix
             ./modules/nixos/brother-printer.nix
             ./modules/nixos/lan.nix
@@ -147,6 +148,7 @@
             ./modules/scripts-overlay.nix
             ./modules/llm-agents-overlay.nix
             ./modules/okta-cli-client-overlay.nix
+            ./modules/sidecar-overlay.nix
             ./modules/nixos/common.nix
             ./modules/nixos/brother-printer.nix
             ./modules/nixos/lan.nix
@@ -218,6 +220,7 @@
             ./modules/scripts-overlay.nix
             ./modules/llm-agents-overlay.nix
             ./modules/okta-cli-client-overlay.nix
+            ./modules/sidecar-overlay.nix
             ./modules/nixos/common.nix
             ./modules/nixos/brother-printer.nix
             ./modules/nixos/lan.nix
@@ -270,6 +273,7 @@
             ./modules/scripts-overlay.nix
             ./modules/llm-agents-overlay.nix
             ./modules/okta-cli-client-overlay.nix
+            ./modules/sidecar-overlay.nix
             ./modules/nixos/common.nix
             ./modules/nixos/brother-printer.nix
             ./modules/nixos/lan.nix
@@ -322,6 +326,7 @@
             ./modules/scripts-overlay.nix
             ./modules/llm-agents-overlay.nix
             ./modules/okta-cli-client-overlay.nix
+            ./modules/sidecar-overlay.nix
             ./modules/nixos/emacs.nix
             ./modules/nixos/fonts.nix
             ./hosts/flomac/configuration.nix
@@ -360,6 +365,7 @@
             ./modules/scripts-overlay.nix
             ./modules/llm-agents-overlay.nix
             ./modules/okta-cli-client-overlay.nix
+            ./modules/sidecar-overlay.nix
             ./users/jordangarrison/home.nix
           ];
           extraSpecialArgs = {

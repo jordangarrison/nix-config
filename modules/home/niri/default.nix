@@ -120,8 +120,20 @@ in
 
     # Output (monitor) configuration
     outputs = lib.mkMerge [
-      # endeavour: dual monitor desktop setup
+      # endeavour: triple monitor desktop setup
       (lib.mkIf (hostname == "endeavour") {
+        "DP-2" = {
+          mode = {
+            width = 1920;
+            height = 1080;
+            refresh = 60.0;
+          };
+          scale = 1.0;
+          position = {
+            x = -1920;
+            y = 0;
+          };
+        };
         "DP-3" = {
           mode = {
             width = 3840;

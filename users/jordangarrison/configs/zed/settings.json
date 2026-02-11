@@ -1,4 +1,9 @@
 {
+  "agent_servers": {
+    "opencode": {
+      "type": "registry"
+    }
+  },
   "git_panel": {
     "tree_view": true
   },
@@ -13,7 +18,7 @@
   },
   "buffer_font_family": "Source Code Pro",
   "buffer_font_size": 14,
-  "ui_font_family": "FiraCode Nerd Font",
+  "ui_font_family": "Source Code Pro",
   "ui_font_size": 14,
   "tab_size": 2,
   "format_on_save": "on",

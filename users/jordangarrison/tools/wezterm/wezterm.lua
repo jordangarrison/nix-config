@@ -23,14 +23,11 @@ config.colors = {
   selection_bg = '#ebbcba',    -- Light pinkish highlight (adjust to your preference)
 }
 
--- ssh domains
-config.ssh_domains = {
-  {
-    name = 'endeavour',
-    remote_address = 'endeavour',
-    username = 'jordangarrison'
-  }
-}
+-- ssh domains (auto-populated from ~/.ssh/config)
+config.ssh_domains = wezterm.default_ssh_domains()
+for _, dom in ipairs(config.ssh_domains) do
+  dom.assume_shell = 'Posix'
+end
 
 -- Key bindings
 local act = wezterm.action

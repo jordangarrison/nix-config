@@ -44,6 +44,10 @@
       url = "github:DuskSystems/nix-zed-extensions";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    greenlight = {
+      url = "github:jordangarrison/greenlight";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -64,6 +68,7 @@
       noctalia,
       sweet-nothings,
       nix-zed-extensions,
+      greenlight,
     }:
     {
       nixosConfigurations = {
@@ -88,6 +93,7 @@
             ./modules/nixos/development.nix
             ./modules/nixos/searx.nix
             ./modules/nixos/postgres.nix
+            ./modules/nixos/greenlight.nix
             ./modules/nixos/jellyfin.nix
             ./modules/nixos/virtualization.nix
             ./modules/nixos/freerdp.nix
@@ -100,6 +106,7 @@
             nixos-hardware.nixosModules.common-gpu-amd
             home-manager.nixosModules.home-manager
             ./modules/home/defaults.nix
+            greenlight.nixosModules.default
             {
               # Configure users for endeavour
               users.jordangarrison = {

@@ -6,3 +6,8 @@
 result
 result/
 .aider*
+.grove
+.grove-agent
+.grove-base
+.grove-start.sh
+.grove-setup.sh

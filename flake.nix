@@ -51,6 +51,10 @@
     ghostty = {
       url = "github:ghostty-org/ghostty";
     };
+    grove = {
+      url = "github:MichaelVessia/grove";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -73,6 +77,7 @@
       nix-zed-extensions,
       greenlight,
       ghostty,
+      grove,
     }:
     {
       nixosConfigurations = {

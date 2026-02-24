@@ -48,6 +48,10 @@
       url = "github:jordangarrison/greenlight";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    grove = {
+      url = "github:MichaelVessia/grove";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -69,6 +73,7 @@
       sweet-nothings,
       nix-zed-extensions,
       greenlight,
+      grove,
     }:
     {
       nixosConfigurations = {

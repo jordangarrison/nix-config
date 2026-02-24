@@ -188,6 +188,9 @@ in
       inputs.aws-tools.packages.${pkgs.system}.default
       inputs.aws-use-sso.packages.${pkgs.system}.default
 
+      # Grove - workspace manager
+      inputs.grove.packages.${pkgs.system}.default
+
       # GCP - using stable due to tkinter dependency issue in unstable
       (stable.google-cloud-sdk.withExtraComponents [
         stable.google-cloud-sdk.components.gke-gcloud-auth-plugin

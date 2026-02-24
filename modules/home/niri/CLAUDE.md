@@ -33,12 +33,12 @@ Wallpaper is managed separately via **swaybg**.
 ### Program Launchers
 | Keybinding | Action |
 |------------|--------|
-| `Mod+Return` | Alacritty terminal |
+| `Mod+Return` | Ghostty terminal |
 | `Mod+Shift+Return` | WezTerm SSH to endeavour |
 | `Mod+B` | Brave browser |
 | `Mod+E` | Emacs client |
 | `Mod+N` | Obsidian |
-| `Mod+F` | Yazi file manager (in terminal) |
+| `Mod+F` | Yazi file manager (in Ghostty) |
 | `Mod+Shift+F` | Nautilus file manager |
 | `Mod+Shift+D` | Sweet Nothings voice dictation |
 | `Mod+Space` | Noctalia launcher |

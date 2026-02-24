@@ -1,5 +1,23 @@
+# Font
 font-family = Source Code Pro
-font-size = 14
-font-thicken = true
+font-size = 10
+
+# Window
+window-decoration = none
+maximize = true
+background-opacity = 0.80
+window-padding-x = 5
+window-padding-y = 5
+
+# Theme (built-in rose-pine)
 theme = rose-pine
-background-opacity = 0.95
+
+# Shell integration
+shell-integration = zsh
+
+# Keybindings
+# Shift+Enter sends newline for Claude Code multiline input
+keybind = shift+enter=text:\n
+
+# GTK
+gtk-titlebar = false

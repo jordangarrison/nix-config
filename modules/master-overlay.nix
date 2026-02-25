@@ -5,7 +5,7 @@
   nixpkgs.overlays = [
     (final: prev: {
       master = import inputs.nixpkgs-master {
-        system = final.system;
+        system = final.stdenv.hostPlatform.system;
         config.allowUnfree = true;
       };
     })

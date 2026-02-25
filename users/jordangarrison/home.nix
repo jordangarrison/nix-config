@@ -185,11 +185,11 @@ in
       lazysql
 
       # AWS Tools from flake inputs
-      inputs.aws-tools.packages.${pkgs.system}.default
-      inputs.aws-use-sso.packages.${pkgs.system}.default
+      inputs.aws-tools.packages.${pkgs.stdenv.hostPlatform.system}.default
+      inputs.aws-use-sso.packages.${pkgs.stdenv.hostPlatform.system}.default
 
       # Grove - workspace manager
-      inputs.grove.packages.${pkgs.system}.default
+      inputs.grove.packages.${pkgs.stdenv.hostPlatform.system}.default
 
       # GCP - using stable due to tkinter dependency issue in unstable
       (stable.google-cloud-sdk.withExtraComponents [
@@ -237,7 +237,7 @@ in
           xclip
 
           # Flake input packages
-          inputs.hubctl.packages.${pkgs.system}.default
+          inputs.hubctl.packages.${pkgs.stdenv.hostPlatform.system}.default
           ghostty
         ]
     );
@@ -359,7 +359,7 @@ in
       rust-analyzer
       elixir-ls
       nil # nix LSP
-      nixfmt-rfc-style # or nixfmt-classic
+      nixfmt
       marksman # markdown
     ];
     settings = {

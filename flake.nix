@@ -100,6 +100,7 @@
             ./modules/nixos/postgres.nix
             ./modules/nixos/greenlight.nix
             ./modules/nixos/jellyfin.nix
+            ./modules/nixos/forgejo.nix
             ./modules/nixos/virtualization.nix
             ./modules/nixos/freerdp.nix
             ./users/jordangarrison/nixos.nix

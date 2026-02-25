@@ -48,9 +48,6 @@
       url = "github:jordangarrison/greenlight";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    ghostty = {
-      url = "github:ghostty-org/ghostty";
-    };
     grove = {
       url = "github:MichaelVessia/grove";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -76,7 +73,6 @@
       sweet-nothings,
       nix-zed-extensions,
       greenlight,
-      ghostty,
       grove,
     }:
     {

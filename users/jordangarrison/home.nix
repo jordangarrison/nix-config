@@ -238,7 +238,7 @@ in
 
           # Flake input packages
           inputs.hubctl.packages.${pkgs.system}.default
-          inputs.ghostty.packages.${pkgs.system}.default
+          ghostty
         ]
     );
 

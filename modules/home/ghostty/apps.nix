@@ -1,11 +1,9 @@
-{ lib, pkgs, config, inputs, ... }:
+{ lib, pkgs, config, ... }:
 
 with lib;
 
 let
   cfg = config.ghosttyApps;
-
-  ghosttyPackage = inputs.ghostty.packages.${pkgs.system}.default;
 
   # Create wrapper scripts for each app
   wrapperScripts = listToAttrs (map
@@ -14,7 +12,7 @@ let
         appId = toLower (replaceStrings [ " " ] [ "-" ] app.name);
         scriptName = "ghostty-${appId}";
         script = pkgs.writeShellScript scriptName ''
-          exec ${ghosttyPackage}/bin/ghostty --class="${app.name}" --title="${app.name}" -e ${escapeShellArg app.command}
+          exec ${pkgs.ghostty}/bin/ghostty --class="${app.name}" --title="${app.name}" -e ${escapeShellArg app.command}
         '';
       in
       nameValuePair appId script

@@ -371,7 +371,7 @@ in
       # ==================
       # PROGRAM LAUNCHERS
       # ==================
-      "Mod+Return".action.spawn = "alacritty";
+      "Mod+Return".action.spawn = "ghostty";
       # Keep wezterm for SSH - has built-in session persistence without needing tmux
       "Mod+Shift+Return".action.spawn = [
         "wezterm"
@@ -385,7 +385,7 @@ in
       ];
       "Mod+N".action.spawn = "obsidian";
       "Mod+F".action.spawn = [
-        "alacritty"
+        "ghostty"
         "-e"
         "yazi"
       ];
@@ -407,11 +407,9 @@ in
 
       # Sweet Nothings - Voice dictation (D for dictation)
       "Mod+Shift+D".action.spawn = [
-        "alacritty"
-        "--class"
-        "sweet-nothings"
-        "--title"
-        "Sweet Nothings"
+        "ghostty"
+        "--class=sweet-nothings"
+        "--title=Sweet Nothings"
         "-e"
         "sweet-nothings"
         "--paste"

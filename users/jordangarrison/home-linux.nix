@@ -4,7 +4,7 @@
   imports = [
     ./home.nix
     ../../modules/home/brave/apps.nix
-    ../../modules/home/alacritty/apps.nix
+    ../../modules/home/ghostty/apps.nix
     ../../modules/home/wezterm  # Keep for SSH apps only
     ../../modules/home/virt-manager/config.nix
     ../../modules/home/languages
@@ -90,7 +90,7 @@
     "org/gnome/shell" = {
       favorite-apps = [
         "brave-browser.desktop"
-        "Alacritty.desktop"
+        "com.mitchellh.ghostty.desktop"
         "emacsclient.desktop"
         "chatgpt.desktop"
         "todoist.desktop"
@@ -126,7 +126,7 @@
     "org/gnome/shell/extensions/auto-move-windows" = {
       application-list = [
         "brave-browser.desktop:1"
-        "Alacritty.desktop:2"
+        "com.mitchellh.ghostty.desktop:2"
         "emacsclient.desktop:3"
         "todoist.desktop:5"
         "1password.desktop:10"
@@ -158,8 +158,8 @@
     }
   ];
 
-  # Regular terminal apps use Alacritty
-  alacrittyApps.apps = [
+  # Regular terminal apps use Ghostty
+  ghosttyApps.apps = [
     {
       name = "btop";
       command = "btop";

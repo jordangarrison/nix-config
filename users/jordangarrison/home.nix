@@ -238,6 +238,7 @@ in
 
           # Flake input packages
           inputs.hubctl.packages.${pkgs.system}.default
+          ghostty
         ]
     );
 
@@ -696,6 +697,9 @@ in
     # Wezterm (linked directly to repo, not via Nix store)
     ".config/wezterm/wezterm.lua".source =
       config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/tools/wezterm/wezterm.lua";
+
+    # Ghostty terminal configuration
+    ".config/ghostty/config".source = ./tools/ghostty/config;
 
     # tmux-cht data files (script hardcodes ~/.tmux-cht-* paths)
     ".tmux-cht-languages".source = ./tools/scripts/tmux-cht-languages.txt;

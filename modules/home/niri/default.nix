@@ -358,7 +358,7 @@ in
       }
       # Float Sweet Nothings dictation window
       {
-        matches = [ { app-id = "^sweet-nothings$"; } ];
+        matches = [ { app-id = "^com\\.sweet-nothings$"; } ];
         open-floating = true;
         default-column-width = {
           fixed = 400;
@@ -408,7 +408,7 @@ in
       # Sweet Nothings - Voice dictation (D for dictation)
       "Mod+Shift+D".action.spawn = [
         "ghostty"
-        "--class=sweet-nothings"
+        "--class=com.sweet-nothings"
         "--title=Sweet Nothings"
         "-e"
         "sweet-nothings"

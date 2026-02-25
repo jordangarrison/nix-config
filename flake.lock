@@ -255,11 +255,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1771904871,
-        "narHash": "sha256-sDBnDNQqtU4JQ0KQaiO7NgqS8kazaXlOs8i37Sl2/5A=",
+        "lastModified": 1771995659,
+        "narHash": "sha256-OIb2MrIX58zzbBsSJalC+fXrXzE1XBTSHy05EHrGjGk=",
         "owner": "MichaelVessia",
         "repo": "grove",
-        "rev": "840b9c76152add53b691d6e9d6a5515303ab8216",
+        "rev": "7caa0378303aafd142ffec41f777561ee56e16d8",
         "type": "github"
       },
       "original": {

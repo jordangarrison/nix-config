@@ -27,6 +27,7 @@
       "dmask=022"
       "fmask=133"
       "nofail"
+      "force" # volume has dirty flag from previous Windows use
     ];
   };
 

@@ -14,6 +14,42 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
+  # Additional drives
+  # ──────────────────────────────────────────────────────────────────
+  # hubble - Seagate Backup Plus Drive (NTFS, 931.5G) - archives/backup
+  fileSystems."/mnt/hubble" = {
+    device = "/dev/disk/by-uuid/06FE60D3FE60BD15";
+    fsType = "ntfs3";
+    options = [
+      "rw"
+      "uid=1000"
+      "gid=100"
+      "dmask=022"
+      "fmask=133"
+      "nofail"
+    ];
+  };
+
+  # apollo - New NVMe SSD (1TB) - fast storage for VMs and data layers
+  # TODO: Install drive, format as ext4, then uncomment and set UUID
+  #   sudo mkfs.ext4 -L apollo /dev/nvmeXn1p1
+  #   blkid /dev/nvmeXn1p1  # get UUID
+  # fileSystems."/mnt/apollo" = {
+  #   device = "/dev/disk/by-uuid/REPLACE-WITH-UUID";
+  #   fsType = "ext4";
+  #   options = [ "nofail" ];
+  # };
+
+  # gemini - Former BitLocker drive (232.4G) - smaller supportive storage
+  # TODO: Wipe and reformat once BitLocker data is recovered (or abandoned)
+  #   sudo mkfs.ext4 -L gemini /dev/sda2
+  #   blkid /dev/sda2  # get UUID
+  # fileSystems."/mnt/gemini" = {
+  #   device = "/dev/disk/by-uuid/REPLACE-WITH-UUID";
+  #   fsType = "ext4";
+  #   options = [ "nofail" ];
+  # };
+
   # Intel WiFi AX200 stability improvements
   # Disables problematic WiFi 6 features and power saving that cause disconnections
   boot.extraModprobeConfig = ''

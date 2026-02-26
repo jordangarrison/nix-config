@@ -34,9 +34,13 @@
     ];
   };
 
+  security.acme.certs."greenlight.jordangarrison.dev" = {
+    group = "nginx";
+  };
+
   services.nginx.virtualHosts."greenlight.jordangarrison.dev" = {
     forceSSL = true;
-    enableACME = true;
+    useACMEHost = "greenlight.jordangarrison.dev";
     locations."/" = {
       proxyPass = "http://localhost:4444";
       proxyWebsockets = true;

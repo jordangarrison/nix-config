@@ -27,4 +27,17 @@
       libvdpau-va-gl      # VDPAU to VA-GL driver
     ];
   };
+
+  security.acme.certs."jellyfin.jordangarrison.dev" = {
+    group = "nginx";
+  };
+
+  services.nginx.virtualHosts."jellyfin.jordangarrison.dev" = {
+    forceSSL = true;
+    useACMEHost = "jellyfin.jordangarrison.dev";
+    locations."/" = {
+      proxyPass = "http://localhost:8096";
+      proxyWebsockets = true;
+    };
+  };
 }

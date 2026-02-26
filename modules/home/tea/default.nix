@@ -23,6 +23,23 @@ let
     preferences = cfg.settings;
   };
 
+  baseConfigFile = yamlFormat.generate "tea-config.yml" teaConfig;
+
+  # Check if any login uses tokenFile
+  hasTokenFiles = any (login: login.tokenFile != null) (attrValues cfg.logins);
+
+  # Build the activation script to inject tokens from files
+  tokenInjectionScript = concatStringsSep "\n" (mapAttrsToList (name: login:
+    optionalString (login.tokenFile != null) ''
+      if [ -f "${login.tokenFile}" ]; then
+        token=$(cat "${login.tokenFile}")
+        ${pkgs.yq-go}/bin/yq -i '(.logins[] | select(.name == "${name}")).token = "'"$token"'"' "$config_dir/config.yml"
+      else
+        echo "Warning: tea tokenFile ${login.tokenFile} not found for login '${name}'" >&2
+      fi
+    ''
+  ) cfg.logins);
+
   loginSubmodule = types.submodule {
     options = {
       url = mkOption {
@@ -45,9 +62,18 @@ let
         type = types.str;
         default = "";
         description = ''
-          API token for authentication. Optional if using SSH.
+          API token for authentication.
           Warning: this value will be stored in the world-readable Nix store.
-          Prefer SSH authentication or manage the token outside of Nix.
+          Prefer tokenFile to keep the token out of the store.
+        '';
+      };
+
+      tokenFile = mkOption {
+        type = types.nullOr types.str;
+        default = null;
+        description = ''
+          Path to a file containing the API token.
+          Read at activation time so the token never enters the Nix store.
         '';
       };
 
@@ -112,8 +138,19 @@ in
   config = mkIf cfg.enable {
     home.packages = [ cfg.package ];
 
-    xdg.configFile."tea/config.yml" = mkIf (cfg.logins != { }) {
-      source = yamlFormat.generate "tea-config.yml" teaConfig;
+    # If no logins use tokenFile, manage config declaratively via xdg.configFile
+    xdg.configFile."tea/config.yml" = mkIf (cfg.logins != { } && !hasTokenFiles) {
+      source = baseConfigFile;
     };
+
+    # If any login uses tokenFile, copy base config and inject tokens at activation time
+    home.activation.teaConfig = mkIf (cfg.logins != { } && hasTokenFiles)
+      (hm.dag.entryAfter [ "writeBoundary" ] ''
+        config_dir="${config.xdg.configHome}/tea"
+        mkdir -p "$config_dir"
+        cp --no-preserve=mode ${baseConfigFile} "$config_dir/config.yml"
+        chmod 600 "$config_dir/config.yml"
+        ${tokenInjectionScript}
+      '');
   };
 }

@@ -88,6 +88,7 @@
             ./modules/llm-agents-overlay.nix
             ./modules/okta-cli-client-overlay.nix
             ./modules/sidecar-overlay.nix
+            ./modules/tea-overlay.nix
             ./modules/nixos/common.nix
             ./modules/nixos/brother-printer.nix
             ./modules/nixos/lan.nix
@@ -158,6 +159,7 @@
                   url = "http://endeavour.owl-yo.ts.net:7770";
                   user = "jordangarrison";
                   default = true;
+                  tokenFile = "/home/jordangarrison/.config/tea/endeavour-token";
                   sshHost = "endeavour.owl-yo.ts.net";
                   sshKey = "~/.ssh/id_ed25519";
                   sshAgent = true;

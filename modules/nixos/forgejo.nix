@@ -20,6 +20,9 @@
       server = {
         HTTP_ADDR = "0.0.0.0";
         HTTP_PORT = 7770;
+        DOMAIN = "endeavour.owl-yo.ts.net";
+        ROOT_URL = "http://endeavour.owl-yo.ts.net:7770/";
+        SSH_DOMAIN = "endeavour.owl-yo.ts.net";
         # Use the host's openssh for SSH cloning
         START_SSH_SERVER = false;
         SSH_PORT = 22;

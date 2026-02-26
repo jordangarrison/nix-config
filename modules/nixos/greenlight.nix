@@ -19,6 +19,10 @@
       "flocasts/experience-service"
       "flocasts/helm-charts"
     ];
+    allowedOrigins = [
+      "//*.ts.net"
+      "//endeavour:4444"
+    ];
     followedOrgs = [
       "NixOS"
       "flocasts"

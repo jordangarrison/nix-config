@@ -22,6 +22,7 @@
     allowedOrigins = [
       "//*.ts.net"
       "//endeavour:4444"
+      "//greenlight.jordangarrison.dev"
     ];
     followedOrgs = [
       "NixOS"
@@ -31,5 +32,14 @@
       "HockeyTech"
       "KartingCoach"
     ];
-};
+  };
+
+  services.nginx.virtualHosts."greenlight.jordangarrison.dev" = {
+    forceSSL = true;
+    enableACME = true;
+    locations."/" = {
+      proxyPass = "http://localhost:4444";
+      proxyWebsockets = true;
+    };
+  };
 }

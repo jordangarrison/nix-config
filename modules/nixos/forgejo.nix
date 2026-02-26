@@ -18,11 +18,11 @@
 
     settings = {
       server = {
-        HTTP_ADDR = "0.0.0.0";
+        HTTP_ADDR = "127.0.0.1";
         HTTP_PORT = 7770;
-        DOMAIN = "endeavour.owl-yo.ts.net";
-        ROOT_URL = "http://endeavour.owl-yo.ts.net:7770/";
-        SSH_DOMAIN = "endeavour.owl-yo.ts.net";
+        DOMAIN = "forgejo.jordangarrison.dev";
+        ROOT_URL = "https://forgejo.jordangarrison.dev/";
+        SSH_DOMAIN = "forgejo.jordangarrison.dev";
         # Use the host's openssh for SSH cloning
         START_SSH_SERVER = false;
         SSH_PORT = 22;
@@ -35,6 +35,15 @@
     };
   };
 
-  # Open the web UI port for Tailscale access
-  networking.firewall.allowedTCPPorts = [ 7770 ];
+  security.acme.certs."forgejo.jordangarrison.dev" = {
+    group = "nginx";
+  };
+
+  services.nginx.virtualHosts."forgejo.jordangarrison.dev" = {
+    forceSSL = true;
+    useACMEHost = "forgejo.jordangarrison.dev";
+    locations."/" = {
+      proxyPass = "http://localhost:7770";
+    };
+  };
 }

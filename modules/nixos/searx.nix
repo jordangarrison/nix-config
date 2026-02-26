@@ -22,4 +22,16 @@
       };
     };
   };
+
+  security.acme.certs."searx.jordangarrison.dev" = {
+    group = "nginx";
+  };
+
+  services.nginx.virtualHosts."searx.jordangarrison.dev" = {
+    forceSSL = true;
+    useACMEHost = "searx.jordangarrison.dev";
+    locations."/" = {
+      proxyPass = "http://localhost:8888";
+    };
+  };
 }

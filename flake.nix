@@ -88,6 +88,7 @@
             ./modules/llm-agents-overlay.nix
             ./modules/okta-cli-client-overlay.nix
             ./modules/sidecar-overlay.nix
+            ./modules/tea-overlay.nix
             ./modules/nixos/common.nix
             ./modules/nixos/brother-printer.nix
             ./modules/nixos/lan.nix
@@ -100,6 +101,7 @@
             ./modules/nixos/postgres.nix
             ./modules/nixos/greenlight.nix
             ./modules/nixos/jellyfin.nix
+            ./modules/nixos/forgejo.nix
             ./modules/nixos/virtualization.nix
             ./modules/nixos/freerdp.nix
             ./users/jordangarrison/nixos.nix
@@ -144,8 +146,25 @@
               # Enable FreeRDP
               services.freerdp.enable = true;
 
-              # Import niri home module for jordangarrison on endeavour
-              home-manager.users.jordangarrison.imports = [ ./modules/home/niri ];
+              # Import home modules for jordangarrison on endeavour
+              home-manager.users.jordangarrison.imports = [
+                ./modules/home/niri
+                ./modules/home/tea
+              ];
+
+              # Configure tea CLI for Forgejo access
+              home-manager.users.jordangarrison.programs.tea = {
+                enable = true;
+                logins.endeavour = {
+                  url = "http://endeavour.owl-yo.ts.net:7770";
+                  user = "jordangarrison";
+                  default = true;
+                  tokenFile = "/home/jordangarrison/.config/tea/endeavour-token";
+                  sshHost = "endeavour.owl-yo.ts.net";
+                  sshKey = "~/.ssh/id_ed25519";
+                  sshAgent = true;
+                };
+              };
             }
           ];
 

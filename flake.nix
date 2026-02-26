@@ -145,8 +145,24 @@
               # Enable FreeRDP
               services.freerdp.enable = true;
 
-              # Import niri home module for jordangarrison on endeavour
-              home-manager.users.jordangarrison.imports = [ ./modules/home/niri ];
+              # Import home modules for jordangarrison on endeavour
+              home-manager.users.jordangarrison.imports = [
+                ./modules/home/niri
+                ./modules/home/tea
+              ];
+
+              # Configure tea CLI for Forgejo access
+              home-manager.users.jordangarrison.programs.tea = {
+                enable = true;
+                logins.endeavour = {
+                  url = "http://endeavour.owl-yo.ts.net:7770";
+                  user = "jordangarrison";
+                  default = true;
+                  sshHost = "endeavour.owl-yo.ts.net";
+                  sshKey = "~/.ssh/id_ed25519";
+                  sshAgent = true;
+                };
+              };
             }
           ];
 

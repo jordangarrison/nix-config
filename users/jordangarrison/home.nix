@@ -698,9 +698,6 @@ in
     ".config/wezterm/wezterm.lua".source =
       config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/tools/wezterm/wezterm.lua";
 
-    # Ghostty terminal configuration
-    ".config/ghostty/config".source = ./tools/ghostty/config;
-
     # tmux-cht data files (script hardcodes ~/.tmux-cht-* paths)
     ".tmux-cht-languages".source = ./tools/scripts/tmux-cht-languages.txt;
     ".tmux-cht-commands".source = ./tools/scripts/tmux-cht-commands.txt;

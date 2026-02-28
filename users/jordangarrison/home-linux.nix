@@ -4,6 +4,7 @@
   imports = [
     ./home.nix
     ../../modules/home/brave/apps.nix
+    ../../modules/home/ghostty
     ../../modules/home/ghostty/apps.nix
     ../../modules/home/wezterm  # Keep for SSH apps only
     ../../modules/home/virt-manager/config.nix

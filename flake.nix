@@ -105,6 +105,7 @@
             ./modules/nixos/forgejo.nix
             ./modules/nixos/virtualization.nix
             ./modules/nixos/freerdp.nix
+            ./modules/nixos/blocky.nix
             ./users/jordangarrison/nixos.nix
             ./users/mikayla/nixos.nix
             ./users/jane/nixos.nix
@@ -146,6 +147,9 @@
 
               # Enable FreeRDP
               services.freerdp.enable = true;
+
+              # Enable DNS-level ad blocking
+              services.dns-blocking.enable = true;
 
               # Import home modules for jordangarrison on endeavour
               home-manager.users.jordangarrison.imports = [

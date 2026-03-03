@@ -123,11 +123,13 @@ in
 
     # --- System integration ---
 
-    # Disable systemd-resolved to free port 53
-    services.resolved.enable = false;
+    # Disable systemd-resolved to free port 53 (mkForce prevents conflicts
+    # if another module tries to enable it)
+    services.resolved.enable = mkForce false;
 
-    # Use Blocky for local DNS resolution
-    networking.nameservers = [ "127.0.0.1" ];
+    # Use Blocky for local DNS resolution (mkForce ensures no other module
+    # can append nameservers that would bypass ad blocking)
+    networking.nameservers = mkForce [ "127.0.0.1" ];
 
     # Open firewall for DNS (LAN + Tailscale clients)
     networking.firewall = {

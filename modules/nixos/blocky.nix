@@ -7,13 +7,11 @@
 # - Hagezi Pro + StevenBlack ad lists, Hagezi TIF threat list, adult content filter
 # - Per-client group filtering (default + kids)
 # - Tailscale MagicDNS conditional forwarding
-# - Prometheus metrics endpoint
-# - Nginx reverse proxy with ACME TLS
+# - Prometheus metrics endpoint (localhost:8053/metrics)
 #
 # Manual steps after enabling:
-# 1. Create a DNS record for blocky.garrisonsbygrace.com pointing to endeavour
+# 1. Set endeavour's LAN IP (192.168.68.75) as DNS in your router's DHCP settings
 # 2. Find device IPs for the kids group and add them to the clients list
-# 3. Point other network devices to endeavour's IP for DNS (port 53)
 #
 { config, lib, pkgs, ... }:
 
@@ -142,18 +140,5 @@ in
       allowedUDPPorts = [ 53 ];
     };
 
-    # --- Nginx reverse proxy ---
-
-    security.acme.certs."blocky.garrisonsbygrace.com" = {
-      group = "nginx";
-    };
-
-    services.nginx.virtualHosts."blocky.garrisonsbygrace.com" = {
-      forceSSL = true;
-      useACMEHost = "blocky.garrisonsbygrace.com";
-      locations."/" = {
-        proxyPass = "http://localhost:8053";
-      };
-    };
   };
 }

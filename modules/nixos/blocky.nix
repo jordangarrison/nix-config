@@ -30,9 +30,14 @@ in
     services.blocky = {
       enable = true;
       settings = {
-        # Listener ports
+        # Listener ports (bind to specific IPs to avoid conflict with
+        # libvirtd's dnsmasq on 192.168.122.1:53)
         ports = {
-          dns = 53;
+          dns = [
+            "127.0.0.1:53"       # localhost
+            "192.168.68.75:53"   # LAN clients
+            "100.118.65.11:53"   # Tailscale clients
+          ];
           http = 8053;
         };
 

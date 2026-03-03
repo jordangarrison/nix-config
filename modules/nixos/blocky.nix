@@ -131,6 +131,11 @@ in
     # can append nameservers that would bypass ad blocking)
     networking.nameservers = mkForce [ "127.0.0.1" ];
 
+    # DNS search domain for Tailscale short hostnames (e.g., "endeavour"
+    # resolves as "endeavour.owl-yo.ts.net" via the *.ts.net conditional
+    # forwarding rule above)
+    networking.search = [ "owl-yo.ts.net" ];
+
     # Open firewall for DNS (LAN + Tailscale clients)
     networking.firewall = {
       allowedTCPPorts = [ 53 ];

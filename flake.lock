@@ -232,11 +232,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1772481472,
-        "narHash": "sha256-/iBIgG3Rvw1PyF37JwozxskRi8nwh+qMl/gvs6nRj6U=",
+        "lastModified": 1772589266,
+        "narHash": "sha256-Jpu/RsuMN0iKTZOvZq6HCupLXkaBr7a0dzaVKRJ5ock=",
         "owner": "jordangarrison",
         "repo": "greenlight",
-        "rev": "e135858bfdbedca6c96980b2021d9163eea249ca",
+        "rev": "8b9ae734b9db82111d9fbe24da5600510717e1fa",
         "type": "github"
       },
       "original": {

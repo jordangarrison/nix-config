@@ -17,6 +17,11 @@
     };
 
     settings = {
+      actions = {
+        ENABLED = true;
+        DEFAULT_ACTIONS_URL = "github";
+      };
+
       server = {
         HTTP_ADDR = "127.0.0.1";
         HTTP_PORT = 7770;

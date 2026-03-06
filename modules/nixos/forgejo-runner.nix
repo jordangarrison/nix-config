@@ -17,6 +17,7 @@
         settings = {
           runner.timeout = "3h";
           runner.shutdown_timeout = "3h";
+          runner.capacity = 4;
           cache.enable = true;
         };
       };

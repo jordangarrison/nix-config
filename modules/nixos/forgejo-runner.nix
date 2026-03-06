@@ -11,8 +11,8 @@
         url = "https://forgejo.jordangarrison.dev";
         tokenFile = "/var/lib/forgejo-runner-secrets/token";
         labels = [
-          "ubuntu-latest:docker://node:22-bookworm"
-          "ubuntu-22.04:docker://node:20-bookworm"
+          "ubuntu-latest:docker://ghcr.io/catthehacker/ubuntu:act-22.04"
+          "ubuntu-22.04:docker://ghcr.io/catthehacker/ubuntu:act-22.04"
         ];
         settings = {
           runner.timeout = "3h";

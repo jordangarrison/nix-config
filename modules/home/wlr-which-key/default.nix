@@ -100,6 +100,9 @@ let
         (entry "h" "Hotkey Overlay" "niri msg action show-hotkey-overlay")
       ])
 
+      # [g] Grove
+      (entry "g" "Grove" "ghostty -e grove")
+
       # [d] Display
       (submenu "d" "Display" [
         (entry "h" "Focus Monitor Left" "niri msg action focus-monitor-left")

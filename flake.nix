@@ -48,6 +48,10 @@
       url = "github:jordangarrison/greenlight";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    lakeline-cg = {
+      url = "github:jordangarrison/lakeline-cg";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     grove = {
       url = "github:MichaelVessia/grove";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -73,6 +77,7 @@
       sweet-nothings,
       nix-zed-extensions,
       greenlight,
+      lakeline-cg,
       grove,
     }:
     {
@@ -107,6 +112,7 @@
             ./modules/nixos/virtualization.nix
             ./modules/nixos/freerdp.nix
             ./modules/nixos/blocky.nix
+            ./modules/nixos/lakeline-cg.nix
             ./users/jordangarrison/nixos.nix
             ./users/mikayla/nixos.nix
             ./users/jane/nixos.nix
@@ -117,6 +123,7 @@
             home-manager.nixosModules.home-manager
             ./modules/home/defaults.nix
             greenlight.nixosModules.default
+            lakeline-cg.nixosModules.default
             {
               # Configure users for endeavour
               users.jordangarrison = {

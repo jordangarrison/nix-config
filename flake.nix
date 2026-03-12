@@ -49,7 +49,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     lakeline-cg = {
-      url = "github:jordangarrison/lakeline-cg";
+      url = "git+https://forgejo.jordangarrison.dev/jordangarrison/cg.git";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     grove = {

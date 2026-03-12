@@ -401,20 +401,19 @@
     "lakeline-cg": {
       "inputs": {
         "flake-utils": "flake-utils_5",
-        "nixpkgs": [
-          "nixpkgs"
-        ]
+        "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1773356753,
-        "narHash": "sha256-hcWu9OUhO56EVqReJZo1fwE8iC8PXZln4w5+y5beSmE=",
-        "ref": "refs/heads/main",
-        "rev": "26705ba15a80300191d236976c12d4dc3817ed5c",
+        "lastModified": 1773357296,
+        "narHash": "sha256-0Vbz3GJ4zYAZ0p3A9Y3P7KbSlxgme303I3BF8Jw0cZQ=",
+        "ref": "nix-cg-service",
+        "rev": "5b9c4774ce3acc4a9e1c778b79d54ce86c260193",
         "revCount": 20,
         "type": "git",
         "url": "ssh://forgejo@forgejo.jordangarrison.dev/jordangarrison/cg.git"
       },
       "original": {
+        "ref": "nix-cg-service",
         "type": "git",
         "url": "ssh://forgejo@forgejo.jordangarrison.dev/jordangarrison/cg.git"
       }
@@ -424,7 +423,7 @@
         "blueprint": "blueprint",
         "bun2nix": "bun2nix",
         "flake-parts": "flake-parts_2",
-        "nixpkgs": "nixpkgs_2",
+        "nixpkgs": "nixpkgs_3",
         "systems": "systems_6",
         "treefmt-nix": "treefmt-nix"
       },
@@ -483,7 +482,7 @@
       "inputs": {
         "niri-stable": "niri-stable",
         "niri-unstable": "niri-unstable",
-        "nixpkgs": "nixpkgs_3",
+        "nixpkgs": "nixpkgs_4",
         "nixpkgs-stable": "nixpkgs-stable",
         "xwayland-satellite-stable": "xwayland-satellite-stable",
         "xwayland-satellite-unstable": "xwayland-satellite-unstable"
@@ -690,6 +689,22 @@
     },
     "nixpkgs_2": {
       "locked": {
+        "lastModified": 1773110118,
+        "narHash": "sha256-mPAG8phMbCReKSiKAijjjd3v7uVcJOQ75gSjGJjt/Rk=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "e607cb5360ff1234862ac9f8839522becb853bb9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixpkgs-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_3": {
+      "locked": {
         "lastModified": 1773201692,
         "narHash": "sha256-NXrKzNMniu4Oam2kAFvqJ3GB2kAvlAFIriTAheaY8hw=",
         "owner": "NixOS",
@@ -704,7 +719,7 @@
         "type": "github"
       }
     },
-    "nixpkgs_3": {
+    "nixpkgs_4": {
       "locked": {
         "lastModified": 1770197578,
         "narHash": "sha256-AYqlWrX09+HvGs8zM6ebZ1pwUqjkfpnv8mewYwAo+iM=",
@@ -720,7 +735,7 @@
         "type": "github"
       }
     },
-    "nixpkgs_4": {
+    "nixpkgs_5": {
       "locked": {
         "lastModified": 1744536153,
         "narHash": "sha256-awS2zRgF4uTwrOKwwiJcByDzDOdo3Q1rPZbiHQg/N38=",
@@ -736,7 +751,7 @@
         "type": "github"
       }
     },
-    "nixpkgs_5": {
+    "nixpkgs_6": {
       "locked": {
         "lastModified": 1770197578,
         "narHash": "sha256-AYqlWrX09+HvGs8zM6ebZ1pwUqjkfpnv8mewYwAo+iM=",
@@ -811,7 +826,7 @@
         "nix-darwin": "nix-darwin",
         "nix-zed-extensions": "nix-zed-extensions",
         "nixos-hardware": "nixos-hardware",
-        "nixpkgs": "nixpkgs_5",
+        "nixpkgs": "nixpkgs_6",
         "nixpkgs-master": "nixpkgs-master",
         "nixpkgs-stable": "nixpkgs-stable_2",
         "noctalia": "noctalia",
@@ -842,7 +857,7 @@
     },
     "rust-overlay_2": {
       "inputs": {
-        "nixpkgs": "nixpkgs_4"
+        "nixpkgs": "nixpkgs_5"
       },
       "locked": {
         "lastModified": 1766890375,

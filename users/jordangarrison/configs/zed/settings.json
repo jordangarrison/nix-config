@@ -1,4 +1,17 @@
 {
+  "ssh_connections": [
+    {
+      "host": "endeavour",
+      "args": [],
+      "projects": [
+        {
+          "paths": [
+            "/home/jordangarrison/dev/jordangarrison/rgd"
+          ]
+        }
+      ]
+    }
+  ],
   "agent_servers": {
     "opencode": {
       "type": "registry"

@@ -71,6 +71,7 @@ in
     with pkgs;
     [
       # nix utilities
+      master.devenv
       nh
       devbox
 
@@ -200,7 +201,6 @@ in
     ++ (
       if pkgs.stdenv.isDarwin then
         [
-          devenv
           glibtool
         ]
       else

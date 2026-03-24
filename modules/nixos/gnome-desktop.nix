@@ -12,12 +12,12 @@ with lib;
     # If the machine is a desktop, disable suspend
     # Uses gbg-config.machine.type from common.nix
     systemd.sleep = mkIf (config.gbg-config.machine.type == "desktop") {
-      extraConfig = ''
-        AllowSuspend=no
-        AllowHibernation=no
-        AllowHybridSleep=no
-        AllowSuspendThenHibernate=no
-      '';
+      settings.Sleep = {
+        AllowSuspend = "no";
+        AllowHibernation = "no";
+        AllowHybridSleep = "no";
+        AllowSuspendThenHibernate = "no";
+      };
     };
 
     # Enable the X11 windowing system

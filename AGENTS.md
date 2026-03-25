@@ -478,12 +478,6 @@ done
 - Integrated into PATH via Home Manager
 - Include utilities for AWS, tmux, wallpapers, IP checking
 
-### Git Configuration
-
-- All git commands configured with `--no-pager` flag
-- Diff display enhanced with diff-so-fancy
-- Aliases for common operations (gss, pu, gd, gdca)
-
 ### Emacs Doom Configuration
 
 **Primary Editor**: Emacs with Doom framework, featuring a comprehensive literate configuration.

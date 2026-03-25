@@ -168,11 +168,11 @@
               home-manager.users.jordangarrison.programs.tea = {
                 enable = true;
                 logins.endeavour = {
-                  url = "http://endeavour.owl-yo.ts.net:7770";
+                  url = "https://forgejo.jordangarrison.dev";
                   user = "jordangarrison";
                   default = true;
                   tokenFile = "/home/jordangarrison/.config/tea/endeavour-token";
-                  sshHost = "endeavour.owl-yo.ts.net";
+                  sshHost = "forgejo.jordangarrison.dev";
                   sshKey = "~/.ssh/id_ed25519";
                   sshAgent = true;
                 };
@@ -398,7 +398,7 @@
       homeConfigurations = {
         "jordangarrison@normandy" = home-manager.lib.homeManagerConfiguration {
           pkgs = import nixpkgs {
-            system = "x86_64-linux";
+            localSystem.system = "x86_64-linux";
             config.allowUnfree = true;
           };
           modules = [

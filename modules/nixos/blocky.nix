@@ -72,6 +72,18 @@ in
             ];
           };
 
+          # Datadog OTLP intake endpoints are caught by Hagezi/StevenBlack
+          # ad lists. Allowlist them so Claude Code telemetry can export.
+          allowlists = let
+            datadogAllowlist = pkgs.writeText "blocky-datadog-allowlist.txt" ''
+              http-intake.logs.datadoghq.com
+              otlp.datadoghq.com
+            '';
+          in {
+            ads = [ "file://${datadogAllowlist}" ];
+            security = [ "file://${datadogAllowlist}" ];
+          };
+
           # Client group -> blocklist mapping
           clientGroupsBlock = {
             default = [ "ads" "security" "adult" ];

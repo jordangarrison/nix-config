@@ -9,6 +9,9 @@
     after = [ "network-online.target" ];
 
     environment = {
+      # Server configuration (binary reads PORT/HOST env vars, not CLI flags)
+      PORT = "7780";
+      HOST = "127.0.0.1";
       # Suppress browser auto-open in headless systemd context
       BROWSER = "true";
       # Allow WebSocket connections through the reverse proxy
@@ -20,7 +23,7 @@
       User = "jordangarrison";
       Group = "users";
       WorkingDirectory = "/home/jordangarrison";
-      ExecStart = "${pkgs.llm-agents.vibe-kanban}/bin/vibe-kanban --host 127.0.0.1 --port 7780";
+      ExecStart = "${pkgs.llm-agents.vibe-kanban}/bin/vibe-kanban";
       Restart = "on-failure";
       RestartSec = 5;
 

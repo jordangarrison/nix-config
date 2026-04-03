@@ -79,6 +79,7 @@ in
       llm-agents.claude-code
       llm-agents.codex
       llm-agents.opencode
+      llm-agents.vibe-kanban
       sox # Audio playback/recording, used by Claude Code
 
       # Ralph - iterative AI loop utility

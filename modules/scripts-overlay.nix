@@ -40,6 +40,13 @@
         deps = with final; [ coreutils gnused ];
         description = "Switch between Claude Code credential profiles";
       };
+
+      flarectl-wrapped = mkScript {
+        name = "flarectl";
+        script = ../packages/flarectl/flarectl-wrapper.sh;
+        deps = with final; [ flarectl ];
+        description = "Cloudflare CLI with automatic API token from ACME secrets";
+      };
     })
   ];
 }

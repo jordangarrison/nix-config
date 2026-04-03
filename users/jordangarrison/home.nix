@@ -126,6 +126,7 @@ in
       cmake
       diff-so-fancy
       fd
+      flarectl-wrapped
       github-copilot-cli
       gnumake
       gnutls

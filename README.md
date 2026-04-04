@@ -53,41 +53,42 @@ nh home switch .#<config>
 ```
 ├── flake.nix                 # Central flake configuration
 ├── hosts/                    # Host-specific configurations
-│   ├── endeavour/            # Desktop workstation (NixOS)
-│   ├── opportunity/          # Framework laptop (NixOS)
+│   ├── endeavour/            # Desktop workstation + home server (NixOS)
+│   ├── opportunity/          # Framework 12 laptop with tablet mode (NixOS)
 │   ├── voyager/              # MacBook Pro (NixOS)
 │   ├── discovery/            # AMD system (NixOS)
 │   └── flomac/               # Work MacBook (nix-darwin)
 ├── modules/
-│   ├── nixos/                # Shared NixOS modules
+│   ├── nixos/                # Shared NixOS modules (25 modules)
 │   │   ├── common.nix        # Base system configuration
 │   │   ├── gnome-desktop.nix # GNOME desktop environment
-│   │   ├── hyprland-desktop.nix # Hyprland compositor
 │   │   ├── niri-desktop.nix  # Niri scrollable compositor
 │   │   ├── tablet-mode.nix   # Tablet mode (hardware sensors)
 │   │   ├── development.nix   # Docker, Emacs, dev tools
-│   │   └── audio/            # Audio configurations
-│   └── home/                 # Home Manager modules
-│       ├── niri/             # Niri user configuration
-│       ├── hyprland/         # Hyprland user configuration
-│       ├── tablet-mode/      # Tablet gestures and OSK
-│       ├── brave/            # Browser app integration
-│       └── alacritty/        # Terminal configuration
+│   │   ├── forgejo.nix       # Self-hosted Git server
+│   │   ├── jellyfin.nix      # Media server
+│   │   ├── nginx.nix         # Reverse proxy
+│   │   └── ...               # And more (see AGENTS.md)
+│   ├── home/                 # Home Manager modules (16 modules)
+│   │   ├── niri/             # Niri user configuration
+│   │   ├── tablet-mode/      # Tablet gestures and OSK
+│   │   ├── tea/              # Forgejo CLI
+│   │   ├── zed-editor/       # Zed IDE
+│   │   ├── ghostty/          # Ghostty terminal
+│   │   └── ...               # And more (see AGENTS.md)
+│   └── *-overlay.nix         # Package overlays (9 modules)
+├── packages/                 # Custom package definitions (10 packages)
 ├── users/                    # User configurations
 │   ├── jordangarrison/       # Primary user
-│   │   ├── nixos.nix         # NixOS user module
-│   │   ├── home.nix          # Core Home Manager config
-│   │   ├── home-linux.nix    # Linux-specific settings
-│   │   ├── home-darwin.nix   # macOS-specific settings
-│   │   ├── configs/          # Application configs (hypr, etc.)
-│   │   ├── tools/            # Custom scripts and tools
+│   │   ├── configs/          # Application configs
+│   │   ├── tools/            # Doom Emacs, nvf, scripts
 │   │   └── wallpapers/       # Wallpaper collection
-│   ├── mikayla/              # Family member configurations
-│   ├── jane/
-│   └── isla/
-├── docs/
-│   └── adr/                  # Architecture Decision Records
-├── packages/                 # Custom package definitions
+│   └── mikayla/, jane/, isla/ # Family member configurations
+├── lib/                      # Nix helper functions
+├── docs/                     # Documentation
+│   ├── adr/                  # Architecture Decision Records
+│   ├── plans/                # Implementation plans
+│   └── lessons-learned/      # Post-implementation learnings
 └── shell.nix                 # Development shell
 ```
 
@@ -149,13 +150,17 @@ nix develop
 - **Multi-user** - Family members have individual configurations
 - **Multiple DEs** - GNOME, Hyprland, and Niri available
 - **Tablet mode** - Touchscreen gestures, auto-rotation, and on-screen keyboard (opportunity)
-- **Modular** - Shared modules for common functionality
-- **Development ready** - Emacs (Doom), Neovim (nvf), Docker, and more
+- **Home server** - Self-hosted services on endeavour (Forgejo, Jellyfin, Searx, Greenlight)
+- **Modular** - 25 NixOS modules + 16 Home Manager modules + 9 overlays
+- **Development ready** - Emacs (Doom), Neovim (nvf), Zed, Docker, and more
+- **Custom packages** - 10 custom utilities via packages/ directory
 
 ## Documentation
 
-- **[AGENTS.md](./AGENTS.md)** - Detailed guidance for AI agents and comprehensive architecture documentation
+- **[AGENTS.md](./AGENTS.md)** - Comprehensive architecture documentation and AI agent guidance
 - **[docs/adr/](./docs/adr/)** - Architecture Decision Records
+- **[docs/plans/](./docs/plans/)** - Implementation plans for features
+- **[docs/lessons-learned/](./docs/lessons-learned/)** - Post-implementation learnings
 
 ## Initial Setup
 

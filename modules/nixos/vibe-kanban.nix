@@ -16,6 +16,10 @@
       BROWSER = "true";
       # Allow WebSocket connections through the reverse proxy
       VK_ALLOWED_ORIGINS = "https://vibe-kanban.jordangarrison.dev";
+      # Wayland display access for "open in editor" functionality
+      WAYLAND_DISPLAY = "wayland-1";
+      DISPLAY = ":0";
+      XDG_RUNTIME_DIR = "/run/user/1000";
     };
 
     serviceConfig = {

@@ -27,6 +27,9 @@
       Restart = "on-failure";
       RestartSec = 5;
 
+      # Prevent fd exhaustion from MCP clients, WebSockets, and Postgres
+      LimitNOFILE = 65536;
+
       # Allow access to user's home for git repos, SSH keys, dev tools
       ProtectHome = false;
     };

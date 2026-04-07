@@ -74,14 +74,17 @@ in
 
           # Datadog OTLP intake endpoints are caught by Hagezi/StevenBlack
           # ad lists. Allowlist them so Claude Code telemetry can export.
+          # Also allowlist jordangarrison.dev subdomains (self-hosted services).
           allowlists = let
-            datadogAllowlist = pkgs.writeText "blocky-datadog-allowlist.txt" ''
+            customAllowlist = pkgs.writeText "blocky-custom-allowlist.txt" ''
               http-intake.logs.datadoghq.com
               otlp.datadoghq.com
+              /.*\.jordangarrison\.dev$/
+              jordangarrison.dev
             '';
           in {
-            ads = [ "file://${datadogAllowlist}" ];
-            security = [ "file://${datadogAllowlist}" ];
+            ads = [ "file://${customAllowlist}" ];
+            security = [ "file://${customAllowlist}" ];
           };
 
           # Client group -> blocklist mapping

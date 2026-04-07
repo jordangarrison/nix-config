@@ -259,6 +259,31 @@ Custom tools are integrated via flake inputs:
 
 These are included in the home.nix packages and automatically built from their respective repositories.
 
+### DNS Management (Cloudflare)
+
+DNS records for `jordangarrison.dev` are managed via Cloudflare. The `flarectl` CLI is available as a wrapped package that automatically sources the API token from `/var/lib/acme-secrets/cloudflare-env` (the same credentials used by ACME/Let's Encrypt).
+
+```bash
+# List all DNS records
+flarectl dns list --zone jordangarrison.dev
+
+# Create a new A record (self-hosted services use the Tailscale IP 100.118.65.11)
+flarectl dns create --zone jordangarrison.dev --name <subdomain> --type A --content 100.118.65.11 --ttl 1
+
+# Create a CNAME record
+flarectl dns create --zone jordangarrison.dev --name <subdomain> --type CNAME --content <target> --ttl 1
+
+# Update an existing record
+flarectl dns update --zone jordangarrison.dev --id <record-id> --content <new-content>
+
+# Delete a record
+flarectl dns delete --zone jordangarrison.dev --id <record-id>
+```
+
+**Convention for self-hosted services:** Use an A record pointing to `100.118.65.11` (Tailscale IP for endeavour), with TTL `1` (auto) and proxy disabled. This matches the pattern used by forgejo, greenlight, jellyfin, and searx.
+
+**Wrapper details:** The `flarectl` command is a wrapper (`packages/flarectl/flarectl-wrapper.sh`) defined in `modules/scripts-overlay.nix`. It sources the Cloudflare token automatically — no manual `CF_API_TOKEN` export needed.
+
 ### Initial Setup (Non-NixOS Systems)
 
 For macOS or other non-NixOS systems, install Nix first using the Determinate Systems installer:

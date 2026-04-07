@@ -192,6 +192,24 @@
         "type": "github"
       }
     },
+    "flake-parts_4": {
+      "inputs": {
+        "nixpkgs-lib": "nixpkgs-lib_2"
+      },
+      "locked": {
+        "lastModified": 1772408722,
+        "narHash": "sha256-rHuJtdcOjK7rAHpHphUb1iCvgkU3GpfvicLMwwnfMT0=",
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "rev": "f20dc5d9b8027381c474144ecabc9034d6a839a3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "type": "github"
+      }
+    },
     "flake-utils": {
       "inputs": {
         "systems": "systems"
@@ -621,6 +639,21 @@
         "type": "github"
       }
     },
+    "nixpkgs-lib_2": {
+      "locked": {
+        "lastModified": 1772328832,
+        "narHash": "sha256-e+/T/pmEkLP6BHhYjx6GmwP5ivonQQn0bJdH9YrRB+Q=",
+        "owner": "nix-community",
+        "repo": "nixpkgs.lib",
+        "rev": "c185c7a5e5dd8f9add5b2f8ebeff00888b070742",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "nixpkgs.lib",
+        "type": "github"
+      }
+    },
     "nixpkgs-master": {
       "locked": {
         "lastModified": 1774390575,
@@ -834,6 +867,27 @@
         "type": "github"
       }
     },
+    "panko": {
+      "inputs": {
+        "flake-parts": "flake-parts_4",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1775602080,
+        "narHash": "sha256-FzqfNKiR2SYXxm/GmLmnhaOhx72vzNQzNGdx+T0HRNI=",
+        "owner": "jordangarrison",
+        "repo": "panko",
+        "rev": "fda9c415b387323489e0b661e1036ee6a9a7de1c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "jordangarrison",
+        "repo": "panko",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "aws-tools": "aws-tools",
@@ -853,6 +907,7 @@
         "nixpkgs-stable": "nixpkgs-stable_2",
         "noctalia": "noctalia",
         "nvf": "nvf",
+        "panko": "panko",
         "sweet-nothings": "sweet-nothings"
       }
     },

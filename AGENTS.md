@@ -109,20 +109,73 @@ The `flake.nix` serves as the central orchestrator for all configurations:
 
 **Inputs:**
 
+Core Infrastructure:
 - `nixpkgs`: Main package repository (nixos-unstable)
+- `nixpkgs-stable`: Stable channel (nixos-25.11) for specific packages
+- `nixpkgs-master`: Latest master branch for bleeding-edge packages
 - `nixos-hardware`: Hardware-specific configurations
 - `nix-darwin`: macOS system management
 - `home-manager`: User environment management
-- `nvf`: Highly modular Neovim configuration framework
+
+Desktop Environment:
 - `niri`: Scrollable-tiling Wayland compositor
 - `noctalia`: Unified desktop shell (bar, notifications, launcher, lock screen)
-- Custom flakes: `aws-tools`, `aws-use-sso`, `hubctl` (Jordan's tools)
+- `nix-zed-extensions`: Zed editor extensions via Nix
+
+Development Tools:
+- `nvf`: Highly modular Neovim configuration framework
+- `llm-agents`: LLM tools including vibe-kanban MCP server
+- `grove`: GitHub visualization tool
+
+Jordan's Custom Flakes:
+- `aws-tools`: AWS utilities
+- `aws-use-sso`: AWS SSO helper
+- `hubctl`: Container management utility
+- `sweet-nothings`: Custom utility
+- `greenlight`: GitHub repository dashboard
+- `lakeline-cg`: Custom service (private Forgejo)
 
 **Outputs:**
 
 - `nixosConfigurations`: Full NixOS system configurations
 - `darwinConfigurations`: macOS system configurations
 - `homeConfigurations`: Standalone Home Manager configurations
+
+### Overlay System
+
+The repository uses overlays to customize and extend nixpkgs. Overlays are in `modules/`:
+
+| Overlay | Purpose |
+|---------|---------|
+| `stable-overlay.nix` | Packages from nixpkgs-stable (25.11) |
+| `master-overlay.nix` | Packages from nixpkgs-master (bleeding edge) |
+| `zed-extensions-overlay.nix` | Zed IDE extensions via nix-zed-extensions |
+| `llm-agents-overlay.nix` | LLM tools including vibe-kanban-mcp |
+| `ralph-overlay.nix` | Custom ralph package |
+| `scripts-overlay.nix` | Custom scripts from packages/ |
+| `okta-cli-client-overlay.nix` | Okta CLI customizations |
+| `sidecar-overlay.nix` | Sidecar utility |
+| `tea-overlay.nix` | Tea CLI tool |
+
+Overlays are imported per-host in `flake.nix` and make packages available via `pkgs.stable.*`, `pkgs.master.*`, etc.
+
+### Custom Packages
+
+The `packages/` directory contains custom package definitions:
+
+| Package | Description |
+|---------|-------------|
+| `claude-switch` | Claude Code session switcher |
+| `gi` | Git interactive helper |
+| `ksn` | Kubernetes namespace switcher |
+| `myip` | IP address checker |
+| `ralph` | Custom utility |
+| `sidecar` | Sidecar utility |
+| `td` | Todo utility |
+| `tmux-cht` | Tmux cheatsheet helper |
+| `okta-cli-client` | Okta CLI with customizations |
+
+Packages are built using `lib/mkScript.nix` for shell scripts.
 
 ### Host and User Management Pattern
 
@@ -139,36 +192,168 @@ Each system configuration follows a consistent pattern:
 ```
 ├── flake.nix                 # Central flake configuration
 ├── hosts/                    # Host-specific configurations
-│   ├── endeavour/           # Desktop workstation (NixOS)
-│   ├── voyager/             # MacBook Pro (NixOS)
-│   ├── discovery/           # AMD system (NixOS)
-│   └── flomac/              # Work MacBook (nix-darwin)
-├── users/                   # User configurations
-│   ├── jordangarrison/      # Primary user
-│   │   ├── nixos.nix        # NixOS user module
-│   │   ├── home.nix         # Core Home Manager config
-│   │   ├── home-linux.nix   # Linux-specific Home Manager
-│   │   ├── home-darwin.nix  # macOS-specific Home Manager
-│   │   ├── configs/         # Application configurations
-│   │   └── tools/           # Custom scripts and tools
-│   │     └── doom.d/        # Emacs Doom configuration
-│   ├── mikayla/            # Family member configurations
-│   ├── jane/               # (Similar structure for each user)
+│   ├── endeavour/            # Desktop workstation (NixOS) - services hub
+│   ├── opportunity/          # Framework 12 laptop (NixOS) - tablet mode
+│   ├── voyager/              # MacBook Pro (NixOS)
+│   ├── discovery/            # AMD system (NixOS)
+│   └── flomac/               # Work MacBook (nix-darwin)
+├── users/                    # User configurations
+│   ├── jordangarrison/       # Primary user
+│   │   ├── nixos.nix         # NixOS user module
+│   │   ├── home.nix          # Core Home Manager config
+│   │   ├── home-linux.nix    # Linux-specific Home Manager
+│   │   ├── home-darwin.nix   # macOS-specific Home Manager
+│   │   ├── configs/          # Application configurations (hypr, noctalia, etc.)
+│   │   ├── tools/            # Custom scripts and tools
+│   │   │   ├── doom.d/       # Emacs Doom configuration
+│   │   │   ├── nvim/         # Neovim (nvf) configuration
+│   │   │   └── scripts/      # Shell scripts and utilities
+│   │   └── wallpapers/       # Wallpaper collection
+│   ├── mikayla/              # Family member configurations
+│   ├── jane/                 # (Similar structure for each user)
 │   └── isla/
 ├── modules/
-│   ├── nixos/              # Shared NixOS modules
-│   │   ├── common.nix      # Base system configuration
-│   │   ├── gnome-desktop.nix
-│   │   ├── hyprland-desktop.nix
-│   │   ├── niri-desktop.nix # Niri compositor (system-level)
-│   │   ├── development.nix # Docker, Emacs, dev tools
-│   │   └── fonts.nix
-│   └── home/               # Home Manager modules
-│       ├── niri/           # Niri configuration (Home Manager)
-│       ├── brave/apps.nix  # Brave browser app integration
-│       └── alacritty/apps.nix # Terminal app shortcuts
-└── shell.nix              # Development shell
+│   ├── nixos/                # Shared NixOS modules (25 modules)
+│   │   ├── common.nix        # Base system configuration
+│   │   ├── gnome-desktop.nix # GNOME desktop environment
+│   │   ├── hyprland-desktop.nix # Hyprland compositor
+│   │   ├── niri-desktop.nix  # Niri scrollable compositor
+│   │   ├── tablet-mode.nix   # Tablet mode (hardware sensors)
+│   │   ├── development.nix   # Docker, Emacs, dev tools
+│   │   ├── fonts.nix         # System fonts
+│   │   ├── audio/pipewire.nix # Audio configuration
+│   │   ├── blocky.nix        # DNS-level ad blocking
+│   │   ├── forgejo.nix       # Self-hosted Git server
+│   │   ├── forgejo-runner.nix # CI/CD action runners
+│   │   ├── greenlight.nix    # GitHub dashboard service
+│   │   ├── jellyfin.nix      # Media server with GPU transcoding
+│   │   ├── nginx.nix         # Reverse proxy
+│   │   ├── postgres.nix      # PostgreSQL database
+│   │   ├── searx.nix         # Privacy-respecting search
+│   │   └── ...               # See full list below
+│   ├── home/                 # Home Manager modules (16 modules)
+│   │   ├── defaults.nix      # Default home-manager settings
+│   │   ├── niri/             # Niri user configuration
+│   │   ├── hyprland/         # Hyprland user configuration
+│   │   ├── tablet-mode/      # Gesture daemon and OSK
+│   │   ├── ghostty/          # Ghostty terminal emulator
+│   │   ├── wezterm/          # WezTerm terminal
+│   │   ├── zed-editor/       # Zed code editor
+│   │   ├── tea/              # Forgejo CLI configuration
+│   │   ├── languages/        # Programming language tools
+│   │   ├── brave/            # Browser app integration
+│   │   ├── alacritty/        # Terminal shortcuts
+│   │   └── ...               # See full list below
+│   └── *-overlay.nix         # Package overlays (9 modules)
+├── packages/                 # Custom package definitions (10 packages)
+│   ├── claude-switch/        # Claude Code session switcher
+│   ├── gi/                   # Git interactive helper
+│   ├── ksn/                  # Kubernetes namespace switcher
+│   ├── myip/                 # IP address checker
+│   ├── ralph/                # Custom utility
+│   ├── sidecar/              # Sidecar utility
+│   ├── td/                   # Todo utility
+│   └── tmux-cht/             # Tmux cheatsheet
+├── lib/                      # Nix helper functions
+│   └── mkScript.nix          # Script packaging helper
+├── docs/                     # Documentation
+│   ├── adr/                  # Architecture Decision Records
+│   ├── plans/                # Implementation plans
+│   ├── lessons-learned/      # Post-implementation learnings
+│   └── agents/               # Agent-specific documentation
+└── shell.nix                 # Development shell
 ```
+
+## NixOS Modules Reference
+
+The `modules/nixos/` directory contains 25 shared modules organized by function:
+
+### Desktop Environments
+
+| Module | Description |
+|--------|-------------|
+| `common.nix` | Base system configuration (networking, locale, Tailscale, 1Password) |
+| `gnome-desktop.nix` | GNOME desktop with extensions and configuration |
+| `hyprland-desktop.nix` | Hyprland dynamic tiling compositor |
+| `niri-desktop.nix` | Niri scrollable-tiling compositor with noctalia shell |
+| `tablet-mode.nix` | Hardware sensor support for touchscreen devices |
+| `fonts.nix` | System-wide font configuration |
+| `audio/pipewire.nix` | PipeWire audio with low-latency configuration |
+
+### Development Tools
+
+| Module | Description |
+|--------|-------------|
+| `development.nix` | Docker, development tools, language runtimes |
+| `emacs.nix` | Emacs system integration (also used on Darwin) |
+| `virtualization.nix` | libvirt/QEMU/KVM virtual machine support |
+| `podman.nix` | Podman container runtime |
+
+### Infrastructure Services (endeavour)
+
+These modules configure services running on the endeavour desktop as a home server:
+
+| Module | Description | Port/URL |
+|--------|-------------|----------|
+| `nginx.nix` | Reverse proxy with ACME certificates | 80, 443 |
+| `postgres.nix` | PostgreSQL database with Tailscale access | 5432 |
+| `blocky.nix` | DNS-level ad blocking | 53 |
+| `forgejo.nix` | Self-hosted Git server | forgejo.jordangarrison.dev |
+| `forgejo-runner.nix` | CI/CD action runners (Docker + native) | - |
+| `greenlight.nix` | GitHub repository dashboard | greenlight.jordangarrison.dev |
+| `jellyfin.nix` | Media server with AMD GPU transcoding | jellyfin.jordangarrison.dev |
+| `searx.nix` | Privacy-respecting metasearch engine | searx.jordangarrison.dev |
+| `metabase.nix` | Analytics and BI platform | - |
+| `n8n.nix` | Low-code workflow automation | - |
+| `lakeline-cg.nix` | Custom service integration | - |
+
+### Hardware & Networking
+
+| Module | Description |
+|--------|-------------|
+| `lan.nix` | LAN-specific networking configuration |
+| `brother-printer.nix` | Brother printer integration |
+| `freerdp.nix` | Remote desktop protocol support |
+| `steam.nix` | Steam gaming platform |
+
+## Home Manager Modules Reference
+
+The `modules/home/` directory contains 16 user-level configuration modules:
+
+### Terminal Emulators
+
+| Module | Description |
+|--------|-------------|
+| `alacritty/` | Alacritty terminal with app shortcuts |
+| `ghostty/` | Ghostty terminal (Rose Pine theme, shell integration) |
+| `wezterm/` | WezTerm with SSH apps and workspace integration |
+
+### Desktop Environment
+
+| Module | Description |
+|--------|-------------|
+| `niri/` | Niri user configuration (keybindings, layout, animations) |
+| `hyprland/` | Hyprland user configuration |
+| `tablet-mode/` | Touchscreen gestures (lisgd) and on-screen keyboard (wvkbd) |
+| `rofi/` | Application launcher |
+| `wlr-which-key/` | Wayland keybinding hints |
+| `desktop-tools/` | Desktop utilities collection |
+
+### Development
+
+| Module | Description |
+|--------|-------------|
+| `zed-editor/` | Zed IDE with Doom-style keybindings and extensions |
+| `languages/` | Programming language tools (Gleam, Ruby) |
+| `tea/` | Forgejo/Gitea CLI with declarative login configuration |
+| `virt-manager/` | Virtual machine GUI configuration |
+
+### Browser & Apps
+
+| Module | Description |
+|--------|-------------|
+| `brave/` | Brave browser with extensions and web apps |
+| `defaults.nix` | Default home-manager settings |
 
 ## User Configuration System
 
@@ -301,6 +486,44 @@ For macOS or other non-NixOS systems, install Nix first using the Determinate Sy
 - Tailscale networking configured
 - Docker enabled for development
 - 1Password GUI with policy ownership for Jordan
+
+### Infrastructure Services (endeavour)
+
+The endeavour desktop doubles as a home server running several self-hosted services:
+
+**Git & CI/CD:**
+- **Forgejo** - Self-hosted Git server at forgejo.jordangarrison.dev
+- **Forgejo Action Runners** - Docker and native runners for CI/CD pipelines
+- **Tea CLI** - Configured via `programs.tea` for command-line access
+
+**Media & Search:**
+- **Jellyfin** - Media server with AMD GPU VAAPI hardware transcoding
+- **Searx** - Privacy-respecting metasearch engine with Redis backend
+
+**Development Tools:**
+- **Greenlight** - GitHub repository dashboard tracking personal and work projects
+- **PostgreSQL** - Database with Tailscale network access (100.x.x.x subnet)
+- **Metabase** - Analytics and BI platform
+
+**Networking:**
+- **Nginx** - Reverse proxy with ACME certificates for *.jordangarrison.dev domains
+- **Blocky** - DNS-level ad blocking with allowlists for Datadog/Claude telemetry
+
+**Service Management Commands:**
+
+```bash
+# Check service status
+systemctl status forgejo
+systemctl status jellyfin
+systemctl status blocky
+
+# View service logs
+journalctl -u forgejo -f
+journalctl -u nginx -f
+
+# Restart a service
+sudo systemctl restart forgejo
+```
 
 ### GNOME Configuration
 
@@ -554,5 +777,41 @@ nvf-print-config-path
 - [nvf Documentation](https://notashelf.github.io/nvf/)
 - [nvf Options Reference](https://notashelf.github.io/nvf/options.html)
 - Local README: `users/jordangarrison/tools/nvim/README.md`
+
+### Zed Editor
+
+**Alternative IDE**: Zed configured with Doom-style keybindings and Nix extensions.
+
+**Key Features:**
+
+- Managed via `modules/home/zed-editor/`
+- Extensions installed via nix-zed-extensions overlay
+- Doom-style keybindings for familiar editing
+- SSH configuration for remote development
+
+## Documentation Structure
+
+The `docs/` directory contains project documentation:
+
+### Architecture Decision Records (ADRs)
+
+Located in `docs/adr/`, these document significant architectural decisions:
+
+- `001-migrate-dotfiles-to-home-manager.md`
+- `002-migrate-desktop-to-hyprland.md`
+- `003-add-niri-scrolling-compositor.md`
+- `004-add-tablet-mode-support.md`
+
+### Implementation Plans
+
+Located in `docs/plans/`, these contain detailed implementation plans for features before they are built. Plans cover scope, approach, and acceptance criteria.
+
+### Lessons Learned
+
+Located in `docs/lessons-learned/`, these capture insights from implementing features, including what worked well and what to avoid.
+
+### Agent Documentation
+
+Located in `docs/agents/`, this contains agent-specific documentation and context.
 
 This configuration provides a fully reproducible, declarative system environment across multiple platforms and users, with consistent development tooling and user experience.

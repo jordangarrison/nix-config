@@ -422,11 +422,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1773894351,
-        "narHash": "sha256-pp5NT47IoiYiEYZeyUkjdfFzkubjPc74YWA+yLO09G4=",
+        "lastModified": 1775762292,
+        "narHash": "sha256-3mXrwuruzf7HWP3CWcvPyTvYTxCVIWni2HiF9sXRyDg=",
         "ref": "refs/heads/main",
-        "rev": "906e7b559c6de7e6231b1e6bd17016954760fa3f",
-        "revCount": 31,
+        "rev": "162b76d01cb771443a5206ef3ae24a8f4c284ed4",
+        "revCount": 36,
         "type": "git",
         "url": "ssh://forgejo@forgejo.jordangarrison.dev/jordangarrison/cg.git"
       },

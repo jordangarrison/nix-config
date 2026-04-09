@@ -1,6 +1,9 @@
-{ config, lib, pkgs, ... }:
+{ ... }:
 
 {
+  # Cloudflare Tunnel for public internet access to panko.
+  # Tunnel created with: cloudflared tunnel create panko
+  # Credentials file must be readable by the cloudflared user (0600, cloudflared:cloudflared).
   services.cloudflared = {
     enable = true;
     tunnels."71e2092b-5e07-4125-8329-f538bdc58d48" = {

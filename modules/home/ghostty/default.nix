@@ -17,6 +17,9 @@ let
     # Shell integration
     shell-integration = zsh
 
+    # GTK single-instance: reuse existing process for new windows
+    gtk-single-instance = true
+
     # Keybindings
     # Shift+Enter sends newline for Claude Code multiline input
     keybind = shift+enter=text:\n

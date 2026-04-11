@@ -12,20 +12,23 @@ This is Jordan Garrison's personal Nix configuration repository, providing decla
 
 ```bash
 # NixOS systems (using nh)
+# Always pass --no-nom to suppress nix-output-monitor's TUI — agent sessions
+# need plain output so errors and diffs are legible.
+
 # build first
-nh os build .
+nh os build . --no-nom
 
 # test next
-nh os test .
+nh os test . --no-nom
 
 # finally switch if and only if build and test pass
-nh os switch .
+nh os switch . --no-nom
 
 # macOS systems (nix-darwin)
-nh darwin switch .
+nh darwin switch . --no-nom
 
 # Home Manager only (WSL/Ubuntu)
-nh home switch .
+nh home switch . --no-nom
 
 # Development shell (for bootstrapping)
 nix develop #or you can rely on direnv
@@ -35,6 +38,8 @@ nix develop #or you can rely on direnv
 # sudo darwin-rebuild switch --flake .#<hostname>
 # home-manager switch --flake .#<config>
 ```
+
+**Note for AI agents:** `--no-nom` is mandatory for every `nh` invocation in this repo. The nix-output-monitor TUI renders escape sequences that clutter agent terminal output and hide real build errors.
 
 ### Package and Flake Management
 

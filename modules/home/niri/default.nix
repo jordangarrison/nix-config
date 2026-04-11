@@ -13,6 +13,8 @@ let
   wallpapersPath = "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/wallpapers";
   scriptsPath = "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/hypr/scripts";
 
+  noctaliaPkg = inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default;
+
   # Get hostname from osConfig if available (NixOS), otherwise use null
   hostname = if osConfig != null then osConfig.networking.hostName else null;
 
@@ -50,7 +52,20 @@ in
   imports = [
     ../desktop-tools
     ../wlr-which-key
+    # Upstream noctalia-shell home-manager module — provides the
+    # systemd.user.services.noctalia-shell unit with ExecStart pinned to the
+    # package store path, so home-manager auto-restarts the service on every
+    # nh os switch that bumps the noctalia-shell package. Without this, the
+    # old quickshell process keeps holding the IPC instance ID and new
+    # `noctalia-shell ipc call ...` invocations fail.
+    inputs.noctalia.homeModules.default
   ];
+
+  programs.noctalia-shell = {
+    enable = true;
+    systemd.enable = true;
+    package = noctaliaPkg;
+  };
 
   # Clipboard services via Home Manager (systemd-managed)
   services.cliphist = {
@@ -67,10 +82,8 @@ in
   };
 
   # Packages needed for niri desktop environment
+  # (noctalia-shell is added automatically by programs.noctalia-shell above)
   home.packages = with pkgs; [
-    # Noctalia shell (unified bar, notifications, launcher, lock screen, power menu)
-    inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default
-
     # Sweet Nothings - voice dictation tool
     inputs.sweet-nothings.packages.${pkgs.stdenv.hostPlatform.system}.default
 
@@ -226,8 +239,8 @@ in
           "fill"
         ];
       }
-      # Noctalia shell (bar, notifications, launcher, lock screen, power menu)
-      { command = [ "noctalia-shell" ]; }
+      # Noctalia shell is managed via systemd.user.services.noctalia-shell
+      # (see above) so it self-heals across package upgrades.
       # Authentication agent
       {
         command = [

@@ -166,12 +166,12 @@ in
       lua
       nixpkgs-fmt
       nodejs
-      nodePackages.bash-language-server
-      nodePackages.prettier
-      nodePackages.typescript
-      nodePackages.typescript-language-server
-      nodePackages.vim-language-server
-      nodePackages.yaml-language-server
+      bash-language-server
+      prettier
+      typescript
+      typescript-language-server
+      vim-language-server
+      yaml-language-server
       yarn
 
       #python
@@ -359,7 +359,7 @@ in
     extraPackages = with pkgs; [
       gopls
       gotools # goimports
-      nodePackages.typescript-language-server
+      typescript-language-server
       rust-analyzer
       elixir-ls
       nil # nix LSP

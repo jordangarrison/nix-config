@@ -1,4 +1,7 @@
 {
+  "edit_predictions": {
+    "provider": "copilot"
+  },
   "ssh_connections": [
     {
       "host": "endeavour",
@@ -19,9 +22,6 @@
   },
   "git_panel": {
     "tree_view": true
-  },
-  "features": {
-    "edit_prediction_provider": "copilot"
   },
   "vim_mode": true,
   "theme": {

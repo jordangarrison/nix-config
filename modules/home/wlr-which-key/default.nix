@@ -98,6 +98,7 @@ let
         (entry "r" "Reload Config" "niri msg action reload-config")
         (entry "q" "Quit Niri" "niri msg action quit")
         (entry "h" "Hotkey Overlay" "niri msg action show-hotkey-overlay")
+        (entry "g" "Restart Ghostty" "killall ghostty; ghostty &")
       ])
 
       # [g] Grove

@@ -264,6 +264,8 @@ in
       }
       # Bluetooth applet
       { command = [ "blueman-applet" ]; }
+      # Ghostty terminal (gtk-single-instance needs a running instance)
+      { command = [ "ghostty" ]; }
       # Idle management (lock screen, monitor power, suspend on laptops)
       { command = swayidleCommand; }
     ];

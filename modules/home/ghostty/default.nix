@@ -18,6 +18,9 @@ let
     shell-integration = zsh
 
     # GTK single-instance: reuse existing process for new windows
+    # Required for niri — ghostty GTK4 surface fails to initialize when
+    # spawned fresh from the compositor, so we keep one instance alive
+    # (via spawn-at-startup) and let new invocations attach to it.
     gtk-single-instance = true
 
     # Keybindings

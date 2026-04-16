@@ -115,7 +115,6 @@
             ./modules/nixos/jellyfin.nix
             ./modules/nixos/forgejo.nix
             ./modules/nixos/forgejo-runner.nix
-            ./modules/nixos/vibe-kanban.nix
             ./modules/nixos/virtualization.nix
             ./modules/nixos/freerdp.nix
             ./modules/nixos/blocky.nix

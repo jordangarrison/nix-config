@@ -11,7 +11,7 @@
       upgrade = true;
       cleanup = "uninstall";
     };
-    taps = [ "homebrew/services" "deskflow/homebrew-tap" ];
+    taps = [ "homebrew/services" "deskflow/homebrew-tap" "manaflow-ai/cmux" ];
     brews = [
       "fzf"
       "mas"
@@ -29,6 +29,7 @@
       "basecamp"
       "brave-browser"
       "chatgpt"
+      "cmux"
       "chatgpt-atlas"
       "claude"
       "cursor"

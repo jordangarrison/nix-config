@@ -42,7 +42,17 @@ let
   emacsPackage = if pkgs.stdenv.isLinux then pkgs.emacs-pgtk else pkgs.emacs;
 in
 {
-  imports = [ ./tools/nvim/nvf.nix ];
+  imports = [
+    ./tools/nvim/nvf.nix
+    ../../modules/home/languages
+  ];
+
+  languages = {
+    clojure.enable = true;
+    elixir.enable = true;
+    erlang.enable = true;
+    gleam.enable = true;
+  };
 
   # Nix settings (required for standalone Home Manager on non-NixOS systems)
   # Use mkDefault so NixOS Home Manager module can override with system's nix package

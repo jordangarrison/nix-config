@@ -8,7 +8,6 @@
     ../../modules/home/ghostty/apps.nix
     ../../modules/home/wezterm  # Keep for SSH apps only
     ../../modules/home/virt-manager/config.nix
-    ../../modules/home/languages
     ../../modules/home/zed-editor
   ];
 

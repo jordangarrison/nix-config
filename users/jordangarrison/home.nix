@@ -9,23 +9,6 @@
 }:
 
 let
-  # TODO: REVERT when numtide/llm-agents.nix merges upstream update to >= 2.1.112
-  # Temporary override: bump claude-code to 2.1.112 ahead of upstream merge
-  # https://github.com/numtide/llm-agents.nix/compare/refs/heads/main...bgamari-positron:llm-agents.nix:refs/heads/main
-  claude-code-version = "2.1.112";
-  claude-code-platform = {
-    x86_64-linux = { suffix = "linux-x64"; hash = "sha256-V76UBtPlyuJZVSeQv3KI3WSWZ1Qw7JPb7XajOldYDT0="; };
-    aarch64-linux = { suffix = "linux-arm64"; hash = "sha256-EBXvV0d2fNrFg3beTsmQJT3KxJMU1U4ZdQ1VEvp0IvY="; };
-    x86_64-darwin = { suffix = "darwin-x64"; hash = "sha256-oqf+pBrO5MiJswEy3UkKwAscuGxuJXVaIk2RscupdzQ="; };
-    aarch64-darwin = { suffix = "darwin-arm64"; hash = "sha256-sFOB84J1QBK5WYQBYAD3BiovEnpqOoQ6/Dfr19RnI0A="; };
-  }.${pkgs.stdenv.hostPlatform.system};
-  claude-code-updated = pkgs.llm-agents.claude-code.overrideAttrs (old: {
-    version = claude-code-version;
-    src = pkgs.fetchurl {
-      url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/${claude-code-version}/${claude-code-platform.suffix}/claude";
-      hash = claude-code-platform.hash;
-    };
-  });
   vscodeScriptPath = pkgs.writeTextFile {
     name = "vscode";
     text = builtins.readFile ./tools/scripts/vscode.sh;
@@ -103,7 +86,7 @@ in
       devbox
 
       # LLM Agents (available via overlay as pkgs.llm-agents.*)
-      claude-code-updated
+      llm-agents.claude-code
       llm-agents.codex
       llm-agents.opencode
       llm-agents.pi
@@ -676,7 +659,7 @@ in
 
   home.file = {
     # Pin ~/.local/bin/claude to the Nix-managed version to prevent auto-updater overwrites
-    ".local/bin/claude".source = "${claude-code-updated}/bin/claude";
+    ".local/bin/claude".source = "${pkgs.llm-agents.claude-code}/bin/claude";
 
     # SSH config with proper permissions fix
     ".ssh/config_source" = {

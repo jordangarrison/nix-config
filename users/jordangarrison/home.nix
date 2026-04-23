@@ -106,7 +106,9 @@ in
       claude-code-updated
       llm-agents.codex
       llm-agents.opencode
+      llm-agents.pi
       sox # Audio playback/recording, used by Claude Code
+      otel-tui # Terminal OpenTelemetry viewer
 
       # Ralph - iterative AI loop utility
       ralph

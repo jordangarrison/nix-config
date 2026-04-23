@@ -893,7 +893,8 @@
         "noctalia": "noctalia",
         "nvf": "nvf",
         "panko": "panko",
-        "sweet-nothings": "sweet-nothings"
+        "sweet-nothings": "sweet-nothings",
+        "warp-preview": "warp-preview"
       }
     },
     "rust-overlay": {
@@ -1153,6 +1154,26 @@
       "original": {
         "owner": "numtide",
         "repo": "treefmt-nix",
+        "type": "github"
+      }
+    },
+    "warp-preview": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1776905692,
+        "narHash": "sha256-ReoVa2q4jSUC23RRvfDboB9sYzujlRvLBW1mQ2q40EQ=",
+        "owner": "jordangarrison",
+        "repo": "warp-preview-flake",
+        "rev": "cd88910bb78b12ae0c9a9c5f5edf5b457801c928",
+        "type": "github"
+      },
+      "original": {
+        "owner": "jordangarrison",
+        "repo": "warp-preview-flake",
         "type": "github"
       }
     },

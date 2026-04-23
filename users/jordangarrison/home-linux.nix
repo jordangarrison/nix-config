@@ -11,6 +11,10 @@
     ../../modules/home/zed-editor
   ];
 
+  home.packages = [
+    inputs.warp-preview.packages.${pkgs.system}.default
+  ];
+
   # KDE Connect for Hyprland/Niri (GSConnect handles GNOME)
   services.kdeconnect = {
     enable = true;

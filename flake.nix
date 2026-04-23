@@ -59,6 +59,10 @@
       url = "github:MichaelVessia/grove";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    warp-preview = {
+      url = "github:jordangarrison/warp-preview-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -83,6 +87,7 @@
       panko,
       lakeline-cg,
       grove,
+      warp-preview,
     }:
     {
       nixosConfigurations = {

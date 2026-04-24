@@ -577,7 +577,9 @@ Native Emacs shell for ACP-driven coding agents. Adapter binaries are installed 
         agent-shell-openai-codex-acp-command '("codex-acp")
         agent-shell-pi-acp-command '("pi-acp")
         agent-shell-anthropic-claude-environment
-        (agent-shell-make-environment-variables :inherit-env t)
+        (agent-shell-make-environment-variables
+         :inherit-env t
+         "CLAUDE_CODE_EXECUTABLE" (or (executable-find "claude") "claude"))
         agent-shell-openai-codex-environment
         (agent-shell-make-environment-variables :inherit-env t)
         agent-shell-pi-environment

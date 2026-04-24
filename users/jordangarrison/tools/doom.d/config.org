@@ -561,6 +561,42 @@ Custom functions for managing NixOS configurations directly from Emacs, providin
 (gptel-make-gh-copilot "Copilot")
 #+end_src
 
+** Agent Shell
+Native Emacs shell for ACP-driven coding agents. Adapter binaries are installed through Home Manager's `programs.acp-adapters` module.
+
+#+begin_src emacs-lisp
+(require 'acp)
+(require 'agent-shell)
+
+(after! agent-shell
+  (setq agent-shell-anthropic-authentication
+        (agent-shell-anthropic-make-authentication :login t)
+        agent-shell-openai-authentication
+        (agent-shell-openai-make-authentication :login t)
+        agent-shell-anthropic-claude-acp-command '("claude-agent-acp")
+        agent-shell-openai-codex-acp-command '("codex-acp")
+        agent-shell-pi-acp-command '("pi-acp")
+        agent-shell-anthropic-claude-environment
+        (agent-shell-make-environment-variables :inherit-env t)
+        agent-shell-openai-codex-environment
+        (agent-shell-make-environment-variables :inherit-env t)
+        agent-shell-pi-environment
+        (agent-shell-make-environment-variables :inherit-env t))
+
+  (setq agent-shell-agent-configs
+        (append
+         (list (agent-shell-anthropic-make-claude-code-config)
+               (agent-shell-openai-make-codex-config))
+         (when (executable-find "pi-acp")
+           (list (agent-shell-pi-make-agent-config))))))
+
+(map! :leader
+      :desc "Agent shell" "j a a" #'agent-shell
+      :desc "Agent shell Claude" "j a c" #'agent-shell-anthropic-start-claude-code
+      :desc "Agent shell Codex" "j a x" #'agent-shell-openai-start-codex
+      :desc "Agent shell Pi" "j a p" #'agent-shell-pi-start-agent)
+#+end_src
+
 ** VTerm Integration
 Functions to send code regions to vterm for quick execution.
 

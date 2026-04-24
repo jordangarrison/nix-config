@@ -20,6 +20,8 @@ let
 
   llmPackage = name: if builtins.hasAttr name llmAgents then builtins.getAttr name llmAgents else null;
 
+  localPiAcp = pkgs.callPackage ../../../packages/pi-acp { };
+
   adapterPackageOption =
     {
       adapterName,
@@ -102,19 +104,18 @@ in
     pi = {
       enable = mkOption {
         type = types.bool;
-        default = llmPackage "pi-acp" != null;
-        defaultText = literalExpression "pkgs.llm-agents ? pi-acp";
+        default = true;
         description = ''
-          Whether to install the Pi ACP adapter. This defaults to true only when
-          pkgs.llm-agents.pi-acp exists, because the current llm-agents input may
-          not expose a Pi ACP package yet.
+          Whether to install the Pi ACP adapter. The package defaults to
+          pkgs.llm-agents.pi-acp when available, otherwise this repository's
+          local pi-acp package is used as a fallback.
         '';
       };
 
       package = adapterPackageOption {
         adapterName = "Pi";
         llmPackageName = "pi-acp";
-        defaultPackage = llmPackage "pi-acp";
+        defaultPackage = if llmPackage "pi-acp" != null then llmPackage "pi-acp" else localPiAcp;
       };
 
       command = adapterCommandOption {

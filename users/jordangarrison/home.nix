@@ -28,6 +28,7 @@ in
   imports = [
     ./tools/nvim/nvf.nix
     ../../modules/home/languages
+    ../../modules/home/pi
   ];
 
   languages = {
@@ -77,6 +78,11 @@ in
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 
+  programs.pi = {
+    enable = true;
+    package = pkgs.llm-agents.pi;
+  };
+
   home.packages =
     with pkgs;
     [
@@ -89,7 +95,6 @@ in
       llm-agents.claude-code
       llm-agents.codex
       llm-agents.opencode
-      llm-agents.pi
       sox # Audio playback/recording, used by Claude Code
       otel-tui # Terminal OpenTelemetry viewer
 

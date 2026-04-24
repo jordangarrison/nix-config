@@ -110,15 +110,15 @@ The module should:
 
 - Add enabled adapter packages to `home.packages`.
 - Default each adapter to enabled when `programs.acp-adapters.enable = true`, unless that is awkward in Nix option semantics; otherwise explicitly enable all three from `home.nix`.
-- Use packages already available from nixpkgs or `pkgs.llm-agents` where possible.
-- Provide package override options if practical, for example `programs.acp-adapters.claude.package`.
+- Prefer packages from the `pkgs.llm-agents` flake overlay for ACP adapters.
+- Keep package selection overridable per adapter, for example `programs.acp-adapters.claude.package`, so callers can swap in nixpkgs, local packages, or future upstream packages without changing the module.
 - Keep the public interface generic enough for later adapters.
 
 Expected package mapping:
 
-- Claude: prefer an available Nix package that provides `claude-agent-acp`; if only `claude-code-acp` is packaged, either use that command in Doom or add a wrapper/package alias that exposes the command expected by `agent-shell`.
-- Codex: use an available package that provides `codex-acp`.
-- Pi: use an available package if one exists; otherwise add a small Nix package for the npm `pi-acp` adapter.
+- Claude: default to `pkgs.llm-agents.claude-code-acp`, whose main program is `claude-agent-acp`.
+- Codex: default to `pkgs.llm-agents.codex-acp`, whose main program is `codex-acp`.
+- Pi: default to `pkgs.llm-agents.pi-acp` when that package exists. The current checked `llm-agents` input does not expose `pi-acp`, so the module must make this package choice overridable and fail clearly if Pi support is enabled without an available Pi ACP package.
 
 ## Doom Emacs design
 
@@ -190,12 +190,12 @@ After implementation:
 ## Risks and mitigations
 
 - **Adapter command name mismatch:** Verify package outputs and configure Doom to use the actual command name or provide a wrapper.
-- **Pi adapter not packaged in nixpkgs:** Add a small npm package derivation or overlay for `pi-acp`.
+- **Pi adapter not exposed by `pkgs.llm-agents`:** Keep the Pi package option overridable and fail clearly when Pi support is enabled without a package. Add or override a Pi ACP package later once it is available from the llm flake or a local package.
 - **Emacs daemon environment mismatch:** Prefer Nix-managed binaries in user profile and configure environment inheritance for agent processes.
 - **`agent-shell` package/API churn:** Keep configuration minimal and avoid relying on experimental features beyond supported agent configs and command variables.
 - **Overlapping AI tools:** Keep existing `claude-code-ide`, `gptel`, and vterm workflows; `agent-shell` is additive.
 
 ## Open follow-up decisions
 
-- Choose whether Claude should use `claude-agent-acp` or `claude-code-acp` after inspecting the packaged binary names.
+- Add Pi ACP support once `pkgs.llm-agents.pi-acp` exists, or set `programs.acp-adapters.pi.package` to an explicit override.
 - Decide later whether `agent-shell` transcripts should stay in project `.agent-shell/` directories or move under Emacs state.

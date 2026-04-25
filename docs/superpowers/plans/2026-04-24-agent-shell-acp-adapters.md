@@ -4,7 +4,7 @@
 
 **Goal:** Add Xenodium `agent-shell` to Doom Emacs with Claude, Codex, and Pi ACP support managed through a reusable, overridable Home Manager ACP adapter module.
 
-**Architecture:** Home Manager owns external ACP adapter binaries through `programs.acp-adapters`; Doom owns Emacs packages, `agent-shell` configuration, and keybindings. The adapter module defaults to `pkgs.llm-agents` packages for Claude and Codex, auto-enables Pi only when `pkgs.llm-agents.pi-acp` exists, and exposes per-adapter package overrides for callers that need a different source.
+**Architecture:** Home Manager owns external ACP adapter binaries through `programs.acp-adapters`; Doom owns Emacs packages, `agent-shell` configuration, and keybindings. The adapter module defaults to `pkgs.llm-agents` packages for Claude and Codex, prefers `pkgs.llm-agents.pi-acp` for Pi when available, falls back to this repository's local `packages/pi-acp`, and exposes per-adapter package overrides for callers that need a different source.
 
 **Tech Stack:** Nix flakes, Home Manager modules, Doom Emacs, Emacs Lisp, `agent-shell`, `acp.el`, `shell-maker`, `pkgs.llm-agents`.
 
@@ -16,7 +16,7 @@
   - Defines `programs.acp-adapters` options.
   - Installs enabled ACP adapter packages into `home.packages`.
   - Defaults Claude to `pkgs.llm-agents.claude-code-acp` and Codex to `pkgs.llm-agents.codex-acp`.
-  - Defaults Pi to `pkgs.llm-agents.pi-acp` only when that attribute exists.
+  - Defaults Pi to `pkgs.llm-agents.pi-acp` when that attribute exists, otherwise to `packages/pi-acp`.
   - Allows each package and command name to be overridden.
   - Fails with a clear assertion when an adapter is enabled without an available package.
 
@@ -267,7 +267,7 @@ add:
   };
 ```
 
-This installs Claude and Codex ACP adapters from `pkgs.llm-agents`. Pi ACP remains auto-disabled until `pkgs.llm-agents.pi-acp` exists or `programs.acp-adapters.pi.package` is explicitly overridden.
+This installs Claude and Codex ACP adapters from `pkgs.llm-agents`. Pi ACP installs from `pkgs.llm-agents.pi-acp` when available, otherwise from the local `packages/pi-acp` fallback.
 
 - [ ] **Step 3: Verify the enabled option evaluates**
 
@@ -307,13 +307,7 @@ Run:
 nix eval '.#homeConfigurations."jordangarrison@normandy".config.programs.acp-adapters.pi.enable'
 ```
 
-Expected output with the current checked `llm-agents` input:
-
-```text
-false
-```
-
-If a future `llm-agents` input exposes `pi-acp`, expected output becomes:
+Expected output:
 
 ```text
 true
@@ -500,12 +494,12 @@ nix eval --raw '.#homeConfigurations."jordangarrison@normandy".config.programs.a
 nix eval '.#homeConfigurations."jordangarrison@normandy".config.programs.acp-adapters.pi.enable'
 ```
 
-Expected output with the current checked `llm-agents` input:
+Expected output:
 
 ```text
 claude-agent-acp
 codex-acp
-false
+true
 ```
 
 - [ ] **Step 3: If switching Home Manager is approved, apply it**
@@ -532,11 +526,7 @@ else
 fi
 ```
 
-Expected output includes paths for `claude-agent-acp` and `codex-acp`. With the current checked `llm-agents` input, expected Pi line is:
-
-```text
-pi-acp not enabled because pkgs.llm-agents.pi-acp is not available
-```
+Expected output includes paths for `claude-agent-acp`, `codex-acp`, and `pi-acp`.
 
 ---
 
@@ -580,7 +570,7 @@ Report these facts to the user:
 agent-shell is configured in Doom Emacs.
 Claude uses claude-agent-acp from pkgs.llm-agents.claude-code-acp.
 Codex uses codex-acp from pkgs.llm-agents.codex-acp.
-Pi agent-shell support is configured and will appear in the picker when pi-acp is installed; the ACP adapter module auto-enables Pi once pkgs.llm-agents.pi-acp exists or when programs.acp-adapters.pi.package is overridden.
+Pi agent-shell support is configured and appears in the picker when pi-acp is installed; the ACP adapter module prefers pkgs.llm-agents.pi-acp and falls back to the local packages/pi-acp package until the llm flake exposes pi-acp.
 ```
 
 ---
@@ -588,6 +578,6 @@ Pi agent-shell support is configured and will appear in the picker when pi-acp i
 ## Self-review checklist
 
 - Spec coverage: This plan implements the reusable ACP adapter module, Doom package declarations, Doom `agent-shell` configuration, leader keybindings, and verification commands. It preserves existing AI tooling by only adding new sections and packages.
-- Package source requirement: Claude and Codex defaults come from `pkgs.llm-agents`; Pi is auto-enabled only if `pkgs.llm-agents.pi-acp` exists, and the module exposes package overrides for all adapters.
+- Package source requirement: Claude and Codex defaults come from `pkgs.llm-agents`; Pi prefers `pkgs.llm-agents.pi-acp` and falls back to local `packages/pi-acp`; the module exposes package overrides for all adapters.
 - Placeholder scan: No implementation step relies on unnamed files, unspecified code, or unresolved command names.
 - Type consistency: Nix option names are consistently `programs.acp-adapters.{claude,codex,pi}.{enable,package,command}`. Emacs command variables match `agent-shell` upstream names from the checked source.

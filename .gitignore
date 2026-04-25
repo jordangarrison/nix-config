@@ -11,3 +11,4 @@ result/
 .grove-base
 .grove-start.sh
 .grove-setup.sh
+/.agent-shell/

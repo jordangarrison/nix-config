@@ -118,7 +118,7 @@ Expected package mapping:
 
 - Claude: default to `pkgs.llm-agents.claude-code-acp`, whose main program is `claude-agent-acp`.
 - Codex: default to `pkgs.llm-agents.codex-acp`, whose main program is `codex-acp`.
-- Pi: default to `pkgs.llm-agents.pi-acp` when that package exists. The current checked `llm-agents` input does not expose `pi-acp`, so the module must make this package choice overridable and fail clearly if Pi support is enabled without an available Pi ACP package.
+- Pi: default to `pkgs.llm-agents.pi-acp` when that package exists. The current checked `llm-agents` input does not expose `pi-acp`, so the module uses this repository's local `packages/pi-acp` package as a fallback while keeping `programs.acp-adapters.pi.package` overridable.
 
 ## Doom Emacs design
 
@@ -190,12 +190,12 @@ After implementation:
 ## Risks and mitigations
 
 - **Adapter command name mismatch:** Verify package outputs and configure Doom to use the actual command name or provide a wrapper.
-- **Pi adapter not exposed by `pkgs.llm-agents`:** Keep the Pi package option overridable and fail clearly when Pi support is enabled without a package. Add or override a Pi ACP package later once it is available from the llm flake or a local package.
+- **Pi adapter not exposed by `pkgs.llm-agents`:** Use the local `packages/pi-acp` fallback and keep the Pi package option overridable. Prefer `pkgs.llm-agents.pi-acp` automatically once the llm flake exposes it.
 - **Emacs daemon environment mismatch:** Prefer Nix-managed binaries in user profile and configure environment inheritance for agent processes.
 - **`agent-shell` package/API churn:** Keep configuration minimal and avoid relying on experimental features beyond supported agent configs and command variables.
 - **Overlapping AI tools:** Keep existing `claude-code-ide`, `gptel`, and vterm workflows; `agent-shell` is additive.
 
 ## Open follow-up decisions
 
-- Add Pi ACP support once `pkgs.llm-agents.pi-acp` exists, or set `programs.acp-adapters.pi.package` to an explicit override.
+- Replace the local `packages/pi-acp` fallback with `pkgs.llm-agents.pi-acp` automatically once the llm flake exposes it.
 - Decide later whether `agent-shell` transcripts should stay in project `.agent-shell/` directories or move under Emacs state.

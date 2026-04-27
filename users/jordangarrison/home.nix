@@ -27,6 +27,7 @@ in
 {
   imports = [
     ./tools/nvim/nvf.nix
+    ../../modules/home/acp-adapters
     ../../modules/home/languages
     ../../modules/home/pi
   ];
@@ -81,6 +82,10 @@ in
   programs.pi = {
     enable = true;
     package = pkgs.llm-agents.pi;
+  };
+
+  programs.acp-adapters = {
+    enable = true;
   };
 
   home.packages =

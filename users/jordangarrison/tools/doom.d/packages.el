@@ -55,6 +55,9 @@
 (package! xclip)
 (package! sqlite3)
 (package! vcl-mode)
+(package! shell-maker)
+(package! acp)
+(package! agent-shell)
 
 ;; Special installs
 (package! git-link

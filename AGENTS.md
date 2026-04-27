@@ -426,10 +426,13 @@ home.packages = with pkgs; [
      - `nh os build .`
      - `nh os test .`
      - `nh os switch .`
+       - Confirm with user before running
    - macOS:
      - `nh darwin build .`
      - `nh darwin switch .`
+       - Confirm with user before running
    - Home Manager: `nh home switch .`
+     - Note this is NOT used on systems which use the above
 4. Commit updates: `git add flake.lock && git commit -m "Update flake inputs"`
 
 ### Development Environment

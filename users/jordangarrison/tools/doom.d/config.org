@@ -564,12 +564,106 @@ Custom functions for managing NixOS configurations directly from Emacs, providin
 ** Agent Shell
 Native Emacs shell for ACP-driven coding agents. Adapter binaries are installed through Home Manager's `programs.acp-adapters` module.
 
+*** jag/agent-shell-tool-call-summary
+Improve collapsed `agent-shell` tool rows by deriving useful labels from ACP raw input.
+
+#+begin_src emacs-lisp
+(require 'map)
+(require 'seq)
+(require 'subr-x)
+
+(defun jag/agent-shell--map-elt-any (map &rest keys)
+  "Return first non-nil value in MAP for KEYS."
+  (seq-some (lambda (key) (map-elt map key)) keys))
+
+(defun jag/agent-shell--tool-call-command-to-string (command)
+  "Normalize tool-call COMMAND to a display string."
+  (cond
+   ((stringp command) command)
+   ((vectorp command) (combine-and-quote-strings (append command nil)))
+   ((and (listp command) (seq-every-p #'stringp command))
+    (combine-and-quote-strings command))
+   (t nil)))
+
+(defun jag/agent-shell--generic-tool-title-p (title kind)
+  "Return non-nil when TITLE is too generic to be useful.
+
+KIND is the ACP tool kind string, such as read, edit, execute, or other."
+  (let ((normalized-title (and (stringp title) (downcase (string-trim title))))
+        (normalized-kind (and (stringp kind) (downcase (string-trim kind)))))
+    (or (null normalized-title)
+        (string-empty-p normalized-title)
+        (and normalized-kind (string= normalized-title normalized-kind))
+        (member normalized-title
+                '("bash" "edit" "execute" "find" "grep" "ls" "other" "read" "tool" "write")))))
+
+(defun jag/agent-shell-tool-call-summary (tool-call)
+  "Return a concise summary for TOOL-CALL, or nil when its title is already useful.
+
+This uses ACP raw input values so collapsed `agent-shell' tool rows show
+what was executed, not only the generic tool name."
+  (let* ((title (map-elt tool-call :title))
+         (kind (map-elt tool-call :kind))
+         (raw-input (map-elt tool-call :raw-input)))
+    (when (and raw-input (jag/agent-shell--generic-tool-title-p title kind))
+      (let* ((command (jag/agent-shell--tool-call-command-to-string
+                       (jag/agent-shell--map-elt-any raw-input 'command :command)))
+             (path (jag/agent-shell--map-elt-any raw-input
+                                                  'path :path
+                                                  'filepath :filepath
+                                                  'filePath :filePath
+                                                  'fileName :fileName
+                                                  'file_name :file_name
+                                                  'file_path :file_path))
+             (pattern (jag/agent-shell--map-elt-any raw-input
+                                                     'pattern :pattern
+                                                     'query :query
+                                                     'regex :regex))
+             (description (jag/agent-shell--map-elt-any raw-input 'description :description))
+             (summary (cond
+                       ((and command (not (string-empty-p (string-trim command)))) command)
+                       ((and pattern path) (format "%s %s" pattern path))
+                       ((stringp path) path)
+                       ((stringp description) description))))
+        (when (and summary (not (string-empty-p (string-trim summary))))
+          (string-trim (replace-regexp-in-string "[\n\r]+" " " summary)))))))
+#+end_src
+
+*** jag/agent-shell-enable-better-tool-labels
+Install the label summary helper as advice around `agent-shell-make-tool-call-label`.
+
+#+begin_src emacs-lisp
+(defun jag/agent-shell--enhance-tool-call-label (original state tool-call-id)
+  "Advice around ORIGINAL to improve collapsed tool labels.
+
+STATE and TOOL-CALL-ID are passed through to
+`agent-shell-make-tool-call-label'."
+  (let* ((labels (funcall original state tool-call-id))
+         (tool-call (map-nested-elt state `(:tool-calls ,tool-call-id)))
+         (summary (and tool-call (jag/agent-shell-tool-call-summary tool-call))))
+    (when (and labels summary)
+      (setf (map-elt labels :title)
+            (propertize summary 'font-lock-face 'font-lock-doc-markup-face)))
+    labels))
+
+(defun jag/agent-shell-enable-better-tool-labels ()
+  "Enable concise, argument-aware collapsed labels for `agent-shell' tools."
+  (unless (advice-member-p #'jag/agent-shell--enhance-tool-call-label
+                           'agent-shell-make-tool-call-label)
+    (advice-add 'agent-shell-make-tool-call-label
+                :around #'jag/agent-shell--enhance-tool-call-label)))
+#+end_src
+
+*** Agent Shell Configuration
+Configure ACP-backed Claude, Codex, and Pi agents.
+
 #+begin_src emacs-lisp
 (require 'acp)
 (require 'agent-shell)
 
 (after! agent-shell
-  (setq agent-shell-anthropic-authentication
+  (setq agent-shell-thought-process-expand-by-default t
+        agent-shell-anthropic-authentication
         (agent-shell-anthropic-make-authentication :login t)
         agent-shell-openai-authentication
         (agent-shell-openai-make-authentication :login t)
@@ -584,6 +678,8 @@ Native Emacs shell for ACP-driven coding agents. Adapter binaries are installed 
         (agent-shell-make-environment-variables :inherit-env t)
         agent-shell-pi-environment
         (agent-shell-make-environment-variables :inherit-env t))
+
+  (jag/agent-shell-enable-better-tool-labels)
 
   (setq agent-shell-agent-configs
         (append

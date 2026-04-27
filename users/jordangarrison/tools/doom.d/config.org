@@ -12,6 +12,7 @@
   - [[#theme-management][Theme Management]]
   - [[#font-configuration][Font Configuration]]
   - [[#line-numbers-and-visual-elements][Line Numbers and Visual Elements]]
+  - [[#frame-size-configuration][Frame Size Configuration]]
   - [[#dashboard-configuration][Dashboard Configuration]]
 - [[#editor-behavior][Editor Behavior]]
   - [[#shell-prompt-recognition][Shell Prompt Recognition]]
@@ -38,6 +39,7 @@
   - [[#nixos-key-bindings][NixOS Key Bindings]]
 - [[#aillm-integration][AI/LLM Integration]]
   - [[#integration-with-various-ai-and-language-model-services-for-enhanced-development-capabilities][Integration with various AI and language model services for enhanced development capabilities.]]
+  - [[#agent-shell][Agent Shell]]
   - [[#vterm-integration][VTerm Integration]]
   - [[#chatgpt-integration][ChatGPT Integration]]
   - [[#claude-code-ide][Claude Code IDE]]
@@ -629,8 +631,71 @@ what was executed, not only the generic tool name."
           (string-trim (replace-regexp-in-string "[\n\r]+" " " summary)))))))
 #+end_src
 
+#+RESULTS:
+: jag/agent-shell-tool-call-summary
+
+*** jag/agent-shell-tool-call-expanded-by-default-p
+Expand inline edit tool calls, and only expand write tool calls when their payload is small enough to review inline.
+
+#+begin_src emacs-lisp
+(defvar jag/agent-shell-write-tool-auto-expand-max-lines 120
+  "Maximum line count for auto-expanding `agent-shell' write tool calls.")
+
+(defvar jag/agent-shell-write-tool-auto-expand-max-chars 12000
+  "Maximum character count for auto-expanding `agent-shell' write tool calls.")
+
+(defun jag/agent-shell--tool-name-p (tool-call name)
+  "Return non-nil when TOOL-CALL appears to invoke tool NAME."
+  (let ((kind (when-let ((kind (map-elt tool-call :kind)))
+                (downcase (string-trim kind))))
+        (title (when-let ((title (map-elt tool-call :title)))
+                 (downcase (string-trim title)))))
+    (or (equal kind name)
+        (and title
+             (string-match-p
+              (concat "\\(?:\\`\\|[./_-]\\)"
+                      (regexp-quote name)
+                      "\\(?:\\'\\|[[:space:]:(_-]\\)")
+              title)))))
+
+(defun jag/agent-shell--line-count (text)
+  "Return the number of lines in TEXT."
+  (if (string-empty-p text)
+      0
+    (1+ (seq-count (lambda (char) (= char ?\n)) text))))
+
+(defun jag/agent-shell--tool-call-write-content (tool-call)
+  "Return write content from TOOL-CALL raw input, when available."
+  (when-let ((raw-input (map-elt tool-call :raw-input)))
+    (jag/agent-shell--map-elt-any raw-input
+                                  'content :content
+                                  'contents :contents
+                                  'text :text
+                                  'fileContent :fileContent
+                                  'file_content :file_content
+                                  'newContent :newContent
+                                  'new_content :new_content)))
+
+(defun jag/agent-shell--small-write-tool-call-p (tool-call)
+  "Return non-nil when TOOL-CALL is a write with small inline content."
+  (when-let (((jag/agent-shell--tool-name-p tool-call "write"))
+             (content (jag/agent-shell--tool-call-write-content tool-call))
+             ((stringp content)))
+    (and (<= (length content) jag/agent-shell-write-tool-auto-expand-max-chars)
+         (<= (jag/agent-shell--line-count content)
+             jag/agent-shell-write-tool-auto-expand-max-lines))))
+
+(defun jag/agent-shell-tool-call-expanded-by-default-p (tool-call)
+  "Return non-nil when TOOL-CALL should be expanded inline by default."
+  (or (jag/agent-shell--tool-name-p tool-call "edit")
+      (jag/agent-shell--small-write-tool-call-p tool-call)))
+#+end_src
+
+#+RESULTS:
+: jag/agent-shell-tool-call-expanded-by-default-p
+
 *** jag/agent-shell-enable-better-tool-labels
-Install the label summary helper as advice around `agent-shell-make-tool-call-label`.
+Install helpers as advice around `agent-shell' rendering functions.
 
 #+begin_src emacs-lisp
 (defun jag/agent-shell--enhance-tool-call-label (original state tool-call-id)
@@ -646,13 +711,30 @@ STATE and TOOL-CALL-ID are passed through to
             (propertize summary 'font-lock-face 'font-lock-doc-markup-face)))
     labels))
 
+(defun jag/agent-shell--expand-selected-tool-fragments (original &rest args)
+  "Advice around ORIGINAL to expand selected `agent-shell' tool fragments."
+  (let* ((state (plist-get args :state))
+         (block-id (plist-get args :block-id))
+         (tool-call (and state block-id
+                         (map-nested-elt state `(:tool-calls ,block-id)))))
+    (when (and tool-call (jag/agent-shell-tool-call-expanded-by-default-p tool-call))
+      (setq args (plist-put args :expanded t)))
+    (apply original args)))
+
 (defun jag/agent-shell-enable-better-tool-labels ()
-  "Enable concise, argument-aware collapsed labels for `agent-shell' tools."
+  "Enable concise labels and smart expansion for `agent-shell' tools."
   (unless (advice-member-p #'jag/agent-shell--enhance-tool-call-label
                            'agent-shell-make-tool-call-label)
     (advice-add 'agent-shell-make-tool-call-label
-                :around #'jag/agent-shell--enhance-tool-call-label)))
+                :around #'jag/agent-shell--enhance-tool-call-label))
+  (unless (advice-member-p #'jag/agent-shell--expand-selected-tool-fragments
+                           'agent-shell--update-fragment)
+    (advice-add 'agent-shell--update-fragment
+                :around #'jag/agent-shell--expand-selected-tool-fragments)))
 #+end_src
+
+#+RESULTS:
+: jag/agent-shell-enable-better-tool-labels
 
 *** Agent Shell Configuration
 Configure ACP-backed Claude, Codex, and Pi agents.
@@ -688,12 +770,28 @@ Configure ACP-backed Claude, Codex, and Pi agents.
          (when (executable-find "pi-acp")
            (list (agent-shell-pi-make-agent-config))))))
 
+(defun jag/agent-shell-prompt-compose-bottom ()
+  "Open `agent-shell' prompt compose in a bottom side window."
+  (interactive)
+  (let ((agent-shell-display-action
+         '((display-buffer-reuse-window display-buffer-in-side-window)
+           (side . bottom)
+           (slot . 0)
+           (window-height . 0.35)
+           (dedicated . t))))
+    (call-interactively #'agent-shell-prompt-compose)))
+
 (map! :leader
       :desc "Agent shell" "j a a" #'agent-shell
       :desc "Agent shell Claude" "j a c" #'agent-shell-anthropic-start-claude-code
-      :desc "Agent shell Codex" "j a x" #'agent-shell-openai-start-codex
-      :desc "Agent shell Pi" "j a p" #'agent-shell-pi-start-agent)
+      :desc "Agent shell compose prompt" "j a e" #'jag/agent-shell-prompt-compose-bottom
+      :desc "Agent shell Pi" "j a p" #'agent-shell-pi-start-agent
+      :desc "Agent shell queue request" "j a q" #'agent-shell-queue-request
+      :desc "Agent shell Codex" "j a x" #'agent-shell-openai-start-codex)
 #+end_src
+
+#+RESULTS:
+: agent-shell-openai-start-codex
 
 ** VTerm Integration
 Functions to send code regions to vterm for quick execution.

@@ -736,6 +736,209 @@ STATE and TOOL-CALL-ID are passed through to
 #+RESULTS:
 : jag/agent-shell-enable-better-tool-labels
 
+*** Active Session Management
+Track live `agent-shell` buffers with launch context (Doom workspace, project root, default-directory) so they participate in normal Doom workspace switching and dedicated Vertico selectors.
+
+#+begin_src emacs-lisp
+(defvar-local jag/agent-shell-launch-workspace-name nil
+  "Doom workspace name active when this `agent-shell' buffer was launched.")
+
+(defvar-local jag/agent-shell-launch-project-root nil
+  "Normalized project root active when this `agent-shell' buffer was launched.")
+
+(defvar-local jag/agent-shell-launch-default-directory nil
+  "Normalized `default-directory' active when this `agent-shell' buffer was launched.")
+
+(defun jag/agent-shell--normalize-dir (path)
+  "Return PATH normalized as a directory string suitable for equality checks."
+  (when (and path (stringp path) (not (string-empty-p path)))
+    (file-name-as-directory (file-truename path))))
+
+(defun jag/agent-shell--current-workspace-name ()
+  "Return current Doom workspace name, or nil when workspaces are unavailable."
+  (when (and (fboundp '+workspace-current-name)
+             (bound-and-true-p persp-mode))
+    (ignore-errors (+workspace-current-name))))
+
+(defun jag/agent-shell--current-launch-project-root ()
+  "Return normalized project root for the current launch context."
+  (jag/agent-shell--normalize-dir
+   (or (and (fboundp 'doom-project-root) (doom-project-root))
+       (and (fboundp 'agent-shell-cwd) (ignore-errors (agent-shell-cwd)))
+       default-directory)))
+
+(defun jag/agent-shell--buffer-launch-project-root (buffer)
+  "Return normalized launch project root for BUFFER, with fallbacks."
+  (with-current-buffer buffer
+    (or jag/agent-shell-launch-project-root
+        (jag/agent-shell--normalize-dir
+         (or (and (fboundp 'agent-shell-cwd) (ignore-errors (agent-shell-cwd)))
+             default-directory)))))
+
+(defun jag/agent-shell--register-buffer-in-workspace (buffer workspace-name)
+  "Add BUFFER to the Doom workspace named WORKSPACE-NAME, if possible."
+  (when (and buffer
+             (buffer-live-p buffer)
+             workspace-name
+             (bound-and-true-p persp-mode)
+             (fboundp 'persp-get-by-name)
+             (fboundp 'persp-add-buffer))
+    (condition-case _err
+        (when-let ((persp (persp-get-by-name workspace-name)))
+          (persp-add-buffer buffer persp nil nil))
+      (error nil))))
+
+(defun jag/agent-shell--around-start (orig-fn &rest args)
+  "Around advice for `agent-shell--start' that captures launch context.
+
+Records workspace, project root and default directory before ORIG-FN runs,
+then stamps them as buffer-local metadata on the returned shell buffer and
+adds the buffer to the launching Doom workspace."
+  (let ((workspace (jag/agent-shell--current-workspace-name))
+        (project-root (jag/agent-shell--current-launch-project-root))
+        (default-dir (jag/agent-shell--normalize-dir default-directory)))
+    (let ((buffer (apply orig-fn args)))
+      (when (and buffer (bufferp buffer) (buffer-live-p buffer))
+        (with-current-buffer buffer
+          (setq-local jag/agent-shell-launch-workspace-name workspace)
+          (setq-local jag/agent-shell-launch-project-root project-root)
+          (setq-local jag/agent-shell-launch-default-directory default-dir))
+        (jag/agent-shell--register-buffer-in-workspace buffer workspace))
+      buffer)))
+
+(defun jag/agent-shell-enable-active-session-management ()
+  "Install advice that captures launch context for new `agent-shell' buffers."
+  (unless (advice-member-p #'jag/agent-shell--around-start 'agent-shell--start)
+    (advice-add 'agent-shell--start :around #'jag/agent-shell--around-start)))
+
+(defun jag/agent-shell--live-buffers ()
+  "Return live buffers whose major mode derives from `agent-shell-mode'."
+  (seq-filter (lambda (buffer)
+                (and (buffer-live-p buffer)
+                     (with-current-buffer buffer
+                       (derived-mode-p 'agent-shell-mode))))
+              (buffer-list)))
+
+(defun jag/agent-shell--buffer-session-id (buffer)
+  "Return the ACP session id for BUFFER, when available."
+  (with-current-buffer buffer
+    (when (and (boundp 'agent-shell--state) agent-shell--state)
+      (ignore-errors (map-nested-elt agent-shell--state '(:session :id))))))
+
+(defun jag/agent-shell--buffer-agent-name (buffer)
+  "Return a short agent identifier for BUFFER, when available."
+  (with-current-buffer buffer
+    (when (and (boundp 'agent-shell--state) agent-shell--state)
+      (let ((cfg (ignore-errors (map-elt agent-shell--state :agent-config))))
+        (or (and cfg (map-elt cfg :buffer-name))
+            (and cfg (map-elt cfg :mode-line-name))
+            (and cfg (map-elt cfg :identifier)))))))
+
+(defun jag/agent-shell--candidate-label (buffer)
+  "Return a display label for BUFFER suitable for completing-read."
+  (with-current-buffer buffer
+    (let* ((bname (buffer-name buffer))
+           (ws (or jag/agent-shell-launch-workspace-name "-"))
+           (root (jag/agent-shell--buffer-launch-project-root buffer))
+           (proj (and root (file-name-nondirectory (directory-file-name root))))
+           (agent (jag/agent-shell--buffer-agent-name buffer))
+           (sid (jag/agent-shell--buffer-session-id buffer))
+           (sid-tag (and sid (stringp sid)
+                         (format " <%s>" (substring sid 0 (min 8 (length sid)))))))
+      (format "%s  [%s | ws:%s]%s%s"
+              bname
+              (or proj "-")
+              ws
+              (if agent (format "  {%s}" agent) "")
+              (or sid-tag "")))))
+
+(defun jag/agent-shell--uniquify-candidates (alist)
+  "Disambiguate duplicate keys in ALIST by appending suffixes."
+  (let ((counts (make-hash-table :test #'equal))
+        (seen (make-hash-table :test #'equal))
+        out)
+    (dolist (cell alist)
+      (puthash (car cell) (1+ (gethash (car cell) counts 0)) counts))
+    (dolist (cell alist)
+      (let* ((label (car cell))
+             (total (gethash label counts 0)))
+        (if (= total 1)
+            (push cell out)
+          (let ((idx (1+ (gethash label seen 0))))
+            (puthash label idx seen)
+            (push (cons (format "%s [%d]" label idx) (cdr cell)) out)))))
+    (nreverse out)))
+
+(defun jag/agent-shell--display-buffer (buffer)
+  "Switch to BUFFER, preferring `agent-shell--display-buffer' when defined."
+  (cond
+   ((not (buffer-live-p buffer))
+    (user-error "Agent-shell buffer is no longer live"))
+   ((fboundp 'agent-shell--display-buffer)
+    (agent-shell--display-buffer buffer))
+   (t (switch-to-buffer buffer))))
+
+(defun jag/agent-shell--prompt-and-switch (prompt buffers empty-message)
+  "Prompt for one of BUFFERS using PROMPT, then switch to it.
+
+Raises a `user-error' with EMPTY-MESSAGE when BUFFERS is empty."
+  (unless buffers
+    (user-error "%s" empty-message))
+  (let* ((alist (mapcar (lambda (b) (cons (jag/agent-shell--candidate-label b) b)) buffers))
+         (labeled (jag/agent-shell--uniquify-candidates alist))
+         (choice (completing-read prompt (mapcar #'car labeled) nil t))
+         (buffer (cdr (assoc choice labeled))))
+    (jag/agent-shell--display-buffer buffer)))
+
+(defun jag/agent-shell-switch-session ()
+  "Switch to a live `agent-shell' buffer chosen via `completing-read'."
+  (interactive)
+  (jag/agent-shell--prompt-and-switch
+   "Active agent session: "
+   (jag/agent-shell--live-buffers)
+   "No active agent-shell sessions"))
+
+(defun jag/agent-shell-switch-project-session ()
+  "Switch to a live `agent-shell' buffer in the current project."
+  (interactive)
+  (let* ((current-root (jag/agent-shell--current-launch-project-root))
+         (matches (and current-root
+                       (seq-filter (lambda (buffer)
+                                     (let ((root (jag/agent-shell--buffer-launch-project-root buffer)))
+                                       (and root (string= root current-root))))
+                                   (jag/agent-shell--live-buffers))))
+         (label (and current-root
+                     (file-name-nondirectory (directory-file-name current-root)))))
+    (jag/agent-shell--prompt-and-switch
+     (format "Project session [%s]: " (or label "?"))
+     matches
+     (format "No active agent-shell sessions in project %s" (or label "(unknown)")))))
+
+(defun jag/agent-shell-switch-workspace-session ()
+  "Switch to a live `agent-shell' buffer in the current Doom workspace."
+  (interactive)
+  (let* ((workspace (jag/agent-shell--current-workspace-name))
+         (matches (seq-filter
+                   (lambda (buffer)
+                     (with-current-buffer buffer
+                       (or (and workspace
+                                jag/agent-shell-launch-workspace-name
+                                (string= workspace jag/agent-shell-launch-workspace-name))
+                           (and workspace
+                                (fboundp 'persp-get-by-name)
+                                (fboundp 'persp-contain-buffer-p)
+                                (when-let ((persp (ignore-errors (persp-get-by-name workspace))))
+                                  (ignore-errors (persp-contain-buffer-p buffer persp)))))))
+                   (jag/agent-shell--live-buffers))))
+    (jag/agent-shell--prompt-and-switch
+     (format "Workspace session [%s]: " (or workspace "?"))
+     matches
+     (format "No active agent-shell sessions in workspace %s" (or workspace "(unknown)")))))
+#+end_src
+
+#+RESULTS:
+: jag/agent-shell-switch-workspace-session
+
 *** Agent Shell Configuration
 Configure ACP-backed Claude and Codex agents. Pi is temporarily disabled because streaming through `agent-shell` can freeze Emacs.
 
@@ -761,6 +964,7 @@ Configure ACP-backed Claude and Codex agents. Pi is temporarily disabled because
         (agent-shell-make-environment-variables :inherit-env t))
 
   (jag/agent-shell-enable-better-tool-labels)
+  (jag/agent-shell-enable-active-session-management)
 
   (setq agent-shell-agent-configs
         (list (agent-shell-anthropic-make-claude-code-config)
@@ -788,6 +992,9 @@ Configure ACP-backed Claude and Codex agents. Pi is temporarily disabled because
       :desc "Agent shell compose prompt" "j a e" #'jag/agent-shell-prompt-compose-bottom
       :desc "Agent shell Pi disabled" "j a p" #'jag/agent-shell-pi-disabled
       :desc "Agent shell queue request" "j a q" #'agent-shell-queue-request
+      :desc "Agent shell switch session" "j a s" #'jag/agent-shell-switch-session
+      :desc "Agent shell switch project session" "j a S" #'jag/agent-shell-switch-project-session
+      :desc "Agent shell switch workspace session" "j a w" #'jag/agent-shell-switch-workspace-session
       :desc "Agent shell Codex" "j a x" #'agent-shell-openai-start-codex)
 #+end_src
 

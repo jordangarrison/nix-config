@@ -737,7 +737,7 @@ STATE and TOOL-CALL-ID are passed through to
 : jag/agent-shell-enable-better-tool-labels
 
 *** Agent Shell Configuration
-Configure ACP-backed Claude, Codex, and Pi agents.
+Configure ACP-backed Claude and Codex agents. Pi is temporarily disabled because streaming through `agent-shell` can freeze Emacs.
 
 #+begin_src emacs-lisp
 (require 'acp)
@@ -753,24 +753,23 @@ Configure ACP-backed Claude, Codex, and Pi agents.
         agent-shell-anthropic-default-session-mode-id "bypassPermissions"
         agent-shell-openai-codex-acp-command '("codex-acp")
         agent-shell-openai-default-session-mode-id "full-access"
-        agent-shell-pi-acp-command '("pi-acp")
         agent-shell-anthropic-claude-environment
         (agent-shell-make-environment-variables
          :inherit-env t
          "CLAUDE_CODE_EXECUTABLE" (or (executable-find "claude") "claude"))
         agent-shell-openai-codex-environment
-        (agent-shell-make-environment-variables :inherit-env t)
-        agent-shell-pi-environment
         (agent-shell-make-environment-variables :inherit-env t))
 
   (jag/agent-shell-enable-better-tool-labels)
 
   (setq agent-shell-agent-configs
-        (append
-         (list (agent-shell-anthropic-make-claude-code-config)
-               (agent-shell-openai-make-codex-config))
-         (when (executable-find "pi-acp")
-           (list (agent-shell-pi-make-agent-config))))))
+        (list (agent-shell-anthropic-make-claude-code-config)
+              (agent-shell-openai-make-codex-config))))
+
+(defun jag/agent-shell-pi-disabled ()
+  "Explain that Pi is temporarily disabled in `agent-shell'."
+  (interactive)
+  (user-error "Agent Shell Pi is temporarily disabled; use Claude or Codex for now"))
 
 (defun jag/agent-shell-prompt-compose-bottom ()
   "Open `agent-shell' prompt compose in a bottom side window."
@@ -787,7 +786,7 @@ Configure ACP-backed Claude, Codex, and Pi agents.
       :desc "Agent shell" "j a a" #'agent-shell
       :desc "Agent shell Claude" "j a c" #'agent-shell-anthropic-start-claude-code
       :desc "Agent shell compose prompt" "j a e" #'jag/agent-shell-prompt-compose-bottom
-      :desc "Agent shell Pi" "j a p" #'agent-shell-pi-start-agent
+      :desc "Agent shell Pi disabled" "j a p" #'jag/agent-shell-pi-disabled
       :desc "Agent shell queue request" "j a q" #'agent-shell-queue-request
       :desc "Agent shell Codex" "j a x" #'agent-shell-openai-start-codex)
 #+end_src

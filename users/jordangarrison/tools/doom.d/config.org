@@ -1082,14 +1082,14 @@ pi-implementer without replacing the session layer.")
     (replace-regexp-in-string "[^[:alnum:]_.-]+" "-" raw)))
 
 (defun jag/agent-vterm--session-buffer-name (agent-name workspace project-root)
-  "Return stable vterm session buffer name for AGENT-NAME."
+  "Return a unique vterm session buffer name for AGENT-NAME."
   (let* ((project-name (and project-root
                             (file-name-nondirectory
                              (directory-file-name project-root))))
          (context (jag/agent-vterm--safe-name-part
                    workspace
                    (or project-name "global"))))
-    (format "*agent:%s:%s*" context agent-name)))
+    (generate-new-buffer-name (format "*agent:%s:%s*" context agent-name))))
 
 (defun jag/agent-vterm--register-buffer-in-workspace (buffer workspace-name)
   "Add BUFFER to the Doom workspace named WORKSPACE-NAME, if possible."
@@ -1122,15 +1122,6 @@ pi-implementer without replacing the session layer.")
     (or jag/agent-vterm-launch-project-root
         (jag/agent-vterm--normalize-dir default-directory))))
 
-(defun jag/agent-vterm--matching-session (agent-name workspace)
-  "Return live workspace-local session buffer for AGENT-NAME and WORKSPACE."
-  (seq-find (lambda (buffer)
-              (with-current-buffer buffer
-                (and (string= agent-name jag/agent-vterm-agent-name)
-                     (equal 'workspace jag/agent-vterm-scope)
-                     (equal workspace jag/agent-vterm-launch-workspace-name))))
-            (jag/agent-vterm--live-buffers)))
-
 (defun jag/agent-vterm--remember-buffer (buffer)
   "Remember BUFFER as the most recently used vterm agent session."
   (when (jag/agent-vterm--live-buffer-p buffer)
@@ -1149,8 +1140,8 @@ pi-implementer without replacing the session layer.")
   (jag/agent-vterm--remember-buffer buffer)
   (pop-to-buffer buffer))
 
-(defun jag/agent-vterm-start-or-switch (agent-name)
-  "Start or switch to workspace-local vterm agent AGENT-NAME."
+(defun jag/agent-vterm-start (agent-name)
+  "Start a new workspace-local vterm agent AGENT-NAME."
   (interactive
    (list (completing-read "Agent: "
                           (jag/agent-vterm--available-agent-names)
@@ -1159,52 +1150,50 @@ pi-implementer without replacing the session layer.")
          (scope (jag/agent-vterm--agent-scope agent-name))
          (workspace (jag/agent-vterm--current-workspace-name))
          (project-root (jag/agent-vterm--current-project-root))
-         (default-dir (jag/agent-vterm--normalize-dir default-directory))
-         (existing (jag/agent-vterm--matching-session agent-name workspace)))
+         (default-dir (jag/agent-vterm--normalize-dir default-directory)))
     (jag/agent-vterm--ensure-executable command)
-    (if existing
-        (jag/agent-vterm--display-buffer existing)
-      (require 'vterm)
-      (let* ((buffer-name (jag/agent-vterm--session-buffer-name
-                           agent-name workspace project-root))
-             (default-directory (or project-root default-dir default-directory))
-             (buffer (vterm buffer-name)))
-        (with-current-buffer buffer
-          (setq-local jag/agent-vterm-agent-name agent-name)
-          (setq-local jag/agent-vterm-command command)
-          (setq-local jag/agent-vterm-launch-workspace-name workspace)
-          (setq-local jag/agent-vterm-launch-project-root project-root)
-          (setq-local jag/agent-vterm-launch-default-directory default-dir)
-          (setq-local jag/agent-vterm-scope scope)
-          (vterm-send-string (jag/agent-vterm--shell-command command))
-          (vterm-send-return))
-        (jag/agent-vterm--register-buffer-in-workspace buffer workspace)
-        (jag/agent-vterm--display-buffer buffer)))))
+    (require 'vterm)
+    (let* ((buffer-name (jag/agent-vterm--session-buffer-name
+                         agent-name workspace project-root))
+           (default-directory (or project-root default-dir default-directory))
+           (buffer (vterm buffer-name)))
+      (with-current-buffer buffer
+        (setq-local jag/agent-vterm-agent-name agent-name)
+        (setq-local jag/agent-vterm-command command)
+        (setq-local jag/agent-vterm-launch-workspace-name workspace)
+        (setq-local jag/agent-vterm-launch-project-root project-root)
+        (setq-local jag/agent-vterm-launch-default-directory default-dir)
+        (setq-local jag/agent-vterm-scope scope)
+        (vterm-send-string (jag/agent-vterm--shell-command command))
+        (vterm-send-return))
+      (jag/agent-vterm--register-buffer-in-workspace buffer workspace)
+      (jag/agent-vterm--display-buffer buffer)
+      buffer)))
 
-(defun jag/agent-vterm-start-or-switch-claude ()
-  "Start or switch to the current workspace's Claude vterm agent."
+(defun jag/agent-vterm-start-claude ()
+  "Start a new Claude vterm agent in the current workspace."
   (interactive)
-  (jag/agent-vterm-start-or-switch "claude"))
+  (jag/agent-vterm-start "claude"))
 
-(defun jag/agent-vterm-start-or-switch-codex ()
-  "Start or switch to the current workspace's Codex vterm agent."
+(defun jag/agent-vterm-start-codex ()
+  "Start a new Codex vterm agent in the current workspace."
   (interactive)
-  (jag/agent-vterm-start-or-switch "codex"))
+  (jag/agent-vterm-start "codex"))
 
-(defun jag/agent-vterm-start-or-switch-pi ()
-  "Start or switch to the current workspace's Pi vterm agent."
+(defun jag/agent-vterm-start-pi ()
+  "Start a new Pi vterm agent in the current workspace."
   (interactive)
-  (jag/agent-vterm-start-or-switch "pi"))
+  (jag/agent-vterm-start "pi"))
 
-(defun jag/agent-vterm-start-or-switch-opencode ()
-  "Start or switch to the current workspace's OpenCode vterm agent."
+(defun jag/agent-vterm-start-opencode ()
+  "Start a new OpenCode vterm agent in the current workspace."
   (interactive)
-  (jag/agent-vterm-start-or-switch "opencode"))
+  (jag/agent-vterm-start "opencode"))
 
 (defun jag/agent-vterm-choose ()
-  "Choose a vterm agent to start or switch in the current workspace."
+  "Choose a vterm agent to start in the current workspace."
   (interactive)
-  (jag/agent-vterm-start-or-switch
+  (jag/agent-vterm-start
    (completing-read "Agent: "
                     (jag/agent-vterm--available-agent-names)
                     nil t)))
@@ -1336,10 +1325,7 @@ pi-implementer without replacing the session layer.")
   (let ((agent-name (completing-read "Start agent for region: "
                                      (jag/agent-vterm--available-agent-names)
                                      nil t)))
-    (jag/agent-vterm-start-or-switch agent-name)
-    (jag/agent-vterm--matching-session
-     agent-name
-     (jag/agent-vterm--current-workspace-name))))
+    (jag/agent-vterm-start agent-name)))
 
 (defun jag/agent-vterm--prompt-for-target-or-start (prompt buffers empty-message)
   "Prompt for a target from BUFFERS, or start an agent when BUFFERS is nil."
@@ -1513,10 +1499,10 @@ Configure optional ACP-backed Claude and Codex agents. The primary interactive w
       :desc "Agent choose" "j a a" #'jag/agent-vterm-choose
       "j a e" nil
       "j a q" nil
-      :desc "Agent Claude" "j a c" #'jag/agent-vterm-start-or-switch-claude
-      :desc "Agent OpenCode" "j a o" #'jag/agent-vterm-start-or-switch-opencode
-      :desc "Agent Pi" "j a p" #'jag/agent-vterm-start-or-switch-pi
-      :desc "Agent Codex" "j a x" #'jag/agent-vterm-start-or-switch-codex
+      :desc "New Claude agent" "j a c" #'jag/agent-vterm-start-claude
+      :desc "New OpenCode agent" "j a o" #'jag/agent-vterm-start-opencode
+      :desc "New Pi agent" "j a p" #'jag/agent-vterm-start-pi
+      :desc "New Codex agent" "j a x" #'jag/agent-vterm-start-codex
       :desc "Agent switch session" "j a s" #'jag/agent-vterm-switch-session
       :desc "Agent switch project session" "j a S" #'jag/agent-vterm-switch-project-session
       :desc "Agent switch workspace session" "j a w" #'jag/agent-vterm-switch-workspace-session

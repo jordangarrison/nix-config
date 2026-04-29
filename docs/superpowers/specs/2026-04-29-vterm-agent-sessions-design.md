@@ -56,35 +56,35 @@ These should be represented with a small internal registry-like data structure s
 
 ## Session Scope and Naming
 
-Default sessions are workspace-local. Starting Claude in the `nix-config` workspace creates or switches to a buffer like:
+Default sessions are workspace-local. Starting Claude in the `nix-config` workspace creates a new buffer like:
 
 ```text
 *agent:nix-config:claude*
 ```
 
-Starting Claude in another workspace creates a distinct session for that workspace. This keeps concurrent agents organized as more sessions accumulate.
+Starting Claude again in the same workspace creates another distinct session with Emacs' normal generated suffix, such as `*agent:nix-config:claude*<2>`. Starting Claude in another workspace creates a distinct session for that workspace. Switching is handled explicitly through the live-session selectors, which keeps concurrent agents organized as more sessions accumulate.
 
 If no Doom workspace name is available, the fallback session label should still be stable and readable, using project name or a generic workspace marker.
 
 ## Session Lifecycle
 
-The replacement bindings are start-or-switch commands:
+The replacement bindings are start-new-session commands:
 
-- `SPC j a c` starts or switches to the current workspace's Claude vterm session.
-- `SPC j a x` starts or switches to the current workspace's Codex vterm session.
-- `SPC j a p` starts or switches to the current workspace's Pi vterm session.
+- `SPC j a c` starts a new Claude vterm session in the current workspace.
+- `SPC j a x` starts a new Codex vterm session in the current workspace.
+- `SPC j a p` starts a new Pi vterm session in the current workspace.
 
 Starting a session should:
 
 1. Capture the current Doom workspace name.
 2. Capture the current project root when available.
 3. Capture the current `default-directory`.
-4. Create a vterm buffer with the stable session name.
+4. Create a vterm buffer with a readable, unique session name.
 5. Start the agent command in that vterm.
 6. Store the metadata as buffer-local variables.
 7. Ensure the buffer participates naturally in Doom workspace switching where possible.
 
-Switching should reuse a live matching session rather than creating a duplicate.
+Switching should only happen through the live-session selectors, not through the agent launch bindings.
 
 ## Session Selection
 
@@ -146,9 +146,9 @@ Initial binding changes:
 
 | Binding | New behavior |
 | --- | --- |
-| `SPC j a c` | Start/switch workspace-local Claude vterm agent |
-| `SPC j a x` | Start/switch workspace-local Codex vterm agent |
-| `SPC j a p` | Start/switch workspace-local Pi vterm agent |
+| `SPC j a c` | Start a new workspace-local Claude vterm agent |
+| `SPC j a x` | Start a new workspace-local Codex vterm agent |
+| `SPC j a p` | Start a new workspace-local Pi vterm agent |
 | `SPC j a t` | Paste selected region with context into a target vterm agent, without submitting |
 
 Existing `agent-shell` bindings that do not conflict may remain for now. The old generic region-to-`*vterm*` helper should be removed or replaced so `SPC j a t` is no longer ambiguous.
@@ -159,7 +159,7 @@ Existing `agent-shell` bindings that do not conflict may remain for now. The old
 - If no region is active for `SPC j a t`, show a clear `user-error`.
 - If a recorded session buffer is dead, ignore it in selectors.
 - If project root detection fails, use `default-directory` for session launch context and absolute file paths for sends.
-- If a target vterm process is no longer live, either restart through the start-or-switch path or report that the session must be restarted.
+- If a target vterm process is no longer live, either start a new session or report that the session must be restarted.
 
 ## Testing and Verification
 
@@ -170,9 +170,9 @@ Use the repo's Doom Emacs guidance for verification:
 3. Confirm the new functions are defined after loading the config.
 4. Confirm the replacement keybindings resolve to vterm-agent commands.
 5. Manually verify, or provide eval checks for, these flows:
-   - `SPC j a c` creates or switches to a workspace-local Claude session.
-   - `SPC j a x` creates or switches to a workspace-local Codex session.
-   - `SPC j a p` creates or switches to a workspace-local Pi session.
+   - `SPC j a c` creates a new workspace-local Claude session each time.
+   - `SPC j a x` creates a new workspace-local Codex session each time.
+   - `SPC j a p` creates a new workspace-local Pi session each time.
    - `SPC j a t` formats a region with project root, file, lines, and content, then pastes without submitting.
 
 Run `doom sync` only if package declarations or generated config require it. Since this design does not add packages, implementation should not require `doom sync` unless later changes alter package declarations.

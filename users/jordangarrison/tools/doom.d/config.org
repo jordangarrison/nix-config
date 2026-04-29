@@ -881,14 +881,18 @@ adds the buffer to the launching Doom workspace."
 (defun jag/agent-shell--prompt-and-switch (prompt buffers empty-message)
   "Prompt for one of BUFFERS using PROMPT, then switch to it.
 
-Raises a `user-error' with EMPTY-MESSAGE when BUFFERS is empty."
+Raises a `user-error' with EMPTY-MESSAGE when BUFFERS is empty.
+Quitting the prompt aborts cleanly without entering the debugger."
   (unless buffers
     (user-error "%s" empty-message))
   (let* ((alist (mapcar (lambda (b) (cons (jag/agent-shell--candidate-label b) b)) buffers))
          (labeled (jag/agent-shell--uniquify-candidates alist))
-         (choice (completing-read prompt (mapcar #'car labeled) nil t))
-         (buffer (cdr (assoc choice labeled))))
-    (jag/agent-shell--display-buffer buffer)))
+         (choice (condition-case nil
+                     (completing-read prompt (mapcar #'car labeled) nil t)
+                   (quit nil)))
+         (buffer (and choice (cdr (assoc choice labeled)))))
+    (when buffer
+      (jag/agent-shell--display-buffer buffer))))
 
 (defun jag/agent-shell-switch-session ()
   "Switch to a live `agent-shell' buffer chosen via `completing-read'."

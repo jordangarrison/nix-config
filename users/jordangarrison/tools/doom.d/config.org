@@ -236,7 +236,19 @@ Special configuration for vterm compilation on macOS with Nix, ensuring proper c
 
   (map! :map vterm-mode-map
         :desc "Send LF to vterm" "S-<return>" #'jag/vterm-send-lf
-        :desc "Send LF to vterm" "C-j" #'jag/vterm-send-lf))
+        :desc "Send LF to vterm" "C-j" #'jag/vterm-send-lf)
+
+  ;; Evil insert state has higher precedence than `vterm-mode-map', so bind
+  ;; these there too.
+  (evil-define-key 'insert vterm-mode-map
+    (kbd "S-<return>") #'jag/vterm-send-lf
+    (kbd "C-j") #'jag/vterm-send-lf)
+
+  ;; Keep Escape for Emacs/Evil navigation in vterm. Literal ESC for terminal
+  ;; programs is available via `C-c C-e' below.
+  (define-key vterm-mode-map (kbd "<escape>") #'evil-normal-state)
+  (evil-define-key 'insert vterm-mode-map
+    (kbd "<escape>") #'evil-normal-state))
 
 ;; Set environment variables before vterm loads
 (when (eq system-type 'darwin)

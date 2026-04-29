@@ -225,7 +225,18 @@ Special configuration for vterm compilation on macOS with Nix, ensuring proper c
   (when (eq system-type 'darwin)
     (setenv "CC" "clang")
     (setenv "CXX" "clang++")
-    (setq vterm-module-cmake-args "-DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++")))
+    (setq vterm-module-cmake-args "-DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++"))
+
+  ;; Terminal agents use a literal LF for multiline input. Bind this inside
+  ;; vterm because external terminal emulator keybindings do not apply there.
+  (defun jag/vterm-send-lf ()
+    "Send a literal LF to vterm for multiline terminal-agent prompts."
+    (interactive)
+    (vterm-send-string "\n"))
+
+  (map! :map vterm-mode-map
+        :desc "Send LF to vterm" "S-<return>" #'jag/vterm-send-lf
+        :desc "Send LF to vterm" "C-j" #'jag/vterm-send-lf))
 
 ;; Set environment variables before vterm loads
 (when (eq system-type 'darwin)

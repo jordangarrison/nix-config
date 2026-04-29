@@ -1395,40 +1395,19 @@ Configure ACP-backed Claude and Codex agents. Pi is temporarily disabled because
 
 (map! :leader
       :desc "Agent shell" "j a a" #'agent-shell
-      :desc "Agent shell Claude" "j a c" #'agent-shell-anthropic-start-claude-code
       :desc "Agent shell compose prompt" "j a e" #'jag/agent-shell-prompt-compose-bottom
-      :desc "Agent shell Pi disabled" "j a p" #'jag/agent-shell-pi-disabled
       :desc "Agent shell queue request" "j a q" #'agent-shell-queue-request
-      :desc "Agent shell switch session" "j a s" #'jag/agent-shell-switch-session
-      :desc "Agent shell switch project session" "j a S" #'jag/agent-shell-switch-project-session
-      :desc "Agent shell switch workspace session" "j a w" #'jag/agent-shell-switch-workspace-session
-      :desc "Agent shell Codex" "j a x" #'agent-shell-openai-start-codex)
+      :desc "Vterm agent Claude" "j a c" #'jag/agent-vterm-start-or-switch-claude
+      :desc "Vterm agent Pi" "j a p" #'jag/agent-vterm-start-or-switch-pi
+      :desc "Vterm agent Codex" "j a x" #'jag/agent-vterm-start-or-switch-codex
+      :desc "Vterm agent switch session" "j a s" #'jag/agent-vterm-switch-session
+      :desc "Vterm agent switch project session" "j a S" #'jag/agent-vterm-switch-project-session
+      :desc "Vterm agent switch workspace session" "j a w" #'jag/agent-vterm-switch-workspace-session
+      :desc "Send region to vterm agent" "j a t" #'jag/agent-vterm-send-region)
 #+end_src
 
 #+RESULTS:
 : agent-shell-openai-start-codex
-
-** VTerm Integration
-Functions to send code regions to vterm for quick execution.
-
-#+begin_src emacs-lisp
-(defun jag/send-to-vterm (text)
-  "Send TEXT to vterm buffer."
-  (interactive "MText to send: ")
-  (let ((vterm-buf (get-buffer "*vterm*")))
-    (if vterm-buf
-        (with-current-buffer vterm-buf
-          (vterm-send-string text)))
-    (message "No *vterm* buffer found")))
-
-(defun jag/send-region-to-vterm (start end)
-  "Send the region between START and END to the current vterm buffer."
-  (interactive "r")
-  (let ((text (buffer-substring-no-properties start end)))
-    (jag/send-to-vterm text)))
-
-(map! :leader :desc "Send code to vterm" "j a t" #'jag/send-region-to-vterm)
-#+end_src
 
 ** ChatGPT Integration
 

@@ -1269,7 +1269,7 @@ pi-implementer without replacing the session layer.")
       (car workspace-buffers))
      ((> (length workspace-buffers) 1)
       (jag/agent-vterm--prompt-for-buffer
-       "Send region to vterm agent: "
+       "Send region to agent: "
        workspace-buffers
        "No active vterm agent sessions in this workspace"))
      (t
@@ -1348,8 +1348,8 @@ pi-implementer without replacing the session layer.")
     (vterm-send-return)))
 #+end_src
 
-*** Agent Shell Configuration
-Configure ACP-backed Claude and Codex agents. Pi is temporarily disabled because streaming through `agent-shell` can freeze Emacs.
+*** Agent Shell Compatibility
+Configure optional ACP-backed Claude and Codex agents. The primary interactive workflow uses vterm agent sessions; `agent-shell` remains installed for compatibility.
 
 #+begin_src emacs-lisp
 (require 'acp)
@@ -1396,20 +1396,17 @@ Configure ACP-backed Claude and Codex agents. Pi is temporarily disabled because
     (call-interactively #'agent-shell-prompt-compose)))
 
 (map! :leader
-      :desc "Agent shell" "j a a" #'agent-shell
-      :desc "Agent shell compose prompt" "j a e" #'jag/agent-shell-prompt-compose-bottom
-      :desc "Agent shell queue request" "j a q" #'agent-shell-queue-request
-      :desc "Vterm agent Claude" "j a c" #'jag/agent-vterm-start-or-switch-claude
-      :desc "Vterm agent Pi" "j a p" #'jag/agent-vterm-start-or-switch-pi
-      :desc "Vterm agent Codex" "j a x" #'jag/agent-vterm-start-or-switch-codex
-      :desc "Vterm agent switch session" "j a s" #'jag/agent-vterm-switch-session
-      :desc "Vterm agent switch project session" "j a S" #'jag/agent-vterm-switch-project-session
-      :desc "Vterm agent switch workspace session" "j a w" #'jag/agent-vterm-switch-workspace-session
-      :desc "Send region to vterm agent" "j a t" #'jag/agent-vterm-send-region)
+      :desc "Legacy agent-shell" "j a a" #'agent-shell
+      :desc "Legacy agent-shell compose prompt" "j a e" #'jag/agent-shell-prompt-compose-bottom
+      "j a q" nil
+      :desc "Agent Claude" "j a c" #'jag/agent-vterm-start-or-switch-claude
+      :desc "Agent Pi" "j a p" #'jag/agent-vterm-start-or-switch-pi
+      :desc "Agent Codex" "j a x" #'jag/agent-vterm-start-or-switch-codex
+      :desc "Agent switch session" "j a s" #'jag/agent-vterm-switch-session
+      :desc "Agent switch project session" "j a S" #'jag/agent-vterm-switch-project-session
+      :desc "Agent switch workspace session" "j a w" #'jag/agent-vterm-switch-workspace-session
+      :desc "Send region to agent" "j a t" #'jag/agent-vterm-send-region)
 #+end_src
-
-#+RESULTS:
-: agent-shell-openai-start-codex
 
 ** ChatGPT Integration
 

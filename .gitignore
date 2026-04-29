@@ -12,3 +12,6 @@ result/
 .grove-start.sh
 .grove-setup.sh
 /.agent-shell/
+
+# Doom Emacs literate config — generated from config.org
+users/jordangarrison/tools/doom.d/config.el

@@ -1133,11 +1133,25 @@ pi-implementer without replacing the session layer.")
                  jag/agent-vterm-last-workspace-buffers))))
   buffer)
 
+(defun jag/agent-vterm--select-buffer-workspace (buffer)
+  "Reselect BUFFER's launch workspace when it differs from the current one."
+  (when-let* ((workspace (and (buffer-live-p buffer)
+                              (with-current-buffer buffer
+                                jag/agent-vterm-launch-workspace-name))))
+    (when (and (stringp workspace)
+               (not (string-empty-p workspace))
+               (fboundp '+workspace-switch)
+               (not (equal workspace (jag/agent-vterm--current-workspace-name))))
+      (jag/agent-vterm--register-buffer-in-workspace buffer workspace)
+      (ignore-errors
+        (+workspace-switch workspace)))))
+
 (defun jag/agent-vterm--display-buffer (buffer)
-  "Display BUFFER as the active window."
+  "Display BUFFER as the active window, reselecting its launch workspace first."
   (unless (buffer-live-p buffer)
     (user-error "Vterm agent buffer is no longer live"))
   (jag/agent-vterm--remember-buffer buffer)
+  (jag/agent-vterm--select-buffer-workspace buffer)
   (pop-to-buffer buffer))
 
 (defun jag/agent-vterm-start (agent-name)

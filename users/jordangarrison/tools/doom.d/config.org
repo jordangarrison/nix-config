@@ -211,9 +211,31 @@ Setting up project management with Projectile, focused on the development direct
 ** Mouse and Clipboard Integration
 Enabling mouse support in terminal and system clipboard integration.
 
+Only enable =xclip-mode= for TTY frames. The =emacs-pgtk= GUI handles the
+Wayland clipboard natively, and routing it through =xclip= (which uses
+XWayland) breaks =p= / =P= because XWayland's clipboard is separate from
+=wl-clipboard=. With =services.emacs.enable= we run a daemon, so use a frame
+hook instead of a one-shot init check.
+
+For TTY frames, point =xclip= at =wl-copy= so terminal Emacs shares the same
+clipboard as native Wayland apps.
+
 #+begin_src emacs-lisp
-(xterm-mouse-mode 1)
-(xclip-mode 1)
+(defun jag/maybe-enable-xclip (&optional frame)
+  "Enable `xclip-mode' only in TTY frames; pgtk handles GUI clipboard natively."
+  (with-selected-frame (or frame (selected-frame))
+    (unless (display-graphic-p)
+      (unless (bound-and-true-p xterm-mouse-mode) (xterm-mouse-mode 1))
+      (unless (bound-and-true-p xclip-mode) (xclip-mode 1)))))
+
+(add-hook 'after-make-frame-functions #'jag/maybe-enable-xclip)
+(jag/maybe-enable-xclip)
+
+(after! xclip
+  (when (and (eq system-type 'gnu/linux)
+             (getenv "WAYLAND_DISPLAY"))
+    (setq xclip-method 'wl-copy
+          xclip-program "wl-copy")))
 #+end_src
 
 ** VTerm Setup for macOS

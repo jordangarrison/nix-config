@@ -1033,10 +1033,26 @@ pi-implementer without replacing the session layer.")
              (bound-and-true-p persp-mode))
     (ignore-errors (+workspace-current-name))))
 
+(defun jag/agent-vterm--nearest-project-marker-root (&optional directory)
+  "Return nearest root at or above DIRECTORY marked by `.projectile' or `.git'.
+
+This keeps `.projectile' useful as an override while still allowing closer Git
+worktrees, whose `.git' marker is usually a file, to win over parent roots."
+  (let ((dir (jag/agent-vterm--normalize-dir (or directory default-directory)))
+        found)
+    (while (and dir (not found))
+      (if (or (file-exists-p (expand-file-name ".projectile" dir))
+              (file-exists-p (expand-file-name ".git" dir)))
+          (setq found dir)
+        (let ((parent (file-name-directory (directory-file-name dir))))
+          (setq dir (unless (equal parent dir) parent)))))
+    found))
+
 (defun jag/agent-vterm--current-project-root ()
   "Return normalized project root for the current launch context."
   (jag/agent-vterm--normalize-dir
-   (or (and (fboundp 'doom-project-root) (doom-project-root))
+   (or (jag/agent-vterm--nearest-project-marker-root)
+       (and (fboundp 'doom-project-root) (doom-project-root))
        default-directory)))
 
 (defun jag/agent-vterm--agent-definition (agent-name)

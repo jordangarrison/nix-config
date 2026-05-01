@@ -17,12 +17,12 @@ nh os switch .#<hostname>
 
 **Available NixOS hosts:**
 
-| Host | Hardware | Description |
-|------|----------|-------------|
-| `endeavour` | MSI B550-A Pro, AMD GPU | Main desktop workstation with GNOME, Hyprland, and Niri |
+| Host          | Hardware                      | Description                                                                                               |
+|---------------|-------------------------------|-----------------------------------------------------------------------------------------------------------|
+| `endeavour`   | MSI B550-A Pro, AMD GPU       | Main desktop workstation with GNOME, Hyprland, and Niri                                                   |
 | `opportunity` | Framework 12 (13th Gen Intel) | Laptop with GNOME, Hyprland, and Niri. **Tablet mode enabled** (touchscreen gestures, auto-rotation, OSK) |
-| `voyager` | MacBook Pro 12,1 | MacBook Pro running NixOS |
-| `discovery` | AMD-based system | Minimal GNOME setup |
+| `voyager`     | MacBook Pro 12,1              | MacBook Pro running NixOS                                                                                 |
+| `discovery`   | AMD-based system              | Minimal GNOME setup                                                                                       |
 
 ### macOS (nix-darwin)
 
@@ -32,9 +32,10 @@ nh darwin switch .#<hostname>
 
 **Available Darwin hosts:**
 
-| Host | Description |
-|------|-------------|
+| Host         | Description                                |
+|--------------|--------------------------------------------|
 | `H952L3DPHH` | Work MacBook with Home Manager integration |
+|              |                                            |
 
 ### WSL/Ubuntu (Home Manager only)
 
@@ -44,8 +45,8 @@ nh home switch .#<config>
 
 **Available Home Manager configurations:**
 
-| Config | Description |
-|--------|-------------|
+| Config                    | Description                 |
+|---------------------------|-----------------------------|
 | `jordangarrison@normandy` | WSL/Ubuntu standalone setup |
 
 ## Directory Structure
@@ -96,11 +97,11 @@ nh home switch .#<config>
 
 The configuration supports multiple desktop environments, selectable at login:
 
-| DE | Description | Hosts |
-|----|-------------|-------|
-| **GNOME** | Traditional desktop with extensions | All NixOS hosts |
-| **Hyprland** | Dynamic tiling Wayland compositor | endeavour, opportunity, voyager |
-| **Niri** | Scrollable-tiling Wayland compositor | endeavour |
+| DE           | Description                          | Hosts                           |
+|--------------|--------------------------------------|---------------------------------|
+| **GNOME**    | Traditional desktop with extensions  | All NixOS hosts                 |
+| **Hyprland** | Dynamic tiling Wayland compositor    | endeavour, opportunity, voyager |
+| **Niri**     | Scrollable-tiling Wayland compositor | endeavour                       |
 
 ## Managing the System
 

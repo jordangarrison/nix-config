@@ -192,6 +192,14 @@ Custom dashboard with a minimalist "Emacs" banner instead of the default ASCII a
 #+end_src
 
 * Editor Behavior
+** Debug on Quit
+Enable a backtrace whenever ~C-g~ is pressed. If the daemon hangs in elisp,
+~C-g~ produces a backtrace in =*Backtrace*= identifying what was running.
+
+#+begin_src emacs-lisp
+(setq debug-on-quit t)
+#+end_src
+
 ** Shell Prompt Recognition
 Configuring Emacs to properly recognize shell prompts for better shell integration.
 
@@ -1581,7 +1589,12 @@ Set up Claude Code for agentic development in emacs
 
 * Org Mode
 ** Readwise
-#+begin_src emacs-lisp
+Disabled 2026-05-05: ~org-readwise-debug-level 1~ caused the package to dump
+the entire highlight payload through ~message~ on each sync, growing
+~*Messages*~ unbounded and bloating the daemon (29.7G peak before a freeze).
+Re-enable only after upstream stops echoing payload data, or set
+~org-readwise-debug-level 0~ if reactivating.
+#+begin_src emacs-lisp :tangle no
 (use-package! org-readwise
   :config
   ;; Set the output location for your highlights (buffer or file)

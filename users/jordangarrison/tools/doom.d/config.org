@@ -195,11 +195,11 @@ Custom dashboard with a minimalist "Emacs" banner instead of the default ASCII a
 ** Debug on Quit Toggle
 Provide a quick toggle for ~debug-on-quit~. Leaving it on globally makes every
 ~C-g~ / ~ESC~ in vertico (and elsewhere) drop a backtrace, which is too noisy.
-Use ~M-x jg/toggle-debug-on-quit~ before reproducing a daemon hang to capture a
+Use ~M-x jag/toggle-debug-on-quit~ before reproducing a daemon hang to capture a
 backtrace identifying what was running, then toggle it back off.
 
 #+begin_src emacs-lisp
-(defun jg/toggle-debug-on-quit ()
+(defun jag/toggle-debug-on-quit ()
   "Toggle `debug-on-quit' and report the new state."
   (interactive)
   (setq debug-on-quit (not debug-on-quit))

@@ -192,12 +192,18 @@ Custom dashboard with a minimalist "Emacs" banner instead of the default ASCII a
 #+end_src
 
 * Editor Behavior
-** Debug on Quit
-Enable a backtrace whenever ~C-g~ is pressed. If the daemon hangs in elisp,
-~C-g~ produces a backtrace in =*Backtrace*= identifying what was running.
+** Debug on Quit Toggle
+Provide a quick toggle for ~debug-on-quit~. Leaving it on globally makes every
+~C-g~ / ~ESC~ in vertico (and elsewhere) drop a backtrace, which is too noisy.
+Use ~M-x jg/toggle-debug-on-quit~ before reproducing a daemon hang to capture a
+backtrace identifying what was running, then toggle it back off.
 
 #+begin_src emacs-lisp
-(setq debug-on-quit t)
+(defun jg/toggle-debug-on-quit ()
+  "Toggle `debug-on-quit' and report the new state."
+  (interactive)
+  (setq debug-on-quit (not debug-on-quit))
+  (message "debug-on-quit %s" (if debug-on-quit "ON" "off")))
 #+end_src
 
 ** Shell Prompt Recognition

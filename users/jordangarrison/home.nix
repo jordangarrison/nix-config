@@ -73,7 +73,7 @@ in
   # Environment variables
   home.sessionVariables = {
     DEV_PATH = "$HOME/dev";
-    EDITOR = "${pkgs.neovim}/bin/nvim";
+    EDITOR = "${emacsPackage}/bin/emacsclient -nw -a ''";
   };
 
   # Let Home Manager install and manage itself.

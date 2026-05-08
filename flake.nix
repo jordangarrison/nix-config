@@ -52,6 +52,10 @@
       url = "github:jordangarrison/panko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    drawl = {
+      url = "github:jordangarrison/drawl";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     lakeline-cg = {
       url = "git+ssh://forgejo@forgejo.jordangarrison.dev/jordangarrison/cg.git";
     };
@@ -85,6 +89,7 @@
       nix-zed-extensions,
       greenlight,
       panko,
+      drawl,
       lakeline-cg,
       grove,
       warp-preview,
@@ -115,6 +120,7 @@
             ./modules/nixos/postgres.nix
             ./modules/nixos/greenlight.nix
             ./modules/nixos/panko.nix
+            ./modules/nixos/drawl.nix
             ./modules/nixos/cloudflared.nix
             ./modules/nixos/nginx.nix
             ./modules/nixos/jellyfin.nix
@@ -135,6 +141,7 @@
             ./modules/home/defaults.nix
             greenlight.nixosModules.default
             panko.nixosModules.default
+            drawl.nixosModules.default
             lakeline-cg.nixosModules.default
             {
               # Configure users for endeavour

@@ -1,7 +1,7 @@
 { ... }:
 
 {
-  # Cloudflare Tunnel for public internet access to panko.
+  # Cloudflare Tunnel for public internet access to panko and drawl.
   # Tunnel created with: cloudflared tunnel create panko
   # Credentials file must be readable by the cloudflared user (0600, cloudflared:cloudflared).
   services.cloudflared = {
@@ -11,6 +11,7 @@
       default = "http_status:404";
       ingress = {
         "panko.jordangarrison.dev" = "http://localhost:4001";
+        "drawl.jordangarrison.dev" = "http://localhost:5555";
       };
     };
   };

@@ -40,9 +40,10 @@
 - [[#aillm-integration][AI/LLM Integration]]
   - [[#integration-with-various-ai-and-language-model-services-for-enhanced-development-capabilities][Integration with various AI and language model services for enhanced development capabilities.]]
   - [[#agent-shell][Agent Shell]]
-  - [[#vterm-integration][VTerm Integration]]
+  - [[#vterm-agent-sessions][VTerm Agent Sessions]]
   - [[#chatgpt-integration][ChatGPT Integration]]
   - [[#claude-code-ide][Claude Code IDE]]
+- [[#irc][IRC]]
 - [[#org-mode][Org Mode]]
   - [[#readwise][Readwise]]
 
@@ -1619,6 +1620,35 @@ Set up Claude Code for agentic development in emacs
   :config
   (claude-code-ide-emacs-tools-setup)) ; Optionally enable Emacs MCP tools
 (map! :leader :desc "Claude Code" "j c" #'claude-code-ide-menu)
+#+end_src
+
+* IRC
+Doom's =:app irc= module uses [[https://github.com/emacs-circe/circe][circe]] (not ERC). Connects to libera.chat
+over TLS and autojoins =#emacsatx=. Open with ~SPC o I~ (~=irc~).
+
+NickServ password is read from =~/.authinfo= when present:
+
+#+begin_example
+machine irc.libera.chat login jordangarrison password YOUR_NICKSERV_PASS
+#+end_example
+
+If no entry exists, circe still connects unauthenticated — fine for an
+unregistered nick. Register later with =/msg NickServ REGISTER <pw> <email>=.
+
+#+begin_src emacs-lisp
+(after! circe
+  (set-irc-server! "Libera.Chat"
+    `(:host "irc.libera.chat"
+      :port 6697
+      :tls t
+      :nick "jordangarrison"
+      :user "jordangarrison"
+      :realname "Jordan Garrison"
+      :sasl-username "jordangarrison"
+      :sasl-password ,(lambda (&rest _)
+                        (auth-source-pick-first-password
+                         :host "irc.libera.chat"))
+      :channels ("#emacsatx"))))
 #+end_src
 
 * Org Mode

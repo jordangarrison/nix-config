@@ -15,6 +15,7 @@
   - [[#frame-size-configuration][Frame Size Configuration]]
   - [[#dashboard-configuration][Dashboard Configuration]]
 - [[#editor-behavior][Editor Behavior]]
+  - [[#debug-on-quit-toggle][Debug on Quit Toggle]]
   - [[#shell-prompt-recognition][Shell Prompt Recognition]]
   - [[#projectile-configuration][Projectile Configuration]]
 - [[#terminal-configuration][Terminal Configuration]]
@@ -134,9 +135,12 @@ Using FiraCode Nerd Font for programming with ligatures and icon support.
 
 #+begin_src emacs-lisp
 (setq doom-font (font-spec :family "Fira Code"
-                           :size (if (member (system-name) '("endeavour" "opportunity")) 20 13)
+                           :size (if (member (system-name) '("endeavour" "opportunity")) 14 14)
                            :weight 'semibold))
 #+end_src
+
+#+RESULTS:
+: #<font-spec nil nil Fira\ Code nil nil semibold nil nil 15 nil nil nil nil>
 
 ** Line Numbers and Visual Elements
 Enabling absolute line numbers and configuring visual spacing.

@@ -223,20 +223,27 @@ Setting up project management with Projectile, focused on the development direct
 
 * Terminal Configuration
 ** Mouse and Clipboard Integration
-Enabling mouse support in terminal and system clipboard integration.
+Mouse support in TTY frames and system clipboard integration for both TTY
+and pgtk GUI frames on Wayland.
 
-Only enable =xclip-mode= for TTY frames. The =emacs-pgtk= GUI handles the
-Wayland clipboard natively, and routing it through =xclip= (which uses
-XWayland) breaks =p= / =P= because XWayland's clipboard is separate from
-=wl-clipboard=. With =services.emacs.enable= we run a daemon, so use a frame
-hook instead of a one-shot init check.
+In TTY frames =xclip-mode= covers clipboard reads/writes (its =cl-defmethod=
+dispatchers are gated on =(window-system nil)=, so they fire there). In
+=pgtk= GUI frames the default =gui-selection-value= runs, and on Wayland it
+caches stale selections — a region yanked inside Emacs keeps coming back
+as the "clipboard" content even after copying fresh text from another app.
 
-For TTY frames, point =xclip= at =wl-copy= so terminal Emacs shares the same
-clipboard as native Wayland apps.
+Fix: install =wl-paste= / =wl-copy= shims as
+=interprogram-{paste,cut}-function= globally on Wayland. They work for both
+GUI and TTY frames; xclip-mode's dispatchers still handle the TTY-specific
+=gui-backend-get-selection= path internally.
+
+For SSH TTY use, the daemon shells out to its *own* Wayland clipboard.
+Cross-machine paste relies on terminal bracketed-paste mode (built-in);
+copy relies on OSC 52, enabled via Doom's =:os (tty +osc)=.
 
 #+begin_src emacs-lisp
 (defun jag/maybe-enable-xclip (&optional frame)
-  "Enable `xclip-mode' only in TTY frames; pgtk handles GUI clipboard natively."
+  "Enable mouse + xclip-mode in TTY frames; pgtk GUI uses wl-paste shims."
   (with-selected-frame (or frame (selected-frame))
     (unless (display-graphic-p)
       (unless (bound-and-true-p xterm-mouse-mode) (xterm-mouse-mode 1))
@@ -250,6 +257,27 @@ clipboard as native Wayland apps.
              (getenv "WAYLAND_DISPLAY"))
     (setq xclip-method 'wl-copy
           xclip-program "wl-copy")))
+
+(defun jag/wl-paste ()
+  "Read the system CLIPBOARD via `wl-paste'. Return nil when empty."
+  (when (executable-find "wl-paste")
+    (let ((s (with-output-to-string
+               (with-current-buffer standard-output
+                 (call-process "wl-paste" nil t nil "-n")))))
+      (unless (string-empty-p s)
+        (substring-no-properties s)))))
+
+(defun jag/wl-copy (text)
+  "Write TEXT to the system CLIPBOARD via `wl-copy'."
+  (when (and text (executable-find "wl-copy"))
+    (let ((proc (start-process "wl-copy" nil "wl-copy")))
+      (process-send-string proc text)
+      (process-send-eof proc))))
+
+(when (and (eq system-type 'gnu/linux)
+           (getenv "WAYLAND_DISPLAY"))
+  (setq interprogram-paste-function #'jag/wl-paste
+        interprogram-cut-function   #'jag/wl-copy))
 #+end_src
 
 ** VTerm Setup for macOS

@@ -72,8 +72,8 @@ in
 
       package = adapterPackageOption {
         adapterName = "Claude";
-        llmPackageName = "claude-code-acp";
-        defaultPackage = llmPackage "claude-code-acp";
+        llmPackageName = "claude-agent-acp";
+        defaultPackage = llmPackage "claude-agent-acp";
       };
 
       command = adapterCommandOption {
@@ -129,7 +129,7 @@ in
     assertions = [
       {
         assertion = !(cfg.claude.enable && cfg.claude.package == null);
-        message = "programs.acp-adapters.claude.enable is true, but no Claude ACP package is available. Set programs.acp-adapters.claude.package or expose pkgs.llm-agents.claude-code-acp.";
+        message = "programs.acp-adapters.claude.enable is true, but no Claude ACP package is available. Set programs.acp-adapters.claude.package or expose pkgs.llm-agents.claude-agent-acp.";
       }
       {
         assertion = !(cfg.codex.enable && cfg.codex.package == null);

@@ -917,6 +917,7 @@
         "noctalia": "noctalia",
         "nvf": "nvf",
         "panko": "panko",
+        "sre-claude-auto-runner": "sre-claude-auto-runner",
         "sweet-nothings": "sweet-nothings",
         "warp-preview": "warp-preview"
       }
@@ -979,6 +980,26 @@
         "owner": "oxalica",
         "repo": "rust-overlay",
         "type": "github"
+      }
+    },
+    "sre-claude-auto-runner": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1778600112,
+        "narHash": "sha256-HNFFR6mdTraqgC8O8AAoCBznGK9ecvNYfPNS2EHnldE=",
+        "ref": "refs/heads/main",
+        "rev": "89ca6f004fc0b198812af7ae3d2fc4ac7e907d58",
+        "revCount": 21,
+        "type": "git",
+        "url": "ssh://forgejo@forgejo.jordangarrison.dev/jordangarrison/sre-claude-auto-runner.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://forgejo@forgejo.jordangarrison.dev/jordangarrison/sre-claude-auto-runner.git"
       }
     },
     "sweet-nothings": {

@@ -67,6 +67,10 @@
       url = "github:jordangarrison/warp-preview-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    sre-claude-auto-runner = {
+      url = "git+ssh://forgejo@forgejo.jordangarrison.dev/jordangarrison/sre-claude-auto-runner.git";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -93,6 +97,7 @@
       lakeline-cg,
       grove,
       warp-preview,
+      sre-claude-auto-runner,
     }:
     {
       nixosConfigurations = {
@@ -130,6 +135,7 @@
             ./modules/nixos/freerdp.nix
             ./modules/nixos/blocky.nix
             ./modules/nixos/lakeline-cg.nix
+            ./modules/nixos/sre-claude-auto-runner.nix
             ./users/jordangarrison/nixos.nix
             ./users/mikayla/nixos.nix
             ./users/jane/nixos.nix

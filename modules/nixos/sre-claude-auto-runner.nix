@@ -1,4 +1,4 @@
-{ inputs, lib, pkgs, ... }:
+{ inputs, pkgs, ... }:
 
 {
   imports = [ inputs.sre-claude-auto-runner.nixosModules.default ];
@@ -11,6 +11,4 @@
     maxParallel = 1;
     path = with pkgs; [ claude-code gh jira-cli-go git ];
   };
-
-  systemd.timers.sre-claude-auto-runner.wantedBy = lib.mkForce [ ];
 }

@@ -112,6 +112,7 @@
             ./modules/llm-agents-overlay.nix
             ./modules/okta-cli-client-overlay.nix
             ./modules/sidecar-overlay.nix
+            ./modules/brave-overlay.nix
             ./modules/tea-overlay.nix
             ./modules/nixos/common.nix
             ./modules/nixos/brother-printer.nix
@@ -120,6 +121,7 @@
             ./modules/nixos/niri-desktop.nix
             ./modules/nixos/fonts.nix
             ./modules/nixos/audio/pipewire.nix
+            ./modules/nixos/audio/speech-dispatcher.nix
             ./modules/nixos/development.nix
             ./modules/nixos/searx.nix
             ./modules/nixos/postgres.nix
@@ -218,6 +220,7 @@
             ./modules/llm-agents-overlay.nix
             ./modules/okta-cli-client-overlay.nix
             ./modules/sidecar-overlay.nix
+            ./modules/brave-overlay.nix
             ./modules/nixos/common.nix
             ./modules/nixos/brother-printer.nix
             ./modules/nixos/lan.nix
@@ -227,6 +230,7 @@
             { gbg-config.machine.type = "laptop"; }
             ./modules/nixos/fonts.nix
             ./modules/nixos/audio/pipewire.nix
+            ./modules/nixos/audio/speech-dispatcher.nix
             ./modules/nixos/development.nix
             ./modules/nixos/virtualization.nix
             ./modules/nixos/tablet-mode.nix
@@ -290,6 +294,7 @@
             ./modules/llm-agents-overlay.nix
             ./modules/okta-cli-client-overlay.nix
             ./modules/sidecar-overlay.nix
+            ./modules/brave-overlay.nix
             ./modules/nixos/common.nix
             ./modules/nixos/brother-printer.nix
             ./modules/nixos/lan.nix
@@ -298,6 +303,7 @@
             # ./modules/nixos/hyprland-desktop.nix  # Disabled - voyager uses GNOME only
             ./modules/nixos/fonts.nix
             ./modules/nixos/audio/pipewire.nix
+            ./modules/nixos/audio/speech-dispatcher.nix
             ./modules/nixos/development.nix
             ./users/jordangarrison/nixos.nix
             ./users/mikayla/nixos.nix
@@ -343,12 +349,14 @@
             ./modules/llm-agents-overlay.nix
             ./modules/okta-cli-client-overlay.nix
             ./modules/sidecar-overlay.nix
+            ./modules/brave-overlay.nix
             ./modules/nixos/common.nix
             ./modules/nixos/brother-printer.nix
             ./modules/nixos/lan.nix
             ./modules/nixos/gnome-desktop.nix
             ./modules/nixos/fonts.nix
             ./modules/nixos/audio/pipewire.nix
+            ./modules/nixos/audio/speech-dispatcher.nix
             ./users/jordangarrison/nixos.nix
             ./users/mikayla/nixos.nix
             ./users/jane/nixos.nix
@@ -435,6 +443,7 @@
             ./modules/llm-agents-overlay.nix
             ./modules/okta-cli-client-overlay.nix
             ./modules/sidecar-overlay.nix
+            ./modules/brave-overlay.nix
             ./users/jordangarrison/home.nix
           ];
           extraSpecialArgs = {

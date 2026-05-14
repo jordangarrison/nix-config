@@ -273,16 +273,29 @@ copy relies on OSC 52, enabled via Doom's =:os (tty +osc)=.
         (substring-no-properties s)))))
 
 (defun jag/wl-copy (text)
-  "Write TEXT to the system CLIPBOARD via `wl-copy'."
+  "Write TEXT to the system CLIPBOARD via `wl-copy'.
+Use `call-process-region' (sync) instead of `start-process'; async
+`process-send-string'+`process-send-eof' from the emacs daemon does not
+reliably deliver to wl-copy and leaves hung child processes."
   (when (and text (executable-find "wl-copy"))
-    (let ((proc (start-process "wl-copy" nil "wl-copy")))
-      (process-send-string proc text)
-      (process-send-eof proc))))
+    (with-temp-buffer
+      (insert text)
+      (call-process-region (point-min) (point-max) "wl-copy"))))
 
 (when (and (eq system-type 'gnu/linux)
            (getenv "WAYLAND_DISPLAY"))
   (setq interprogram-paste-function #'jag/wl-paste
         interprogram-cut-function   #'jag/wl-copy))
+
+;; Doom's `:os (tty +osc)' loads clipetty and turns on `global-clipetty-mode',
+;; which adds an `:around' advice on `interprogram-cut-function'. That advice
+;; fires in pgtk GUI frames too and emits OSC 52 to a terminal that isn't
+;; there, swallowing the kill before `jag/wl-copy' can run. Disable the global
+;; mode and enable clipetty only when a TTY frame attaches (e.g. SSH client),
+;; which is the case OSC 52 is intended for.
+(after! clipetty
+  (global-clipetty-mode -1)
+  (add-hook 'tty-setup-hook #'clipetty-mode))
 #+end_src
 
 ** VTerm Setup for macOS

@@ -4,7 +4,7 @@
   imports = [ inputs.sre-claude-auto-runner.nixosModules.default ];
 
   services.sre-claude-auto-runner = {
-    enable = true;
+    enable = false;
     user = "jordangarrison";
     workspaceDir = "/home/jordangarrison/dev/flocasts";
     dryRun = false;

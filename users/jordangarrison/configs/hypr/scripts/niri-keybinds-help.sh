@@ -78,6 +78,7 @@ s then c                  → Region to clipboard
 s then f                  → Focused screen to clipboard
 s then a                  → All monitors + Satty annotation
 s then A                  → All monitors to clipboard
+s then o                  → Open screenshots folder (yazi, newest first)
 Print                     → Screenshot (niri built-in)
 Shift + Print             → Screenshot window (niri built-in)
 

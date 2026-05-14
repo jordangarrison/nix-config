@@ -38,6 +38,7 @@ let
         (entry "f" "Screen -> Clipboard" "${scriptsPath}/screenshot-focused-monitor-clipboard.sh")
         (entry "a" "All Monitors -> Annotate" "${scriptsPath}/screenshot-full-satty.sh")
         (entry "A" "All Monitors -> Clipboard" "${scriptsPath}/screenshot-full-clipboard.sh")
+        (entry "o" "Open Folder (yazi, newest first)" "yazi-screenshots")
       ])
 
       # [a] Apps
@@ -119,10 +120,25 @@ let
   whichKeyMenu = pkgs.writeShellScriptBin "wlr-which-key-menu" ''
     exec ${pkgs.wlr-which-key}/bin/wlr-which-key ${configFile}
   '';
+
+  # Throwaway yazi config: open screenshots dir sorted by mtime, newest first.
+  yaziScreenshotsConfig = pkgs.writeTextDir "yazi.toml" ''
+    [mgr]
+    sort_by      = "mtime"
+    sort_reverse = true
+    sort_dir_first = false
+  '';
+
+  yaziScreenshots = pkgs.writeShellScriptBin "yazi-screenshots" ''
+    exec ${pkgs.ghostty}/bin/ghostty --title="Screenshots" -e \
+      env YAZI_CONFIG_HOME=${yaziScreenshotsConfig} \
+      ${pkgs.yazi}/bin/yazi "${homeDirectory}/Pictures/Screenshots"
+  '';
 in
 {
   home.packages = [
     pkgs.wlr-which-key
     whichKeyMenu
+    yaziScreenshots
   ];
 }

@@ -60,18 +60,14 @@ nix-config/
 ├── modules/nixos/
 │   └── home-assistant.nix                 # NEW — service + nginx + ACME + backup unit
 └── modules/nixos/home-assistant/          # NEW — Nix-authored YAML, packaged via linkFarm
-    ├── automations.yaml                   # initially empty / minimal
-    ├── scripts.yaml                       # initially empty / minimal
     └── packages/
         └── homekit-bridge.yaml            # HomeKit Bridge config + entity filter
 
 /var/lib/hass/                             # HA's state dir (HA-owned)
 ├── configuration.yaml                     # rendered from Nix; HA may edit at runtime, reasserted on switch
-├── packages/                              # symlink → nix store linkFarm
-├── automations.yaml                       # symlink → nix store
-├── scripts.yaml                           # symlink → nix store
+├── packages/                              # symlink → nix store linkFarm (read-only, Nix-authored)
 ├── secrets.yaml                           # symlink → /var/lib/hass-secrets/secrets.yaml
-├── .storage/                              # UI-managed state (irreplaceable)
+├── .storage/                              # UI-managed state (integrations, dashboards, UI automations) — irreplaceable
 ├── home-assistant_v2.db                   # recorder SQLite
 └── home-assistant.log
 
@@ -96,8 +92,6 @@ let
       path = ./home-assistant/packages/homekit-bridge.yaml; }
     # add more package files here as the config grows
   ];
-  haAutomations = ./home-assistant/automations.yaml;
-  haScripts     = ./home-assistant/scripts.yaml;
 
   hassBackup = pkgs.writeShellApplication {
     name = "hass-backup";
@@ -153,6 +147,8 @@ in
         unit_system  = "imperial";
         internal_url = "https://hass.garrisonsbygrace.com";
         external_url = "https://hass.garrisonsbygrace.com";
+        # split-config: read-only Nix-authored package files
+        packages     = "!include_dir_named packages";
       };
       default_config = {};
       http = {
@@ -164,20 +160,19 @@ in
         purge_keep_days = 10;
         # exclude: tune later as entity churn grows
       };
-      # split-config: pull in nix-managed yaml dirs/files
-      homeassistant.packages = "!include_dir_named packages";
-      automation = "!include automations.yaml";
-      script     = "!include scripts.yaml";
+      # NOTE: deliberately not setting `automation = !include automations.yaml`
+      # or `script = !include scripts.yaml`. With configWritable=true HA's UI
+      # editor would try to write to those files; if they're symlinks to /nix/store
+      # the write fails. HA stores UI-authored automations/scripts in .storage/
+      # by default — fine. Add hand-authored ones as new files under packages/.
     };
   };
 
   systemd.tmpfiles.rules = [
-    "d  /var/lib/hass-secrets           0750 hass hass -"
-    "d  /var/backups/hass               0750 hass hass -"
-    "L+ /var/lib/hass/packages          -    -    -    - ${haPackages}"
-    "L+ /var/lib/hass/automations.yaml  -    -    -    - ${haAutomations}"
-    "L+ /var/lib/hass/scripts.yaml      -    -    -    - ${haScripts}"
-    "L+ /var/lib/hass/secrets.yaml      -    -    -    - /var/lib/hass-secrets/secrets.yaml"
+    "d  /var/lib/hass-secrets       0750 hass hass -"
+    "d  /var/backups/hass           0750 hass hass -"
+    "L+ /var/lib/hass/packages      -    -    -    - ${haPackages}"
+    "L+ /var/lib/hass/secrets.yaml  -    -    -    - /var/lib/hass-secrets/secrets.yaml"
   ];
 
   security.acme.certs."hass.garrisonsbygrace.com" = {

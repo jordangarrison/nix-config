@@ -131,6 +131,7 @@
             ./modules/nixos/cloudflared.nix
             ./modules/nixos/nginx.nix
             ./modules/nixos/jellyfin.nix
+            ./modules/nixos/home-assistant.nix
             ./modules/nixos/forgejo.nix
             ./modules/nixos/forgejo-runner.nix
             ./modules/nixos/virtualization.nix

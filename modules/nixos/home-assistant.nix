@@ -51,4 +51,26 @@
   systemd.tmpfiles.rules = [
     "d /var/lib/hass-secrets 0750 hass hass -"
   ];
+
+  security.acme.certs."hass.garrisonsbygrace.com" = {
+    group = "nginx";
+  };
+
+  services.nginx.virtualHosts."hass.garrisonsbygrace.com" = {
+    forceSSL    = true;
+    useACMEHost = "hass.garrisonsbygrace.com";
+    locations."/" = {
+      proxyPass       = "http://127.0.0.1:8123";
+      proxyWebsockets = true;
+      extraConfig = ''
+        proxy_buffering off;
+        proxy_read_timeout  86400;
+      '';
+    };
+  };
+
+  networking.firewall = {
+    allowedTCPPorts = [ 21063 ];   # HomeKit Bridge (Task 4) — LAN only, mDNS-discovered
+    allowedUDPPorts = [ 5353 ];    # mDNS / zeroconf for HA's built-in responder
+  };
 }

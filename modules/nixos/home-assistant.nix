@@ -1,18 +1,26 @@
 { config, lib, pkgs, ... }:
 
+let
+  haPackages = pkgs.linkFarm "hass-packages" [
+    { name = "homekit_bridge.yaml";
+      path = ./home-assistant/packages/homekit_bridge.yaml; }
+  ];
+in
 {
   # Home Assistant on endeavour
   # Spec: docs/superpowers/specs/2026-05-15-home-assistant-design.md
 
   services.home-assistant = {
     enable          = true;
-    openFirewall    = false;             # nginx will be the only ingress (added in Task 3)
+    openFirewall    = false;             # nginx is the only ingress
     configWritable  = true;              # HA can edit configuration.yaml at runtime;
                                          # nh os switch reasserts the Nix-rendered version.
     extraComponents = [
       "default_config"
       "met"
       "backup"
+      "google_translate"     # default_config auto-loads this; needs gtts dep
+      "homekit"              # HomeKit Bridge: HA -> Apple Home
       # Apple-ecosystem deps: HomePods / Apple TVs on the LAN trigger zeroconf
       # discovery flows. Without these, HA logs ERRORs every scan even though
       # the integrations aren't configured. Pulling them in keeps logs clean
@@ -30,7 +38,9 @@
         unit_system  = "us_customary";
         internal_url = "https://hass.garrisonsbygrace.com";
         external_url = "https://hass.garrisonsbygrace.com";
-        # HomeKit Bridge YAML will land in /var/lib/hass/packages/ via tmpfiles symlink in Task 4
+        # Split-config: HomeKit Bridge + future hand-authored YAML lives in
+        # /var/lib/hass/packages/ (tmpfiles symlink below to a nix-store linkFarm).
+        # HA never writes here, so a read-only store path is safe.
         packages     = "!include_dir_named packages";
       };
       default_config = {};
@@ -45,11 +55,10 @@
     };
   };
 
-  # Bootstrap dirs that later tasks (and HA itself) will populate.
-  # /var/lib/hass-secrets exists now so secrets.yaml has a home in Task 4.
-  # /var/lib/hass/packages will be made a symlink in Task 4 (don't pre-create as a dir).
   systemd.tmpfiles.rules = [
-    "d /var/lib/hass-secrets 0750 hass hass -"
+    "d  /var/lib/hass-secrets       0750 hass hass -"
+    "L+ /var/lib/hass/packages      -    -    -    - ${haPackages}"
+    "L+ /var/lib/hass/secrets.yaml  -    -    -    - /var/lib/hass-secrets/secrets.yaml"
   ];
 
   security.acme.certs."hass.garrisonsbygrace.com" = {
@@ -70,7 +79,7 @@
   };
 
   networking.firewall = {
-    allowedTCPPorts = [ 21063 ];   # HomeKit Bridge (Task 4) — LAN only, mDNS-discovered
+    allowedTCPPorts = [ 21063 ];   # HomeKit Bridge — LAN only, mDNS-discovered
     allowedUDPPorts = [ 5353 ];    # mDNS / zeroconf for HA's built-in responder
   };
 }

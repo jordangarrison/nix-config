@@ -1,0 +1,16 @@
+homekit:
+  - name: GarrisonsByGrace Bridge
+    port: 21063
+    pin: !secret homekit_pin
+    filter:
+      include_domains:
+        - light
+        - switch
+        - sensor
+        - binary_sensor
+        - climate
+        - cover
+        - lock
+        - media_player
+    # Start permissive; tighten with include_entities later once HA
+    # discovers actual devices via UI integration flows.

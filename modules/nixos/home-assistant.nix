@@ -5,6 +5,43 @@ let
     { name = "homekit_bridge.yaml";
       path = ./home-assistant/packages/homekit_bridge.yaml; }
   ];
+
+  hassBackup = pkgs.writeShellApplication {
+    name = "hass-backup";
+    runtimeInputs = with pkgs; [ sqlite zstd gnutar coreutils findutils ];
+    text = ''
+      set -euo pipefail
+      stamp=$(date -u +%Y-%m-%dT%H-%M-%SZ)
+      dest=/var/backups/hass
+      work=$(mktemp -d)
+      trap 'rm -rf "$work"' EXIT
+
+      mkdir -p "$dest"
+
+      # 1. online SQLite snapshot (atomic, no HA downtime)
+      sqlite3 /var/lib/hass/home-assistant_v2.db \
+        ".backup '$work/home-assistant_v2.db'"
+
+      # 2. tar everything else minus the live DB / WAL / SHM, then pull in
+      #    the snapshot via a second -C directive in the same archive.
+      tar --create \
+          --file - \
+          --exclude='home-assistant_v2.db' \
+          --exclude='home-assistant_v2.db-wal' \
+          --exclude='home-assistant_v2.db-shm' \
+          --exclude='home-assistant.log*' \
+          --exclude='deps' \
+          -C /var/lib/hass . \
+          -C "$work" home-assistant_v2.db \
+        | zstd -T0 -19 -o "$dest/hass-$stamp.tar.zst"
+
+      # 3. prune archives older than 7 days
+      find "$dest" -maxdepth 1 -name 'hass-*.tar.zst' -mtime +7 -delete
+
+      # 4. emit size for journal
+      ls -lh "$dest/hass-$stamp.tar.zst"
+    '';
+  };
 in
 {
   # Home Assistant on endeavour
@@ -57,6 +94,7 @@ in
 
   systemd.tmpfiles.rules = [
     "d  /var/lib/hass-secrets       0750 hass hass -"
+    "d  /var/backups/hass           0750 hass hass -"
     "L+ /var/lib/hass/packages      -    -    -    - ${haPackages}"
     "L+ /var/lib/hass/secrets.yaml  -    -    -    - /var/lib/hass-secrets/secrets.yaml"
   ];
@@ -82,4 +120,35 @@ in
     allowedTCPPorts = [ 21063 ];   # HomeKit Bridge — LAN only, mDNS-discovered
     allowedUDPPorts = [ 5353 ];    # mDNS / zeroconf for HA's built-in responder
   };
+
+  systemd.services.hass-backup = {
+    description = "Daily Home Assistant backup";
+    serviceConfig = {
+      Type      = "oneshot";
+      ExecStart = "${hassBackup}/bin/hass-backup";
+      User      = "hass";
+      Group     = "hass";
+
+      ProtectSystem    = "strict";
+      ProtectHome      = true;
+      PrivateTmp       = true;
+      NoNewPrivileges  = true;
+      ReadWritePaths   = [ "/var/backups/hass" ];
+
+      Nice              = 19;
+      IOSchedulingClass = "idle";
+    };
+  };
+
+  systemd.timers.hass-backup = {
+    description = "Daily Home Assistant backup timer";
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnCalendar         = "*-*-* 03:30:00";
+      Persistent         = true;
+      RandomizedDelaySec = "10m";
+    };
+  };
+
+  environment.systemPackages = [ hassBackup ];
 }

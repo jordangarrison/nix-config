@@ -6,6 +6,8 @@
 }:
 
 {
+  imports = [ ./emacs.nix ];
+
   # Machine type option - used by various modules for power management, suspend behavior, etc.
   options.gbg-config.machine.type = lib.mkOption {
     type = lib.types.enum [

@@ -36,6 +36,7 @@ in {
         deskflow
         stable.nextcloud-client # Broken in nix-unstable - Qt6 GuiPrivate component missing
         obsidian
+        logseq
         # session-desktop: clear executable stack flag on better-sqlite3
         # glibc 2.41+ rejects dlopen of shared libraries with RWE GNU_STACK
         # https://github.com/NixOS/nixpkgs/issues/487524

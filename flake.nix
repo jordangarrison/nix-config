@@ -127,6 +127,7 @@
             ./modules/nixos/postgres.nix
             ./modules/nixos/greenlight.nix
             ./modules/nixos/panko.nix
+            ./modules/nixos/agentsview.nix
             ./modules/nixos/drawl.nix
             ./modules/nixos/cloudflared.nix
             ./modules/nixos/nginx.nix

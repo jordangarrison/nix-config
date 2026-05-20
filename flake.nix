@@ -158,6 +158,29 @@
                 enable = true;
                 username = "jordangarrison";
                 homeDirectory = "/home/jordangarrison";
+                apps = {
+                  zoom.enable = true;
+                  session-desktop.enable = true;
+                  slack.enable = true;
+                  spotify.enable = true;
+                  discord.enable = true;
+                  signal.enable = true;
+                  obs.enable = true;
+                  obsidian.enable = true;
+                  todoist.enable = true;
+                  calibre.enable = true;
+                  nextcloud.enable = true;
+                  deskflow.enable = true;
+                  freelens.enable = true;
+                  zed.enable = true;
+                  vscode.enable = true;
+                  warp.enable = true;
+                  sidecar.enable = true;
+                  codex.enable = true;
+                  grove.enable = true;
+                  google-cloud-sdk.enable = true;
+                  okta.enable = true;
+                };
               };
 
               users.mikayla = {
@@ -244,12 +267,35 @@
             home-manager.nixosModules.home-manager
             ./modules/home/defaults.nix
             {
-              # Configure users for voyager
+              # Configure users for opportunity
               users.jordangarrison = {
                 enable = true;
                 username = "jordangarrison";
                 homeDirectory = "/home/jordangarrison";
                 swapSuperAlt = true;
+                apps = {
+                  zoom.enable = true;
+                  session-desktop.enable = true;
+                  slack.enable = true;
+                  spotify.enable = true;
+                  discord.enable = true;
+                  signal.enable = true;
+                  obs.enable = true;
+                  obsidian.enable = true;
+                  todoist.enable = true;
+                  calibre.enable = true;
+                  nextcloud.enable = true;
+                  deskflow.enable = true;
+                  freelens.enable = true;
+                  zed.enable = true;
+                  vscode.enable = true;
+                  warp.enable = true;
+                  sidecar.enable = true;
+                  codex.enable = true;
+                  grove.enable = true;
+                  google-cloud-sdk.enable = true;
+                  okta.enable = true;
+                };
               };
 
               users.mikayla = {

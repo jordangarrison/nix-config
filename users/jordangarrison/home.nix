@@ -5,6 +5,7 @@
   username,
   homeDirectory,
   inputs,
+  userApps ? {},
   ...
 }:
 
@@ -98,8 +99,6 @@ in
 
       # LLM Agents (available via overlay as pkgs.llm-agents.*)
       llm-agents.claude-code
-      llm-agents.codex
-      llm-agents.opencode
       sox # Audio playback/recording, used by Claude Code
       otel-tui # Terminal OpenTelemetry viewer
 
@@ -113,17 +112,10 @@ in
       ksn # kubectl namespace switcher
       claude-switch # Claude Code credential profile switcher
 
-      # Okta CLI
-      okta-cli-client
-
-      # Sidecar - TUI companion for CLI coding agents
-      sidecar
       td
 
       # Apps
       arandr
-      spotify
-      todoist
       wezterm
       # doom-emacs
 
@@ -213,16 +205,29 @@ in
       inputs.aws-tools.packages.${pkgs.stdenv.hostPlatform.system}.default
       inputs.aws-use-sso.packages.${pkgs.stdenv.hostPlatform.system}.default
 
-      # Grove - workspace manager
-      inputs.grove.packages.${pkgs.stdenv.hostPlatform.system}.default
-
       # Google Workspace CLI
       gws
-
-      # GCP - using stable due to tkinter dependency issue in unstable
+    ]
+    ++ lib.optionals (userApps.grove.enable or false) [
+      inputs.grove.packages.${pkgs.stdenv.hostPlatform.system}.default
+    ]
+    ++ lib.optionals (userApps.google-cloud-sdk.enable or false) [
       (stable.google-cloud-sdk.withExtraComponents [
         stable.google-cloud-sdk.components.gke-gcloud-auth-plugin
       ])
+    ]
+    ++ lib.optionals (userApps.sidecar.enable or false) [
+      sidecar
+    ]
+    ++ lib.optionals (userApps.okta.enable or false) [
+      okta-cli-client
+    ]
+    ++ lib.optionals (userApps.codex.enable or false) [
+      llm-agents.codex
+      llm-agents.opencode
+    ]
+    ++ lib.optionals (userApps.todoist.enable or false) [
+      todoist
     ]
     ++ (
       if pkgs.stdenv.isDarwin then
@@ -234,30 +239,16 @@ in
           aws-sso-cli
           bibletime
           comixcursors
-          discord
-          # Signal Desktop wrapped to use gnome-keyring for secrets storage
-          (pkgs.symlinkJoin {
-            name = "signal-desktop";
-            paths = [ pkgs.signal-desktop ];
-            buildInputs = [ pkgs.makeWrapper ];
-            postBuild = ''
-              wrapProgram $out/bin/signal-desktop \
-                --add-flags "--password-store=gnome-libsecret"
-            '';
-          })
           deno
           dig
           # emacs
           emacsPackages.sqlite3
-          freelens-bin
           glibc
           gnaural
           grip
-          obs-studio
           pavucontrol
           pinentry-gnome3
           remmina
-          stable.slack
           vial
           wally-cli
           xcb-util-cursor
@@ -267,7 +258,33 @@ in
           inputs.hubctl.packages.${pkgs.stdenv.hostPlatform.system}.default
           ghostty
         ]
-    );
+    )
+    ++ lib.optionals ((userApps.discord.enable or false) && pkgs.stdenv.isLinux) [
+      discord
+    ]
+    ++ lib.optionals ((userApps.signal.enable or false) && pkgs.stdenv.isLinux) [
+      (pkgs.symlinkJoin {
+        name = "signal-desktop";
+        paths = [ pkgs.signal-desktop ];
+        buildInputs = [ pkgs.makeWrapper ];
+        postBuild = ''
+          wrapProgram $out/bin/signal-desktop \
+            --add-flags "--password-store=gnome-libsecret"
+        '';
+      })
+    ]
+    ++ lib.optionals ((userApps.obs.enable or false) && pkgs.stdenv.isLinux) [
+      obs-studio
+    ]
+    ++ lib.optionals (userApps.spotify.enable or false) [
+      spotify
+    ]
+    ++ lib.optionals (userApps.slack.enable or false) [
+      stable.slack
+    ]
+    ++ lib.optionals (userApps.freelens.enable or false) [
+      freelens-bin
+    ];
 
   programs.gpg = {
     enable = pkgs.stdenv.isLinux;
@@ -453,7 +470,7 @@ in
   };
 
   programs.vscode = {
-    enable = true;
+    enable = userApps.vscode.enable or false;
     # package = pkgs.code-cursor;
   };
 

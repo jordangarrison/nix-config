@@ -1,4 +1,4 @@
-{ config, pkgs, lib, username, homeDirectory, inputs, swapSuperAlt ? false, ... }:
+{ config, pkgs, lib, username, homeDirectory, inputs, swapSuperAlt ? false, userApps ? {}, ... }:
 
 {
   imports = [
@@ -8,10 +8,11 @@
     ../../modules/home/ghostty/apps.nix
     ../../modules/home/wezterm  # Keep for SSH apps only
     ../../modules/home/virt-manager/config.nix
+  ] ++ lib.optionals (userApps.zed.enable or false) [
     ../../modules/home/zed-editor
   ];
 
-  home.packages = [
+  home.packages = lib.optionals (userApps.warp.enable or false) [
     inputs.warp-preview.packages.${pkgs.system}.default
   ];
 

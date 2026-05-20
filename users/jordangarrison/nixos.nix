@@ -22,6 +22,37 @@ in {
       default = false;
       description = "Swap Super and Alt keys in GNOME";
     };
+
+    apps = {
+      # Communication
+      zoom.enable = lib.mkEnableOption "Zoom video conferencing";
+      session-desktop.enable = lib.mkEnableOption "Session encrypted messenger";
+      slack.enable = lib.mkEnableOption "Slack messaging";
+      discord.enable = lib.mkEnableOption "Discord";
+      signal.enable = lib.mkEnableOption "Signal messenger";
+
+      # Media & productivity
+      spotify.enable = lib.mkEnableOption "Spotify music";
+      obs.enable = lib.mkEnableOption "OBS Studio";
+      obsidian.enable = lib.mkEnableOption "Obsidian and Logseq note-taking";
+      todoist.enable = lib.mkEnableOption "Todoist task manager";
+      calibre.enable = lib.mkEnableOption "Calibre e-book manager";
+      nextcloud.enable = lib.mkEnableOption "Nextcloud client";
+      deskflow.enable = lib.mkEnableOption "Deskflow KVM";
+
+      # Editors & terminals
+      zed.enable = lib.mkEnableOption "Zed editor";
+      vscode.enable = lib.mkEnableOption "VSCode / Cursor editor";
+      warp.enable = lib.mkEnableOption "Warp terminal (preview)";
+
+      # Dev tools (heavy, built from source)
+      freelens.enable = lib.mkEnableOption "Freelens Kubernetes IDE";
+      sidecar.enable = lib.mkEnableOption "Sidecar TUI for coding agents";
+      codex.enable = lib.mkEnableOption "Codex and OpenCode LLM agents";
+      grove.enable = lib.mkEnableOption "Grove workspace manager";
+      google-cloud-sdk.enable = lib.mkEnableOption "Google Cloud SDK";
+      okta.enable = lib.mkEnableOption "Okta CLI client";
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -32,11 +63,19 @@ in {
       shell = pkgs.zsh;
       home = cfg.homeDirectory;
       packages = with pkgs; [
-        stable.calibre # Broken in nix-unstable - Qt6 GuiPrivate component missing
+        xournalpp
+      ] ++ lib.optionals cfg.apps.calibre.enable [
+        stable.calibre
+      ] ++ lib.optionals cfg.apps.deskflow.enable [
         deskflow
-        stable.nextcloud-client # Broken in nix-unstable - Qt6 GuiPrivate component missing
+      ] ++ lib.optionals cfg.apps.nextcloud.enable [
+        stable.nextcloud-client
+      ] ++ lib.optionals cfg.apps.obsidian.enable [
         obsidian
         logseq
+      ] ++ lib.optionals cfg.apps.todoist.enable [
+        todoist-electron
+      ] ++ lib.optionals cfg.apps.session-desktop.enable [
         # session-desktop: clear executable stack flag on better-sqlite3
         # glibc 2.41+ rejects dlopen of shared libraries with RWE GNU_STACK
         # https://github.com/NixOS/nixpkgs/issues/487524
@@ -49,8 +88,7 @@ in {
             done
           '';
         }))
-        todoist-electron
-        xournalpp
+      ] ++ lib.optionals cfg.apps.zoom.enable [
         zoom-us
       ];
     };
@@ -77,6 +115,7 @@ in {
       username = cfg.username;
       homeDirectory = cfg.homeDirectory;
       swapSuperAlt = cfg.swapSuperAlt;
+      userApps = cfg.apps;
     };
   };
 }

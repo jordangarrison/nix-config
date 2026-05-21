@@ -99,6 +99,7 @@ in
 
       # LLM Agents (available via overlay as pkgs.llm-agents.*)
       llm-agents.claude-code
+      llm-agents.agent-browser # Headless browser automation CLI for AI agents
       sox # Audio playback/recording, used by Claude Code
       otel-tui # Terminal OpenTelemetry viewer
 

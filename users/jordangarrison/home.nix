@@ -113,6 +113,7 @@ in
       claude-switch # Claude Code credential profile switcher
 
       td
+      readwise-cli # Readwise & Reader CLI
 
       # Apps
       arandr

@@ -421,7 +421,7 @@ in
       ];
 
       # Handy - Voice dictation. Toggles the running instance.
-      "Mod+Ctrl+Alt+Space".action.spawn = [
+      "Mod+Ctrl+Alt+Shift+5".action.spawn = [
         "handy"
         "--toggle-transcription"
       ];

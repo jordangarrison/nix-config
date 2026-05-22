@@ -10,10 +10,6 @@
 }:
 
 let
-  vscodeScriptPath = pkgs.writeTextFile {
-    name = "vscode";
-    text = builtins.readFile ./tools/scripts/vscode.sh;
-  };
   borkedNsScriptPath = pkgs.writeTextFile {
     name = "borked-ns";
     text = builtins.readFile ./tools/scripts/borked-ns.sh;
@@ -315,8 +311,8 @@ in
         return
       fi
 
-      # VSCode shell integration
-      [[ "$TERM_PROGRAM" == "vscode" ]] && . "$(code --locate-shell-integration-path zsh)"
+      # VSCode shell integration (disabled — vscode removed)
+      # [[ "$TERM_PROGRAM" == "vscode" ]] && . "$(code --locate-shell-integration-path zsh)"
 
       # Nix daemon (Darwin only)
       if [[ "$(uname -s)" == "Darwin" ]] && [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
@@ -328,7 +324,7 @@ in
       # Load user secrets if present
       [ -f "$HOME/.env" ] && source "$HOME/.env"
 
-      source ${vscodeScriptPath}
+      # source ''${vscodeScriptPath}  # disabled — vscode wrapper removed
       source ${borkedNsScriptPath}
     '';
   };

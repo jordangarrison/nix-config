@@ -255,6 +255,14 @@ in
           "--components=secrets"
         ];
       }
+      # Handy - voice dictation. Start hidden so Mod+Shift+D can toggle it
+      # via --toggle-transcription against the running instance.
+      {
+        command = [
+          "handy"
+          "--start-hidden"
+        ];
+      }
       # Network manager applet
       {
         command = [
@@ -418,6 +426,12 @@ in
         "call"
         "launcher"
         "emoji"
+      ];
+
+      # Handy - Voice dictation. Toggles the running instance.
+      "Mod+Ctrl+Alt+Space".action.spawn = [
+        "handy"
+        "--toggle-transcription"
       ];
 
       # Sweet Nothings - Voice dictation (D for dictation)

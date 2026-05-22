@@ -229,6 +229,9 @@ in
       llm-agents.codex
       llm-agents.opencode
     ]
+    ++ lib.optionals (userApps.handy.enable or false) [
+      llm-agents.handy
+    ]
     ++ lib.optionals (userApps.todoist.enable or false) [
       todoist
     ]

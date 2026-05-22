@@ -183,6 +183,7 @@
                   grove.enable = true;
                   google-cloud-sdk.enable = true;
                   okta.enable = true;
+                  handy.enable = true;
                 };
               };
 
@@ -300,6 +301,7 @@
                   grove.enable = true;
                   google-cloud-sdk.enable = true;
                   okta.enable = true;
+                  handy.enable = true;
                 };
               };
 

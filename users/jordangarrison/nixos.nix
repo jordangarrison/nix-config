@@ -52,6 +52,7 @@ in {
       grove.enable = lib.mkEnableOption "Grove workspace manager";
       google-cloud-sdk.enable = lib.mkEnableOption "Google Cloud SDK";
       okta.enable = lib.mkEnableOption "Okta CLI client";
+      handy.enable = lib.mkEnableOption "Handy push-to-talk speech-to-text";
     };
   };
 

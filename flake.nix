@@ -112,6 +112,7 @@
             ./modules/llm-agents-overlay.nix
             ./modules/okta-cli-client-overlay.nix
             ./modules/readwise-cli-overlay.nix
+            ./modules/varlock-overlay.nix
             ./modules/sidecar-overlay.nix
             ./modules/brave-overlay.nix
             ./modules/tea-overlay.nix
@@ -246,6 +247,7 @@
             ./modules/llm-agents-overlay.nix
             ./modules/okta-cli-client-overlay.nix
             ./modules/readwise-cli-overlay.nix
+            ./modules/varlock-overlay.nix
             ./modules/sidecar-overlay.nix
             ./modules/brave-overlay.nix
             ./modules/nixos/common.nix
@@ -344,6 +346,7 @@
             ./modules/llm-agents-overlay.nix
             ./modules/okta-cli-client-overlay.nix
             ./modules/readwise-cli-overlay.nix
+            ./modules/varlock-overlay.nix
             ./modules/sidecar-overlay.nix
             ./modules/brave-overlay.nix
             ./modules/nixos/common.nix
@@ -400,6 +403,7 @@
             ./modules/llm-agents-overlay.nix
             ./modules/okta-cli-client-overlay.nix
             ./modules/readwise-cli-overlay.nix
+            ./modules/varlock-overlay.nix
             ./modules/sidecar-overlay.nix
             ./modules/brave-overlay.nix
             ./modules/nixos/common.nix
@@ -456,6 +460,7 @@
             ./modules/llm-agents-overlay.nix
             ./modules/okta-cli-client-overlay.nix
             ./modules/readwise-cli-overlay.nix
+            ./modules/varlock-overlay.nix
             ./modules/sidecar-overlay.nix
             ./modules/nixos/emacs.nix
             ./modules/nixos/fonts.nix
@@ -496,6 +501,7 @@
             ./modules/llm-agents-overlay.nix
             ./modules/okta-cli-client-overlay.nix
             ./modules/readwise-cli-overlay.nix
+            ./modules/varlock-overlay.nix
             ./modules/sidecar-overlay.nix
             ./modules/brave-overlay.nix
             ./users/jordangarrison/home.nix

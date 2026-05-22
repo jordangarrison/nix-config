@@ -115,6 +115,7 @@ in
 
       td
       readwise-cli # Readwise & Reader CLI
+      varlock # AI-safe .env files: schemas for agents, secrets for humans
 
       # Apps
       arandr

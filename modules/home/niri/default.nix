@@ -255,14 +255,6 @@ in
           "--components=secrets"
         ];
       }
-      # Handy - voice dictation. Start hidden so Mod+Shift+D can toggle it
-      # via --toggle-transcription against the running instance.
-      {
-        command = [
-          "handy"
-          "--start-hidden"
-        ];
-      }
       # Network manager applet
       {
         command = [

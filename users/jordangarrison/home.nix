@@ -759,4 +759,24 @@ in
       executable = true;
     };
   };
+
+  # Handy daemon: keep a running instance so the compositor's
+  # `handy --toggle-transcription` bind hits something. Pinning ExecStart to
+  # the store path means home-manager restarts the unit on package bumps.
+  # Linux-only: systemd.user.services doesn't exist in home-manager on darwin.
+  systemd.user.services = lib.mkIf (pkgs.stdenv.isLinux && (userApps.handy.enable or false)) {
+    handy = {
+      Unit = {
+        Description = "Handy - push-to-talk speech-to-text";
+        PartOf = [ "graphical-session.target" ];
+        After = [ "graphical-session.target" ];
+      };
+      Service = {
+        ExecStart = "${pkgs.llm-agents.handy}/bin/handy --start-hidden";
+        Restart = "on-failure";
+        RestartSec = 3;
+      };
+      Install.WantedBy = [ "graphical-session.target" ];
+    };
+  };
 }

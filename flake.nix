@@ -176,6 +176,7 @@
                   azure-cli.enable = true;
                   okta.enable = true;
                   handy.enable = true;
+                  herdr.enable = true;
                 };
               };
 
@@ -284,6 +285,7 @@
                   google-cloud-sdk.enable = true;
                   okta.enable = true;
                   handy.enable = true;
+                  herdr.enable = true;
                 };
               };
 
@@ -462,6 +464,7 @@
                   homeDirectory = "/Users/jordan.garrison";
                   userApps = {
                     azure-cli.enable = true;
+                    herdr.enable = true;
                   };
                 };
               };

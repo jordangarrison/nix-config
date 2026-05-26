@@ -54,6 +54,7 @@ in {
       azure-cli.enable = lib.mkEnableOption "Azure CLI";
       okta.enable = lib.mkEnableOption "Okta CLI client";
       handy.enable = lib.mkEnableOption "Handy push-to-talk speech-to-text";
+      herdr.enable = lib.mkEnableOption "Herdr terminal workspace manager for AI coding agents";
     };
   };
 

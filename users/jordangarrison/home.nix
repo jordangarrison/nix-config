@@ -231,6 +231,9 @@ in
     ++ lib.optionals (userApps.handy.enable or false) [
       llm-agents.handy
     ]
+    ++ lib.optionals (userApps.herdr.enable or false) [
+      llm-agents.herdr
+    ]
     ++ lib.optionals (userApps.todoist.enable or false) [
       todoist
     ]

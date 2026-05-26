@@ -215,6 +215,9 @@ in
         stable.google-cloud-sdk.components.gke-gcloud-auth-plugin
       ])
     ]
+    ++ lib.optionals (userApps.azure-cli.enable or false) [
+      azure-cli
+    ]
     ++ lib.optionals (userApps.sidecar.enable or false) [
       sidecar
     ]

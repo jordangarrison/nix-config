@@ -51,6 +51,7 @@ in {
       codex.enable = lib.mkEnableOption "Codex and OpenCode LLM agents";
       grove.enable = lib.mkEnableOption "Grove workspace manager";
       google-cloud-sdk.enable = lib.mkEnableOption "Google Cloud SDK";
+      azure-cli.enable = lib.mkEnableOption "Azure CLI";
       okta.enable = lib.mkEnableOption "Okta CLI client";
       handy.enable = lib.mkEnableOption "Handy push-to-talk speech-to-text";
     };

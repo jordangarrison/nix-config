@@ -173,6 +173,7 @@
                   deskflow.enable = true;
                   codex.enable = true;
                   google-cloud-sdk.enable = true;
+                  azure-cli.enable = true;
                   okta.enable = true;
                   handy.enable = true;
                 };
@@ -459,6 +460,9 @@
                   inherit inputs;
                   username = "jordan.garrison";
                   homeDirectory = "/Users/jordan.garrison";
+                  userApps = {
+                    azure-cli.enable = true;
+                  };
                 };
               };
               users.users."jordan.garrison" = {

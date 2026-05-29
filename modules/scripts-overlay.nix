@@ -47,6 +47,13 @@
         deps = with final; [ flarectl ];
         description = "Cloudflare CLI with automatic API token from ACME secrets";
       };
+
+      herdr-handoff = mkScript {
+        name = "herdr-handoff";
+        script = ../packages/herdr-handoff/herdr-handoff.sh;
+        deps = with final; [ coreutils ];
+        description = "Migrate the running herdr session onto the current binary via live-handoff";
+      };
     })
   ];
 }

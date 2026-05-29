@@ -806,6 +806,16 @@ settings in `users/jordangarrison/home.nix` and rebuild, not in the herdr UI.
 conversations survive a server restart (runtime state lives in the unmanaged
 `session.json` / `session-history.json`).
 
+**Agent integrations:** `resume_agents_on_restore` only works when the per-agent herdr
+hook is current (e.g. Claude Code needs integration v4+). These hooks live in mutable
+dotfiles (`~/.claude/hooks/`, `~/.codex/`, …) and herdr bumps their version on every
+release, so they silently drift and break resume after a herdr update. The
+`programs.herdr.integrations` option (`["claude" "codex" "pi" "opencode"]`) re-runs
+`herdr integration install <agent>` on every activation to keep them in sync. Two
+caveats: `pane_history` is startup-only (a server already running when it is first
+enabled captures nothing — the *next* restart begins capturing), and resume only works
+for agent panes that ran under the current hook before the restart.
+
 **Update workflow (keep live processes across a herdr bump):**
 `herdr update --handoff` does not work on Nix (its downloader can't write to
 `/nix/store`). Instead:

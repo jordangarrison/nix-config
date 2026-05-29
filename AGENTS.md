@@ -797,6 +797,35 @@ nvf-print-config-path
 - Doom-style keybindings for familiar editing
 - SSH configuration for remote development
 
+### herdr session persistence
+
+herdr config is managed declaratively by `programs.herdr` (`modules/home/herdr/`),
+gated on `userApps.herdr.enable`. `config.toml` is a read-only Nix symlink — change
+settings in `users/jordangarrison/home.nix` and rebuild, not in the herdr UI.
+`pane_history` and `resume_agents_on_restore` are enabled, so scrollback and agent
+conversations survive a server restart (runtime state lives in the unmanaged
+`session.json` / `session-history.json`).
+
+**Agent integrations:** `resume_agents_on_restore` only works when the per-agent herdr
+hook is current (e.g. Claude Code needs integration v4+). These hooks live in mutable
+dotfiles (`~/.claude/hooks/`, `~/.codex/`, …) and herdr bumps their version on every
+release, so they silently drift and break resume after a herdr update. The
+`programs.herdr.integrations` option (`["claude" "codex" "pi" "opencode"]`) re-runs
+`herdr integration install <agent>` on every activation to keep them in sync. Two
+caveats: `pane_history` is startup-only (a server already running when it is first
+enabled captures nothing — the *next* restart begins capturing), and resume only works
+for agent panes that ran under the current hook before the restart.
+
+**Update workflow (keep live processes across a herdr bump):**
+`herdr update --handoff` does not work on Nix (its downloader can't write to
+`/nix/store`). Instead:
+1. `nh flake update llm-agents` then `nh os switch . --no-nom`
+2. `herdr-handoff`  — migrates the running session onto the new store-path binary
+   via `herdr server live-handoff --import-exe`, keeping pane processes alive.
+If herdr refuses the handoff (incompatible protocol across versions), restart the
+server normally; `pane_history` + `resume_agents_on_restore` restore scrollback and
+agent conversations.
+
 ## Documentation Structure
 
 The `docs/` directory contains project documentation:

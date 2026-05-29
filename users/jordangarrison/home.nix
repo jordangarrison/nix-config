@@ -27,6 +27,7 @@ in
     ../../modules/home/acp-adapters
     ../../modules/home/languages
     ../../modules/home/pi
+    ../../modules/home/herdr
   ];
 
   languages = {
@@ -83,6 +84,17 @@ in
 
   programs.acp-adapters = {
     enable = true;
+  };
+
+  programs.herdr = {
+    enable = userApps.herdr.enable or false;
+    settings = {
+      onboarding = false;
+      theme.name = "rose-pine";
+      ui.agent_panel_scope = "all";
+      experimental.pane_history = true;
+      session.resume_agents_on_restore = true;
+    };
   };
 
   home.packages =
@@ -230,9 +242,6 @@ in
     ]
     ++ lib.optionals (userApps.handy.enable or false) [
       llm-agents.handy
-    ]
-    ++ lib.optionals (userApps.herdr.enable or false) [
-      llm-agents.herdr
     ]
     ++ lib.optionals (userApps.todoist.enable or false) [
       todoist

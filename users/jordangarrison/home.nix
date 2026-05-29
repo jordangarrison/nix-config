@@ -88,6 +88,12 @@ in
 
   programs.herdr = {
     enable = userApps.herdr.enable or false;
+    integrations = [
+      "claude"
+      "codex"
+      "pi"
+      "opencode"
+    ];
     settings = {
       onboarding = false;
       theme.name = "rose-pine";

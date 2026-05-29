@@ -30,17 +30,27 @@
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
-  # Opportunity-specific keyboard configuration (caps2esc)
-  services.interception-tools = {
+  # Per-device keyboard remapping via keyd.
+  # Listed devices get: caps -> esc/ctrl, and left/right Alt <-> Meta swap.
+  # Any keyboard NOT listed here (e.g. QMK boards that handle their own
+  # remapping) is left completely untouched — keyd does not open it.
+  # Iterate live with `sudo keyd reload`; only the config file changes
+  # need a rebuild to materialize into /etc/keyd/.
+  services.keyd = {
     enable = true;
-    plugins = with pkgs; [ interception-tools-plugins.caps2esc ];
-    udevmonConfig = ''
-      - JOB: "${pkgs.interception-tools}/bin/intercept -g $DEVNODE | ${pkgs.interception-tools-plugins.caps2esc}/bin/caps2esc | ${pkgs.interception-tools}/bin/uinput -d $DEVNODE"
-        DEVICE:
-          NAME: "AT Translated Set 2 keyboard"
-          EVENTS:
-            EV_KEY: [KEY_CAPSLOCK, KEY_ESC, KEY_LEFTCTRL]
-    '';
+    keyboards.framework-and-k400 = {
+      ids = [
+        "0001:0001" # AT Translated Set 2 keyboard (Framework internal, PS/2)
+        "046d:404b" # Logitech K400 wireless keyboard
+      ];
+      settings.main = {
+        capslock = "overload(control, esc)";
+        leftalt = "leftmeta";
+        leftmeta = "leftalt";
+        rightalt = "rightmeta";
+        rightmeta = "rightalt";
+      };
+    };
   };
 
   # Opportuity-specific firewall configuration

@@ -271,7 +271,10 @@
                 enable = true;
                 username = "jordangarrison";
                 homeDirectory = "/home/jordangarrison";
-                swapSuperAlt = true;
+                # super/alt swap is handled per-device by interception-tools
+                # (see hosts/opportunity/configuration.nix). Compositor-level
+                # XKB swap is off so QMK/external boards aren't double-swapped.
+                swapSuperAlt = false;
                 apps = {
                   slack.enable = true;
                   spotify.enable = true;

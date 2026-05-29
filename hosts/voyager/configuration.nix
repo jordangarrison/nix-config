@@ -22,18 +22,18 @@
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
-  # Voyager-specific keyboard configuration (caps2esc)
-  services.interception-tools = {
+  # Keyboard remapping via keyd: caps -> esc on tap, ctrl on hold.
+  # Applied to all keyboards (wildcard `*`) to preserve the previous
+  # caps2esc behavior. To scope to specific devices, replace the wildcard
+  # with vendor:product IDs (find via `cat /proc/bus/input/devices`).
+  services.keyd = {
     enable = true;
-    plugins = with pkgs; [
-      interception-tools-plugins.caps2esc
-    ];
-    udevmonConfig = ''
-      - JOB: "${pkgs.interception-tools}/bin/intercept -g $DEVNODE | ${pkgs.interception-tools-plugins.caps2esc}/bin/caps2esc | ${pkgs.interception-tools}/bin/uinput -d $DEVNODE"
-        DEVICE:
-          EVENTS:
-            EV_KEY: [KEY_CAPSLOCK, KEY_ESC, KEY_LEFTCTRL]
-    '';
+    keyboards.default = {
+      ids = [ "*" ];
+      settings.main = {
+        capslock = "overload(control, esc)";
+      };
+    };
   };
 
   # User configuration now handled by user modules in flake.nix

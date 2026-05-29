@@ -173,12 +173,27 @@ in
           transform.rotation = 270; # Portrait rotation
         };
       })
-      # opportunity: Framework 12 Laptop with single eDP-1 display
+      # opportunity: Framework 12 Laptop, optionally docked to Samsung 4K
       (lib.mkIf (hostname == "opportunity") {
         "eDP-1" = {
           # Framework 12 internal display: 2256x1504@60Hz
           # Using auto-detection for resolution
           scale = 1.5;
+          # Placed below the external monitor so they don't overlap when docked
+          position = {
+            x = 0;
+            y = 1080;
+          };
+        };
+        # Match the Samsung 4K by make/model/serial so the config applies
+        # whichever port it's plugged into (DP, HDMI, dock, etc.)
+        "Samsung Electric Company SAMSUNG 0x01000E00" = {
+          mode = {
+            width = 3840;
+            height = 2160;
+            refresh = 60.0;
+          };
+          scale = 2.75;
           position = {
             x = 0;
             y = 0;

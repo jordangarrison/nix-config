@@ -113,6 +113,7 @@
             ./modules/okta-cli-client-overlay.nix
             ./modules/readwise-cli-overlay.nix
             ./modules/varlock-overlay.nix
+            ./modules/pup-overlay.nix
             ./modules/sidecar-overlay.nix
             ./modules/brave-overlay.nix
             ./modules/tea-overlay.nix
@@ -175,6 +176,7 @@
                   google-cloud-sdk.enable = true;
                   azure-cli.enable = true;
                   okta.enable = true;
+                  pup.enable = true;
                   handy.enable = true;
                   herdr.enable = true;
                 };
@@ -242,6 +244,7 @@
             ./modules/okta-cli-client-overlay.nix
             ./modules/readwise-cli-overlay.nix
             ./modules/varlock-overlay.nix
+            ./modules/pup-overlay.nix
             ./modules/sidecar-overlay.nix
             ./modules/brave-overlay.nix
             ./modules/nixos/common.nix
@@ -287,6 +290,7 @@
                   codex.enable = true;
                   google-cloud-sdk.enable = true;
                   okta.enable = true;
+                  pup.enable = true;
                   handy.enable = true;
                   herdr.enable = true;
                 };
@@ -336,6 +340,7 @@
             ./modules/okta-cli-client-overlay.nix
             ./modules/readwise-cli-overlay.nix
             ./modules/varlock-overlay.nix
+            ./modules/pup-overlay.nix
             ./modules/sidecar-overlay.nix
             ./modules/brave-overlay.nix
             ./modules/nixos/common.nix
@@ -393,6 +398,7 @@
             ./modules/okta-cli-client-overlay.nix
             ./modules/readwise-cli-overlay.nix
             ./modules/varlock-overlay.nix
+            ./modules/pup-overlay.nix
             ./modules/sidecar-overlay.nix
             ./modules/brave-overlay.nix
             ./modules/nixos/common.nix
@@ -450,6 +456,7 @@
             ./modules/okta-cli-client-overlay.nix
             ./modules/readwise-cli-overlay.nix
             ./modules/varlock-overlay.nix
+            ./modules/pup-overlay.nix
             ./modules/sidecar-overlay.nix
             ./modules/nixos/emacs.nix
             ./modules/nixos/fonts.nix
@@ -467,6 +474,7 @@
                   homeDirectory = "/Users/jordan.garrison";
                   userApps = {
                     azure-cli.enable = true;
+                    pup.enable = true;
                     herdr.enable = true;
                   };
                 };
@@ -495,6 +503,7 @@
             ./modules/okta-cli-client-overlay.nix
             ./modules/readwise-cli-overlay.nix
             ./modules/varlock-overlay.nix
+            ./modules/pup-overlay.nix
             ./modules/sidecar-overlay.nix
             ./modules/brave-overlay.nix
             ./users/jordangarrison/home.nix

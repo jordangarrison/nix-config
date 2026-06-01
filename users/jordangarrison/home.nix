@@ -242,6 +242,9 @@ in
     ++ lib.optionals (userApps.okta.enable or false) [
       okta-cli-client
     ]
+    ++ lib.optionals (userApps.pup.enable or false) [
+      pup # AI-agent-ready CLI for Datadog's observability platform
+    ]
     ++ lib.optionals (userApps.codex.enable or false) [
       llm-agents.codex
       llm-agents.opencode

@@ -98,6 +98,7 @@ in
       onboarding = false;
       theme.name = "rose-pine";
       ui.agent_panel_scope = "all";
+      ui.sound.enabled = false; # silence the agent state-change chime
       experimental.pane_history = true;
       session.resume_agents_on_restore = true;
     };

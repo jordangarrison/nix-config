@@ -17,11 +17,12 @@ let
     # Shell integration
     shell-integration = zsh
 
-    # GTK single-instance: reuse existing process for new windows
-    # Required for niri — ghostty GTK4 surface fails to initialize when
-    # spawned fresh from the compositor, so we keep one instance alive
-    # (via spawn-at-startup) and let new invocations attach to it.
-    gtk-single-instance = true
+    # GTK single-instance: disabled. A long-lived primary instance can wedge
+    # (accepts the new-window activation but stops creating surfaces), which
+    # silently breaks Super+Enter — the launcher hands off and exits 0 but no
+    # window appears. Fresh per-window spawns from the compositor work fine on
+    # Ghostty 1.3.1 + GTK 4.20.3, so each window is its own process instead.
+    gtk-single-instance = false
 
     # Keybindings
     # Shift+Enter sends newline for Claude Code multiline input

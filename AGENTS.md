@@ -826,6 +826,20 @@ If herdr refuses the handoff (incompatible protocol across versions), restart th
 server normally; `pane_history` + `resume_agents_on_restore` restore scrollback and
 agent conversations.
 
+**Crash-loop recovery (server segfaults on restore / TUI shows "io error"):**
+A corrupt `~/.config/herdr/session-history.json` (persisted scrollback) can segfault
+the server on restore — even on a version that supposedly fixed the crash (0.6.8
+still segfaulted on a history file poisoned under 0.6.6/0.6.7, ogulcancelik/herdr#453).
+The handoff can *appear* to succeed in the log, then the new server dies right after
+`session restore evaluated workspaces=N` with a native libc backtrace, leaving the
+TUI talking to a dead socket ("io error"). Recovery:
+1. `pgrep -af 'herdr server'` — confirm no server is actually running.
+2. Back up `session.json` + `session-history.json`, then `rm -f ~/.config/herdr/herdr.sock ~/.config/herdr/herdr-client.sock` (stale sockets from the dead server).
+3. **Quarantine the scrollback, keep the layout:** `mv session-history.json session-history.json.quarantine-<tag>`. `session.json` holds workspaces/tabs/panes; `session-history.json` is only scrollback — moving the latter aside loses scrollback but keeps the full layout.
+4. Restart detached so it outlives your shell: `setsid herdr server >> herdr-server.log 2>> herdr-server.stderr.log </dev/null &`
+5. Verify: `pgrep -af 'herdr server'` stays up + `herdr workspace list` responds, then reattach with `herdr`.
+Keep the quarantined history file — it reproduces the crash and is worth attaching upstream.
+
 ## Documentation Structure
 
 The `docs/` directory contains project documentation:

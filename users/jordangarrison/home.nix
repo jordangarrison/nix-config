@@ -88,9 +88,10 @@ in
 
   programs.herdr = {
     enable = userApps.herdr.enable or false;
-    # Pinned to herdr 0.6.6 via the herdr-pin flake input — 0.6.7 crash-loops on
-    # restore over unicode pane scrollback (ogulcancelik/herdr#453). Remove this
-    # override and the herdr-pin input in flake.nix once upstream ships a fix.
+    # Pinned to herdr 0.6.8 via the herdr-pin flake input — fixes the unicode
+    # pane-scrollback crash-loop that affected 0.6.6/0.6.7 (ogulcancelik/herdr#453).
+    # Remove this override and the herdr-pin input in flake.nix once the main
+    # llm-agents input ships herdr >=0.6.8.
     package = inputs.herdr-pin.packages.${pkgs.stdenv.hostPlatform.system}.herdr;
     integrations = [
       "claude"

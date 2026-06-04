@@ -31,12 +31,12 @@
       # inputs.nixpkgs.follows = "nixpkgs";
     };
     llm-agents.url = "github:numtide/llm-agents.nix";
-    # Pin herdr to 0.6.6: 0.6.7 crash-loops on restore when persisted pane
-    # scrollback contains unicode/emoji (ogulcancelik/herdr#453). Only herdr is
-    # pulled from this rev; the rest of llm-agents stays current. Drop this input
-    # and the programs.herdr.package override in users/jordangarrison/home.nix
-    # once a fixed herdr (>0.6.7) lands upstream.
-    herdr-pin.url = "github:numtide/llm-agents.nix/a418d272c8ed1f30bce9919cd738d347bf2d9d1c";
+    # Pin herdr to 0.6.8: the 0.6.7 unicode-scrollback crash-loop persisted on
+    # 0.6.6 too (ogulcancelik/herdr#453); upstream fixed it in 0.6.8. Only herdr
+    # is pulled from this rev; the rest of llm-agents stays current. Drop this
+    # input and the programs.herdr.package override in users/jordangarrison/home.nix
+    # once the main llm-agents input catches up to herdr >=0.6.8.
+    herdr-pin.url = "github:numtide/llm-agents.nix/25a97203ed9695166febf0680bc2f85815b9f846";
     niri.url = "github:sodiboo/niri-flake";
     noctalia = {
       url = "github:noctalia-dev/noctalia-shell";

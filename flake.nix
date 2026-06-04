@@ -31,12 +31,12 @@
       # inputs.nixpkgs.follows = "nixpkgs";
     };
     llm-agents.url = "github:numtide/llm-agents.nix";
-    # Pin herdr to 0.6.8: the 0.6.7 unicode-scrollback crash-loop persisted on
-    # 0.6.6 too (ogulcancelik/herdr#453); upstream fixed it in 0.6.8. Only herdr
-    # is pulled from this rev; the rest of llm-agents stays current. Drop this
-    # input and the programs.herdr.package override in users/jordangarrison/home.nix
-    # once the main llm-agents input catches up to herdr >=0.6.8.
-    herdr-pin.url = "github:numtide/llm-agents.nix/25a97203ed9695166febf0680bc2f85815b9f846";
+    # Pin herdr to 0.6.4: 0.6.6/0.6.7/0.6.8 all suffer the same restore
+    # crash-loop / disconnect (ogulcancelik/herdr#453 and the "io error" segfault
+    # on session-history restore). 0.6.4 predates the regression. Only herdr is
+    # pulled from this rev; the rest of llm-agents stays current. Revisit the pin
+    # once a herdr release is confirmed stable on restore.
+    herdr-pin.url = "github:numtide/llm-agents.nix/2aad42e79b1d7b2ca226e409e65a4bf7d728823e";
     niri.url = "github:sodiboo/niri-flake";
     noctalia = {
       url = "github:noctalia-dev/noctalia-shell";

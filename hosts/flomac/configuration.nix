@@ -9,7 +9,9 @@
     onActivation = {
       autoUpdate = true;
       upgrade = true;
-      cleanup = "uninstall";
+      # cleanup disabled — Homebrew 5.1.15 broke `brew bundle install --cleanup`
+      # (requires --force/HOMEBREW_ASK). nix-darwin fix tracked in PR #1774 / issue #1787.
+      cleanup = "none";
     };
     taps = [ "homebrew/services" "deskflow/homebrew-tap" "manaflow-ai/cmux" ];
     brews = [

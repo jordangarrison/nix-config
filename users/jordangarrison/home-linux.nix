@@ -12,7 +12,9 @@
     ../../modules/home/zed-editor
   ];
 
-  home.packages = lib.optionals (userApps.warp.enable or false) [
+  home.packages = [
+    pkgs.llm-agents.agent-browser # Headless browser automation CLI for AI agents (Linux only — dashboard pnpm build OOMs on aarch64-darwin)
+  ] ++ lib.optionals (userApps.warp.enable or false) [
     inputs.warp-preview.packages.${pkgs.system}.default
   ];
 

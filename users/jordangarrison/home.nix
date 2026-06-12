@@ -315,6 +315,9 @@ in
     ]
     ++ lib.optionals (userApps.freelens.enable or false) [
       freelens-bin
+    ]
+    ++ lib.optionals ((userApps.codiff.enable or false) && pkgs.stdenv.isLinux) [
+      codiff
     ];
 
   programs.gpg = {

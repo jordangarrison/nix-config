@@ -122,6 +122,7 @@
             ./modules/varlock-overlay.nix
             ./modules/pup-overlay.nix
             ./modules/sidecar-overlay.nix
+            ./modules/codiff-overlay.nix
             ./modules/brave-overlay.nix
             ./modules/tea-overlay.nix
             ./modules/nixos/common.nix
@@ -180,6 +181,7 @@
                   nextcloud.enable = true;
                   deskflow.enable = true;
                   codex.enable = true;
+                  codiff.enable = true;
                   google-cloud-sdk.enable = true;
                   azure-cli.enable = true;
                   okta.enable = true;
@@ -253,6 +255,7 @@
             ./modules/varlock-overlay.nix
             ./modules/pup-overlay.nix
             ./modules/sidecar-overlay.nix
+            ./modules/codiff-overlay.nix
             ./modules/brave-overlay.nix
             ./modules/nixos/common.nix
             ./modules/nixos/brother-printer.nix
@@ -295,6 +298,7 @@
                   todoist.enable = true;
                   nextcloud.enable = true;
                   codex.enable = true;
+                  codiff.enable = true;
                   google-cloud-sdk.enable = true;
                   okta.enable = true;
                   pup.enable = true;
@@ -349,6 +353,7 @@
             ./modules/varlock-overlay.nix
             ./modules/pup-overlay.nix
             ./modules/sidecar-overlay.nix
+            ./modules/codiff-overlay.nix
             ./modules/brave-overlay.nix
             ./modules/nixos/common.nix
             ./modules/nixos/brother-printer.nix
@@ -407,6 +412,7 @@
             ./modules/varlock-overlay.nix
             ./modules/pup-overlay.nix
             ./modules/sidecar-overlay.nix
+            ./modules/codiff-overlay.nix
             ./modules/brave-overlay.nix
             ./modules/nixos/common.nix
             ./modules/nixos/brother-printer.nix
@@ -465,6 +471,7 @@
             ./modules/varlock-overlay.nix
             ./modules/pup-overlay.nix
             ./modules/sidecar-overlay.nix
+            ./modules/codiff-overlay.nix
             ./modules/nixos/emacs.nix
             ./modules/nixos/fonts.nix
             ./hosts/flomac/configuration.nix
@@ -512,6 +519,7 @@
             ./modules/varlock-overlay.nix
             ./modules/pup-overlay.nix
             ./modules/sidecar-overlay.nix
+            ./modules/codiff-overlay.nix
             ./modules/brave-overlay.nix
             ./users/jordangarrison/home.nix
           ];

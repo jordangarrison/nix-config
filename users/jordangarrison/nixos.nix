@@ -46,6 +46,7 @@ in {
       warp.enable = lib.mkEnableOption "Warp terminal (preview)";
 
       # Dev tools (heavy, built from source)
+      codiff.enable = lib.mkEnableOption "Codiff local Git diff viewer";
       freelens.enable = lib.mkEnableOption "Freelens Kubernetes IDE";
       sidecar.enable = lib.mkEnableOption "Sidecar TUI for coding agents";
       codex.enable = lib.mkEnableOption "Codex and OpenCode LLM agents";

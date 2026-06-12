@@ -121,6 +121,7 @@ in
       llm-agents.claude-code
       sox # Audio playback/recording, used by Claude Code
       otel-tui # Terminal OpenTelemetry viewer
+      stack-cli # Squash-safe stacked PR/MR repair CLI (kitlangton/stack), installs `stack`
 
       # Ralph - iterative AI loop utility
       ralph
@@ -318,6 +319,9 @@ in
     ]
     ++ lib.optionals ((userApps.codiff.enable or false) && pkgs.stdenv.isLinux) [
       codiff
+    ]
+    ++ lib.optionals (userApps.plannotator.enable or false) [
+      plannotator
     ];
 
   programs.gpg = {

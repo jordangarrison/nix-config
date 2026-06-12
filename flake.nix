@@ -123,6 +123,8 @@
             ./modules/pup-overlay.nix
             ./modules/sidecar-overlay.nix
             ./modules/codiff-overlay.nix
+            ./modules/plannotator-overlay.nix
+            ./modules/stack-cli-overlay.nix
             ./modules/brave-overlay.nix
             ./modules/tea-overlay.nix
             ./modules/nixos/common.nix
@@ -182,6 +184,7 @@
                   deskflow.enable = true;
                   codex.enable = true;
                   codiff.enable = true;
+                  plannotator.enable = true;
                   google-cloud-sdk.enable = true;
                   azure-cli.enable = true;
                   okta.enable = true;
@@ -256,6 +259,8 @@
             ./modules/pup-overlay.nix
             ./modules/sidecar-overlay.nix
             ./modules/codiff-overlay.nix
+            ./modules/plannotator-overlay.nix
+            ./modules/stack-cli-overlay.nix
             ./modules/brave-overlay.nix
             ./modules/nixos/common.nix
             ./modules/nixos/brother-printer.nix
@@ -299,6 +304,7 @@
                   nextcloud.enable = true;
                   codex.enable = true;
                   codiff.enable = true;
+                  plannotator.enable = true;
                   google-cloud-sdk.enable = true;
                   okta.enable = true;
                   pup.enable = true;
@@ -354,6 +360,8 @@
             ./modules/pup-overlay.nix
             ./modules/sidecar-overlay.nix
             ./modules/codiff-overlay.nix
+            ./modules/plannotator-overlay.nix
+            ./modules/stack-cli-overlay.nix
             ./modules/brave-overlay.nix
             ./modules/nixos/common.nix
             ./modules/nixos/brother-printer.nix
@@ -413,6 +421,8 @@
             ./modules/pup-overlay.nix
             ./modules/sidecar-overlay.nix
             ./modules/codiff-overlay.nix
+            ./modules/plannotator-overlay.nix
+            ./modules/stack-cli-overlay.nix
             ./modules/brave-overlay.nix
             ./modules/nixos/common.nix
             ./modules/nixos/brother-printer.nix
@@ -472,6 +482,8 @@
             ./modules/pup-overlay.nix
             ./modules/sidecar-overlay.nix
             ./modules/codiff-overlay.nix
+            ./modules/plannotator-overlay.nix
+            ./modules/stack-cli-overlay.nix
             ./modules/nixos/emacs.nix
             ./modules/nixos/fonts.nix
             ./hosts/flomac/configuration.nix
@@ -488,6 +500,7 @@
                   homeDirectory = "/Users/jordan.garrison";
                   userApps = {
                     azure-cli.enable = true;
+                    plannotator.enable = true;
                     pup.enable = true;
                     herdr.enable = true;
                   };
@@ -520,6 +533,8 @@
             ./modules/pup-overlay.nix
             ./modules/sidecar-overlay.nix
             ./modules/codiff-overlay.nix
+            ./modules/plannotator-overlay.nix
+            ./modules/stack-cli-overlay.nix
             ./modules/brave-overlay.nix
             ./users/jordangarrison/home.nix
           ];

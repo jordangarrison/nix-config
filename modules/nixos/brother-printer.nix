@@ -20,4 +20,12 @@
     }];
     ensureDefaultPrinter = "Brother_3765";
   };
+
+  # The `everywhere` driverless model makes lpadmin query the live printer over
+  # IPP at activation time. On a laptop that roams (or whenever the printer is
+  # simply powered off), that query times out, ensure-printers.service exits
+  # non-zero, and the whole `nixos-rebuild switch` aborts (exit 4). Treat that
+  # connection failure (exit 1) as success so an unreachable printer never
+  # blocks activation — the queue registers normally once the printer is online.
+  systemd.services.ensure-printers.serviceConfig.SuccessExitStatus = "0 1";
 }

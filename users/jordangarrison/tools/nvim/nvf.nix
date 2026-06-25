@@ -51,14 +51,14 @@
           nix.enable = true;
           python.enable = true;
           svelte.enable = true;
-          tailwind.enable = true;
-          ts.enable = true;
+          typescript.enable = true;
         };
         lsp = {
           enable = true;
           formatOnSave = true;
           lightbulb.enable = true;
           trouble.enable = true;
+          presets.tailwindcss-language-server.enable = true;
         };
         statusline.lualine = {
           enable = true;

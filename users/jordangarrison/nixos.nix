@@ -78,7 +78,6 @@ in {
         stable.nextcloud-client
       ] ++ lib.optionals cfg.apps.obsidian.enable [
         obsidian
-        logseq
       ] ++ lib.optionals cfg.apps.todoist.enable [
         todoist-electron
       ] ++ lib.optionals cfg.apps.session-desktop.enable [

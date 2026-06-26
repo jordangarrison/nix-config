@@ -13,19 +13,16 @@
 
   hardware.printers = {
     ensurePrinters = [{
-      name = "Brother_3765";
+      name = "Brother_MFC_L3760CDW";
       location = "Office";
       deviceUri = "ipp://192.168.68.73/ipp/print";
-      model = "everywhere";
+      # Use a local generic IPP Everywhere PPD instead of model = "everywhere".
+      # "everywhere" makes lpadmin contact the printer at activation to fetch its
+      # capabilities, so a powered-off printer fails ensure-printers.service and
+      # aborts the whole `nh os switch/test` activation. The local PPD registers
+      # the queue without touching the network; jobs simply queue when it's offline.
+      model = "drv:///cupsfilters.drv/pwgrast.ppd";
     }];
-    ensureDefaultPrinter = "Brother_3765";
+    ensureDefaultPrinter = "Brother_MFC_L3760CDW";
   };
-
-  # The `everywhere` driverless model makes lpadmin query the live printer over
-  # IPP at activation time. On a laptop that roams (or whenever the printer is
-  # simply powered off), that query times out, ensure-printers.service exits
-  # non-zero, and the whole `nixos-rebuild switch` aborts (exit 4). Treat that
-  # connection failure (exit 1) as success so an unreachable printer never
-  # blocks activation — the queue registers normally once the printer is online.
-  systemd.services.ensure-printers.serviceConfig.SuccessExitStatus = "0 1";
 }

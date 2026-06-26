@@ -102,7 +102,6 @@
         "chatgpt.desktop"
         "todoist.desktop"
         "obsidian.desktop"
-        "logseq.desktop"
         "slack.desktop"
         "discord.desktop"
         "btop.desktop"

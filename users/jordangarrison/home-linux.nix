@@ -14,6 +14,7 @@
 
   home.packages = [
     pkgs.llm-agents.agent-browser # Headless browser automation CLI for AI agents (Linux only — dashboard pnpm build OOMs on aarch64-darwin)
+    pkgs.llm-agents.claude-desktop # Claude desktop app (Electron)
   ] ++ lib.optionals (userApps.warp.enable or false) [
     inputs.warp-preview.packages.${pkgs.system}.default
   ];

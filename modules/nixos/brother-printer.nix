@@ -15,13 +15,17 @@
     ensurePrinters = [{
       name = "Brother_MFC_L3760CDW";
       location = "Office";
-      deviceUri = "ipp://192.168.68.73/ipp/print";
-      # Use a local generic IPP Everywhere PPD instead of model = "everywhere".
-      # "everywhere" makes lpadmin contact the printer at activation to fetch its
-      # capabilities, so a powered-off printer fails ensure-printers.service and
-      # aborts the whole `nh os switch/test` activation. The local PPD registers
-      # the queue without touching the network; jobs simply queue when it's offline.
-      model = "drv:///cupsfilters.drv/pwgrast.ppd";
+      # Address the printer by its stable mDNS name, not a DHCP-assigned IP.
+      # The lease changes (e.g. .73 -> .58) silently break a hardcoded-IP queue;
+      # BRWD8B32FCE8935.local always resolves to the printer via Avahi.
+      deviceUri = "ipp://BRWD8B32FCE8935.local/ipp/print";
+      # This printer rejects the generic pwgrast.ppd raster ("Print job canceled
+      # at printer"). model = "everywhere" queries the printer's real IPP
+      # capabilities so the job format is one it accepts. Tradeoff: lpadmin
+      # contacts the printer at activation, so a powered-off printer fails
+      # ensure-printers.service and aborts `nh os switch/test`. Keep the printer
+      # on when rebuilding, or temporarily comment this host out if it's offline.
+      model = "everywhere";
     }];
     ensureDefaultPrinter = "Brother_MFC_L3760CDW";
   };

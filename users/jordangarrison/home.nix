@@ -71,7 +71,7 @@ in
   # Environment variables
   home.sessionVariables = {
     DEV_PATH = "$HOME/dev";
-    EDITOR = "${emacsPackage}/bin/emacsclient -nw -a ''";
+    EDITOR = "nvim";
   };
 
   # Let Home Manager install and manage itself.
@@ -402,7 +402,7 @@ in
       init.defaultBranch = "main";
       pull.ff = "only";
       merge.tool = "vimdiff";
-      core.editor = "emacsclient";
+      core.editor = "nvim";
       url."git@github.com:".insteadOf = "https://github.com/";
       github.user = "jordangarrison";
       gitlab.user = "jordan.andrew.garrison";

@@ -106,6 +106,19 @@ in
       ui.sound.enabled = false; # silence the agent state-change chime
       experimental.pane_history = true;
       session.resume_agents_on_restore = true;
+      # Direct (no-prefix) grove-style navigation. Caveat: these are grabbed
+      # globally, so terminal apps inside panes never see these Meta chords
+      # (e.g. terminal Emacs M-h/M-j/M-k/M-l).
+      keys = {
+        focus_pane_left = "alt+h";
+        focus_pane_down = "alt+j";
+        focus_pane_up = "alt+k";
+        focus_pane_right = "alt+l";
+        previous_workspace = "alt+shift+k"; # up the sidebar list
+        next_workspace = "alt+shift+j"; # down the sidebar list
+        previous_tab = "alt+{";
+        next_tab = "alt+}";
+      };
     };
   };
 

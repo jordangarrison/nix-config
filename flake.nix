@@ -49,6 +49,10 @@
       url = "github:jordangarrison/sweet-nothings";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    focus-fox = {
+      url = "github:jordangarrison/focus-fox";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nix-zed-extensions = {
       url = "github:DuskSystems/nix-zed-extensions";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -100,6 +104,7 @@
       niri,
       noctalia,
       sweet-nothings,
+      focus-fox,
       nix-zed-extensions,
       greenlight,
       panko,

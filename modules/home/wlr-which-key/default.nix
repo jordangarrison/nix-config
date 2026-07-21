@@ -55,6 +55,7 @@ let
         (submenu "m" "Media" [
           (entry "o" "OBS Studio" "obs")
         ])
+        (entry "p" "Focus Fox (Pomodoro)" "ghostty -e focus-fox")
       ])
 
       # [w] Web

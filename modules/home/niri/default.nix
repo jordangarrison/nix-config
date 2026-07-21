@@ -87,6 +87,9 @@ in
     # Sweet Nothings - voice dictation tool
     inputs.sweet-nothings.packages.${pkgs.stdenv.hostPlatform.system}.default
 
+    # Focus Fox - terminal pomodoro timer
+    inputs.focus-fox.packages.${pkgs.stdenv.hostPlatform.system}.default
+
     # File manager (terminal)
     yazi
 

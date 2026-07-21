@@ -11,6 +11,7 @@
     bookmarkedRepos = [
       "jordangarrison/nix-config"
       "jordangarrison/sweet-nothings"
+      "jordangarrison/focus-fox"
       "jordangarrison/wiggle-puppy"
       "jordangarrison/panko"
       "flocasts/web-monorepo"

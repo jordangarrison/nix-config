@@ -101,7 +101,7 @@ Interactive hierarchical command menu powered by `wlr-which-key`. Press `Mod+D` 
 |---------|-----|----------|
 | Power | p | Suspend, Reboot, Shutdown, Lock Screen |
 | Screenshots | s | Region/Screen/Window capture with Annotate or Clipboard |
-| Apps | a | AI Tools (Claude, ChatGPT, Gemini), System (btop, nmtui), Media (OBS) |
+| Apps | a | AI Tools (Claude, ChatGPT, Gemini), System (btop, nmtui), Media (OBS), Focus Fox (p) |
 | Web | w | Mail, GitHub repos, Jira, Calendar, Meet |
 | Media | m | Headphone/Speaker switching, Mic mute |
 | Session | x | Reload config, Quit niri, Hotkey overlay |

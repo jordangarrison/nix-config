@@ -437,11 +437,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1784860269,
-        "narHash": "sha256-ts4tkpdzP7uLXuLnr+c3tM5f5eSs/s7VIvSOioahOaA=",
+        "lastModified": 1784923001,
+        "narHash": "sha256-cVKMllr04ly2vu7E8A44Tvyxryb+3uKw8P2OnmKeVKo=",
         "owner": "jordangarrison",
         "repo": "focus-fox",
-        "rev": "15609e0936f8a8d44bc11ce9140280575bf25b54",
+        "rev": "8e65b5bd8a7a3bd3d8f6c4a590723a437154852a",
         "type": "github"
       },
       "original": {

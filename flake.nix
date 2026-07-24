@@ -233,6 +233,7 @@
               home-manager.users.jordangarrison.imports = [
                 ./modules/home/niri
                 ./modules/home/tea
+                ./modules/home/yazi
               ];
 
               # Configure tea CLI for Forgejo access
@@ -340,6 +341,7 @@
               home-manager.users.jordangarrison.imports = [
                 ./modules/home/niri
                 ./modules/home/tablet-mode
+                ./modules/home/yazi
               ];
 
               # Enable virtualization with virt-manager

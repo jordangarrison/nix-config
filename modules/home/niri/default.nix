@@ -90,9 +90,6 @@ in
     # Focus Fox - terminal pomodoro timer
     inputs.focus-fox.packages.${pkgs.stdenv.hostPlatform.system}.default
 
-    # File manager (terminal)
-    yazi
-
     # System tray applets
     networkmanagerapplet
     blueman

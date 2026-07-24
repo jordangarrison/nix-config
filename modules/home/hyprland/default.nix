@@ -31,9 +31,6 @@ in
     # Emoji picker (Hyprland-specific, Niri uses noctalia)
     rofimoji
 
-    # File manager (terminal)
-    yazi
-
     # System tray applets
     networkmanagerapplet
     blueman
@@ -49,13 +46,6 @@ in
   # This prevents conflicts when running multiple desktops (Hyprland/Niri)
   systemd.user.services.mako = {
     Install.WantedBy = lib.mkForce [ ];
-  };
-
-  # Yazi file manager configuration
-  programs.yazi = {
-    enable = true;
-    enableZshIntegration = true;
-    shellWrapperName = "y";
   };
 
   # XDG config files via mkOutOfStoreSymlink for live editing

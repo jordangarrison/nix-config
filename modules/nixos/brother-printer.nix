@@ -29,4 +29,10 @@
     }];
     ensureDefaultPrinter = "Brother_MFC_L3760CDW";
   };
+
+  # A roaming laptop often can't reach the printer, and model = "everywhere"
+  # makes lpadmin contact it during activation. Treat lpadmin's exit 1
+  # (connection failure) as success so an unreachable printer doesn't abort
+  # `nh os switch/test`; the queue is (re)created on the next rebuild at home.
+  systemd.services.ensure-printers.serviceConfig.SuccessExitStatus = "1";
 }

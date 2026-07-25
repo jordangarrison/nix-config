@@ -11,8 +11,8 @@ let
     window-padding-x = 5
     window-padding-y = 5
 
-    # Theme (built-in rose-pine)
-    theme = Rose Pine
+    # Theme follows desktop color-scheme (noctalia syncs it via gsettings)
+    theme = dark:Rose Pine,light:Rose Pine Dawn
 
     # Shell integration
     shell-integration = zsh

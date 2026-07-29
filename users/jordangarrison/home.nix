@@ -289,7 +289,8 @@ in
           # emacs
           emacsPackages.sqlite3
           glibc
-          gnaural
+          # gnaural was removed from unstable (unmaintained, gtk2); still in 25.11
+          stable.gnaural
           grip
           pavucontrol
           pinentry-gnome3

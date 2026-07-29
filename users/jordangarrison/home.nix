@@ -5,7 +5,7 @@
   username,
   homeDirectory,
   inputs,
-  userApps ? {},
+  userApps ? { },
   ...
 }:
 
@@ -398,6 +398,7 @@ in
     };
     extensions = with pkgs; [
       gh-dash
+      gh-stack
     ];
   };
 

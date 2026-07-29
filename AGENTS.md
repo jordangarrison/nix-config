@@ -827,6 +827,9 @@ server normally; `pane_history` + `resume_agents_on_restore` restore scrollback 
 agent conversations.
 
 **Crash-loop recovery (server segfaults on restore / TUI shows "io error"):**
+*Historical: this regression hit 0.6.6–0.6.8 and was resolved upstream; the 0.6.4
+pin was removed 2026-07-28 when 0.7.5 handed off and restored cleanly. Procedure
+kept as a fallback for any future restore crash.*
 A corrupt `~/.config/herdr/session-history.json` (persisted scrollback) can segfault
 the server on restore — even on a version that supposedly fixed the crash (0.6.8
 still segfaulted on a history file poisoned under 0.6.6/0.6.7, ogulcancelik/herdr#453).

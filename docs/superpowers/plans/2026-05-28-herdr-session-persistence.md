@@ -6,7 +6,7 @@
 
 **Architecture:** A new `programs.herdr` home-manager module (modeled on the existing `programs.tea` / `programs.pi` modules) owns herdr's `config.toml`, writing it from a TOML settings attrset and installing the herdr package. A small `herdr-handoff` script package wraps `herdr server live-handoff --import-exe`, which is the only Nix-viable way to keep live pane processes alive across a herdr binary swap (the bundled `herdr update` downloader can't write to `/nix/store`). The existing per-host `userApps.herdr.enable` switch drives the module.
 
-**Tech Stack:** Nix, home-manager, `pkgs.formats.toml`, `lib/mkScript.nix`, herdr 0.6.4 (`pkgs.llm-agents.herdr`).
+**Tech Stack:** Nix, home-manager, `pkgs.formats.toml`, `lib/mkScript.nix`, herdr 0.6.4 (`pkgs.llm-agents.herdr`; 0.7.5+ since 2026-07-28).
 
 **Reference spec:** `docs/superpowers/specs/2026-05-28-herdr-session-persistence-design.md`
 

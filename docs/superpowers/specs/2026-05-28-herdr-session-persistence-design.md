@@ -6,7 +6,7 @@
 
 ## Problem
 
-herdr is installed via Nix (`llm-agents.herdr`, v0.6.4) and enabled per-host through
+herdr is installed via Nix (`llm-agents.herdr`, v0.6.4 at the time of writing; 0.7.5+ since 2026-07-28) and enabled per-host through
 `userApps.herdr.enable` (endeavour, opportunity, and the work Darwin host). Its config at
 `~/.config/herdr/config.toml` is hand-edited and currently sets only `onboarding`, `theme`,
 and `ui.agent_panel_scope`. **None of herdr's persistence features are enabled.**

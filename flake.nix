@@ -31,12 +31,6 @@
       # inputs.nixpkgs.follows = "nixpkgs";
     };
     llm-agents.url = "github:numtide/llm-agents.nix";
-    # Pin herdr to 0.6.4: 0.6.6/0.6.7/0.6.8 all suffer the same restore
-    # crash-loop / disconnect (ogulcancelik/herdr#453 and the "io error" segfault
-    # on session-history restore). 0.6.4 predates the regression. Only herdr is
-    # pulled from this rev; the rest of llm-agents stays current. Revisit the pin
-    # once a herdr release is confirmed stable on restore.
-    herdr-pin.url = "github:numtide/llm-agents.nix/2aad42e79b1d7b2ca226e409e65a4bf7d728823e";
     niri.url = "github:sodiboo/niri-flake";
     noctalia = {
       # Pinned to the last v4 (QML/quickshell) commit. v5 is a ground-up C++
@@ -100,7 +94,6 @@
       aws-use-sso,
       hubctl,
       llm-agents,
-      herdr-pin,
       niri,
       noctalia,
       sweet-nothings,

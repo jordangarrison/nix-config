@@ -1,6 +1,13 @@
 { config, lib, pkgs, osConfig ? null, ... }:
 
 let
+  # Touchscreen (ILIT2901 via I2C-HID). This by-path symlink only exists once
+  # the touchscreen has probed successfully, which can be after
+  # graphical-session.target — so lisgd must wait for it instead of assuming
+  # it is present at service start.
+  touchscreenDevice =
+    "/dev/input/by-path/pci-0000:00:15.0-platform-i2c_designware.0-event";
+
   # Show OSK script - starts wvkbd if not running
   showOsk = pkgs.writeShellScript "show-osk" ''
     if ! ${pkgs.procps}/bin/pgrep -x wvkbd-mobintl > /dev/null; then
@@ -42,6 +49,24 @@ let
     "-g '2,LR,*,*,R,${pkgs.wtype}/bin/wtype -M alt -k Right -m alt'"
     "-g '2,RL,*,*,R,${pkgs.wtype}/bin/wtype -M alt -k Left -m alt'"
   ];
+
+  # Wait for the touchscreen device before starting lisgd; libinput treats a
+  # missing path as a client bug and lisgd exits immediately, so without the
+  # wait the service fails in a restart loop whenever the touchscreen probes
+  # late (or not at all).
+  lisgdStart = pkgs.writeShellScript "lisgd-start" ''
+    for _ in $(${pkgs.coreutils}/bin/seq 60); do
+      [ -e ${touchscreenDevice} ] && break
+      ${pkgs.coreutils}/bin/sleep 1
+    done
+    if [ ! -e ${touchscreenDevice} ]; then
+      echo "lisgd: touchscreen device ${touchscreenDevice} did not appear within 60s" >&2
+      exit 1
+    fi
+    exec ${pkgs.lisgd}/bin/lisgd -d ${touchscreenDevice} ${
+      lib.concatStringsSep " " gestures
+    }
+  '';
 in {
   # Packages for tablet mode
   home.packages = with pkgs; [
@@ -60,9 +85,9 @@ in {
     };
     Service = {
       Type = "simple";
-      ExecStart = "${pkgs.lisgd}/bin/lisgd -d /dev/input/by-path/pci-0000:00:15.0-platform-i2c_designware.0-event ${lib.concatStringsSep " " gestures}";
+      ExecStart = "${lisgdStart}";
       Restart = "on-failure";
-      RestartSec = 3;
+      RestartSec = 10;
     };
     Install.WantedBy = [ "graphical-session.target" ];
   };
@@ -76,7 +101,7 @@ in {
     };
     Service = {
       Type = "simple";
-      ExecStart = "${pkgs.iio-niri}/bin/iio-niri";
+      ExecStart = "${pkgs.iio-niri}/bin/iio-niri listen";
       Restart = "on-failure";
       RestartSec = 3;
     };

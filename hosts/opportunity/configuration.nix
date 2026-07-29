@@ -16,6 +16,14 @@
   # Use latest kernel.
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
+  # Workaround for kernel 7.1.0 HID battery regression (fixed upstream in
+  # 7.1.1, commit b15b03d6): if the PIXA3854 touchpad / ILIT2901 touchscreen
+  # first bind to hid-generic and are later re-probed by hid_multitouch, the
+  # kernel oopses in hidinput_setup_battery. Loading hid_multitouch from the
+  # initrd ensures it is registered before the I2C-HID devices appear, so no
+  # re-probe happens. Safe to drop once confirmed running kernel >= 7.1.1.
+  boot.initrd.kernelModules = [ "hid_multitouch" ];
+
   # Swap configuration
   swapDevices = [{
     device = "/swapfile";

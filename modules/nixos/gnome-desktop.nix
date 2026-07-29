@@ -2,6 +2,7 @@
   config,
   pkgs,
   lib,
+  inputs,
   ...
 }:
 
@@ -54,7 +55,7 @@ with lib;
     # Enable D-Bus
     services.dbus.enable = true;
 
-    # Install Firefox
+    # Install Firefox release and Nightly
     programs.firefox.enable = true;
 
     # 1Password programs
@@ -63,6 +64,8 @@ with lib;
 
     # Common GNOME packages
     environment.systemPackages = with pkgs; [
+      inputs.firefox-nightly.packages.${pkgs.system}.firefox-nightly-bin
+
       # GNOME utilities
       gnome-tweaks
       gnome-remote-desktop

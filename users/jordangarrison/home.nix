@@ -97,6 +97,9 @@ in
     settings = {
       onboarding = false;
       theme.name = "rose-pine";
+      # Agent panel as an attention queue (agents needing input first)
+      # instead of grouped by workspace.
+      ui.agent_panel_sort = "priority";
       ui.sound.enabled = false; # silence the agent state-change chime
       experimental.pane_history = true;
       session.resume_agents_on_restore = true;

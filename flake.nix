@@ -47,6 +47,7 @@
       url = "github:jordangarrison/focus-fox";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    firefox-nightly.url = "github:nix-community/flake-firefox-nightly";
     nix-zed-extensions = {
       url = "github:DuskSystems/nix-zed-extensions";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -98,6 +99,7 @@
       noctalia,
       sweet-nothings,
       focus-fox,
+      firefox-nightly,
       nix-zed-extensions,
       greenlight,
       panko,

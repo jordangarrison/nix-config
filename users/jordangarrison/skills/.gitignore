@@ -1,0 +1,3 @@
+# Runtime state written by skills at run time — not config
+.cache.json
+.identity.json

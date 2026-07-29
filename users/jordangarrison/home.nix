@@ -28,7 +28,14 @@ in
     ../../modules/home/languages
     ../../modules/home/pi
     ../../modules/home/herdr
+    ../../modules/home/agent-skills
   ];
+
+  programs.agent-skills = {
+    enable = true;
+    skillsDir = ./skills;
+    liveDir = "${config.home.homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/skills";
+  };
 
   languages = {
     clojure.enable = true;

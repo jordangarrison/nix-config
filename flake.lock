@@ -411,11 +411,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1784923001,
-        "narHash": "sha256-cVKMllr04ly2vu7E8A44Tvyxryb+3uKw8P2OnmKeVKo=",
+        "lastModified": 1785365026,
+        "narHash": "sha256-k2oRCDz6zGmv3UXZjtx0Ouu8jEzRai1hFId4jJByNKA=",
         "owner": "jordangarrison",
         "repo": "focus-fox",
-        "rev": "8e65b5bd8a7a3bd3d8f6c4a590723a437154852a",
+        "rev": "a25b8fe30ffd1b97abcb74908921ad4d9039e176",
         "type": "github"
       },
       "original": {
@@ -1144,11 +1144,11 @@
         "rust-overlay": "rust-overlay_4"
       },
       "locked": {
-        "lastModified": 1772059033,
-        "narHash": "sha256-AeKV6zeT9Xg6VXMf4cdvidmoGrbvGdoiIJH7NewW0VY=",
+        "lastModified": 1785366251,
+        "narHash": "sha256-JwVNt8/tDM38E77gyHJlBXzy7wo2nramxz3fNfSZJ5I=",
         "owner": "jordangarrison",
         "repo": "sweet-nothings",
-        "rev": "d99eef412aff9261a3891f21ed3c2e144dd58a6b",
+        "rev": "fd26a141065c51fe19f1ead3cd283d4c8aac07d0",
         "type": "github"
       },
       "original": {

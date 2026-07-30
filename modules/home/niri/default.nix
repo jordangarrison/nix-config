@@ -14,6 +14,18 @@ let
   scriptsPath = "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/hypr/scripts";
 
   noctaliaPkg = inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default;
+  sweetNothingsPkg =
+    inputs.sweet-nothings.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs
+      (_: {
+        buildInputs = with pkgs; [
+          alsa-lib
+          openssl
+          libx11
+          libxcursor
+          libxrandr
+          libxi
+        ];
+      });
 
   # Get hostname from osConfig if available (NixOS), otherwise use null
   hostname = if osConfig != null then osConfig.networking.hostName else null;
@@ -85,7 +97,7 @@ in
   # (noctalia-shell is added automatically by programs.noctalia-shell above)
   home.packages = with pkgs; [
     # Sweet Nothings - voice dictation tool
-    inputs.sweet-nothings.packages.${pkgs.stdenv.hostPlatform.system}.default
+    sweetNothingsPkg
 
     # Focus Fox - terminal pomodoro timer
     inputs.focus-fox.packages.${pkgs.stdenv.hostPlatform.system}.default

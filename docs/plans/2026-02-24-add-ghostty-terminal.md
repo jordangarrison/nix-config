@@ -123,7 +123,7 @@ git commit -m "feat(ghostty): configure ghostty matching alacritty look and feel
 In `users/jordangarrison/home.nix`, in the Linux-only packages section (the `else` block starting around line 203), add:
 
 ```nix
-inputs.ghostty.packages.${pkgs.system}.default
+inputs.ghostty.packages.${pkgs.stdenv.hostPlatform.system}.default
 ```
 
 Add it near the other flake input packages (around line 237, near `inputs.hubctl`).
@@ -162,7 +162,7 @@ with lib;
 
 let
   cfg = config.ghosttyApps;
-  ghosttyPkg = inputs.ghostty.packages.${pkgs.system}.default;
+  ghosttyPkg = inputs.ghostty.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
   # Create wrapper scripts for each app
   wrapperScripts = listToAttrs (map

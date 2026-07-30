@@ -9,9 +9,9 @@ with lib;
 
   config = mkIf config.languages.elixir.enable {
     home.packages = with pkgs; [
-      elixir
+      beamPackages.elixir
       elixir-ls
-      erlang
+      beamPackages.erlang
       rebar3
     ];
   };

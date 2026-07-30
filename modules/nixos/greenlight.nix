@@ -1,8 +1,9 @@
-{ config, lib, pkgs, ... }:
+{ config, inputs, lib, pkgs, ... }:
 
 {
   services.greenlight = {
     enable = true;
+    package = inputs.greenlight.packages.${pkgs.stdenv.hostPlatform.system}.default;
     host = "endeavour";
     port = 4444;
     listenAddress = "0.0.0.0";

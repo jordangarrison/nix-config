@@ -71,12 +71,29 @@ in
     # old quickshell process keeps holding the IPC instance ID and new
     # `noctalia-shell ipc call ...` invocations fail.
     inputs.noctalia.homeModules.default
+    inputs.sweet-nothings.homeManagerModules.default
   ];
 
   programs.noctalia-shell = {
     enable = true;
     systemd.enable = true;
     package = noctaliaPkg;
+  };
+
+  programs.sweet-nothings = {
+    enable = true;
+    package = sweetNothingsPkg;
+    settings = {
+      exit_delay = "1s";
+      preferred_words = [
+        "Mikayla"
+        "Isla"
+        "NixOS"
+        "Garrison"
+        "FloSports"
+        "herdr"
+      ];
+    };
   };
 
   # Clipboard services via Home Manager (systemd-managed)
@@ -96,9 +113,6 @@ in
   # Packages needed for niri desktop environment
   # (noctalia-shell is added automatically by programs.noctalia-shell above)
   home.packages = with pkgs; [
-    # Sweet Nothings - voice dictation tool
-    sweetNothingsPkg
-
     # Focus Fox - terminal pomodoro timer
     inputs.focus-fox.packages.${pkgs.stdenv.hostPlatform.system}.default
 

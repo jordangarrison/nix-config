@@ -241,6 +241,9 @@ in
       lazyjournal
       lazysql
 
+      # Code review TUI
+      inputs.tuicr.packages.${pkgs.stdenv.hostPlatform.system}.default
+
       # AWS Tools from flake inputs
       inputs.aws-tools.packages.${pkgs.stdenv.hostPlatform.system}.default
       inputs.aws-use-sso.packages.${pkgs.stdenv.hostPlatform.system}.default

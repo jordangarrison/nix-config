@@ -71,6 +71,10 @@
       url = "github:MichaelVessia/grove";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    tuicr = {
+      url = "github:agavra/tuicr";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     warp-preview = {
       url = "github:jordangarrison/warp-preview-flake";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -106,6 +110,7 @@
       drawl,
       lakeline-cg,
       grove,
+      tuicr,
       warp-preview,
       sre-claude-auto-runner,
     }:

@@ -1,7 +1,10 @@
-{ config, lib, pkgs, ... }:
+{ config, inputs, lib, pkgs, ... }:
 
 {
-  services.lakeline-cg.enable = true;
+  services.lakeline-cg = {
+    enable = true;
+    package = inputs.lakeline-cg.packages.${pkgs.stdenv.hostPlatform.system}.default;
+  };
 
   security.acme.certs."cg.garrisonsbygrace.com" = {
     group = "nginx";

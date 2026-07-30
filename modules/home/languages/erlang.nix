@@ -14,7 +14,7 @@ with lib;
   # Doom's (erlang +lsp) module will auto-connect once the binary is on PATH.
   config = mkIf config.languages.erlang.enable {
     home.packages = with pkgs; [
-      erlang
+      beamPackages.erlang
       rebar3
       erlfmt
       efmt

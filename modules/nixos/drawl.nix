@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, inputs, lib, pkgs, ... }:
 
 let
   port = 5555;
@@ -11,6 +11,7 @@ in
   services.drawl = {
     enable = true;
     host = "drawl.jordangarrison.dev";
+    package = inputs.drawl.packages.${pkgs.stdenv.hostPlatform.system}.default;
   };
 
   services.nginx.virtualHosts."drawl.jordangarrison.dev-local" = {

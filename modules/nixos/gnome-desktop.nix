@@ -64,7 +64,7 @@ with lib;
 
     # Common GNOME packages
     environment.systemPackages = with pkgs; [
-      inputs.firefox-nightly.packages.${pkgs.system}.firefox-nightly-bin
+      inputs.firefox-nightly.packages.${pkgs.stdenv.hostPlatform.system}.firefox-nightly-bin
 
       # GNOME utilities
       gnome-tweaks

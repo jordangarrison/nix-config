@@ -10,7 +10,7 @@ with lib;
   config = mkIf config.languages.gleam.enable {
     home.packages = with pkgs; [
       gleam
-      erlang
+      beamPackages.erlang
       rebar3
     ];
   };

@@ -1,8 +1,9 @@
-{ config, lib, pkgs, ... }:
+{ config, inputs, lib, pkgs, ... }:
 
 {
   services.panko = {
     enable = true;
+    package = inputs.panko.packages.${pkgs.stdenv.hostPlatform.system}.default;
     host = "panko.jordangarrison.dev";
     port = 4001;
     listenAddress = "127.0.0.1";

@@ -1,0 +1,58 @@
+# Rose Pine (main, dark) local theme for tuicr.
+# Palette: https://rosepinetheme.com/palette (base #191724, text #e0def4,
+# love #eb6f92, gold #f6c177, rose #ebbcba, pine #31748f, foam #9ccfd8,
+# iris #c4a7e7, highlight low/med #21202e/#403d52, overlay #26233a).
+# Diff backgrounds are the accent blended ~20% over base.
+# Additions use foam (rose-pine's convention for git adds on dark);
+# border_focused matches the niri focus ring (foam).
+
+panel_bg = "#191724"       # base
+bg_highlight = "#403d52"   # highlight med
+fg_primary = "#e0def4"     # text
+fg_secondary = "#908caa"   # subtle
+fg_dim = "#6e6a86"         # muted
+
+diff_add = "#9ccfd8"       # foam
+diff_add_bg = "#333c48"    # foam 20% over base
+diff_del = "#eb6f92"       # love
+diff_del_bg = "#43293a"    # love 20% over base
+diff_context = "#e0def4"   # text
+diff_hunk_header = "#c4a7e7" # iris
+expanded_context_fg = "#6e6a86" # muted
+
+syntax_add_bg = "#333c48"
+syntax_del_bg = "#43293a"
+# syntax_theme omitted: tuicr falls back to its bundled dark syntax theme.
+
+file_added = "#9ccfd8"     # foam
+file_modified = "#f6c177"  # gold
+file_deleted = "#eb6f92"   # love
+file_renamed = "#c4a7e7"   # iris
+
+reviewed = "#9ccfd8"       # foam
+pending = "#f6c177"        # gold
+
+comment_note = "#f6c177"       # gold (note = question)
+comment_suggestion = "#9ccfd8" # foam
+comment_issue = "#eb6f92"      # love
+comment_praise = "#31748f"     # pine
+
+border_focused = "#9ccfd8"   # foam, matches niri active focus ring
+border_unfocused = "#403d52" # highlight med
+status_bar_bg = "#26233a"    # overlay
+cursor_color = "#ebbcba"     # rose
+cursor_line_bg = "#21202e"   # highlight low
+branch_name = "#c4a7e7"      # iris
+help_indicator = "#908caa"   # subtle
+
+message_info_fg = "#191724"
+message_info_bg = "#9ccfd8"    # foam
+message_warning_fg = "#191724"
+message_warning_bg = "#f6c177" # gold
+message_error_fg = "#191724"
+message_error_bg = "#eb6f92"   # love
+update_badge_fg = "#191724"
+update_badge_bg = "#f6c177"    # gold
+
+mode_fg = "#191724"
+mode_bg = "#ebbcba"            # rose

@@ -1,0 +1,7 @@
+# Managed by Home Manager (modules/home/tuicr).
+# Theme follows the desktop color-scheme, matching ghostty
+# (dark: Rose Pine, light: Rose Pine Dawn). Both are local themes
+# in the sibling themes/ directory.
+appearance = "system"
+theme_dark = "rose-pine"
+theme_light = "rose-pine-dawn"

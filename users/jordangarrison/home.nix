@@ -28,6 +28,7 @@ in
     ../../modules/home/languages
     ../../modules/home/pi
     ../../modules/home/herdr
+    ../../modules/home/tuicr
     ../../modules/home/agent-skills
   ];
 

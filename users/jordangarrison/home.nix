@@ -534,8 +534,38 @@ in
   programs.emacs = {
     enable = true;
     # Use pgtk variant on Linux for native Wayland support (fixes blurry text with fractional scaling)
-    package = if pkgs.stdenv.isLinux then pkgs.emacs-pgtk else pkgs.emacs;
+    package = emacsPackage;
   };
+
+  # Doom caches Emacs' absolute load-path, including Nix store paths, in an
+  # init file keyed only by the Emacs version. Rebuild that cache when Nix
+  # changes the store path without changing the version.
+  home.activation.doomSyncOnEmacsChange = lib.mkIf pkgs.stdenv.isLinux (
+    lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      doom_cli="${homeDirectory}/.emacs.d/bin/doom"
+      doom_init="${homeDirectory}/.emacs.d/.local/etc/@/init.${lib.versions.majorMinor emacsPackage.version}.el"
+
+      if [[ -x "$doom_cli" ]] \
+        && { [[ ! -f "$doom_init" ]] || ! ${pkgs.gnugrep}/bin/grep -Fq "${emacsPackage}" "$doom_init"; }
+      then
+        echo "Doom cache references an old Emacs store path; running doom sync -U"
+        if ! run ${pkgs.coreutils}/bin/env \
+          PATH="${lib.makeBinPath [
+            config.programs.emacs.finalPackage
+            pkgs.bash
+            pkgs.coreutils
+            pkgs.findutils
+            pkgs.git
+            pkgs.gnugrep
+            pkgs.gnused
+          ]}:$PATH" \
+          "$doom_cli" sync -U
+        then
+          echo "Doom sync failed; Emacs daemon may not start" >&2
+        fi
+      fi
+    ''
+  );
 
   programs.direnv = {
     enable = true;

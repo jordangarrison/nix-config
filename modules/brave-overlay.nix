@@ -1,4 +1,4 @@
-{ ... }:
+{ lib, options, ... }:
 
 {
   # Patch upstream Brave (binary tarball repackaged by nixpkgs) so the Web
@@ -42,21 +42,28 @@
   # Apply this only on single-user trusted machines where the Web Speech API
   # is actually needed. Do not apply to multi-tenant hosts, kiosks exposed
   # to the public internet, or systems running untrusted code.
-  nixpkgs.overlays = [
-    (final: prev: {
-      brave = prev.brave.overrideAttrs (old: {
-        buildInputs = (old.buildInputs or [ ]) ++ [ final.speechd-minimal ];
-        preFixup = (old.preFixup or "") + ''
-          gappsWrapperArgs+=(
-            --prefix LD_LIBRARY_PATH : ${final.lib.makeLibraryPath [ final.speechd-minimal ]}
-            --add-flags "--enable-speech-dispatcher"
-          )
-        '';
-      });
-    })
-  ];
-
-  environment.etc."brave/policies/managed/disable-bad-flag-warnings.json".text = builtins.toJSON {
-    CommandLineFlagSecurityWarningsEnabled = false;
-  };
+  config =
+    {
+      nixpkgs.overlays = [
+        (final: prev: {
+          brave = prev.brave.overrideAttrs (old: {
+            buildInputs = (old.buildInputs or [ ]) ++ [ final.speechd-minimal ];
+            preFixup = (old.preFixup or "") + ''
+              gappsWrapperArgs+=(
+                --prefix LD_LIBRARY_PATH : ${final.lib.makeLibraryPath [ final.speechd-minimal ]}
+                --add-flags "--enable-speech-dispatcher"
+              )
+            '';
+          });
+        })
+      ];
+    }
+    # The managed-policy file lives under the system-level `environment`
+    # namespace, which standalone Home Manager (jordangarrison@normandy) does
+    # not have — only define it where the option exists.
+    // lib.optionalAttrs (options ? environment) {
+      environment.etc."brave/policies/managed/disable-bad-flag-warnings.json".text = builtins.toJSON {
+        CommandLineFlagSecurityWarningsEnabled = false;
+      };
+    };
 }

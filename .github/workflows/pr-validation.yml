@@ -1,0 +1,104 @@
+name: pr-validation
+
+# PR CI for the nix-config flake. Full builds of these configurations
+# (multiple GNOME desktop closures) exceed GitHub-hosted runner disk and
+# time, so every job evaluates configurations to their .drvPath instead —
+# a full module-system evaluation that catches syntax errors, bad option
+# references, missing packages, and broken module wiring without building.
+# See docs/adr/005-pr-ci-nix-validation.md for the trade-offs.
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # The lakeline-cg and sre-claude-auto-runner inputs live on the
+  # Tailscale-only Forgejo, unreachable from GitHub-hosted runners. CI
+  # swaps them for local stubs that mirror the interface this repo uses.
+  STUB_OVERRIDES: >-
+    --override-input lakeline-cg path:./ci/stubs/lakeline-cg
+    --override-input sre-claude-auto-runner path:./ci/stubs/sre-claude-auto-runner
+    --no-write-lock-file
+
+jobs:
+  syntax:
+    name: nix syntax
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25 # v22
+      - name: Parse all .nix files
+        run: |
+          set -euo pipefail
+          fail=0
+          while IFS= read -r -d '' f; do
+            if ! nix-instantiate --parse "$f" > /dev/null 2>&1; then
+              echo "::error file=$f::nix syntax error"
+              nix-instantiate --parse "$f" || true
+              fail=1
+            fi
+          done < <(find . -name '*.nix' -not -path './.git/*' -print0)
+          exit "$fail"
+
+  eval-nixos:
+    name: eval nixos (${{ matrix.host }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        host:
+          - endeavour
+          - opportunity
+          - voyager
+          - discovery
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25 # v22
+      - name: Evaluate system closure
+        run: >-
+          nix eval --raw
+          ".#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel.drvPath"
+          $STUB_OVERRIDES
+
+  eval-darwin:
+    name: eval darwin (H952L3DPHH)
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25 # v22
+      - name: Evaluate system closure
+        run: >-
+          nix eval --raw
+          ".#darwinConfigurations.H952L3DPHH.config.system.build.toplevel.drvPath"
+          $STUB_OVERRIDES
+
+  eval-home:
+    name: eval home (jordangarrison@normandy)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25 # v22
+      - name: Evaluate activation package
+        run: >-
+          nix eval --raw
+          '.#homeConfigurations."jordangarrison@normandy".activationPackage.drvPath'
+          $STUB_OVERRIDES

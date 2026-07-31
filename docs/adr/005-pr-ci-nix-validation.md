@@ -117,5 +117,8 @@ configuration.
   `nh os build → test → switch` discipline remains the last line of defense.
 - The `ci/stubs/` flakes are a maintained artifact: changing what the repo
   consumes from the private inputs requires updating the matching stub.
-- `update-flake-lock.yml` was bumped from `actions/checkout@v3` (deprecated,
-  node16) to `@v4` as part of the same audit.
+- All actions in both workflows are pinned to reviewed full commit SHAs
+  (with a `# vN` comment naming the release) rather than mutable tags or
+  `@main`, so upstream action changes cannot execute in CI without a
+  repository change. Bumping an action means updating the SHA and comment
+  together.

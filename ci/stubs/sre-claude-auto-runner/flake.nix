@@ -15,7 +15,7 @@
           options.services.sre-claude-auto-runner = {
             enable = lib.mkEnableOption "sre-claude-auto-runner (CI stub)";
             user = lib.mkOption { type = lib.types.str; };
-            workspaceDir = lib.mkOption { type = lib.types.str; };
+            workspaceDir = lib.mkOption { type = lib.types.path; };
             dryRun = lib.mkOption { type = lib.types.bool; };
             maxParallel = lib.mkOption { type = lib.types.int; };
             path = lib.mkOption { type = lib.types.listOf lib.types.package; };

@@ -552,6 +552,9 @@
             inherit inputs;
             username = "jordangarrison";
             homeDirectory = "/home/jordangarrison";
+            # Module-arg defaults (`userApps ? { }`) are ignored by the module
+            # system — the arg must be provided, as nixos.nix and the darwin
+            # config both do. No optional apps on the WSL box.
             userApps = { };
           };
         };

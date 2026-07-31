@@ -1,4 +1,4 @@
-{ ... }:
+{ lib, options, ... }:
 
 {
   # Patch upstream Brave (binary tarball repackaged by nixpkgs) so the Web
@@ -8,9 +8,8 @@
   #   2. --enable-speech-dispatcher on the command line — Chromium-based
   #      browsers gate the speechd code path behind this switch and do nothing
   #      without it (which is why dlopen never even fires).
-  #   3. A managed-policy file from modules/nixos/brave-policy.nix suppressing
-  #      Chromium's "bad flags" infobar, which would otherwise warn the user
-  #      about #2 on every launch.
+  #   3. A managed-policy file suppressing Chromium's "bad flags" infobar,
+  #      which would otherwise warn the user about #2 on every launch.
   # Tracked upstream in NixOS/nixpkgs#41074.
   #
   # SECURITY CAVEATS — read before copying this to a different machine.
@@ -43,17 +42,28 @@
   # Apply this only on single-user trusted machines where the Web Speech API
   # is actually needed. Do not apply to multi-tenant hosts, kiosks exposed
   # to the public internet, or systems running untrusted code.
-  nixpkgs.overlays = [
-    (final: prev: {
-      brave = prev.brave.overrideAttrs (old: {
-        buildInputs = (old.buildInputs or [ ]) ++ [ final.speechd-minimal ];
-        preFixup = (old.preFixup or "") + ''
-          gappsWrapperArgs+=(
-            --prefix LD_LIBRARY_PATH : ${final.lib.makeLibraryPath [ final.speechd-minimal ]}
-            --add-flags "--enable-speech-dispatcher"
-          )
-        '';
-      });
-    })
-  ];
+  config =
+    {
+      nixpkgs.overlays = [
+        (final: prev: {
+          brave = prev.brave.overrideAttrs (old: {
+            buildInputs = (old.buildInputs or [ ]) ++ [ final.speechd-minimal ];
+            preFixup = (old.preFixup or "") + ''
+              gappsWrapperArgs+=(
+                --prefix LD_LIBRARY_PATH : ${final.lib.makeLibraryPath [ final.speechd-minimal ]}
+                --add-flags "--enable-speech-dispatcher"
+              )
+            '';
+          });
+        })
+      ];
+    }
+    # The managed-policy file lives under the system-level `environment`
+    # namespace, which standalone Home Manager (jordangarrison@normandy) does
+    # not have — only define it where the option exists.
+    // lib.optionalAttrs (options ? environment) {
+      environment.etc."brave/policies/managed/disable-bad-flag-warnings.json".text = builtins.toJSON {
+        CommandLineFlagSecurityWarningsEnabled = false;
+      };
+    };
 }

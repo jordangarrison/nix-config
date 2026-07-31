@@ -552,6 +552,7 @@
             inherit inputs;
             username = "jordangarrison";
             homeDirectory = "/home/jordangarrison";
+            userApps = { };
           };
         };
       };

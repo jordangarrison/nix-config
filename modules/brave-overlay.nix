@@ -8,8 +8,9 @@
   #   2. --enable-speech-dispatcher on the command line — Chromium-based
   #      browsers gate the speechd code path behind this switch and do nothing
   #      without it (which is why dlopen never even fires).
-  #   3. A managed-policy file suppressing Chromium's "bad flags" infobar,
-  #      which would otherwise warn the user about #2 on every launch.
+  #   3. A managed-policy file from modules/nixos/brave-policy.nix suppressing
+  #      Chromium's "bad flags" infobar, which would otherwise warn the user
+  #      about #2 on every launch.
   # Tracked upstream in NixOS/nixpkgs#41074.
   #
   # SECURITY CAVEATS — read before copying this to a different machine.
@@ -55,8 +56,4 @@
       });
     })
   ];
-
-  environment.etc."brave/policies/managed/disable-bad-flag-warnings.json".text = builtins.toJSON {
-    CommandLineFlagSecurityWarningsEnabled = false;
-  };
 }

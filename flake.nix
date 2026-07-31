@@ -71,6 +71,13 @@
       url = "github:MichaelVessia/grove";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Private flocasts repo — fetched over SSH, so `nh flake update` needs
+    # GitHub SSH access (the daily update-flake-lock action can't touch it).
+    # No nixpkgs follows on purpose: consume the exact toolchain floai's CI
+    # tests (its own nixpkgs pin, bun version).
+    floai = {
+      url = "git+ssh://git@github.com/flocasts/floai";
+    };
     tuicr = {
       url = "github:agavra/tuicr";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -114,6 +121,7 @@
       drawl,
       lakeline-cg,
       grove,
+      floai,
       tuicr,
       warp-preview,
       sre-claude-auto-runner,
@@ -204,6 +212,7 @@
                   pup.enable = true;
                   handy.enable = true;
                   herdr.enable = true;
+                  floai.enable = true;
                 };
               };
 
@@ -536,6 +545,7 @@
                     plannotator.enable = true;
                     pup.enable = true;
                     herdr.enable = true;
+                    floai.enable = true;
                   };
                 };
               };

@@ -20,11 +20,14 @@ concurrency:
 
 env:
   # The lakeline-cg and sre-claude-auto-runner inputs live on the
-  # Tailscale-only Forgejo, unreachable from GitHub-hosted runners. CI
-  # swaps them for local stubs that mirror the interface this repo uses.
+  # Tailscale-only Forgejo, and floai is a private GitHub repo fetched
+  # over SSH — all unreachable from credential-less GitHub-hosted
+  # runners. CI swaps them for local stubs that mirror the interface
+  # this repo uses.
   STUB_OVERRIDES: >-
     --override-input lakeline-cg path:./ci/stubs/lakeline-cg
     --override-input sre-claude-auto-runner path:./ci/stubs/sre-claude-auto-runner
+    --override-input floai path:./ci/stubs/floai
     --no-write-lock-file
 
 jobs:

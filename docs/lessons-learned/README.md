@@ -24,6 +24,7 @@ Lessons learned documents capture:
 ## Documents
 
 - [Tablet Mode Implementation](./tablet-mode-implementation.md) - Touchscreen gestures, auto-rotation, and OSK for Framework 12 laptop
+- [Herdr: agents panel on the opposite side](./herdr-agent-panel-opposite-side.md) - Investigation result: not supported in herdr 0.7.5; upstream path via Ideas discussions
 
 ## When to Create a Lessons Learned Document
 

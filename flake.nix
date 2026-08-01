@@ -422,6 +422,20 @@
           ];
 
         };
+        # Installer ISO for voyager: minimal live CD + the full voyager
+        # closure + a guided install script. Built via packages.voyager-iso.
+        "voyager-installer" = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          specialArgs = {
+            inherit inputs;
+            voyagerToplevel = self.nixosConfigurations.voyager.config.system.build.toplevel;
+            voyagerDiskoScript = self.nixosConfigurations.voyager.config.system.build.diskoScript;
+          };
+          modules = [
+            "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
+            ./hosts/voyager/installer.nix
+          ];
+        };
         "discovery" = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs; };
           modules = [
@@ -564,5 +578,8 @@
           };
         };
       };
+
+      packages.x86_64-linux.voyager-iso =
+        self.nixosConfigurations.voyager-installer.config.system.build.isoImage;
     };
 }

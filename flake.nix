@@ -393,6 +393,8 @@
             ./users/jane/nixos.nix
             ./users/isla/nixos.nix
             ./hosts/voyager/configuration.nix
+            inputs.disko.nixosModules.disko
+            (import ./hosts/voyager/disko.nix { })
             nixos-hardware.nixosModules.apple-macbook-pro-12-1
             home-manager.nixosModules.home-manager
             ./modules/home/defaults.nix

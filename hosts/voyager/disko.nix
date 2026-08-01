@@ -8,6 +8,10 @@
 #   disko --mode destroy,format,mount \
 #     --arg ssdDevice '"/dev/sdX"' --arg sdDevice '"/dev/sdY"' \
 #     ./disko.nix
+#
+# CAUTION: a misspelled --arg name is silently ignored (the `...`
+# swallows it) and the DEFAULT devices get wiped instead. Double-check
+# arg spelling before running destroy modes.
 { ssdDevice ? "/dev/sda", sdDevice ? "/dev/sdb", ... }:
 {
   disko.devices.disk = {
@@ -32,6 +36,7 @@
           swap = {
             priority = 2;
             size = "8G";
+            type = "8200";
             content.type = "swap";
           };
           root = {

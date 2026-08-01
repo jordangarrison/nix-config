@@ -14,7 +14,7 @@
   boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
 
-  # Filesystems and swap are declared by disko (../voyager/disko.nix);
+  # Filesystems and swap are declared by disko (./disko.nix);
   # the old UUID-based entries from the previous install were removed.
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking

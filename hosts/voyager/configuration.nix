@@ -45,6 +45,21 @@
     allowedUDPPortRanges = allowedTCPPortRanges;
   };
 
+  # Shared family storage on the SD card (/data, see disko.nix).
+  # tmpfiles re-asserts ownership/modes every boot, so the layout
+  # self-heals after the card is reformatted or files are restored.
+  users.groups.family.members = [ "jordangarrison" "mikayla" "jane" "isla" ];
+
+  systemd.tmpfiles.rules = [
+    "d /data 0755 root family -"
+    "d /data/jordangarrison 0755 jordangarrison users -"
+    "d /data/mikayla 0755 mikayla users -"
+    "d /data/jane 0755 jane users -"
+    "d /data/isla 0755 isla users -"
+    # setgid + sticky: files inherit the family group; only owners delete.
+    "d /data/shared 3775 root family -"
+  ];
+
   # Power management commands to restart wpa_supplicant on power up
   powerManagement.powerUpCommands = ''
     ${pkgs.systemd}/bin/systemctl restart wpa_supplicant.service

@@ -21,6 +21,9 @@ let
       echo "  /dev/sda  (internal 256 GB SSD  -> NixOS: ESP + swap + root)"
       echo "  /dev/sdb  (256 GB SD card       -> /data)"
       echo
+      echo "NOTE: the installer USB you booted from also appears in the"
+      echo "list above (TRAN usb, label VOYAGER) - do NOT select it."
+      echo
       echo "If the lsblk output above does NOT match those devices, ABORT"
       echo "and partition manually with the disko CLI instead:"
       echo "  disko --mode destroy,format,mount \\"

@@ -28,6 +28,16 @@ let
       echo "    ${./disko.nix}"
       echo "then run: nixos-install --system ${voyagerToplevel} --no-root-passwd"
       echo
+      read -rp "Type the SSD device to wipe (expected: /dev/sda): " ssd
+      read -rp "Type the SD card device to wipe (expected: /dev/sdb): " sd
+      if [ "$ssd" != "/dev/sda" ] || [ "$sd" != "/dev/sdb" ]; then
+        echo
+        echo "Devices differ from the pre-built script's targets."
+        echo "Use the disko CLI escape hatch shown above with your actual"
+        echo "devices, then run the nixos-install command it printed."
+        exit 1
+      fi
+      echo
       read -rp "Type WIPE to continue: " confirm
       if [ "$confirm" != "WIPE" ]; then
         echo "Aborted."
@@ -40,7 +50,9 @@ let
 
       echo
       echo "Set Jordan's login password:"
-      nixos-enter --root /mnt -c 'passwd jordangarrison'
+      nixos-enter --root /mnt -c 'passwd jordangarrison' || {
+        echo "passwd failed - set it on first boot from a console instead."
+      }
 
       echo
       echo "Install complete. Set the other users' passwords after first"

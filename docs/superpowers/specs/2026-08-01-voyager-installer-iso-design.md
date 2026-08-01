@@ -75,8 +75,8 @@ SSD: wipe and format.
 
 All four users share the machine, so `/data` is structured for the family:
 
-- A `family` group (declared in the voyager config) containing jordan, mikayla,
-  jane, and isla.
+- A `family` group (declared in the voyager config) containing jordangarrison,
+  mikayla, jane, and isla.
 - `systemd.tmpfiles.rules` declare the layout (created on every boot, self-healing;
   no install-script chown needed):
   - `/data` — `root:family`, `0755`: browsable top level, no stray files.
@@ -84,6 +84,15 @@ All four users share the machine, so `/data` is structured for the family:
   - `/data/shared` — `root:family`, `3775` (setgid + sticky): everyone can create
     files, new files inherit the `family` group, and only a file's owner can delete
     or rename it.
+
+### 2d. Username normalization
+
+Voyager historically used `jordan` as Jordan's username (with `/home/jordan`),
+unlike every other machine. Since this is a fresh install, the overrides
+(`username = "jordan"`, `homeDirectory = "/home/jordan"`) are removed from
+voyager's block in `flake.nix`, letting the user module's defaults apply:
+username `jordangarrison`, home `/home/jordangarrison`. Consistent with all other
+hosts; no data migration needed because the disk is wiped anyway.
 
 ### 3. Installer ISO (`hosts/voyager/installer.nix`)
 

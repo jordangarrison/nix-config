@@ -59,25 +59,19 @@ GPT layout on the internal disk, mirroring the current scheme declaratively:
   argument with a sensible default for voyager's internal SSD, and the installer
   script passes the user-confirmed device to `disko` at install time. Nothing is
   hardcoded to an unstable `/dev/sdX` name inside the committed config.
-- Only the 256 GB internal SSD is managed by disko. The SD card (below) is
-  deliberately excluded so the destroy/format pass cannot touch it.
+### 2b. SD card (second disko-managed disk)
 
-### 2b. SD card (`/data`, declare-only for now)
+Voyager has a permanently inserted 256 GB SD card, previously exFAT from its macOS
+days. Its data has been backed up externally, so the installer treats it like the
+SSD: wipe and format.
 
-Voyager has a permanently inserted 256 GB SD card carrying an exFAT filesystem from
-its macOS days, with data that must survive the install.
-
-- Declared as a plain `fileSystems."/data"` entry in the voyager config (not in
-  disko): exFAT, mounted by label `sdcard`, with `nofail` (boot proceeds if the card
-  is absent) and `uid`/`gid` mount options so Jordan's user owns the contents
-  (exFAT has no Unix permissions).
-- The install script labels the card `sdcard` non-destructively (`exfatlabel` /
-  `tune.exfat -L`; no reformat, data intact) before installing, so the baked-in
-  fstab entry resolves without knowing the card's UUID at ISO build time.
-- **Future migration (out of scope):** when ready, copy the data off, move the card
-  into `disko.nix` as ext4 (label `sdcard`, same `/data` mount), run disko for that
-  disk, and copy the data back. The mount point and label stay stable across the
-  migration.
+- Declared in `disko.nix` as a second disk: single ext4 partition, label `sdcard`,
+  mounted at `/data` with `nofail` (boot proceeds if the card is ever removed).
+- Its device is likewise a module argument (SD readers enumerate unpredictably),
+  confirmed by the installer script alongside the SSD.
+- Ownership: `/data` is chowned to Jordan's user post-format by the install script
+  (ext4 has real permissions, unlike the old exFAT setup).
+- After first boot, the backed-up data is copied back manually.
 
 ### 3. Installer ISO (`hosts/voyager/installer.nix`)
 
@@ -85,12 +79,11 @@ its macOS days, with data that must survive the install.
 - Embeds the voyager toplevel closure via `isoImage.storeContents = [
   nixosConfigurations.voyager.config.system.build.toplevel ]`.
 - Ships a guided `install-voyager` script on PATH that:
-  1. Shows detected disks and asks the user to confirm the target SSD device
-     (confirm-the-disk prompt; no silent auto-wipe). The SD card is never a
-     candidate target.
+  1. Shows detected disks and asks the user to confirm both target devices — the
+     SSD and the SD card (confirm-the-disk prompt; no silent auto-wipe of either).
   2. Runs `disko` in destroy/format/mount mode against the voyager disko config
-     (SSD only).
-  3. Labels the SD card `sdcard` non-destructively if the label is not already set.
+     (both disks).
+  3. Chowns `/data` to Jordan's user.
   4. Runs `nixos-install --system <embedded voyager toplevel> --no-root-passwd`.
   5. Prints a done message and offers to reboot.
 - The script hardcodes the embedded toplevel store path at ISO build time so no
@@ -142,4 +135,3 @@ install-voyager
 - Remote deploys from endeavour (`nixos-rebuild --target-host` / nh build-host) to
   fix ongoing rebuild pain.
 - Extending disko layouts to other hosts and enabling nixos-anywhere.
-- Migrating the SD card from exFAT to ext4 under disko management (see §2b).

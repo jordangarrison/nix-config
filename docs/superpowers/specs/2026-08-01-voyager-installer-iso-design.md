@@ -69,9 +69,21 @@ SSD: wipe and format.
   mounted at `/data` with `nofail` (boot proceeds if the card is ever removed).
 - Its device is likewise a module argument (SD readers enumerate unpredictably),
   confirmed by the installer script alongside the SSD.
-- Ownership: `/data` is chowned to Jordan's user post-format by the install script
-  (ext4 has real permissions, unlike the old exFAT setup).
 - After first boot, the backed-up data is copied back manually.
+
+### 2c. Family group and /data layout
+
+All four users share the machine, so `/data` is structured for the family:
+
+- A `family` group (declared in the voyager config) containing jordan, mikayla,
+  jane, and isla.
+- `systemd.tmpfiles.rules` declare the layout (created on every boot, self-healing;
+  no install-script chown needed):
+  - `/data` — `root:family`, `0755`: browsable top level, no stray files.
+  - `/data/<user>` — one dir per family member, owned by them, `0755`.
+  - `/data/shared` — `root:family`, `3775` (setgid + sticky): everyone can create
+    files, new files inherit the `family` group, and only a file's owner can delete
+    or rename it.
 
 ### 3. Installer ISO (`hosts/voyager/installer.nix`)
 
@@ -83,9 +95,9 @@ SSD: wipe and format.
      SSD and the SD card (confirm-the-disk prompt; no silent auto-wipe of either).
   2. Runs `disko` in destroy/format/mount mode against the voyager disko config
      (both disks).
-  3. Chowns `/data` to Jordan's user.
-  4. Runs `nixos-install --system <embedded voyager toplevel> --no-root-passwd`.
-  5. Prints a done message and offers to reboot.
+  3. Runs `nixos-install --system <embedded voyager toplevel> --no-root-passwd`.
+  4. Prints a done message and offers to reboot. (No chown step — /data ownership
+     is handled declaratively by tmpfiles rules on first boot, per §2c.)
 - The script hardcodes the embedded toplevel store path at ISO build time so no
   evaluation happens on the laptop.
 

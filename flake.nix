@@ -402,8 +402,6 @@
               # Configure users for voyager
               users.jordangarrison = {
                 enable = true;
-                username = "jordan";
-                homeDirectory = "/home/jordan";
               };
 
               users.mikayla = {

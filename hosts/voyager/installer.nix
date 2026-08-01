@@ -17,37 +17,52 @@ let
       echo
       lsblk -o NAME,SIZE,MODEL,TRAN,TYPE
       echo
-      echo "This will DESTROY ALL DATA on:"
-      echo "  /dev/sda  (internal 256 GB SSD  -> NixOS: ESP + swap + root)"
-      echo "  /dev/sdb  (256 GB SD card       -> /data)"
+      echo "Targets:"
+      echo "  internal 256 GB SSD  -> NixOS: ESP + swap + root"
+      echo "  256 GB SD card       -> /data"
       echo
       echo "NOTE: the installer USB you booted from also appears in the"
       echo "list above (TRAN usb, label VOYAGER) - do NOT select it."
       echo
-      echo "If the lsblk output above does NOT match those devices, ABORT"
-      echo "and partition manually with the disko CLI instead:"
-      echo "  disko --mode destroy,format,mount \\"
-      echo "    --arg ssdDevice '\"/dev/sdX\"' --arg sdDevice '\"/dev/sdY\"' \\"
-      echo "    ${./disko.nix}"
-      echo "then run: nixos-install --system ${voyagerToplevel} --no-root-passwd"
-      echo
-      read -rp "Type the SSD device to wipe (expected: /dev/sda): " ssd
-      read -rp "Type the SD card device to wipe (expected: /dev/sdb): " sd
-      if [ "$ssd" != "/dev/sda" ] || [ "$sd" != "/dev/sdb" ]; then
-        echo
-        echo "Devices differ from the pre-built script's targets."
-        echo "Use the disko CLI escape hatch shown above with your actual"
-        echo "devices, then run the nixos-install command it printed."
+      read -rp "SSD device to wipe [/dev/sda]: " ssd
+      if [ -z "$ssd" ]; then ssd=/dev/sda; fi
+      read -rp "SD card device to wipe [/dev/sdb]: " sd
+      if [ -z "$sd" ]; then sd=/dev/sdb; fi
+
+      if [ ! -b "$ssd" ] || [ ! -b "$sd" ]; then
+        echo "Not a block device: $ssd and/or $sd" >&2
         exit 1
       fi
+      if [ "$ssd" = "$sd" ]; then
+        echo "SSD and SD card devices must differ." >&2
+        exit 1
+      fi
+      for dev in "$ssd" "$sd"; do
+        if lsblk -no LABEL "$dev" | grep -q VOYAGER; then
+          echo "$dev is the installer USB you booted from - refusing." >&2
+          exit 1
+        fi
+      done
+
       echo
+      echo "About to DESTROY ALL DATA on $ssd (SSD) and $sd (SD card)."
       read -rp "Type WIPE to continue: " confirm
       if [ "$confirm" != "WIPE" ]; then
         echo "Aborted."
         exit 1
       fi
 
-      ${voyagerDiskoScript}
+      if [ "$ssd" = "/dev/sda" ] && [ "$sd" = "/dev/sdb" ]; then
+        # Fast path: pre-built partition script, no evaluation needed.
+        ${voyagerDiskoScript}
+      else
+        # Retargeted devices: small offline nix evaluation against the
+        # ISO's bundled nixpkgs channel.
+        disko --mode destroy,format,mount \
+          --arg ssdDevice "\"$ssd\"" \
+          --arg sdDevice "\"$sd\"" \
+          ${./disko.nix}
+      fi
 
       nixos-install --system ${voyagerToplevel} --no-root-passwd
 

@@ -83,6 +83,10 @@
       url = "git+ssh://forgejo@forgejo.jordangarrison.dev/jordangarrison/sre-claude-auto-runner.git";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    disko = {
+      url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -113,6 +117,7 @@
       tuicr,
       warp-preview,
       sre-claude-auto-runner,
+      disko,
     }:
     {
       nixosConfigurations = {

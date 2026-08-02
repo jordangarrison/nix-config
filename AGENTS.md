@@ -87,8 +87,16 @@ All git commands in this repository are configured to disable pager output by de
   - Virtualization enabled
 
 - **voyager**: MacBook Pro running NixOS (Apple hardware profile)
-  - Laptop-optimized GNOME configuration
-  - Development environment
+  - Treated as an always-on server (`machine.type = "desktop"`), NOT a laptop:
+    S3 suspend permanently kills the internal SD reader backing the family
+    `/data` share, and only a cold power-off revives it. All sleep verbs are
+    disabled; closing the lid locks the screen only. Do not re-enable suspend
+    or flip `machine.type` back to `"laptop"` — the full investigation (every
+    failed kernel-quirk workaround) is documented in
+    `hosts/voyager/configuration.nix`.
+  - Family `/data` share on a permanently-inserted SD card (disko-managed,
+    per-user directories + setgid `shared/`)
+  - GNOME desktop, development environment
 
 - **discovery**: AMD-based system
   - Minimal GNOME setup
@@ -199,7 +207,7 @@ Each system configuration follows a consistent pattern:
 ├── hosts/                    # Host-specific configurations
 │   ├── endeavour/            # Desktop workstation (NixOS) - services hub
 │   ├── opportunity/          # Framework 12 laptop (NixOS) - tablet mode
-│   ├── voyager/              # MacBook Pro (NixOS)
+│   ├── voyager/              # MacBook Pro (NixOS) - always-on family server, never sleeps
 │   ├── discovery/            # AMD system (NixOS)
 │   └── flomac/               # Work MacBook (nix-darwin)
 ├── users/                    # User configurations

@@ -382,7 +382,11 @@
             ./modules/nixos/brother-printer.nix
             ./modules/nixos/lan.nix
             ./modules/nixos/gnome-desktop.nix
-            { gbg-config.machine.type = "laptop"; }
+            # "desktop" despite being a MacBook: treated as an always-on server
+            # because S3 permanently kills the SD reader backing /data (no
+            # software recovery, only a cold power-off). This disables suspend
+            # and GDM auto-suspend. See hosts/voyager/configuration.nix.
+            { gbg-config.machine.type = "desktop"; }
             # ./modules/nixos/hyprland-desktop.nix  # Disabled - voyager uses GNOME only
             ./modules/nixos/fonts.nix
             ./modules/nixos/audio/pipewire.nix

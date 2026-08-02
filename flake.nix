@@ -83,6 +83,10 @@
       url = "git+ssh://forgejo@forgejo.jordangarrison.dev/jordangarrison/sre-claude-auto-runner.git";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    disko = {
+      url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -113,6 +117,7 @@
       tuicr,
       warp-preview,
       sre-claude-auto-runner,
+      disko,
     }:
     {
       nixosConfigurations = {
@@ -388,6 +393,8 @@
             ./users/jane/nixos.nix
             ./users/isla/nixos.nix
             ./hosts/voyager/configuration.nix
+            inputs.disko.nixosModules.disko
+            (import ./hosts/voyager/disko.nix { })
             nixos-hardware.nixosModules.apple-macbook-pro-12-1
             home-manager.nixosModules.home-manager
             ./modules/home/defaults.nix
@@ -395,8 +402,6 @@
               # Configure users for voyager
               users.jordangarrison = {
                 enable = true;
-                username = "jordan";
-                homeDirectory = "/home/jordan";
               };
 
               users.mikayla = {
@@ -416,6 +421,20 @@
             }
           ];
 
+        };
+        # Installer ISO for voyager: minimal live CD + the full voyager
+        # closure + a guided install script. Built via packages.voyager-iso.
+        "voyager-installer" = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          specialArgs = {
+            inherit inputs;
+            voyagerToplevel = self.nixosConfigurations.voyager.config.system.build.toplevel;
+            voyagerDiskoScript = self.nixosConfigurations.voyager.config.system.build.diskoScript;
+          };
+          modules = [
+            "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
+            ./hosts/voyager/installer.nix
+          ];
         };
         "discovery" = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs; };
@@ -559,5 +578,8 @@
           };
         };
       };
+
+      packages.x86_64-linux.voyager-iso =
+        self.nixosConfigurations.voyager-installer.config.system.build.isoImage;
     };
 }

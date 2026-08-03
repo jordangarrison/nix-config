@@ -147,6 +147,9 @@ Jordan's Custom Flakes:
 - `sweet-nothings`: Custom utility
 - `greenlight`: GitHub repository dashboard
 - `lakeline-cg`: Custom service (private Forgejo)
+- `floai`: FloSports `flo` CLI (private flocasts GitHub repo, fetched over
+  SSH — `nh flake update floai` needs GitHub SSH access, and PR CI swaps it
+  for `ci/stubs/floai`)
 
 **Outputs:**
 

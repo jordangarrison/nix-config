@@ -272,6 +272,9 @@ in
     ++ lib.optionals (userApps.pup.enable or false) [
       pup # AI-agent-ready CLI for Datadog's observability platform
     ]
+    ++ lib.optionals (userApps.floai.enable or false) [
+      inputs.floai.packages.${pkgs.stdenv.hostPlatform.system}.flo-cli
+    ]
     ++ lib.optionals (userApps.codex.enable or false) [
       llm-agents.codex
       llm-agents.opencode

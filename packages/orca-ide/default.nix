@@ -27,6 +27,7 @@
   nspr,
   pango,
   python3,
+  runtimeShell,
   systemd,
   xorg,
 }:
@@ -139,15 +140,30 @@ stdenv.mkDerivation {
     install -Dm644 usr/share/applications/orca-ide.desktop \
       $out/share/applications/orca-ide.desktop
     substituteInPlace $out/share/applications/orca-ide.desktop \
-      --replace-fail "/opt/Orca/orca-ide" "orca-ide"
+      --replace-fail "/opt/Orca/orca-ide" "orca-ide-app"
 
+    # GUI launcher.
     # LD_LIBRARY_PATH: the bundled ANGLE (libGLESv2.so) dlopens libEGL.so.1
     # itself, so an rpath on the main binary isn't enough.
-    makeWrapper $out/share/orca-ide/orca-ide $out/bin/orca-ide \
+    makeWrapper $out/share/orca-ide/orca-ide $out/bin/orca-ide-app \
       --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath [ libGL ]} \
       --prefix PATH : ${lib.makeBinPath [ computerUsePython ]} \
       --prefix GI_TYPELIB_PATH : ${computerUseTypelibs} \
       --add-flags "\''${NIXOS_OZONE_WL:+\''${WAYLAND_DISPLAY:+--ozone-platform-hint=auto --enable-features=WaylandWindowDecorations --enable-wayland-ime=true}}"
+
+    # Dispatcher matching upstream's Linux split: `orca-ide <subcommand>` is
+    # the CLI (upstream's resources/bin shim runs the Electron binary with
+    # ELECTRON_RUN_AS_NODE against out/cli/index.js and would otherwise start
+    # a second app instance if pointed at the GUI); bare `orca-ide` opens the
+    # app, which upstream only offers via the desktop entry.
+    cat > $out/bin/orca-ide <<EOF
+    #!${runtimeShell}
+    if [ "\$#" -eq 0 ]; then
+      exec "$out/bin/orca-ide-app"
+    fi
+    exec "$out/share/orca-ide/resources/bin/orca-ide" "\$@"
+    EOF
+    chmod 755 $out/bin/orca-ide
 
     runHook postInstall
   '';

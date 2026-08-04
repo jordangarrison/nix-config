@@ -13,8 +13,11 @@
   cups,
   dbus,
   expat,
+  gdk-pixbuf,
   glib,
+  gobject-introspection,
   gtk3,
+  harfbuzz,
   libdrm,
   libgbm,
   libGL,
@@ -23,6 +26,7 @@
   nss,
   nspr,
   pango,
+  python3,
   systemd,
   xorg,
 }:
@@ -45,6 +49,19 @@ let
   source =
     sources.${stdenv.hostPlatform.system}
       or (throw "orca-ide: unsupported platform ${stdenv.hostPlatform.system}");
+
+  # Computer use: the sidecar spawns plain `python3` from PATH to run
+  # resources/computer-use-linux/runtime.py, which imports gi and the
+  # Atspi-2.0 typelib (Gdk-3.0/GdkPixbuf-2.0 for screenshots).
+  computerUsePython = python3.withPackages (ps: [ ps.pygobject3 ]);
+  computerUseTypelibs = lib.makeSearchPath "lib/girepository-1.0" [
+    at-spi2-core
+    gobject-introspection # DBus/cairo core typelibs Atspi and Gdk depend on
+    gtk3
+    gdk-pixbuf
+    pango.out # pango's default output is "bin"; the typelib is in "out"
+    harfbuzz
+  ];
 in
 stdenv.mkDerivation {
   # "orca-ide" (upstream's own binary/deb name) — NOT "orca", which would
@@ -128,6 +145,8 @@ stdenv.mkDerivation {
     # itself, so an rpath on the main binary isn't enough.
     makeWrapper $out/share/orca-ide/orca-ide $out/bin/orca-ide \
       --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath [ libGL ]} \
+      --prefix PATH : ${lib.makeBinPath [ computerUsePython ]} \
+      --prefix GI_TYPELIB_PATH : ${computerUseTypelibs} \
       --add-flags "\''${NIXOS_OZONE_WL:+\''${WAYLAND_DISPLAY:+--ozone-platform-hint=auto --enable-features=WaylandWindowDecorations --enable-wayland-ime=true}}"
 
     runHook postInstall

@@ -344,6 +344,9 @@ in
     ]
     ++ lib.optionals (userApps.plannotator.enable or false) [
       plannotator
+    ]
+    ++ lib.optionals ((userApps.orca.enable or false) && pkgs.stdenv.isLinux) [
+      orca-ide
     ];
 
   programs.gpg = {

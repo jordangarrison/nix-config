@@ -137,6 +137,7 @@
             ./modules/sidecar-overlay.nix
             ./modules/codiff-overlay.nix
             ./modules/plannotator-overlay.nix
+            ./modules/orca-overlay.nix
             ./modules/stack-cli-overlay.nix
             ./modules/brave-overlay.nix
             ./modules/tea-overlay.nix
@@ -198,6 +199,7 @@
                   codex.enable = true;
                   codiff.enable = true;
                   plannotator.enable = true;
+                  orca.enable = true;
                   google-cloud-sdk.enable = true;
                   azure-cli.enable = true;
                   okta.enable = true;
@@ -274,6 +276,7 @@
             ./modules/sidecar-overlay.nix
             ./modules/codiff-overlay.nix
             ./modules/plannotator-overlay.nix
+            ./modules/orca-overlay.nix
             ./modules/stack-cli-overlay.nix
             ./modules/brave-overlay.nix
             ./modules/nixos/common.nix
@@ -319,6 +322,7 @@
                   codex.enable = true;
                   codiff.enable = true;
                   plannotator.enable = true;
+                  orca.enable = true;
                   google-cloud-sdk.enable = true;
                   okta.enable = true;
                   pup.enable = true;

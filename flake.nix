@@ -145,6 +145,7 @@
             ./modules/sidecar-overlay.nix
             ./modules/codiff-overlay.nix
             ./modules/plannotator-overlay.nix
+            ./modules/orca-overlay.nix
             ./modules/stack-cli-overlay.nix
             ./modules/brave-overlay.nix
             ./modules/tea-overlay.nix
@@ -246,9 +247,12 @@
               # Import home modules for jordangarrison on endeavour
               home-manager.users.jordangarrison.imports = [
                 ./modules/home/niri
+                ./modules/home/orca
                 ./modules/home/tea
                 ./modules/home/yazi
               ];
+
+              home-manager.users.jordangarrison.programs.orca.enable = true;
 
               # Configure tea CLI for Forgejo access
               home-manager.users.jordangarrison.programs.tea = {
@@ -283,6 +287,7 @@
             ./modules/sidecar-overlay.nix
             ./modules/codiff-overlay.nix
             ./modules/plannotator-overlay.nix
+            ./modules/orca-overlay.nix
             ./modules/stack-cli-overlay.nix
             ./modules/brave-overlay.nix
             ./modules/nixos/common.nix
@@ -354,9 +359,12 @@
               # Import niri and tablet-mode home modules for jordangarrison on opportunity
               home-manager.users.jordangarrison.imports = [
                 ./modules/home/niri
+                ./modules/home/orca
                 ./modules/home/tablet-mode
                 ./modules/home/yazi
               ];
+
+              home-manager.users.jordangarrison.programs.orca.enable = true;
 
               # Enable virtualization with virt-manager
               virtualization.virt-manager = {

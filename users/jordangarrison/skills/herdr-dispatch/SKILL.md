@@ -1,6 +1,6 @@
 ---
 name: herdr-dispatch
-description: Dispatch a task into an isolated herdr worktree - create (or reuse) the repo's herdr workspace, cut a worktree workspace off the fresh default branch, start an agent in its pane, and hand off minimal context. The dispatching session stays a coordinator; execution happens in the worktree pane and the user manages it there. Triggered by `/herdr-dispatch`, "dispatch this to a worktree", "spin up a worktree for X", or when a workspace AGENTS.md routes parallel/isolated work to herdr. Requires HERDR_ENV=1 (fall back to the workspace's manual .worktrees/ convention otherwise).
+description: Dispatch a task into an isolated herdr workspace - for repo work, cut a worktree workspace off the fresh default branch; for investigation-shaped work with no owning repo, create a plain workspace in the workspace's investigations home instead. Start an agent in the pane and hand off minimal context. The dispatching session stays a coordinator; execution happens in the new pane and the user manages it there. Triggered by `/herdr-dispatch`, "dispatch this to a worktree", "spin up a worktree for X", or when a workspace AGENTS.md routes parallel/isolated work to herdr. Requires HERDR_ENV=1 (fall back to the workspace's manual .worktrees/ convention otherwise).
 ---
 
 # Herdr Dispatch
@@ -13,6 +13,7 @@ Send a unit of work to its own herdr worktree + workspace, staffed with an agent
 
 - A task needs an isolated branch/checkout (feature work, a review, a risky experiment) and the session is running inside herdr.
 - A multi-repo change needs one worktree per repo, each with its own agent and its slice of the context.
+- An investigation-shaped task (diagnose / quantify / "why is X broken") has no obvious owning repo - use **Investigation mode** below instead of a worktree.
 
 **Do NOT use** for quick edits in the current checkout, or outside herdr (`HERDR_ENV` unset) - use the workspace's manual `.worktrees/` fallback instead.
 
@@ -20,7 +21,7 @@ Send a unit of work to its own herdr worktree + workspace, staffed with an agent
 
 - **Task** (required): what the worktree agent should do. A ticket id counts.
 - **Repo(s)**: resolve via the workspace AGENTS.md routing table if not given; ask if ambiguous.
-- **Agent kind**: default `claude`; honor an explicit request (`codex`, etc. - `herdr agent` lists installed kinds).
+- **Agent kind**: default to the calling agent's own kind - a dispatch from claude staffs claude, from codex staffs codex, and likewise for opencode, pi, and any other installed kind. Discover your own kind with `herdr agent get "$HERDR_PANE_ID"` (`.result.agent.agent`) instead of assuming. Honor an explicit request for a different kind (`herdr agent` lists installed kinds).
 - **Branch name**: default to the ticket's suggested branch (Linear style, e.g. `jordangarrison/sre-123-slug`) in ticketed workspaces, otherwise a short conventional slug (`fix-pool-leak`).
 
 ## Steps
@@ -42,12 +43,22 @@ Load the [[herdr]] skill first for CLI mechanics - discover syntax from the inst
    ```bash
    herdr agent start <name> --kind <kind> --pane <root-pane-id>
    ```
-   Name it after the task (`[a-z][a-z0-9_-]{0,31}`, unique among live agents, e.g. `playbooks-rp`).
+   `<kind>` is the caller's own kind unless the user asked for a different one (see Inputs). Name it after the task (`[a-z][a-z0-9_-]{0,31}`, unique among live agents, e.g. `playbooks-rp`).
 7. **Hand off context** with `herdr agent prompt <name> "..."`. Keep it minimal: the task, the ticket, "read CLAUDE.md first", and any state the agent can't cheaply rediscover (decisions already made, files already touched, known gotchas). For a multi-repo change, pass only that repo's slice. Do not restate worktree mechanics, commit chains, or the full deliverable list.
 8. **Verify the prompt actually submitted**: multi-line prompts can land as an unsubmitted paste (`[Pasted text #1 ...]` sitting at the input). Check `herdr agent get <name>` - if status is still `idle`, `herdr agent read <name> --source visible --lines 10` to confirm, then `herdr agent send-keys <name> enter` and re-check for `working`.
 9. **Report back**: workspace id + label, agent name, checkout path. Then stand down - coordinate, don't edit the checkout. The user manages the work in the new pane.
 
 For multi-repo dispatch, repeat 1-9 per repo, partitioning the context in step 7.
+
+## Investigation mode (no worktree)
+
+For investigation-shaped tasks, the workspace AGENTS.md names an investigations home (in flocasts: the `investigations` repo, convention `YYYY-MM-DD-<ticket>-<slug>`, see its `CLAUDE.md`). Replace steps 2-5 with:
+
+1. `mkdir` the dated investigation folder in the investigations home.
+2. `herdr workspace create --cwd <folder> --label "<TICKET> <short desc>" --no-focus` - plain workspace; no branch, no worktree, no env files.
+3. Continue from step 6 (start agent, hand off, verify, report). The handoff points at the ticket and the investigations `CLAUDE.md`; include pointers to likely-relevant sibling repos if routing recon already found them.
+
+If the investigation graduates into code changes, run a normal repo dispatch then - findings stay in the investigation folder. Committing/pushing the investigations repo is the user's call; don't do it unasked. Cleanup for these is `herdr workspace close <id>` only - never delete the investigation folder itself.
 
 ## Cleanup (later, on request)
 

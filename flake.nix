@@ -199,7 +199,6 @@
                   codex.enable = true;
                   codiff.enable = true;
                   plannotator.enable = true;
-                  orca.enable = true;
                   google-cloud-sdk.enable = true;
                   azure-cli.enable = true;
                   okta.enable = true;
@@ -239,9 +238,12 @@
               # Import home modules for jordangarrison on endeavour
               home-manager.users.jordangarrison.imports = [
                 ./modules/home/niri
+                ./modules/home/orca
                 ./modules/home/tea
                 ./modules/home/yazi
               ];
+
+              home-manager.users.jordangarrison.programs.orca.enable = true;
 
               # Configure tea CLI for Forgejo access
               home-manager.users.jordangarrison.programs.tea = {
@@ -322,7 +324,6 @@
                   codex.enable = true;
                   codiff.enable = true;
                   plannotator.enable = true;
-                  orca.enable = true;
                   google-cloud-sdk.enable = true;
                   okta.enable = true;
                   pup.enable = true;
@@ -349,9 +350,12 @@
               # Import niri and tablet-mode home modules for jordangarrison on opportunity
               home-manager.users.jordangarrison.imports = [
                 ./modules/home/niri
+                ./modules/home/orca
                 ./modules/home/tablet-mode
                 ./modules/home/yazi
               ];
+
+              home-manager.users.jordangarrison.programs.orca.enable = true;
 
               # Enable virtualization with virt-manager
               virtualization.virt-manager = {

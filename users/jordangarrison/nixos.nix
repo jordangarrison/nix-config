@@ -55,7 +55,6 @@ in {
       azure-cli.enable = lib.mkEnableOption "Azure CLI";
       okta.enable = lib.mkEnableOption "Okta CLI client";
       plannotator.enable = lib.mkEnableOption "Plannotator agent plan/code review surface";
-      orca.enable = lib.mkEnableOption "Orca agent-fleet ADE";
       pup.enable = lib.mkEnableOption "Datadog pup CLI";
       handy.enable = lib.mkEnableOption "Handy push-to-talk speech-to-text";
       herdr.enable = lib.mkEnableOption "Herdr terminal workspace manager for AI coding agents";

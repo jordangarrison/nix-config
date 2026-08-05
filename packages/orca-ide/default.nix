@@ -10,6 +10,7 @@
   at-spi2-atk,
   at-spi2-core,
   cairo,
+  coreutils,
   cups,
   dbus,
   expat,
@@ -29,7 +30,14 @@
   python3,
   runtimeShell,
   systemd,
+  wl-clipboard,
+  xclip,
+  xdotool,
   xorg,
+  xorg-server,
+  waylandSupport ? true,
+  x11Support ? true,
+  headlessSupport ? true,
 }:
 
 let
@@ -63,6 +71,19 @@ let
     pango.out # pango's default output is "bin"; the typelib is in "out"
     harfbuzz
   ];
+  runtimePath = lib.makeBinPath (
+    [
+      computerUsePython
+      coreutils
+    ]
+    ++ lib.optionals waylandSupport [ wl-clipboard ]
+    ++ lib.optionals x11Support [
+      xdotool
+      xclip
+    ]
+    ++ lib.optionals headlessSupport [ xorg-server ]
+  );
+  runtimeLibraryPath = lib.makeLibraryPath [ libGL ];
 in
 stdenv.mkDerivation {
   # "orca-ide" (upstream's own binary/deb name) — NOT "orca", which would
@@ -142,14 +163,24 @@ stdenv.mkDerivation {
     substituteInPlace $out/share/applications/orca-ide.desktop \
       --replace-fail "/opt/Orca/orca-ide" "orca-ide-app"
 
-    # GUI launcher.
+    # GUI launcher. Keep this environment in sync with the CLI wrapper below:
+    # `open` and `serve` can launch the same app from the CLI process.
     # LD_LIBRARY_PATH: the bundled ANGLE (libGLESv2.so) dlopens libEGL.so.1
     # itself, so an rpath on the main binary isn't enough.
     makeWrapper $out/share/orca-ide/orca-ide $out/bin/orca-ide-app \
-      --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath [ libGL ]} \
-      --prefix PATH : ${lib.makeBinPath [ computerUsePython ]} \
+      --prefix LD_LIBRARY_PATH : ${runtimeLibraryPath} \
+      --prefix PATH : ${runtimePath} \
       --prefix GI_TYPELIB_PATH : ${computerUseTypelibs} \
       --add-flags "\''${NIXOS_OZONE_WL:+\''${WAYLAND_DISPLAY:+--ozone-platform-hint=auto --enable-features=WaylandWindowDecorations --enable-wayland-ime=true}}"
+
+    # The CLI shim runs Electron as Node and may respawn the app for `open`
+    # and `serve`. Give it the same runtime environment as the GUI and direct
+    # respawns through the wrapped executable so that environment is retained.
+    wrapProgram $out/share/orca-ide/resources/bin/orca-ide \
+      --prefix LD_LIBRARY_PATH : ${runtimeLibraryPath} \
+      --prefix PATH : ${runtimePath} \
+      --prefix GI_TYPELIB_PATH : ${computerUseTypelibs} \
+      --set-default ORCA_APP_EXECUTABLE "$out/bin/orca-ide-app"
 
     # Dispatcher matching upstream's Linux split: `orca-ide <subcommand>` is
     # the CLI (upstream's resources/bin shim runs the Electron binary with

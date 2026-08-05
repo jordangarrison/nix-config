@@ -46,7 +46,7 @@ PRs with `:reverse:` reaction ("I left a comment") are also **kept** — multipl
 2. **Read thread replies** — `slack_read_thread` with the thread `ts`.
 3. **Parse out PR URLs** — match `https://github.com/<owner>/<repo>/pull/<num>` (Slack-wrapped or bare).
 4. **Filter** — drop the current user's own replies; drop bot replies; for each remaining PR call `gh pr view --json state,mergedAt,headRefName,headRepositoryOwner` and drop merged ones.
-5. **Group by repo + present the plan** — short table; ask user to confirm before creating worktrees (since this writes to disk).
+5. **Group by repo + present the plan** — short table shown for auditability; proceed without waiting for confirmation.
 6. **For each remaining PR**: refresh the main clone, then `git worktree add`, then copy env files + `direnv allow`. Run all per-repo refreshes in parallel; run worktree creation in parallel.
 7. **Report** — print the worktree paths + suggest invoking [[multi-agent-pr-review]].
 
@@ -99,13 +99,13 @@ gh pr view <num> --repo <owner>/<repo> --json state,isDraft,mergedAt,headRefName
 - `state` != `OPEN` (closed PRs).
 - `mergedAt` is not null (merged PRs — surface to user with a one-line note so they know which were skipped for this reason).
 - `reviewDecision` == `"APPROVED"` (formal GitHub approval already in place — same rationale as the `:mega-approved:` Slack filter; the two won't always agree, so check both).
-- (Default) `isDraft` is true — collect drafts and ask user "Drafts found: X, Y; include them?" once for the whole batch.
+- (Default) `isDraft` is true — drop drafts and list them in the Dropped table with reason "draft"; the user can re-run with `--include-drafts` if they want them.
 
 **Important: the Slack-side `:mega-approved:` filter (step 3) and the GitHub-side `reviewDecision: APPROVED` filter both catch already-approved PRs but capture different signals.** A PR can have a Slack mega-approved reaction without a formal GitHub review (someone reacted but never clicked "Approve"). Drop the PR if EITHER filter matches.
 
 Group the survivors by `<owner>/<repo>` for parallel refresh in the next step.
 
-### 5. Present plan + confirm
+### 5. Present plan
 
 Show two tables: **kept** and **dropped (with reason)**.
 
@@ -124,7 +124,7 @@ Dropped:
 
 The "Existing state" column surfaces Slack reactions like `:dumpsterfire:` (changes already requested) and `:reverse:` (someone commented) so the user can decide whether to add another voice. PRs with no reactions show blank.
 
-Ask: "Create N worktrees for these PRs?" — wait for explicit yes before creating any.
+Invoking this skill *is* the consent to create the worktrees — show the tables and proceed straight to step 6, no confirmation gate. Only pause if a Red Flag below applies or the user explicitly asked for a dry-run.
 
 ### 6. Refresh main clones + create worktrees
 
@@ -222,7 +222,7 @@ If the user wants to also drop themselves a Slack mention or a status, that's [[
 | Creating worktrees off a stale `main`/`master` | Always `git fetch --all --prune && git checkout <default> && git pull --ff-only` first. |
 | Slashes in worktree slug | Replace with `-`. `git worktree add /path/chore/foo` will fail or create unexpected nesting. |
 | Forgot `direnv allow` after copying `.envrc` | Always run `direnv allow` on the new worktree dir if an `.envrc` was copied. Without it, devbox/asdf/node tooling won't activate. See [[feedback_worktree_envrc_allow]]. |
-| Auto-creating without preview | Worktrees write to disk and copy secrets. Always preview the plan + ask before creating. |
+| Creating silently | No confirmation gate, but always show the kept/dropped tables before creating — the user must be able to audit what was fanned out and why. |
 | Cloning a repo without asking | If a target repo isn't cloned in the workspace, ask before `gh repo clone` — the user may have a specific clone strategy. |
 
 ## Red Flags — STOP

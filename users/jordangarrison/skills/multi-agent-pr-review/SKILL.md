@@ -1,6 +1,6 @@
 ---
 name: multi-agent-pr-review
-description: Use when the user asks to do a thorough multi-agent review of one or more PRs (or every non-author PR in the daily SRE review thread). Fans out domain specialists + a Rich Hickey "Simple Made Easy" lens reviewer in parallel background, then a consolidator that drops nits and dedupes findings, then 1x1 sign-off per PR before posting via gh api with inline comments. When thread-driven, signals status to the poster via Slack reactions (eye-twitch on launch; mega-approved / reverse / dumpsterfire mirroring the posted verdict). Pass `--skip-user-confirmation` to post reviews and Slack messages with no preview and no per-PR sign-off, and `--sre-thread-loop` to additionally watch today's thread on a self-paced loop until stopped. Triggered by `/review-prs`, "do a multi-agent review", "review the SRE thread PRs", or following a /sre-review thread fan-out.
+description: Use when the user asks to do a thorough multi-agent review of one or more PRs (or every non-author PR in the daily SRE review thread). Fans out domain specialists + a Rich Hickey "Simple Made Easy" lens reviewer in parallel background, then a consolidator that drops nits and dedupes findings, then 1x1 sign-off per PR before posting via gh api with inline comments. When thread-driven, signals status to the poster via Slack reactions (eye-twitch on launch; mega-approved / reverse / dumpsterfire mirroring the posted verdict). Pass `--skip-user-confirmation` (alias: `--yolo`) to post reviews and Slack messages with no preview and no per-PR sign-off, and `--sre-thread-loop` to additionally watch today's thread on a self-paced loop until stopped. Triggered by `/review-prs`, "do a multi-agent review", "review the SRE thread PRs", or following a /sre-review thread fan-out.
 ---
 
 # Multi-Agent PR Review
@@ -27,12 +27,12 @@ Skill accepts:
 - Optional: domain hint to override the auto-derived team (e.g., "skip the Hickey agent on this one", "add an auth-security specialist").
 
 Flags (both optional, composable):
-- `--skip-user-confirmation` → drop the human gate. Post reviews and Slack messages with no preview and no per-PR sign-off. Works with any input, including a single ad-hoc PR URL.
+- `--skip-user-confirmation` (alias: `--yolo` — same meaning everywhere it appears below) → drop the human gate. Post reviews and Slack messages with no preview and no per-PR sign-off. Works with any input, including a single ad-hoc PR URL.
 - `--sre-thread-loop` → watch today's thread on a self-paced loop instead of running once over a fixed set. **Implies `--skip-user-confirmation`** (an unattended loop that stops to ask permission isn't unattended).
 
 The two are deliberately separate concerns: one is *who decides*, the other is *how long you run*. `--skip-user-confirmation` alone is the common case — "review these three PRs and just post them". `--sre-thread-loop` alone is not meaningful.
 
-## `--skip-user-confirmation`
+## `--skip-user-confirmation` (`--yolo`)
 
 Removes the human from the path. Build `post.json` and post it.
 

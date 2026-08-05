@@ -9,7 +9,7 @@ description: Use when yesterday's SRE-review PR posts in Flocasts #infra-private
 
 Re-post yesterday's un-reviewed PRs into today's SRE review thread, keeping a link back to the original post so context is preserved without quoting the old message.
 
-**Core flow:** identify me → find yesterday's bot thread → list my replies → filter to PRs still needing review → find today's bot thread → preview → confirm → post one rollover reply per eligible PR.
+**Core flow:** identify me → find yesterday's bot thread → list my replies → filter to PRs still needing review → find today's bot thread → show the plan → post one rollover reply per eligible PR.
 
 Companion to the [[sre-review]] skill. This skill never creates a top-level message — it only replies inside today's bot-created thread, same as `sre-review`.
 
@@ -126,9 +126,9 @@ Read today's thread with `slack_read_thread`. For each eligible PR, check whethe
 
 This prevents double-rolling if the skill ran earlier today, or if the user manually re-posted.
 
-### 7. Preview + confirm
+### 7. Show the plan
 
-Show the user a table:
+Invoking this skill *is* the consent to post — no y/n gate. Show the user the plan (for auditability, not approval), then proceed straight to step 8. Show a table:
 
 ```
 Channel:        #infra-private
@@ -145,11 +145,9 @@ Skipping (M):
   · <desc>: <pr-url>   (already in today's thread)
 ```
 
-For each rollover, also show the exact final message text so the user sees the `[rollover from …]` prefix that's about to be posted.
+For each rollover, also show the exact final message text so the user sees the `[rollover from …]` prefix being posted.
 
-Ask: "Post these N rollover replies to today's thread? (y/n)"
-
-Wait for explicit yes. Anything else = cancel.
+Only pause for input if the user explicitly asked for a dry-run/preview, or if step 4 surfaced errors that make eligibility ambiguous.
 
 ### 8. Post (one reply per eligible PR)
 
@@ -201,7 +199,7 @@ This and a re-post are alternatives, not both — pick one per PR with the user.
 - Step 5 found no today thread → STOP, don't post top-level.
 - Identity lookup returns multiple users for the email → STOP, ask user which is theirs.
 - A PR URL in your post doesn't match the GitHub regex (e.g. you posted a Linear link) → skip that one with reason "non-GitHub URL".
-- User says "y" but the preview shows zero eligible PRs → don't post anything; restate that the list was empty.
+- Zero eligible PRs after filtering → don't post anything; report that the list was empty (with the skipped reasons).
 
 ## Security
 

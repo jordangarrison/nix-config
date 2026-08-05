@@ -9,7 +9,7 @@ description: Use when posting a PR for SRE review in Flocasts #infra-private —
 
 Post a PR link as a reply to today's SRE review thread in Flocasts `#infra-private`. The thread is created daily at ~9 AM CDT by the **SRE Review Thread** bot.
 
-**Core flow:** detect PR → find today's bot thread → preview → confirm → post reply.
+**Core flow:** detect PR → find today's bot thread → show what's being posted → post reply.
 
 ## Constants
 
@@ -98,18 +98,16 @@ Save the matched message's `ts` — this is the `thread_ts` for the reply.
 
 **Cache invalidation:** if step 4 (post) fails with a thread-not-found / `thread_not_found` / `message_not_found` error, delete `.cache.json` and re-run from step 2 once. If it fails again, stop and report.
 
-### 3. Preview + confirm
+### 3. Show what's being posted
 
-Show the user:
+Invoking this skill *is* the consent to post — no y/n gate. Show the user exactly what's going out (for auditability, not approval), then proceed straight to step 4:
 ```
 Channel:  #infra-private
 Thread:   <permalink to bot message>
 Message:  <description>: <pr-url>
 ```
 
-Ask: "Post this to the thread? (y/n)"
-
-Wait for explicit yes. Treat anything else as cancel.
+Only pause for input if the user explicitly asked for a dry-run/preview, or if something upstream is ambiguous (e.g., couldn't resolve the PR).
 
 ### 4. Post
 
@@ -148,7 +146,7 @@ Adding a duplicate succeeds silently, so re-bumping is harmless. Don't post a ne
 | Posting top-level (not in thread) | Always pass `thread_ts`. Refuse to post if step 2 returned no match. |
 | Wrong day's thread | Filter by today's date in America/Chicago TZ, not UTC. Bot posts ~9 AM CDT. |
 | Stale cache from yesterday | Always compare cache `date` to `TZ=America/Chicago date +%F` before reuse. Different = rescan. |
-| Skipping confirmation | Slack post = irreversible + visible to org. Always preview + ask. |
+| Posting silently | No y/n gate, but always show channel/thread/message as you post — the user must be able to audit what went out under their name. |
 | Auto-detecting on a non-PR branch | If `gh pr view` fails, ask user — don't fall back to a guess. |
 | Multi-line / formatted message | Convention is one line: `<desc>: <url>`. No bullets, no bold, no Slack mentions. |
 | `:travolta:` on a freshly posted PR | The bump reaction is only for PRs that have sat without review. Don't add it at post time — gate it on genuine starvation (no review reactions, no GitHub review activity, real time elapsed). |
@@ -161,4 +159,4 @@ Channel ID and name are not credentials but DO leak internal org structure. This
 
 - No today-bot match found → STOP, tell user. Don't post top-level.
 - `gh pr view` fails and no URL arg → STOP, ask for URL.
-- User said "post" but skill in dry-run / preview only → still require explicit y/n before sending.
+- User explicitly asked for dry-run / "show me first" → preview only, wait for a go-ahead before sending.

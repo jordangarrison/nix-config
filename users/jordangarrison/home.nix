@@ -20,6 +20,8 @@ let
   };
   # Use pgtk variant on Linux for native Wayland support
   emacsPackage = if pkgs.stdenv.isLinux then pkgs.emacs-pgtk else pkgs.emacs;
+  # Live-checkout path for hand-authored agent content (see ./agents)
+  agentsLive = "${config.home.homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/agents";
 in
 {
   imports = [
@@ -30,12 +32,94 @@ in
     ../../modules/home/herdr
     ../../modules/home/tuicr
     ../../modules/home/agent-skills
+    ../../modules/home/agent-workspaces
+    ../../modules/home/claude-code
+    ../../modules/home/codex
   ];
 
   programs.agent-skills = {
     enable = true;
     skillsDir = ./skills;
     liveDir = "${config.home.homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/skills";
+  };
+
+  # Agent CLI configs (claude/codex) + workspace routers. Hand-authored
+  # content lives in ./agents and is symlinked out-of-store from the live
+  # checkout; settings/config files that the tools mutate at runtime are
+  # merged on activation, never made read-only. See docs/plans/
+  # nixify-agent-configs.md.
+  programs.claude-code = {
+    enable = true;
+    instructionsFile = "${agentsLive}/AGENTS.md";
+    files = {
+      "workflows/deep-research-staged.js" = "${agentsLive}/claude/workflows/deep-research-staged.js";
+      "statusline.sh" = "${agentsLive}/claude/statusline.sh";
+    };
+    settings = {
+      model = "fable";
+      effortLevel = "high";
+      theme = "auto";
+      tui = "fullscreen";
+      editorMode = "normal";
+      alwaysThinkingEnabled = true;
+      includeCoAuthoredBy = false;
+      attribution.sessionUrl = false;
+      agentPushNotifEnabled = true;
+      inputNeededNotifEnabled = true;
+      voiceEnabled = true;
+      remoteControlAtStartup = true;
+      skillListingBudgetFraction = 0.02;
+      skipAutoPermissionPrompt = true;
+      skipDangerousModePermissionPrompt = true;
+      statusLine = {
+        type = "command";
+        command = ''bash "$HOME/.claude/statusline.sh"'';
+      };
+    };
+  };
+
+  programs.codex = {
+    enable = true;
+    instructionsFile = "${agentsLive}/AGENTS.md";
+    rules."default.rules" = "${agentsLive}/codex/rules/default.rules";
+    config = {
+      approval_policy = "never";
+      sandbox_mode = "danger-full-access";
+      model = "gpt-5.6-sol";
+      model_reasoning_effort = "high";
+      plan_mode_reasoning_effort = "xhigh";
+      personality = "pragmatic";
+      approvals_reviewer = "user";
+      tui = {
+        status_line = [
+          "model-with-reasoning"
+          "current-dir"
+          "git-branch"
+          "context-used"
+        ];
+        theme = "1337";
+        pet = "seedy";
+      };
+    };
+  };
+
+  programs.agent-workspaces = {
+    enable = true;
+    routerFile = "${agentsLive}/ROUTER.md";
+    workspaces = {
+      jordangarrison = {
+        directory = "dev/jordangarrison";
+        additionsFile = "${agentsLive}/workspaces/jordangarrison-additions.md";
+      };
+      flocasts = {
+        directory = "dev/flocasts";
+        # additions stay a local untracked file (work content, public repo)
+      };
+      kartingcoach = {
+        directory = "dev/kartingcoach";
+        additionsFile = "${agentsLive}/workspaces/kartingcoach-additions.md";
+      };
+    };
   };
 
   languages = {
@@ -557,15 +641,17 @@ in
       then
         echo "Doom cache references an old Emacs store path; running doom sync -U"
         if ! run ${pkgs.coreutils}/bin/env \
-          PATH="${lib.makeBinPath [
-            config.programs.emacs.finalPackage
-            pkgs.bash
-            pkgs.coreutils
-            pkgs.findutils
-            pkgs.git
-            pkgs.gnugrep
-            pkgs.gnused
-          ]}:$PATH" \
+          PATH="${
+            lib.makeBinPath [
+              config.programs.emacs.finalPackage
+              pkgs.bash
+              pkgs.coreutils
+              pkgs.findutils
+              pkgs.git
+              pkgs.gnugrep
+              pkgs.gnused
+            ]
+          }:$PATH" \
           "$doom_cli" sync -U
         then
           echo "Doom sync failed; Emacs daemon may not start" >&2

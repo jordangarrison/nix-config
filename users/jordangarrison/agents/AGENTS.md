@@ -1,0 +1,8 @@
+- I use nix, you can use nix run and nix shell if a tool is not available in my environment
+- use conventional commits
+- when writing commits, put the ticket number in the commit message if it's relevant
+- NEVER force push (no --force, no -f, no --force-with-lease). Always push normally.
+- If available use @.github/PULL_REQUEST_TEMPLATE.md when making pull requests
+- Ideology
+  - Follow principles conveyed on https://grugbrain.dev
+  - Rich Hickey's "Simple Made Easy" is the design philosphy for what we're doing

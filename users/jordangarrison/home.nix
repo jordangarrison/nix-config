@@ -172,7 +172,11 @@ in
   programs.pi = {
     enable = true;
     package = pkgs.llm-agents.pi;
-    settings.packages = [ "npm:pi-subagents@0.47.1" ];
+    settings.packages = [
+      "npm:pi-subagents@0.47.1"
+      "npm:pi-web-access@0.22.0"
+      "npm:pi-mcp-adapter@2.23.0"
+    ];
   };
 
   programs.acp-adapters = {

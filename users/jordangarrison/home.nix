@@ -172,6 +172,7 @@ in
   programs.pi = {
     enable = true;
     package = pkgs.llm-agents.pi;
+    settings.packages = [ "npm:pi-subagents@0.47.1" ];
   };
 
   programs.acp-adapters = {

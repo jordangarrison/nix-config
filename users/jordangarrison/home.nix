@@ -22,6 +22,7 @@ let
   emacsPackage = if pkgs.stdenv.isLinux then pkgs.emacs-pgtk else pkgs.emacs;
   # Live-checkout path for hand-authored agent content (see ./agents)
   agentsLive = "${config.home.homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/agents";
+  piExtensions = pkgs.callPackage ../../packages/pi-extensions { };
 in
 {
   imports = [
@@ -173,9 +174,7 @@ in
     enable = true;
     package = pkgs.llm-agents.pi;
     settings.packages = [
-      "npm:pi-subagents@0.47.1"
-      "npm:pi-web-access@0.22.0"
-      "npm:pi-mcp-adapter@2.23.0"
+      "${piExtensions}/lib/node_modules/jordangarrison-pi-extensions"
     ];
   };
 

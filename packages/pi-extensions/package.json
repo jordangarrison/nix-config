@@ -1,0 +1,35 @@
+{
+  "name": "jordangarrison-pi-extensions",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Reproducible bundle of Pi extensions managed by Nix",
+  "files": [
+    "node_modules"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.29.0",
+    "pi-mcp-adapter": "2.23.0",
+    "pi-subagents": "0.47.1",
+    "pi-web-access": "0.22.0"
+  },
+  "bundledDependencies": [
+    "@modelcontextprotocol/sdk",
+    "pi-mcp-adapter",
+    "pi-subagents",
+    "pi-web-access"
+  ],
+  "pi": {
+    "extensions": [
+      "./node_modules/pi-subagents/index.ts",
+      "./node_modules/pi-web-access/index.ts",
+      "./node_modules/pi-mcp-adapter/index.ts"
+    ],
+    "skills": [
+      "./node_modules/pi-subagents/skills",
+      "./node_modules/pi-mcp-adapter/skills"
+    ],
+    "prompts": [
+      "./node_modules/pi-subagents/prompts"
+    ]
+  }
+}

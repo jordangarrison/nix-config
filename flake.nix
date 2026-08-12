@@ -252,7 +252,7 @@
                 ./modules/home/yazi
               ];
 
-              home-manager.users.jordangarrison.programs.orca.enable = true;
+              home-manager.users.jordangarrison.programs.orca.enable = false;
 
               # Configure tea CLI for Forgejo access
               home-manager.users.jordangarrison.programs.tea = {
@@ -364,7 +364,7 @@
                 ./modules/home/yazi
               ];
 
-              home-manager.users.jordangarrison.programs.orca.enable = true;
+              home-manager.users.jordangarrison.programs.orca.enable = false;
 
               # Enable virtualization with virt-manager
               virtualization.virt-manager = {

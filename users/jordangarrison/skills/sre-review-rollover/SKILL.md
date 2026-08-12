@@ -1,6 +1,14 @@
 ---
 name: sre-review-rollover
-description: Use when yesterday's SRE-review PR posts in Flocasts #infra-private got no review and need to be re-posted to today's bot thread. Finds your own replies in yesterday's "SRE Review Thread", filters to PRs still needing review (open, non-draft, not approved), and re-posts each to today's thread with a `[rollover from <slack-link|yesterday>]` prefix — or, as a lighter alternative, bumps the original post in place with a gated `:travolta:` reaction. Triggered by `/sre-review-rollover`, "rollover yesterday's SRE reviews", or "give yesterday's PRs a travolta bump".
+description: >-
+  Use when yesterday's SRE-review PR posts in Flocasts #infra-private got no
+  review and need to be re-posted to today's bot thread. Finds your own replies
+  in yesterday's "SRE Review Thread", filters to PRs still needing review (open,
+  non-draft, not approved), and re-posts each to today's thread with a `[rollover
+  from <slack-link|yesterday>]` prefix — or, as a lighter alternative, bumps the
+  original post in place with a gated `:travolta:` reaction. Triggered by
+  `/sre-review-rollover`, "rollover yesterday's SRE reviews", or "give yesterday's
+  PRs a travolta bump".
 ---
 
 # SRE Review Rollover

@@ -22,6 +22,7 @@ let
   emacsPackage = if pkgs.stdenv.isLinux then pkgs.emacs-pgtk else pkgs.emacs;
   # Live-checkout path for hand-authored agent content (see ./agents)
   agentsLive = "${config.home.homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/agents";
+  piExtensions = pkgs.callPackage ../../packages/pi-extensions { };
 in
 {
   imports = [
@@ -172,6 +173,9 @@ in
   programs.pi = {
     enable = true;
     package = pkgs.llm-agents.pi;
+    settings.packages = [
+      "${piExtensions}/lib/node_modules/jordangarrison-pi-extensions"
+    ];
   };
 
   programs.acp-adapters = {
@@ -867,6 +871,18 @@ in
   home.file = {
     # Pin ~/.local/bin/claude to the Nix-managed version to prevent auto-updater overwrites
     ".local/bin/claude".source = "${pkgs.llm-agents.claude-code}/bin/claude";
+
+    # Claude Bridge provides Claude Code-backed models to Pi. Point it at the
+    # Nix-managed CLI because the Agent SDK's bundled binary may not run on NixOS.
+    ".pi/agent/claude-bridge.json".text = builtins.toJSON {
+      askClaude.enabled = false;
+      provider = {
+        plan = "pro";
+        longContextExtraUsage = false;
+        strictMcpConfig = true;
+        pathToClaudeCodeExecutable = "${pkgs.llm-agents.claude-code}/bin/claude";
+      };
+    };
 
     # SSH config with proper permissions fix
     ".ssh/config_source" = {

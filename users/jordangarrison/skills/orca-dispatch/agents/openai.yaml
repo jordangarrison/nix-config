@@ -1,4 +1,0 @@
-interface:
-  display_name: "Orca Dispatch"
-  short_description: "Hand off work in a fresh Orca worktree"
-  default_prompt: "Use $orca-dispatch to hand this task off in a fresh Orca worktree."

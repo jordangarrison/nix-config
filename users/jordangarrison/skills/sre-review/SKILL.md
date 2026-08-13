@@ -1,6 +1,12 @@
 ---
 name: sre-review
-description: Use when posting a PR for SRE review in Flocasts #infra-private — finds today's "SRE Review Thread" bot post and replies with the PR link. Also handles bumping a stale post that isn't getting reviewed via a gated `:travolta:` reaction. Triggered by `/sre-review`, phrases like "post this to the SRE review thread" / "drop in #infra-private review thread", or "bump my PR" / "give it a travolta".
+description: >-
+  Use when posting a PR for SRE review in Flocasts #infra-private — finds
+  today's "SRE Review Thread" bot post and replies with the PR link. Also handles
+  bumping a stale post that isn't getting reviewed via a gated `:travolta:`
+  reaction. Triggered by `/sre-review`, phrases like "post this to the SRE review
+  thread" / "drop in #infra-private review thread", or "bump my PR" / "give it a
+  travolta".
 ---
 
 # SRE Review Thread Poster

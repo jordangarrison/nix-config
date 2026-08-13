@@ -1,6 +1,12 @@
 ---
 name: sre-review-worktrees
-description: Use to set up the worktrees needed to review the PRs in today's SRE review thread in Flocasts #infra-private. Reads the thread, filters out the current user's own PRs and merged PRs, then creates a worktree per remaining PR at `.worktrees/<repo>/<slug>/` so [[multi-agent-pr-review]] can run against them. Triggered by `/sre-review-worktrees`, "set up worktrees for the SRE thread", or following a /sre-review post when reviewing the backlog.
+description: >-
+  Use to set up the worktrees needed to review the PRs in today's SRE review
+  thread in Flocasts #infra-private. Reads the thread, filters out the current
+  user's own PRs and merged PRs, then creates a worktree per remaining PR at
+  `.worktrees/<repo>/<slug>/` so [[multi-agent-pr-review]] can run against them.
+  Triggered by `/sre-review-worktrees`, "set up worktrees for the SRE thread", or
+  following a /sre-review post when reviewing the backlog.
 ---
 
 # SRE-Review Worktree Setup

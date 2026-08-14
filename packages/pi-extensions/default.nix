@@ -40,9 +40,15 @@ buildNpmPackage {
         'if (minutes === 10_080) return compact ? "wk" : "Weekly";' \
         'if (minutes === 10_080) return compact ? "7d" : "Weekly";'
 
-    # Upstream emits an uncolored status string. Dim the labels and color each
-    # percentage by its own severity, so one hot window stands out.
+    # Pi sorts footer statuses by key, so "0-usage" keeps the segment leftmost,
+    # matching the Claude extension's sibling key "0-usage-claude".
+    #
+    # Upstream also emits an uncolored status string. Dim the labels and color
+    # each percentage by its own severity, so one hot window stands out.
     substituteInPlace "$piUsage/usage.ts" \
+      --replace-fail \
+        'const STATUS_KEY = "usage";' \
+        'const STATUS_KEY = "0-usage";' \
       --replace-fail \
         'ctx.ui.setStatus(STATUS_KEY, value);' \
         'ctx.ui.setStatus(STATUS_KEY, value === undefined ? undefined : value.split(" ").map((token) => { const match = /^(.*?)(\d+)%$/.exec(token); if (!match) return ctx.ui.theme.fg("dim", token); const percent = Number(match[2]); return ctx.ui.theme.fg("dim", match[1]) + ctx.ui.theme.fg(percent >= 90 ? "error" : percent >= 70 ? "warning" : "success", match[2] + "%"); }).join(" "));'

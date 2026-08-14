@@ -8,7 +8,9 @@ import {
   type ExtensionContext,
 } from "@earendil-works/pi-coding-agent";
 
-const STATUS_KEY = "claude-subscription-usage";
+// Pi sorts footer statuses by key, so the leading "0-" keeps usage leftmost.
+// `pi-usage` is patched to the sibling key "0-usage" for the same reason.
+const STATUS_KEY = "0-usage-claude";
 const USAGE_URL = "https://api.anthropic.com/api/oauth/usage";
 const OAUTH_BETA = "oauth-2025-04-20";
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000;

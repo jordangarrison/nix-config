@@ -21,17 +21,37 @@ buildNpmPackage {
   npmPackFlags = [ "--ignore-scripts" ];
 
   postInstall = ''
-    # The upstream compact status shows remaining quota without saying so.
-    # Display the complement explicitly so the footer answers "how much used?".
-    substituteInPlace \
-      "$out/lib/node_modules/jordangarrison-pi-extensions/node_modules/@narumitw/pi-usage/src/format.ts" \
+    piUsage="$out/lib/node_modules/jordangarrison-pi-extensions/node_modules/@narumitw/pi-usage/src"
+
+    # Match the compact footer used by the Claude subscription extension:
+    # "[usage] 5h:12% 7d:26%" reporting consumption, not upstream's unlabeled
+    # remaining quota ("codex 88% wk").
+    substituteInPlace "$piUsage/format.ts" \
       --replace-fail \
-        'clampPercent(bucket.remaining).toFixed(0)}% ' \
-        '(100 - clampPercent(bucket.remaining)).toFixed(0)}% used '
+        'group === "codex" ? "codex" : `codex ''${compactLimitLabel(labelBucket?.groupLabel ?? group)}`,' \
+        'group === "codex" ? "[usage]" : `[usage] ''${compactLimitLabel(labelBucket?.groupLabel ?? group)}`,' \
+      --replace-fail \
+        '`''${clampPercent(bucket.remaining).toFixed(0)}% ''${formatWindowLabel(bucket.windowMinutes, fallback, true)}`,' \
+        '`''${formatWindowLabel(bucket.windowMinutes, fallback, true)}:''${(100 - clampPercent(bucket.remaining)).toFixed(0)}%`,' \
+      --replace-fail \
+        'return compact && fallback === "weekly" ? "wk" : capitalize(fallback);' \
+        'return compact && fallback === "weekly" ? "7d" : capitalize(fallback);' \
+      --replace-fail \
+        'if (minutes === 10_080) return compact ? "wk" : "Weekly";' \
+        'if (minutes === 10_080) return compact ? "7d" : "Weekly";'
+
+    # Upstream emits an uncolored status string. Dim the labels and color each
+    # percentage by its own severity, so one hot window stands out.
+    substituteInPlace "$piUsage/usage.ts" \
+      --replace-fail \
+        'ctx.ui.setStatus(STATUS_KEY, value);' \
+        'ctx.ui.setStatus(STATUS_KEY, value === undefined ? undefined : value.split(" ").map((token) => { const match = /^(.*?)(\d+)%$/.exec(token); if (!match) return ctx.ui.theme.fg("dim", token); const percent = Number(match[2]); return ctx.ui.theme.fg("dim", match[1]) + ctx.ui.theme.fg(percent >= 90 ? "error" : percent >= 70 ? "warning" : "success", match[2] + "%"); }).join(" "));'
 
     # Claude Bridge always uses the separately Nix-managed Claude Code binary,
     # so omit the Agent SDK's redundant 220+ MiB platform binary from the result.
     rm -rf "$out/lib/node_modules/jordangarrison-pi-extensions/node_modules/@anthropic-ai"/claude-agent-sdk-{darwin,linux,win32}-*
+
+    unset piUsage
   '';
 
   meta = {

@@ -276,6 +276,9 @@ function modelSpecificWindow(
   usage: ClaudeUsage,
   modelId: string | undefined,
 ): { label: "opus" | "sonnet"; window: UsageWindow } | undefined {
+  // Fable has its own top-level window, so never double-report it here.
+  if (modelId?.toLowerCase().includes("fable")) return undefined;
+
   const normalized = modelId?.toLowerCase() ?? "";
   if (normalized.includes("opus") && usage.seven_day_opus) {
     return { label: "opus", window: usage.seven_day_opus };
@@ -289,27 +292,23 @@ function modelSpecificWindow(
 function statusParts(
   usage: ClaudeUsage,
   modelId: string | undefined,
-): Array<{ text: string; percent: number }> {
-  const parts: Array<{ text: string; percent: number }> = [];
+): Array<{ label: string; percent: number }> {
+  const parts: Array<{ label: string; percent: number }> = [];
   if (usage.five_hour) {
-    const percent = clampPercent(usage.five_hour.utilization);
-    parts.push({ text: `${Math.round(percent)}% used 5h`, percent });
+    parts.push({ label: "5h", percent: clampPercent(usage.five_hour.utilization) });
   }
   if (usage.seven_day) {
-    const percent = clampPercent(usage.seven_day.utilization);
-    parts.push({ text: `${Math.round(percent)}% used wk`, percent });
+    parts.push({ label: "7d", percent: clampPercent(usage.seven_day.utilization) });
   }
   if (usage.fable) {
-    const percent = clampPercent(usage.fable.utilization);
-    parts.push({ text: `${Math.round(percent)}% used fable wk`, percent });
+    parts.push({ label: "fable", percent: clampPercent(usage.fable.utilization) });
   }
 
   const modelWindow = modelSpecificWindow(usage, modelId);
   if (modelWindow) {
-    const percent = clampPercent(modelWindow.window.utilization);
     parts.push({
-      text: `${Math.round(percent)}% used ${modelWindow.label} wk`,
-      percent,
+      label: modelWindow.label,
+      percent: clampPercent(modelWindow.window.utilization),
     });
   }
   return parts;
@@ -343,31 +342,26 @@ export default function claudeSubscriptionUsage(pi: ExtensionAPI) {
 
   const renderStatus = (ctx: ExtensionContext) => {
     if (!ctx.hasUI || !active) return;
-    if (!lastUsage) {
-      ctx.ui.setStatus(
-        STATUS_KEY,
-        ctx.ui.theme.fg("dim", "claude subscription usage unavailable"),
-      );
-      return;
-    }
-
-    const parts = statusParts(lastUsage, activeModelId);
+    const theme = ctx.ui.theme;
+    const parts = lastUsage ? statusParts(lastUsage, activeModelId) : [];
     if (parts.length === 0) {
-      ctx.ui.setStatus(
-        STATUS_KEY,
-        ctx.ui.theme.fg("dim", "claude subscription usage unavailable"),
-      );
+      ctx.ui.setStatus(STATUS_KEY, theme.fg("dim", "[usage] n/a"));
       return;
     }
 
-    const maxPercent = Math.max(...parts.map((part) => part.percent));
-    const suffix = lastUsageStale ? " (stale)" : "";
+    // Each window is colored by its own severity so a single hot quota stands
+    // out instead of being averaged into one label-wide color.
+    const rendered = parts
+      .map(
+        (part) =>
+          theme.fg("dim", `${part.label}:`) +
+          theme.fg(usageColor(part.percent), `${Math.round(part.percent)}%`),
+      )
+      .join(" ");
+    const suffix = lastUsageStale ? theme.fg("dim", " stale") : "";
     ctx.ui.setStatus(
       STATUS_KEY,
-      ctx.ui.theme.fg(
-        usageColor(maxPercent),
-        `claude ${parts.map((part) => part.text).join(" ")}${suffix}`,
-      ),
+      `${theme.fg("dim", "[usage] ")}${rendered}${suffix}`,
     );
   };
 

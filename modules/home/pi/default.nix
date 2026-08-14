@@ -10,6 +10,100 @@ with lib;
 let
   cfg = config.programs.pi;
   jsonFormat = pkgs.formats.json { };
+  settingsPath = "${config.home.homeDirectory}/.pi/agent/settings.json";
+
+  validateManagedSettingsSymlink = path: ''
+    linkTarget="$(${getExe' pkgs.coreutils "readlink"} ${escapeShellArg path})"
+    case "$linkTarget" in
+      /nix/store/*-home-manager-files/.pi/agent/settings.json) ;;
+      *)
+        echo "Refusing to replace non-Home-Manager settings symlink: ${path} -> $linkTarget" >&2
+        exit 1
+        ;;
+    esac
+  '';
+
+  migrateManagedSettingsSymlink = path: ''
+    if [ -L ${escapeShellArg path} ]; then
+      ${validateManagedSettingsSymlink path}
+
+      if [ ! -e ${escapeShellArg path} ]; then
+        echo "Cannot migrate dangling Home Manager settings symlink: ${path} -> $linkTarget" >&2
+        exit 1
+      fi
+      if ! ${getExe pkgs.jq} -e . ${escapeShellArg path} >/dev/null; then
+        echo "Refusing to migrate invalid JSON from ${path}" >&2
+        exit 1
+      fi
+
+      if [[ -v DRY_RUN ]]; then
+        echo "Would migrate Home Manager settings symlink to a writable file: ${path}"
+      else
+        piSettingsTmp="$(${getExe' pkgs.coreutils "mktemp"} \
+          "$(dirname ${escapeShellArg path})/.settings.json.home-manager.XXXXXX")"
+        trap '${getExe' pkgs.coreutils "rm"} -f "$piSettingsTmp"' EXIT
+        cat ${escapeShellArg path} > "$piSettingsTmp"
+        ${getExe' pkgs.coreutils "mv"} -f "$piSettingsTmp" ${escapeShellArg path}
+        trap - EXIT
+        unset piSettingsTmp
+      fi
+      unset linkTarget
+    fi
+  '';
+
+  mergeMutableJson = path: staticSettings: ''
+    if [ -L ${escapeShellArg path} ]; then
+      ${validateManagedSettingsSymlink path}
+    fi
+
+    if [[ -v DRY_RUN ]]; then
+      echo "Would deep-merge declarative Pi settings into ${path}"
+    else
+      mkdir -p "$(dirname ${escapeShellArg path})"
+
+      if [ -e ${escapeShellArg path} ]; then
+        if ! dynamic="$(${getExe pkgs.jq} -c . ${escapeShellArg path})"; then
+          echo "Refusing to overwrite invalid JSON in ${path}" >&2
+          exit 1
+        fi
+      else
+        dynamic='{}'
+      fi
+
+      static="$(cat ${escapeShellArg staticSettings})"
+      merged="$(${getExe pkgs.jq} -n ${escapeShellArg "$dynamic * $static"} \
+        --argjson dynamic "$dynamic" \
+        --argjson static "$static")"
+
+      piSettingsTmp="$(${getExe' pkgs.coreutils "mktemp"} \
+        "$(dirname ${escapeShellArg path})/.settings.json.home-manager.XXXXXX")"
+      trap '${getExe' pkgs.coreutils "rm"} -f "$piSettingsTmp"' EXIT
+      printf '%s\n' "$merged" > "$piSettingsTmp"
+      ${getExe' pkgs.coreutils "mv"} -f "$piSettingsTmp" ${escapeShellArg path}
+      trap - EXIT
+      unset dynamic static merged piSettingsTmp
+    fi
+    unset linkTarget
+  '';
+
+  obsoleteOrcaExtensions = [
+    "orca-agent-status.ts"
+    "orca-prefill.ts"
+    "orca-titlebar-spinner.ts"
+  ];
+
+  removeObsoleteOrcaExtension = name: ''
+    orcaExtension=${escapeShellArg "${config.home.homeDirectory}/.pi/agent/extensions/${name}"}
+    if [ -f "$orcaExtension" ] && [ ! -L "$orcaExtension" ] \
+      && ${getExe pkgs.gnugrep} -Fqx '// @orca-managed-pi-extension' "$orcaExtension"; then
+      if [[ -v DRY_RUN ]]; then
+        echo "Would remove obsolete Orca-managed Pi extension: $orcaExtension"
+      else
+        ${getExe' pkgs.coreutils "rm"} -f "$orcaExtension"
+      fi
+    fi
+    unset orcaExtension
+  '';
 
   fileEntryType = types.submodule {
     options = {
@@ -54,8 +148,6 @@ let
   };
 
   defaultSettings = {
-    defaultProvider = "openai-codex";
-    defaultModel = "gpt-5.6-sol";
     defaultThinkingLevel = "xhigh";
     collapseChangelog = true;
     enableInstallTelemetry = false;
@@ -140,7 +232,11 @@ in
     settings = mkOption {
       type = jsonFormat.type;
       default = { };
-      description = "Settings written to ~/.pi/agent/settings.json.";
+      description = ''
+        Declarative settings deep-merged into the writable
+        {file}`~/.pi/agent/settings.json` on activation. Declarative values
+        take precedence over values already in the file.
+      '';
     };
 
     keybindings = mkOption {
@@ -209,8 +305,21 @@ in
 
     home.packages = [ cfg.package ];
 
+    home.activation = {
+      piSettingsSymlinkMigration = hm.dag.entryBetween [ "linkGeneration" ] [ "writeBoundary" ] (
+        migrateManagedSettingsSymlink settingsPath
+      );
+
+      piSettingsActivation = hm.dag.entryAfter [ "linkGeneration" ] (
+        mergeMutableJson settingsPath settingsFile
+      );
+
+      piRemoveObsoleteOrcaExtensions = hm.dag.entryAfter [ "linkGeneration" ] (
+        concatMapStringsSep "\n" removeObsoleteOrcaExtension obsoleteOrcaExtensions
+      );
+    };
+
     home.file = {
-      ".pi/agent/settings.json".source = settingsFile;
       ".pi/agent/keybindings.json".source = keybindingsFile;
     }
     // resourceHomeFiles "prompts" promptFiles

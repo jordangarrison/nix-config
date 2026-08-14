@@ -132,14 +132,18 @@ async function getSubscriptionCredential(
   }
 }
 
-function isUsageWindow(value: unknown): value is UsageWindow {
-  if (!value || typeof value !== "object") return false;
-  const candidate = value as Partial<UsageWindow>;
-  return (
-    typeof candidate.utilization === "number" &&
-    Number.isFinite(candidate.utilization) &&
-    (candidate.resets_at === null || typeof candidate.resets_at === "string")
-  );
+// Anthropic declares every window optional and its `utilization` nullable, so
+// an unreadable window means "no data for this window", never a bad payload.
+function parseWindow(value: unknown): UsageWindow | null {
+  if (!value || typeof value !== "object") return null;
+  const candidate = value as Record<string, unknown>;
+  const utilization = candidate.utilization;
+  if (typeof utilization !== "number" || !Number.isFinite(utilization)) return null;
+  const resetsAt = candidate.resets_at;
+  return {
+    utilization,
+    resets_at: typeof resetsAt === "string" ? resetsAt : null,
+  };
 }
 
 function parseFableWindow(value: unknown): UsageWindow | null {
@@ -159,13 +163,7 @@ function parseFableWindow(value: unknown): UsageWindow | null {
       continue;
     }
 
-    const percent = limit.percent;
-    const resetsAt = limit.resets_at;
-    if (typeof percent !== "number" || !Number.isFinite(percent)) return null;
-    if (resetsAt !== undefined && resetsAt !== null && typeof resetsAt !== "string") {
-      return null;
-    }
-    return { utilization: percent, resets_at: resetsAt ?? null };
+    return parseWindow({ utilization: limit.percent, resets_at: limit.resets_at });
   }
 
   return null;
@@ -174,23 +172,24 @@ function parseFableWindow(value: unknown): UsageWindow | null {
 function parseUsage(value: unknown): ClaudeUsage | undefined {
   if (!value || typeof value !== "object") return undefined;
   const candidate = value as Record<string, unknown>;
-  const parseWindow = (name: string): UsageWindow | null | undefined => {
-    const window = candidate[name];
-    if (window === null || window === undefined) return window;
-    return isUsageWindow(window) ? window : undefined;
-  };
 
-  const fiveHour = parseWindow("five_hour");
-  const sevenDay = parseWindow("seven_day");
-  if (fiveHour === undefined || sevenDay === undefined) return undefined;
-
-  return {
-    five_hour: fiveHour,
-    seven_day: sevenDay,
-    seven_day_opus: parseWindow("seven_day_opus"),
-    seven_day_sonnet: parseWindow("seven_day_sonnet"),
+  const usage: ClaudeUsage = {
+    five_hour: parseWindow(candidate.five_hour),
+    seven_day: parseWindow(candidate.seven_day),
+    seven_day_opus: parseWindow(candidate.seven_day_opus),
+    seven_day_sonnet: parseWindow(candidate.seven_day_sonnet),
     fable: parseFableWindow(candidate.limits),
   };
+
+  // One missing window must not discard the rest of the response; only a
+  // payload with nothing readable in it counts as a failed parse.
+  const hasWindow =
+    usage.five_hour ??
+    usage.seven_day ??
+    usage.seven_day_opus ??
+    usage.seven_day_sonnet ??
+    usage.fable;
+  return hasWindow ? usage : undefined;
 }
 
 async function readBoundedBody(response: Response): Promise<string | undefined> {
@@ -262,8 +261,11 @@ function usageColor(percent: number): UsageColor {
 
 function formatReset(resetAt: string | null): string {
   if (!resetAt) return "unknown";
-  const remainingMs = new Date(resetAt).getTime() - Date.now();
-  if (!Number.isFinite(remainingMs) || remainingMs <= 0) return "now";
+  const resetTime = new Date(resetAt).getTime();
+  // An unreadable timestamp is not a reset that just happened.
+  if (!Number.isFinite(resetTime)) return "unknown";
+  const remainingMs = resetTime - Date.now();
+  if (remainingMs <= 0) return "now";
 
   const minutes = Math.ceil(remainingMs / 60_000);
   const days = Math.floor(minutes / (24 * 60));
@@ -444,14 +446,21 @@ export default function claudeSubscriptionUsage(pi: ExtensionAPI) {
     }
   };
 
+  // Nothing awaits these, and pi has no unhandledRejection handler, so a throw
+  // from a stale `ctx` would take the agent down rather than a status segment.
+  const refreshInBackground = (
+    ctx: ExtensionContext,
+    options: { force?: boolean } = {},
+  ) => void refresh(ctx, options).catch(() => {});
+
   pi.on("session_start", async (_event, ctx) => {
     active = isClaudeBridge(ctx);
     activeModelId = active ? ctx.model?.id : undefined;
-    if (active) void refresh(ctx, { force: true });
+    if (active) refreshInBackground(ctx, { force: true });
     else clearStatus(ctx);
 
     if (pollTimer) clearInterval(pollTimer);
-    pollTimer = setInterval(() => void refresh(ctx), REFRESH_INTERVAL_MS);
+    pollTimer = setInterval(() => refreshInBackground(ctx), REFRESH_INTERVAL_MS);
     pollTimer.unref?.();
   });
 
@@ -459,8 +468,10 @@ export default function claudeSubscriptionUsage(pi: ExtensionAPI) {
     active = event.model.provider === "claude-bridge";
     activeModelId = active ? event.model.id : undefined;
     if (active) {
-      clearStatus(ctx);
-      void refresh(ctx, { force: true });
+      // Both models share one account and one set of windows, so repaint from
+      // cache instead of blanking the footer for the length of the refresh.
+      renderStatus(ctx);
+      refreshInBackground(ctx, { force: true });
     } else {
       cancelRequest();
       lastUsageStale = lastUsage !== undefined;
@@ -471,7 +482,7 @@ export default function claudeSubscriptionUsage(pi: ExtensionAPI) {
   pi.on("turn_end", async (_event, ctx) => {
     if (!active) return;
     if (turnTimer) clearTimeout(turnTimer);
-    turnTimer = setTimeout(() => void refresh(ctx), TURN_REFRESH_DELAY_MS);
+    turnTimer = setTimeout(() => refreshInBackground(ctx), TURN_REFRESH_DELAY_MS);
     turnTimer.unref?.();
   });
 
@@ -527,10 +538,13 @@ export default function claudeSubscriptionUsage(pi: ExtensionAPI) {
         );
       }
 
-      const prefix = result === "fresh" ? "" : "Cached (refresh failed): ";
+      // A superseded refresh returns "inactive" while another request may have
+      // just refreshed the data, so report staleness from the data itself.
+      const prefix =
+        result === "fresh" || !lastUsageStale ? "" : "Cached (refresh failed): ";
       ctx.ui.notify(
         `${prefix}${lines.join("\n") || "Claude subscription usage has no active windows."}`,
-        result === "fresh" ? "info" : "warning",
+        lastUsageStale ? "warning" : "info",
       );
     },
   });

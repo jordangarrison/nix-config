@@ -40,18 +40,31 @@ buildNpmPackage {
         'if (minutes === 10_080) return compact ? "wk" : "Weekly";' \
         'if (minutes === 10_080) return compact ? "7d" : "Weekly";'
 
+    # The fast-mode marker anchors on the old "codex" prefix, so re-anchor it or
+    # the footer silently stops warning that the 2x-cost tier is active.
+    substituteInPlace "$piUsage/codex-fast.ts" \
+      --replace-fail \
+        'if (!enabled || !/^codex(?:\s|$)/u.test(status)) return status;' \
+        'if (!enabled || !/^\[usage\](?:\s|$)/u.test(status)) return status;' \
+      --replace-fail \
+        'return status === "codex" ? "codex fast" : `codex fast''${status.slice("codex".length)}`;' \
+        'return status === "[usage]" ? "[usage] fast" : `[usage] fast''${status.slice("[usage]".length)}`;'
+
     # Pi sorts footer statuses by key, so "0-usage" keeps the segment leftmost,
     # matching the Claude extension's sibling key "0-usage-claude".
     #
     # Upstream also emits an uncolored status string. Dim the labels and color
-    # each percentage by its own severity, so one hot window stands out.
+    # each percentage by its own severity, so one hot window stands out. Only
+    # "label:NN%" tokens are colored: those are the ones the format patch above
+    # converted to consumption, whereas other providers (GitHub Copilot) still
+    # report remaining quota, which this scale would invert.
     substituteInPlace "$piUsage/usage.ts" \
       --replace-fail \
         'const STATUS_KEY = "usage";' \
         'const STATUS_KEY = "0-usage";' \
       --replace-fail \
         'ctx.ui.setStatus(STATUS_KEY, value);' \
-        'ctx.ui.setStatus(STATUS_KEY, value === undefined ? undefined : value.split(" ").map((token) => { const match = /^(.*?)(\d+)%$/.exec(token); if (!match) return ctx.ui.theme.fg("dim", token); const percent = Number(match[2]); return ctx.ui.theme.fg("dim", match[1]) + ctx.ui.theme.fg(percent >= 90 ? "error" : percent >= 70 ? "warning" : "success", match[2] + "%"); }).join(" "));'
+        'ctx.ui.setStatus(STATUS_KEY, value === undefined ? undefined : value.split(" ").map((token) => { const match = /^(.*?:)(\d+)%$/.exec(token); if (!match) return ctx.ui.theme.fg("dim", token); const percent = Number(match[2]); return ctx.ui.theme.fg("dim", match[1]) + ctx.ui.theme.fg(percent >= 90 ? "error" : percent >= 70 ? "warning" : "success", match[2] + "%"); }).join(" "));'
 
     # Claude Bridge always uses the separately Nix-managed Claude Code binary,
     # so omit the Agent SDK's redundant 220+ MiB platform binary from the result.

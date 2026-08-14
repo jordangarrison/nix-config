@@ -1,3 +1,11 @@
+# Pi's settings.json is mutable: pi itself writes it at runtime (model picker,
+# `pi install`), so this module owns the file as a regular file and deep-merges
+# the declarative values into it on activation instead of linking the store.
+#
+# Rolling back to a generation from before that change fails on a machine that
+# already has `~/.pi/agent/settings.json.backup`: Home Manager wants to back up
+# the now-unmanaged regular file and refuses to clobber the existing backup
+# (check-link-targets.sh). Remove that stale backup first, then roll back.
 {
   config,
   lib,
@@ -23,29 +31,39 @@ let
     esac
   '';
 
+  # Both writers run in a subshell: Home Manager installs its own EXIT trap for
+  # the new generation's GC root right before the activation commands, so
+  # clearing a local trap here would disarm that cleanup for everything after.
+  writeSettingsAtomically = path: source: ''
+    (
+      piSettingsTmp="$(${getExe' pkgs.coreutils "mktemp"} \
+        "$(dirname ${escapeShellArg path})/.settings.json.home-manager.XXXXXX")"
+      trap '${getExe' pkgs.coreutils "rm"} -f "$piSettingsTmp"' EXIT
+      ${source}
+      ${getExe' pkgs.coreutils "mv"} -f "$piSettingsTmp" ${escapeShellArg path}
+    )
+  '';
+
   migrateManagedSettingsSymlink = path: ''
     if [ -L ${escapeShellArg path} ]; then
       ${validateManagedSettingsSymlink path}
 
       if [ ! -e ${escapeShellArg path} ]; then
-        echo "Cannot migrate dangling Home Manager settings symlink: ${path} -> $linkTarget" >&2
-        exit 1
-      fi
-      if ! ${getExe pkgs.jq} -e . ${escapeShellArg path} >/dev/null; then
+        # Verified above as Home Manager's own link, and it can only have held
+        # declarative values that the merge re-applies moments later, so drop
+        # it rather than wedging this and every later activation.
+        if [[ -v DRY_RUN ]]; then
+          echo "Would remove dangling Home Manager settings symlink: ${path} -> $linkTarget"
+        else
+          ${getExe' pkgs.coreutils "rm"} -f ${escapeShellArg path}
+        fi
+      elif ! ${getExe pkgs.jq} -e . ${escapeShellArg path} >/dev/null; then
         echo "Refusing to migrate invalid JSON from ${path}" >&2
         exit 1
-      fi
-
-      if [[ -v DRY_RUN ]]; then
+      elif [[ -v DRY_RUN ]]; then
         echo "Would migrate Home Manager settings symlink to a writable file: ${path}"
       else
-        piSettingsTmp="$(${getExe' pkgs.coreutils "mktemp"} \
-          "$(dirname ${escapeShellArg path})/.settings.json.home-manager.XXXXXX")"
-        trap '${getExe' pkgs.coreutils "rm"} -f "$piSettingsTmp"' EXIT
-        cat ${escapeShellArg path} > "$piSettingsTmp"
-        ${getExe' pkgs.coreutils "mv"} -f "$piSettingsTmp" ${escapeShellArg path}
-        trap - EXIT
-        unset piSettingsTmp
+        ${writeSettingsAtomically path ''cat ${escapeShellArg path} > "$piSettingsTmp"''}
       fi
       unset linkTarget
     fi
@@ -61,9 +79,13 @@ let
     else
       mkdir -p "$(dirname ${escapeShellArg path})"
 
-      if [ -e ${escapeShellArg path} ]; then
-        if ! dynamic="$(${getExe pkgs.jq} -c . ${escapeShellArg path})"; then
-          echo "Refusing to overwrite invalid JSON in ${path}" >&2
+      # A partial write from pi leaves an empty or non-object file; treat the
+      # empty case as "no runtime settings yet" and refuse the rest by name,
+      # rather than letting jq fail mid-merge with an anonymous error.
+      if [ -s ${escapeShellArg path} ]; then
+        if ! dynamic="$(${getExe pkgs.jq} -c \
+          'if type == "object" then . else halt_error(1) end' ${escapeShellArg path})"; then
+          echo "Refusing to overwrite invalid or non-object JSON in ${path}" >&2
           exit 1
         fi
       else
@@ -75,17 +97,15 @@ let
         --argjson dynamic "$dynamic" \
         --argjson static "$static")"
 
-      piSettingsTmp="$(${getExe' pkgs.coreutils "mktemp"} \
-        "$(dirname ${escapeShellArg path})/.settings.json.home-manager.XXXXXX")"
-      trap '${getExe' pkgs.coreutils "rm"} -f "$piSettingsTmp"' EXIT
-      printf '%s\n' "$merged" > "$piSettingsTmp"
-      ${getExe' pkgs.coreutils "mv"} -f "$piSettingsTmp" ${escapeShellArg path}
-      trap - EXIT
-      unset dynamic static merged piSettingsTmp
+      ${writeSettingsAtomically path ''printf '%s\n' "$merged" > "$piSettingsTmp"''}
+      unset dynamic static merged
     fi
     unset linkTarget
   '';
 
+  # One-shot cleanup of extensions the retired Orca module used to write into
+  # this same mutable directory. Drop this list (and its activation entry) after
+  # 2026-11-01, by which point every machine has activated at least once.
   obsoleteOrcaExtensions = [
     "orca-agent-status.ts"
     "orca-prefill.ts"
@@ -237,6 +257,16 @@ in
         Declarative settings deep-merged into the writable
         {file}`~/.pi/agent/settings.json` on activation. Declarative values
         take precedence over values already in the file.
+
+        Two consequences of the merge, since pi also writes this file:
+
+        - Objects merge key by key, but arrays are replaced wholesale. Setting
+          `settings.packages` therefore discards anything `pi install` added to
+          that array at the next activation. Leave an array undeclared to let
+          pi own it.
+        - The merge only adds and overwrites; it never prunes. Removing a key
+          here leaves the last written value in the file, so drop it from the
+          file by hand when a declarative setting is retired.
       '';
     };
 

@@ -174,6 +174,7 @@ let
   };
 
   defaultExtensions = {
+    "claude-subscription-usage.ts".source = ./extensions/claude-subscription-usage.ts;
     "protected-paths.ts".source = ./extensions/protected-paths.ts;
     "status-line.ts".source = ./extensions/status-line.ts;
   };

@@ -1,3 +1,11 @@
+# Pi's settings.json is mutable: pi itself writes it at runtime (model picker,
+# `pi install`), so this module owns the file as a regular file and deep-merges
+# the declarative values into it on activation instead of linking the store.
+#
+# Rolling back to a generation from before that change fails on a machine that
+# already has `~/.pi/agent/settings.json.backup`: Home Manager wants to back up
+# the now-unmanaged regular file and refuses to clobber the existing backup
+# (check-link-targets.sh). Remove that stale backup first, then roll back.
 {
   config,
   lib,
@@ -10,6 +18,112 @@ with lib;
 let
   cfg = config.programs.pi;
   jsonFormat = pkgs.formats.json { };
+  settingsPath = "${config.home.homeDirectory}/.pi/agent/settings.json";
+
+  validateManagedSettingsSymlink = path: ''
+    linkTarget="$(${getExe' pkgs.coreutils "readlink"} ${escapeShellArg path})"
+    case "$linkTarget" in
+      /nix/store/*-home-manager-files/.pi/agent/settings.json) ;;
+      *)
+        echo "Refusing to replace non-Home-Manager settings symlink: ${path} -> $linkTarget" >&2
+        exit 1
+        ;;
+    esac
+  '';
+
+  # Both writers run in a subshell: Home Manager installs its own EXIT trap for
+  # the new generation's GC root right before the activation commands, so
+  # clearing a local trap here would disarm that cleanup for everything after.
+  writeSettingsAtomically = path: source: ''
+    (
+      piSettingsTmp="$(${getExe' pkgs.coreutils "mktemp"} \
+        "$(dirname ${escapeShellArg path})/.settings.json.home-manager.XXXXXX")"
+      trap '${getExe' pkgs.coreutils "rm"} -f "$piSettingsTmp"' EXIT
+      ${source}
+      ${getExe' pkgs.coreutils "mv"} -f "$piSettingsTmp" ${escapeShellArg path}
+    )
+  '';
+
+  migrateManagedSettingsSymlink = path: ''
+    if [ -L ${escapeShellArg path} ]; then
+      ${validateManagedSettingsSymlink path}
+
+      if [ ! -e ${escapeShellArg path} ]; then
+        # Verified above as Home Manager's own link, and it can only have held
+        # declarative values that the merge re-applies moments later, so drop
+        # it rather than wedging this and every later activation.
+        if [[ -v DRY_RUN ]]; then
+          echo "Would remove dangling Home Manager settings symlink: ${path} -> $linkTarget"
+        else
+          ${getExe' pkgs.coreutils "rm"} -f ${escapeShellArg path}
+        fi
+      elif ! ${getExe pkgs.jq} -e . ${escapeShellArg path} >/dev/null; then
+        echo "Refusing to migrate invalid JSON from ${path}" >&2
+        exit 1
+      elif [[ -v DRY_RUN ]]; then
+        echo "Would migrate Home Manager settings symlink to a writable file: ${path}"
+      else
+        ${writeSettingsAtomically path ''cat ${escapeShellArg path} > "$piSettingsTmp"''}
+      fi
+      unset linkTarget
+    fi
+  '';
+
+  mergeMutableJson = path: staticSettings: ''
+    if [ -L ${escapeShellArg path} ]; then
+      ${validateManagedSettingsSymlink path}
+    fi
+
+    if [[ -v DRY_RUN ]]; then
+      echo "Would deep-merge declarative Pi settings into ${path}"
+    else
+      mkdir -p "$(dirname ${escapeShellArg path})"
+
+      # A partial write from pi leaves an empty or non-object file; treat the
+      # empty case as "no runtime settings yet" and refuse the rest by name,
+      # rather than letting jq fail mid-merge with an anonymous error.
+      if [ -s ${escapeShellArg path} ]; then
+        if ! dynamic="$(${getExe pkgs.jq} -c \
+          'if type == "object" then . else halt_error(1) end' ${escapeShellArg path})"; then
+          echo "Refusing to overwrite invalid or non-object JSON in ${path}" >&2
+          exit 1
+        fi
+      else
+        dynamic='{}'
+      fi
+
+      static="$(cat ${escapeShellArg staticSettings})"
+      merged="$(${getExe pkgs.jq} -n ${escapeShellArg "$dynamic * $static"} \
+        --argjson dynamic "$dynamic" \
+        --argjson static "$static")"
+
+      ${writeSettingsAtomically path ''printf '%s\n' "$merged" > "$piSettingsTmp"''}
+      unset dynamic static merged
+    fi
+    unset linkTarget
+  '';
+
+  # One-shot cleanup of extensions the retired Orca module used to write into
+  # this same mutable directory. Drop this list (and its activation entry) after
+  # 2026-11-01, by which point every machine has activated at least once.
+  obsoleteOrcaExtensions = [
+    "orca-agent-status.ts"
+    "orca-prefill.ts"
+    "orca-titlebar-spinner.ts"
+  ];
+
+  removeObsoleteOrcaExtension = name: ''
+    orcaExtension=${escapeShellArg "${config.home.homeDirectory}/.pi/agent/extensions/${name}"}
+    if [ -f "$orcaExtension" ] && [ ! -L "$orcaExtension" ] \
+      && ${getExe pkgs.gnugrep} -Fqx '// @orca-managed-pi-extension' "$orcaExtension"; then
+      if [[ -v DRY_RUN ]]; then
+        echo "Would remove obsolete Orca-managed Pi extension: $orcaExtension"
+      else
+        ${getExe' pkgs.coreutils "rm"} -f "$orcaExtension"
+      fi
+    fi
+    unset orcaExtension
+  '';
 
   fileEntryType = types.submodule {
     options = {
@@ -54,8 +168,6 @@ let
   };
 
   defaultSettings = {
-    defaultProvider = "openai-codex";
-    defaultModel = "gpt-5.6-sol";
     defaultThinkingLevel = "xhigh";
     collapseChangelog = true;
     enableInstallTelemetry = false;
@@ -82,6 +194,7 @@ let
   };
 
   defaultExtensions = {
+    "claude-subscription-usage.ts".source = ./extensions/claude-subscription-usage.ts;
     "protected-paths.ts".source = ./extensions/protected-paths.ts;
     "status-line.ts".source = ./extensions/status-line.ts;
   };
@@ -140,7 +253,21 @@ in
     settings = mkOption {
       type = jsonFormat.type;
       default = { };
-      description = "Settings written to ~/.pi/agent/settings.json.";
+      description = ''
+        Declarative settings deep-merged into the writable
+        {file}`~/.pi/agent/settings.json` on activation. Declarative values
+        take precedence over values already in the file.
+
+        Two consequences of the merge, since pi also writes this file:
+
+        - Objects merge key by key, but arrays are replaced wholesale. Setting
+          `settings.packages` therefore discards anything `pi install` added to
+          that array at the next activation. Leave an array undeclared to let
+          pi own it.
+        - The merge only adds and overwrites; it never prunes. Removing a key
+          here leaves the last written value in the file, so drop it from the
+          file by hand when a declarative setting is retired.
+      '';
     };
 
     keybindings = mkOption {
@@ -209,8 +336,21 @@ in
 
     home.packages = [ cfg.package ];
 
+    home.activation = {
+      piSettingsSymlinkMigration = hm.dag.entryBetween [ "linkGeneration" ] [ "writeBoundary" ] (
+        migrateManagedSettingsSymlink settingsPath
+      );
+
+      piSettingsActivation = hm.dag.entryAfter [ "linkGeneration" ] (
+        mergeMutableJson settingsPath settingsFile
+      );
+
+      piRemoveObsoleteOrcaExtensions = hm.dag.entryAfter [ "linkGeneration" ] (
+        concatMapStringsSep "\n" removeObsoleteOrcaExtension obsoleteOrcaExtensions
+      );
+    };
+
     home.file = {
-      ".pi/agent/settings.json".source = settingsFile;
       ".pi/agent/keybindings.json".source = keybindingsFile;
     }
     // resourceHomeFiles "prompts" promptFiles

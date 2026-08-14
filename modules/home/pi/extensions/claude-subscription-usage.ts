@@ -28,6 +28,7 @@ interface ClaudeUsage {
   seven_day: UsageWindow | null;
   seven_day_opus?: UsageWindow | null;
   seven_day_sonnet?: UsageWindow | null;
+  fable: UsageWindow | null;
 }
 
 interface ClaudeCredentials {
@@ -139,6 +140,35 @@ function isUsageWindow(value: unknown): value is UsageWindow {
   );
 }
 
+function parseFableWindow(value: unknown): UsageWindow | null {
+  if (!Array.isArray(value)) return null;
+
+  for (const item of value) {
+    if (!item || typeof item !== "object") continue;
+    const limit = item as Record<string, unknown>;
+    if (limit.kind !== "weekly_scoped") continue;
+
+    const scope = limit.scope;
+    if (!scope || typeof scope !== "object") continue;
+    const model = (scope as Record<string, unknown>).model;
+    if (!model || typeof model !== "object") continue;
+    const displayName = (model as Record<string, unknown>).display_name;
+    if (typeof displayName !== "string" || displayName.toLowerCase() !== "fable") {
+      continue;
+    }
+
+    const percent = limit.percent;
+    const resetsAt = limit.resets_at;
+    if (typeof percent !== "number" || !Number.isFinite(percent)) return null;
+    if (resetsAt !== undefined && resetsAt !== null && typeof resetsAt !== "string") {
+      return null;
+    }
+    return { utilization: percent, resets_at: resetsAt ?? null };
+  }
+
+  return null;
+}
+
 function parseUsage(value: unknown): ClaudeUsage | undefined {
   if (!value || typeof value !== "object") return undefined;
   const candidate = value as Record<string, unknown>;
@@ -157,6 +187,7 @@ function parseUsage(value: unknown): ClaudeUsage | undefined {
     seven_day: sevenDay,
     seven_day_opus: parseWindow("seven_day_opus"),
     seven_day_sonnet: parseWindow("seven_day_sonnet"),
+    fable: parseFableWindow(candidate.limits),
   };
 }
 
@@ -267,6 +298,10 @@ function statusParts(
   if (usage.seven_day) {
     const percent = clampPercent(usage.seven_day.utilization);
     parts.push({ text: `${Math.round(percent)}% used wk`, percent });
+  }
+  if (usage.fable) {
+    const percent = clampPercent(usage.fable.utilization);
+    parts.push({ text: `${Math.round(percent)}% used fable wk`, percent });
   }
 
   const modelWindow = modelSpecificWindow(usage, modelId);
@@ -482,6 +517,11 @@ export default function claudeSubscriptionUsage(pi: ExtensionAPI) {
       if (lastUsage.seven_day) {
         lines.push(
           `Weekly: ${Math.round(clampPercent(lastUsage.seven_day.utilization))}% used; resets in ${formatReset(lastUsage.seven_day.resets_at)}`,
+        );
+      }
+      if (lastUsage.fable) {
+        lines.push(
+          `Fable weekly: ${Math.round(clampPercent(lastUsage.fable.utilization))}% used; resets in ${formatReset(lastUsage.fable.resets_at)}`,
         );
       }
       const modelWindow = modelSpecificWindow(lastUsage, activeModelId);

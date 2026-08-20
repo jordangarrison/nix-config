@@ -72,6 +72,7 @@ in
       skillListingBudgetFraction = 0.02;
       skipAutoPermissionPrompt = true;
       skipDangerousModePermissionPrompt = true;
+      permissions.defaultMode = "bypassPermissions";
       statusLine = {
         type = "command";
         command = ''bash "$HOME/.claude/statusline.sh"'';

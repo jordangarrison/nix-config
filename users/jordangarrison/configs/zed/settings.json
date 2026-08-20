@@ -1,4 +1,18 @@
 {
+  "project_panel": {
+    "dock": "left"
+  },
+  "outline_panel": {
+    "dock": "left"
+  },
+  "collaboration_panel": {
+    "dock": "left"
+  },
+  "agent": {
+    "dock": "right",
+    "favorite_models": [],
+    "model_parameters": []
+  },
   "edit_predictions": {
     "provider": "copilot"
   },
@@ -21,6 +35,7 @@
     }
   },
   "git_panel": {
+    "dock": "left",
     "tree_view": true
   },
   "vim_mode": true,

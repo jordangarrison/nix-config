@@ -14,6 +14,7 @@
 
   home.packages = [
     pkgs.llm-agents.agent-browser # Headless browser automation CLI for AI agents (Linux only — dashboard pnpm build OOMs on aarch64-darwin)
+    pkgs.llm-agents.chatgpt # ChatGPT desktop app (Electron)
     pkgs.llm-agents.claude-desktop # Claude desktop app (Electron)
   ] ++ lib.optionals (userApps.warp.enable or false) [
     inputs.warp-preview.packages.${pkgs.stdenv.hostPlatform.system}.default
@@ -146,12 +147,6 @@
   };
 
   braveApps.apps = [
-    {
-      name = "ChatGPT";
-      url = "https://chat.openai.com/";
-      categories = [ "Development" ];
-      icon = ../../icons/chatgpt.png;
-    }
     {
       name = "Google Meet";
       url = "https://meet.google.com/";

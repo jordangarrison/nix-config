@@ -183,6 +183,46 @@ in
     enable = true;
   };
 
+  # MCP servers written to ~/.config/mcp/mcp.json (read by pi-mcp-adapter,
+  # and any other MCP client). Gated to the coding-agent hosts via herdr,
+  # which is enabled on exactly the machines that run agents (endeavour,
+  # opportunity, flomac) and off on the servers (voyager, discovery). Slack
+  # is a remote OAuth endpoint hosted by Slack, so there is no local daemon
+  # to run — pi runs the browser OAuth flow on first use and stores tokens in
+  # its own keyring, not in this file. The clientId is Slack's public MCP
+  # OAuth client, safe to commit.
+  programs.mcp = {
+    enable = userApps.herdr.enable or false;
+    servers.slack = {
+      url = "https://mcp.slack.com/mcp";
+      oauth = {
+        clientId = "1601185624273.8899143856786";
+        # pi-mcp-adapter reads oauth.redirectUri (a full URI), not the
+        # plugin's callbackPort field. Slack's pre-registered OAuth client
+        # only accepts port 3118, so pin the exact registered redirect URI
+        # — otherwise pi falls back to its default port 19876 and Slack
+        # rejects it with "redirect_uri did not match any configured URIs".
+        redirectUri = "http://localhost:3118/callback";
+      };
+    };
+    # SRE/dev remote MCP servers. All OAuth with dynamic client registration,
+    # so pi's default callback works and no clientId/redirectUri pin is needed
+    # (unlike Slack's pre-registered client above). No secrets — tokens land in
+    # pi's keyring, so these are safe in a public repo.
+    servers.linear.url = "https://mcp.linear.app/mcp";
+    servers.rootly.url = "https://mcp.rootly.com/mcp";
+    # scaleops' authorization-server metadata is self-inconsistent: it
+    # advertises the AS as "https://mcp.scaleops.com" (no slash) but publishes
+    # issuer "https://mcp.scaleops.com/" (slash), violating RFC 8414 §3.3. The
+    # MCP SDK's one-directional slash tolerance can't bridge it and rejects the
+    # server, so relax the issuer echo check for this server only (a config
+    # bug on scaleops' side, not ours). Revisit/remove once they fix it.
+    servers.scaleops = {
+      url = "https://mcp.scaleops.com";
+      oauth.skipIssuerMetadataValidation = true;
+    };
+  };
+
   programs.herdr = {
     enable = userApps.herdr.enable or false;
     integrations = [

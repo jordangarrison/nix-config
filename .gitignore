@@ -16,3 +16,6 @@ result/
 # Doom Emacs literate config — generated from config.org
 users/jordangarrison/tools/doom.d/config.el
 .claude/worktrees
+
+# pi agent runtime artifacts (sessions, subagent outputs)
+.pi/

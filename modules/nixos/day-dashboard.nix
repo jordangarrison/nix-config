@@ -42,23 +42,27 @@ in
 
     allowedRanges = lib.mkOption {
       type = lib.types.listOf lib.types.str;
-      default = [ "127.0.0.1" "::1" "100.64.0.0/10" "192.168.0.0/16" ];
+      default = [ "127.0.0.1" "::1" "100.64.0.0/10" ];
       description = ''
-        nginx allow list. Defaults to localhost, the Tailscale CGNAT range and
-        RFC1918 LAN. Everything else is denied — defense in depth on top of the
-        tailnet-only DNS, since endeavour's host firewall is disabled.
+        nginx allow list. Defaults to localhost + the Tailscale CGNAT range only
+        — everything else is denied. RFC1918 LAN is deliberately excluded: the
+        page aggregates private Slack/email/Linear data, nginx routes by Host
+        header, and endeavour's host firewall is disabled, so allowing the LAN
+        would let any LAN device reach it with a spoofed Host. Add a LAN range
+        here only if you accept that exposure.
       '';
     };
   };
 
   config = lib.mkIf cfg.enable {
-    # secrets/ holds the optional Confluence credential file (see the package
-    # README). 0700 so only the service user can read it. www/ is the served
-    # root and must be traversable by nginx; the user service writes into it.
+    # State dirs are group-nginx and 0750: the aggregated Slack/email/Linear
+    # data under here must not be readable by the other local accounts on this
+    # box (family users). nginx (group nginx) can still traverse and read the
+    # served www/ files; "other" cannot even enter the dir. secrets/ stays 0700.
     systemd.tmpfiles.rules = [
-      "d ${cfg.stateDir} 0755 ${cfg.user} users - -"
-      "d ${cfg.stateDir}/secrets 0700 ${cfg.user} users - -"
-      "d ${cfg.stateDir}/www 0755 ${cfg.user} users - -"
+      "d ${cfg.stateDir} 0750 ${cfg.user} nginx - -"
+      "d ${cfg.stateDir}/secrets 0700 ${cfg.user} ${cfg.user} - -"
+      "d ${cfg.stateDir}/www 0750 ${cfg.user} nginx - -"
     ];
 
     security.acme.certs.${cfg.host} = {

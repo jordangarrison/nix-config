@@ -30,7 +30,7 @@ stdenvNoCC.mkDerivation {
   # Fail the build if the renderer's unit tests regress. This is the security
   # gate (injection-safety) baked into the package.
   doCheck = true;
-  checkInputs = [ nodejs ];
+  nativeCheckInputs = [ nodejs ];
   checkPhase = ''
     runHook preCheck
     node --test test/render.test.mjs

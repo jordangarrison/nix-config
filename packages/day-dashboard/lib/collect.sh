@@ -177,7 +177,7 @@ collect_email() {
   while read -r id; do
     [ -n "$id" ] || continue
     _gws gmail users messages get \
-      --params "{\"userId\":\"me\",\"id\":\"$id\",\"format\":\"metadata\",\"metadataHeaders\":[\"From\",\"Subject\"]}" 2>/dev/null \
+      --params "$(jq -cn --arg id "$id" '{userId:"me", id:$id, format:"metadata", metadataHeaders:["From","Subject"]}')" 2>/dev/null \
       | jq -c --arg id "$id" '
           (.payload.headers // []) as $h
           | ([$h[]|select(.name=="From")|.value][0] // "?") as $fromRaw

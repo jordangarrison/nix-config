@@ -14,7 +14,7 @@
 //   DAY_DASHBOARD_LIBDIR       dir holding render.mjs + headline.ttf
 
 import { createServer } from "node:http";
-import { readFileSync, writeFileSync, renameSync } from "node:fs";
+import { readFileSync, writeFileSync, renameSync, chmodSync } from "node:fs";
 import { renderHtml } from "./render.mjs";
 
 const STATE = process.env.DAY_DASHBOARD_STATE_DIR || "/var/lib/day-dashboard";
@@ -32,9 +32,10 @@ function readJson(path, fallback) {
   }
 }
 
-function writeAtomic(path, text) {
+function writeAtomic(path, text, mode) {
   const tmp = `${path}.tmp.${process.pid}`;
   writeFileSync(tmp, text);
+  if (mode !== undefined) chmodSync(tmp, mode);
   renameSync(tmp, path);
 }
 
@@ -90,7 +91,8 @@ const server = createServer((req, res) => {
     if (url.pathname === "/dismiss") dismissed[key] = { dismissedAt: new Date().toISOString() };
     else delete dismissed[key];
     try {
-      writeAtomic(DISMISSED, `${JSON.stringify(dismissed)}\n`);
+      // 0600: dismissed.json can encode which items (Slack/email/etc.) exist.
+      writeAtomic(DISMISSED, `${JSON.stringify(dismissed)}\n`, 0o600);
       rerender(dismissed);
     } catch (e) {
       res.writeHead(500).end(`error: ${e.message}`);

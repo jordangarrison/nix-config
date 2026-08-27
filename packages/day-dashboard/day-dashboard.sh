@@ -195,22 +195,30 @@ fi
 # Persist the cache before rendering, so a later render failure still keeps the
 # fetched data + briefing (and the last good page).
 if [ -z "${DAY_DASHBOARD_NO_CACHE:-}" ]; then
-  printf '%s' "$cache" >"$OUT_DIR/../.cache.json.new" 2>/dev/null \
-    && mv -f "$OUT_DIR/../.cache.json.new" "$CACHE_FILE" 2>/dev/null || true
+  ( umask 077; printf '%s' "$cache" >"$STATE_DIR/.cache.json.new" ) 2>/dev/null \
+    && mv -f "$STATE_DIR/.cache.json.new" "$CACHE_FILE" 2>/dev/null || true
 fi
 
 # ── 4. render ───────────────────────────────────────────────────────────────
 # Persist the render inputs so the dismiss handler can re-render instantly (from
 # the last run) without re-collecting. dismissed.json is honored on every render.
+# Persist atomically (.new + mv) so a dismiss re-render landing mid-generation
+# never reads a torn file — same discipline as the cache/index/status writes.
 DISMISSED_FILE="$STATE_DIR/dismissed.json"
-install -m 0644 "$WORK/context.json" "$STATE_DIR/last-context.json" 2>/dev/null || true
-install -m 0644 "$WORK/meta.json" "$STATE_DIR/last-meta.json" 2>/dev/null || true
+_persist() { # $1=src-file  $2=dest
+  install -m 0600 "$1" "$2.new" 2>/dev/null && mv -f "$2.new" "$2" 2>/dev/null || true
+}
+_persist "$WORK/context.json" "$STATE_DIR/last-context.json"
+_persist "$WORK/meta.json" "$STATE_DIR/last-meta.json"
 if [ ${#BRIEFING_ARG[@]} -gt 0 ]; then
-  _extract_obj <"$WORK/briefing.txt" 2>/dev/null >"$STATE_DIR/last-briefing.json" || echo 'null' >"$STATE_DIR/last-briefing.json"
+  _extract_obj <"$WORK/briefing.txt" 2>/dev/null >"$WORK/last-briefing.json" || echo 'null' >"$WORK/last-briefing.json"
 else
-  echo 'null' >"$STATE_DIR/last-briefing.json"
+  echo 'null' >"$WORK/last-briefing.json"
 fi
-[ -f "$DISMISSED_FILE" ] || echo '{}' >"$DISMISSED_FILE"
+_persist "$WORK/last-briefing.json" "$STATE_DIR/last-briefing.json"
+if [ ! -f "$DISMISSED_FILE" ]; then
+  ( umask 077; echo '{}' >"$DISMISSED_FILE" )
+fi
 
 if ! node "$LIBDIR/render.mjs" \
     --context "$WORK/context.json" \

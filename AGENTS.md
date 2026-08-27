@@ -322,6 +322,7 @@ These modules configure services running on the endeavour desktop as a home serv
 | `metabase.nix` | Analytics and BI platform | - |
 | `n8n.nix` | Low-code workflow automation | - |
 | `lakeline-cg.nix` | Custom service integration | - |
+| `day-dashboard.nix` | Private nginx vhost for the hourly personal day dashboard (the generator is a Home Manager **user** service — Pi MCP Slack/Linear + `gws` email/calendar + Confluence), served over Tailscale | day.jordangarrison.dev |
 
 ### Hardware & Networking
 

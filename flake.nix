@@ -190,7 +190,20 @@
             panko.nixosModules.default
             drawl.nixosModules.default
             lakeline-cg.nixosModules.default
-            {
+            (
+              let
+                # Single source of truth for the day-dashboard's shared knobs.
+                # The NixOS module (state dirs + vhost) and the Home Manager
+                # generator both need the same stateDir/dismissPort/user;
+                # declare them once here and pass them to both call sites so
+                # they can't silently drift out of sync.
+                dayDashboard = {
+                  stateDir = "/var/lib/day-dashboard";
+                  dismissPort = 8846;
+                  user = "jordangarrison";
+                };
+              in
+              {
               # Configure users for endeavour
               users.jordangarrison = {
                 enable = true;
@@ -252,7 +265,10 @@
               # Tailscale). The generator itself is a Home Manager *user*
               # service (below) so it can reach the login keyring for Pi MCP +
               # gws. See packages/day-dashboard/README.md.
-              services.day-dashboard.enable = true;
+              services.day-dashboard = {
+                enable = true;
+                inherit (dayDashboard) stateDir dismissPort user;
+              };
 
               # Import home modules for jordangarrison on endeavour
               home-manager.users.jordangarrison.imports = [
@@ -268,6 +284,7 @@
               # private nginx vhost and served directory.
               home-manager.users.jordangarrison.services.day-dashboard = {
                 enable = true;
+                inherit (dayDashboard) stateDir dismissPort;
                 # Confluence collector needs a token file too (see README);
                 # this only points it at the right Atlassian site.
                 environment.DAY_DASHBOARD_CONFLUENCE_BASE =
@@ -290,6 +307,7 @@
                 };
               };
             }
+            )
           ];
 
         };

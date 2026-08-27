@@ -174,9 +174,20 @@ in
   programs.pi = {
     enable = true;
     package = pkgs.llm-agents.pi;
-    settings.packages = [
-      "${piExtensions}/lib/node_modules/jordangarrison-pi-extensions"
-    ];
+    settings = {
+      packages = [
+        "${piExtensions}/lib/node_modules/jordangarrison-pi-extensions"
+      ];
+      # Thinking at xhigh produces pages of reasoning that push the actual
+      # answer off screen. This collapses every thinking block to a single
+      # italic "Thinking..." line; the reasoning still happens and is still
+      # written to the session file, it just is not rendered.
+      #
+      # Ctrl+T (app.thinking.toggle) flips this live and writes the new value
+      # back to settings.json, but the declarative merge here reasserts `true`
+      # on the next activation — so a rebuild re-collapses the blocks.
+      hideThinkingBlock = true;
+    };
   };
 
   programs.acp-adapters = {

@@ -36,9 +36,8 @@ not re-implement the gathering or rendering here.
   ticketed vs open) and **Needs attention** / **Resolved**. All links open in a
   new tab.
 - **Cache** (`<stateDir>/cache.json`, not served): TTL-caches the costly MCP
-  sources (120 min), skips the model entirely when the context is unchanged, and
-  keeps an item ledger (first/last seen, ticket) so it knows what is already
-  tracked. `status.json` shows `briefingSource` (model|cache) + `trackedFollowups`.
+  sources (120 min) and skips the model entirely when the context is unchanged.
+  `status.json` shows `briefingSource` (model|cache).
 - **Dismiss** (the ✕ on each item): a `day-dashboard-dismiss` user service records
   it in `dismissed.json`, instantly re-renders, and it stays gone across runs —
   the manual answer for "already handled elsewhere" that no collector can see.

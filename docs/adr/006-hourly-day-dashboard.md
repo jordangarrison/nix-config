@@ -113,10 +113,8 @@ dismisses it once and it stays gone.
   tickets are tracked, not re-nagged.
 - **Cache** (`<stateDir>/cache.json`, never served): a TTL cache for the
   token-costly MCP collectors (Slack/Linear/Rootly, 120 min) while free `gws`
-  sources stay fresh; a context **fingerprint** that skips the synthesis model
-  call outright on an unchanged hour (zero tokens); and an **item ledger**
-  (first/last seen, status, ticket) that records what is already tracked — the
-  basis for future update notifications.
+  sources stay fresh, plus a context **fingerprint** that skips the synthesis
+  model call outright on an unchanged hour (zero tokens).
 - **Collection is sequential**, not parallel: the MCP collectors share one model
   provider that serializes concurrent sessions, so parallelism only slowed each
   call and risked rate-limits. The unit timeout is 10 min for the occasional

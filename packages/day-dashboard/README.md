@@ -61,9 +61,9 @@ changes and it can reappear. Undo by hitting `/undismiss?k=<key>`; inspect with
 `GET /dismissed`. The handler binds to 127.0.0.1 and only ever reads/writes JSON
 and re-runs the renderer — no shell, no user input executed.
 
-### Caching (fewer tokens, and a tracking ledger)
+### Caching (fewer tokens)
 
-`<stateDir>/cache.json` (not served) holds three things:
+`<stateDir>/cache.json` (not served) holds two things:
 
 - **TTL cache** for the token-costly MCP collectors (Slack/Linear/Rootly),
   default 120 min (`DAY_DASHBOARD_MCP_TTL_MIN`). `gws`/Confluence are free so
@@ -74,10 +74,8 @@ and re-runs the renderer — no shell, no user input executed.
   `DAY_DASHBOARD_BRIEF_MAX_MIN`, default 360), the model call is skipped entirely
   and the page is just re-rendered (new time + "now" marker). A quiet hour costs
   **zero** model tokens.
-- **Item ledger**: every grouped action item is remembered (first/last seen,
-  status, ticket) so we know what is already tracked and what is new — the
-  foundation for future update notifications. `status.json` reports
-  `trackedFollowups`. Set `DAY_DASHBOARD_NO_CACHE=1` to bypass it all.
+
+Set `DAY_DASHBOARD_NO_CACHE=1` to bypass it all.
 
 ## Pipeline
 

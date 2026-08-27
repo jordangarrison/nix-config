@@ -82,9 +82,8 @@ release_lock() { rmdir "$LOCK_DIR" 2>/dev/null || true; }
 
 # ── cache ───────────────────────────────────────────────────────────────────
 # One JSON file holds: TTL-cached results for the token-costly MCP collectors,
-# the last synthesized briefing keyed by a context fingerprint (so an unchanged
-# hour skips the model entirely), and an item ledger that remembers each
-# meeting follow-up (first/last seen, ticket) so we know what is already tracked.
+# plus the last synthesized briefing keyed by a context fingerprint (so an
+# unchanged hour skips the model entirely).
 CACHE_FILE="$STATE_DIR/cache.json"
 MCP_TTL_MIN="${DAY_DASHBOARD_MCP_TTL_MIN:-120}"
 BRIEF_MAX_MIN="${DAY_DASHBOARD_BRIEF_MAX_MIN:-360}"
@@ -196,20 +195,6 @@ else
   log "skipping model (skip flag or no sources)"
 fi
 
-# ── ledger: remember each meeting follow-up so we know what is already tracked
-# and what is new. Keyed by "meeting|title"; carries first/last seen + ticket.
-if [ ${#BRIEFING_ARG[@]} -gt 0 ]; then
-  briefObj="$(_extract_obj <"$WORK/briefing.txt" 2>/dev/null || echo '{}')"
-  seen="$(jq -c --argjson b "$briefObj" '[ (($b.actionGroups // $b.followupGroups) // [])[] | ((.kind//"other")+"|"+((.title//.meeting)//"")) as $g | (.items // [])[] | {key:($g+"|"+(.title//"")), status:(.status//"open"), ticket:(.ticket.id // null)} ]' <<<'{}' 2>/dev/null || echo '[]')"
-  ledger="$(jq -c --argjson now "$NOW_EPOCH" --argjson seen "$seen" '
-    (.ledger // {}) as $led
-    | reduce $seen[] as $it ($led;
-        .[$it.key] = ((.[$it.key] // {firstSeenEpoch:$now}) + {lastSeenEpoch:$now, status:$it.status, ticket:$it.ticket}))
-    | [ to_entries[] | select((.value.lastSeenEpoch // 0) > ($now - 1209600)) ] | from_entries
-  ' <<<"$cache" 2>/dev/null || jq -c '.ledger // {}' <<<"$cache")"
-  cache="$(jq -c --argjson l "$ledger" '.ledger=$l' <<<"$cache")"
-fi
-
 # Persist the cache before rendering, so a later render failure still keeps the
 # fetched data + briefing (and the last good page).
 if [ -z "${DAY_DASHBOARD_NO_CACHE:-}" ]; then
@@ -255,7 +240,6 @@ if [ ! -s "$WORK/index.html" ]; then
 fi
 
 # ── 5. publish atomically ───────────────────────────────────────────────────
-trackedCount="$(jq -r '[.ledger // {} | to_entries[] | select(.value.status=="ticketed")] | length' <<<"$cache" 2>/dev/null || echo 0)"
 acquire_lock
 publish_ok=1
 if install -m 0644 "$WORK/index.html" "$OUT_DIR/.index.html.new" \
@@ -263,8 +247,8 @@ if install -m 0644 "$WORK/index.html" "$OUT_DIR/.index.html.new" \
   # status.json is machine-readable run metadata (last success, per-source state).
   jq -cn --slurpfile ctx "$WORK/context.json" --arg t "$GENERATED_AT" \
     --argjson brief "$( [ ${#BRIEFING_ARG[@]} -gt 0 ] && echo true || echo false )" \
-    --arg bs "$briefing_source" --argjson tracked "${trackedCount:-0}" \
-    '{lastSuccess:$t, briefing:$brief, briefingSource:$bs, trackedFollowups:$tracked,
+    --arg bs "$briefing_source" \
+    '{lastSuccess:$t, briefing:$brief, briefingSource:$bs,
       sources:[$ctx[0].sources[]|{source, available}]}' \
     >"$OUT_DIR/.status.json.new" 2>/dev/null \
     && mv -f "$OUT_DIR/.status.json.new" "$OUT_DIR/status.json"
@@ -277,4 +261,4 @@ if [ "$publish_ok" != 1 ]; then
   log "publish failed — PRESERVING last good page at $OUT_DIR/index.html"
   exit 1
 fi
-log "published $OUT_DIR/index.html (briefing: $briefing_source, tracked follow-ups: ${trackedCount:-0})"
+log "published $OUT_DIR/index.html (briefing: $briefing_source)"

@@ -297,6 +297,7 @@ in
 
       # Apps
       arandr
+      cliamp # Winamp-style terminal music player
       wezterm
       # doom-emacs
 

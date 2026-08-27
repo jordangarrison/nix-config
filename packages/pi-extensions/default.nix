@@ -1,16 +1,30 @@
 {
   buildNpmPackage,
+  fetchFromGitHub,
   lib,
 }:
 
+let
+  # pi-until is not published to npm, and its committed package-lock.json has
+  # entries missing `integrity`, which makes nixpkgs' prefetch-npm-deps panic on
+  # a `github:` dependency. So vendor the source directly and let the bundle's
+  # own lockfile carry its one runtime dependency (xstate). Everything else it
+  # imports (@earendil-works/*, typebox) is injected by pi at load time.
+  pi-until = fetchFromGitHub {
+    owner = "joelhooks";
+    repo = "pi-until";
+    rev = "7c90bdc90291321f60130984e479bc4a844a7d50"; # main @ 2026-08-19
+    hash = "sha256-/nOVWOS5uf0qqiap23nlrAqS02T5y5yAcqkA+5eU/7o=";
+  };
+in
 buildNpmPackage {
   pname = "jordangarrison-pi-extensions";
-  version = "1.2.0";
+  version = "1.3.0";
 
   src = ./.;
   # Refresh with `npm install --package-lock-only --ignore-scripts --legacy-peer-deps`,
   # then recompute using `nix run nixpkgs#prefetch-npm-deps -- package-lock.json`.
-  npmDepsHash = "sha256-X0VIA9KoWMQI9Zve8c5ZyOsfG2TkEhZJQlZpiIU9j3w=";
+  npmDepsHash = "sha256-ARLazdBoWZy9l3RmGRP7FKKLbqF/LqiUX292qJKKq0c=";
 
   dontNpmBuild = true;
   dontNpmPrune = true;
@@ -21,7 +35,16 @@ buildNpmPackage {
   npmPackFlags = [ "--ignore-scripts" ];
 
   postInstall = ''
-    piUsage="$out/lib/node_modules/jordangarrison-pi-extensions/node_modules/@narumitw/pi-usage/src"
+    bundle="$out/lib/node_modules/jordangarrison-pi-extensions"
+    piUsage="$bundle/node_modules/@narumitw/pi-usage/src"
+
+    # Drop the vendored pi-until where its manifest entry expects it. Its
+    # `import "xstate"` resolves by walking up to the bundle's flat node_modules,
+    # the same way every npm-installed extension here resolves its deps.
+    mkdir -p "$bundle/node_modules/@joelhooks/pi-until"
+    cp -r ${pi-until}/extensions ${pi-until}/src ${pi-until}/package.json ${pi-until}/LICENSE \
+      "$bundle/node_modules/@joelhooks/pi-until/"
+    chmod -R u+w "$bundle/node_modules/@joelhooks/pi-until"
 
     # Match the compact footer used by the Claude subscription extension:
     # "[usage] 5h:12% 7d:26%" reporting consumption, not upstream's unlabeled
@@ -68,9 +91,9 @@ buildNpmPackage {
 
     # Claude Bridge always uses the separately Nix-managed Claude Code binary,
     # so omit the Agent SDK's redundant 220+ MiB platform binary from the result.
-    rm -rf "$out/lib/node_modules/jordangarrison-pi-extensions/node_modules/@anthropic-ai"/claude-agent-sdk-{darwin,linux,win32}-*
+    rm -rf "$bundle/node_modules/@anthropic-ai"/claude-agent-sdk-{darwin,linux,win32}-*
 
-    unset piUsage
+    unset bundle piUsage
   '';
 
   meta = {

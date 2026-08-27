@@ -149,6 +149,7 @@
             ./modules/stack-cli-overlay.nix
             ./modules/brave-overlay.nix
             ./modules/tea-overlay.nix
+            ./modules/day-dashboard-overlay.nix
             ./modules/nixos/common.nix
             ./modules/nixos/brother-printer.nix
             ./modules/nixos/lan.nix
@@ -175,6 +176,7 @@
             ./modules/nixos/blocky.nix
             ./modules/nixos/lakeline-cg.nix
             ./modules/nixos/sre-claude-auto-runner.nix
+            ./modules/nixos/day-dashboard.nix
             ./users/jordangarrison/nixos.nix
             ./users/mikayla/nixos.nix
             ./users/jane/nixos.nix
@@ -188,7 +190,20 @@
             panko.nixosModules.default
             drawl.nixosModules.default
             lakeline-cg.nixosModules.default
-            {
+            (
+              let
+                # Single source of truth for the day-dashboard's shared knobs.
+                # The NixOS module (state dirs + vhost) and the Home Manager
+                # generator both need the same stateDir/dismissPort/user;
+                # declare them once here and pass them to both call sites so
+                # they can't silently drift out of sync.
+                dayDashboard = {
+                  stateDir = "/var/lib/day-dashboard";
+                  dismissPort = 8846;
+                  user = "jordangarrison";
+                };
+              in
+              {
               # Configure users for endeavour
               users.jordangarrison = {
                 enable = true;
@@ -244,13 +259,37 @@
               # Enable DNS-level ad blocking
               services.dns-blocking.enable = true;
 
+              # Hourly private personal day/work dashboard (06:00–21:00).
+              # This enables the system side: state dirs + the private nginx
+              # vhost (needs a `day.jordangarrison.dev` A record → 100.118.65.11
+              # Tailscale). The generator itself is a Home Manager *user*
+              # service (below) so it can reach the login keyring for Pi MCP +
+              # gws. See packages/day-dashboard/README.md.
+              services.day-dashboard = {
+                enable = true;
+                inherit (dayDashboard) stateDir dismissPort user;
+              };
+
               # Import home modules for jordangarrison on endeavour
               home-manager.users.jordangarrison.imports = [
                 ./modules/home/niri
                 ./modules/home/orca
                 ./modules/home/tea
                 ./modules/home/yazi
+                ./modules/home/day-dashboard
               ];
+
+              # The generator runs as a systemd --user service (needs the login
+              # keyring for Pi MCP + gws); the system module above owns the
+              # private nginx vhost and served directory.
+              home-manager.users.jordangarrison.services.day-dashboard = {
+                enable = true;
+                inherit (dayDashboard) stateDir dismissPort;
+                # Confluence collector needs a token file too (see README);
+                # this only points it at the right Atlassian site.
+                environment.DAY_DASHBOARD_CONFLUENCE_BASE =
+                  "https://flocasts.atlassian.net/wiki";
+              };
 
               home-manager.users.jordangarrison.programs.orca.enable = false;
 
@@ -268,6 +307,7 @@
                 };
               };
             }
+            )
           ];
 
         };

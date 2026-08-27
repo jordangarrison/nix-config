@@ -42,7 +42,7 @@ _finalize() {
 
 # Extract the last JSON object from noisy text (model output may add prose).
 _extract_obj() {
-  node -e 'const s=require("fs").readFileSync(0,"utf8");const i=s.indexOf("{"),j=s.lastIndexOf("}");if(i<0||j<i){process.exit(1)}try{process.stdout.write(JSON.stringify(JSON.parse(s.slice(i,j+1))))}catch{process.exit(1)}'
+  bun -e 'const s=require("fs").readFileSync(0,"utf8");const i=s.indexOf("{"),j=s.lastIndexOf("}");if(i<0||j<i){process.exit(1)}try{process.stdout.write(JSON.stringify(JSON.parse(s.slice(i,j+1))))}catch{process.exit(1)}'
 }
 
 # If DAY_DASHBOARD_<SOURCE>_CMD is set, run it instead of the built-in.

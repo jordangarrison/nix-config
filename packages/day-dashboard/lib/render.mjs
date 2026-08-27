@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 // render.mjs — deterministic, injection-safe renderer for the day dashboard.
 //
 // Aesthetic adapted from a personal "morning brief": a warm two-band page with

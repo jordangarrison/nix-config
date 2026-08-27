@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 // dismiss-server.mjs — tiny localhost handler for the dashboard's ✕ dismiss
 // links. It records a dismissed item key, re-renders the page instantly from
 // the last run's persisted inputs (so the item disappears on click, not an

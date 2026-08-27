@@ -238,7 +238,7 @@ if [ ! -f "$DISMISSED_FILE" ]; then
   ( umask 077; echo '{}' >"$DISMISSED_FILE" )
 fi
 
-if ! node "$LIBDIR/render.mjs" \
+if ! bun "$LIBDIR/render.mjs" \
     --context "$WORK/context.json" \
     "${BRIEFING_ARG[@]}" \
     --meta "$WORK/meta.json" \

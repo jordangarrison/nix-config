@@ -1,4 +1,4 @@
-// Unit tests for the renderer. Run with: node --test test/render.test.mjs
+// Unit tests for the renderer. Run with: bun test test/render.test.mjs
 // Focus: injection safety (the security-critical property), URL scheme
 // filtering, time/day-classification helpers, and graceful degradation.
 

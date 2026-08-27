@@ -25,6 +25,7 @@
 #   DAY_DASHBOARD_BRIEF_MAX_MIN  max age to reuse a cached briefing on unchanged context (default 360)
 #   DAY_DASHBOARD_NO_CACHE     if set, ignore and do not write the cache
 #   DAY_DASHBOARD_<SRC>_CMD    override a collector with a command printing {"items":[…]}
+#   DAY_DASHBOARD_GMAIL_PROFILE   browser Gmail profile for email links, mail/u/<N>/ (default 1)
 #   DAY_DASHBOARD_CONFLUENCE_BASE  see lib/collect.sh
 #
 # Slack/Linear collectors drive the Pi CLI against the MCP servers in

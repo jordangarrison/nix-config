@@ -178,6 +178,10 @@ collect_email() {
     _unavailable email "gmail list failed (is the login keyring unlocked?)"
     return 0
   fi
+  # Which browser Gmail profile the links open in (mail/u/<N>/). The work
+  # account is the second profile here, so default to 1; override with
+  # DAY_DASHBOARD_GMAIL_PROFILE.
+  local profile="${DAY_DASHBOARD_GMAIL_PROFILE:-1}"
   : >"$WORK/email.items"
   local id
   while read -r id; do
@@ -193,7 +197,8 @@ collect_email() {
           | ($fromRaw | sub("\\s*<[^>]*>$";"") | sub("^\"";"") | sub("\"$";"")) as $from
           | { title: ($from + " — " + $subj),
               detail: $subj,
-              url: ("https://mail.google.com/mail/u/0/#all/" + $id) }' 2>/dev/null \
+              url: ("https://mail.google.com/mail/u/" + $p + "/#all/" + $id) }' \
+          --arg p "$profile" 2>/dev/null \
       >>"$WORK/email.items" || true
   done <<<"$ids"
   jq -cs '{items: .}' "$WORK/email.items" 2>/dev/null | _finalize email \

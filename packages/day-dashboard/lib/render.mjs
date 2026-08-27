@@ -30,6 +30,20 @@ export function itemKey(source, title) {
   return createHash("sha1").update(`${String(source ?? "")}|${norm}`).digest("hex").slice(0, 16);
 }
 
+// Dismiss key namespace for a grouped action item: include the group's origin
+// (url, else title) so identically-titled actions in two different groups don't
+// collide and dismiss each other.
+function groupSource(g) {
+  return `group:${g.kind}|${g.url || g.title || ""}`;
+}
+
+// Small no-JS dismiss control. A POST form (not a GET link) so a cross-origin
+// page can't silently dismiss/restore via a drive-by GET; the handler also
+// checks Origin/Referer.
+function dismissControl(key) {
+  return ` <form class="dismiss" method="post" action="/dismiss"><input type="hidden" name="k" value="${escapeHtml(key)}"><button type="submit" title="Dismiss \u2014 already handled">\u2715</button></form>`;
+}
+
 const SOURCE_LABELS = {
   calendar: "Calendar",
   email: "Email",
@@ -223,12 +237,13 @@ function normalizeBriefing(briefing) {
 function timedEvents(calendarSource) {
   if (!calendarSource || !calendarSource.available) return [];
   return asArray(calendarSource.items)
-    .filter((it) => it && !it.allDay)
+    .filter((it) => it && typeof it === "object" && !it.allDay)
     .map((it) => {
       const start = hhmmMinutes(it.start ?? it.when);
       let end = hhmmMinutes(it.end);
       if (start == null) return null;
-      if (end == null || end <= start) end = start + 30; // assume 30m if unknown
+      if (end == null) end = start + 30; // unknown → assume 30m
+      else if (end <= start) end += 24 * 60; // spans midnight → next day
       return { start, end, title: clip(it.title, 80), url: safeUrl(it.url) };
     })
     .filter(Boolean)
@@ -345,8 +360,7 @@ function renderBriefItem(item, index) {
       .join("");
     srcPhrase = ` <span class="src">${escapeHtml(srcLabel || "links")}</span> <span class="lks">${nums}</span>`;
   }
-  const key = itemKey(item.source, item.title);
-  const dismiss = ` <a class="dismiss" href="/dismiss?k=${escapeHtml(key)}" title="Dismiss — already handled">✕</a>`;
+  const dismiss = dismissControl(itemKey(item.source, item.title));
   return `<li><span class="num">${index}</span><div><div class="line">${title}${dismiss}</div><div class="say">${sentence}${srcPhrase}</div></div></li>`;
 }
 
@@ -372,8 +386,7 @@ function renderActionGroups(groups) {
             badge = `<span class="open">open</span>`;
           }
           const say = it.sentence ? `<div class="say">${escapeHtml(it.sentence)}</div>` : "";
-          const key = itemKey(g.kind, it.title);
-          const dismiss = ` <a class="dismiss" href="/dismiss?k=${escapeHtml(key)}" title="Dismiss — already handled">✕</a>`;
+          const dismiss = dismissControl(itemKey(groupSource(g), it.title));
           return `<li class="fu ${it.status}"><div class="line"><span class="ttl">${escapeHtml(it.title)}</span> ${badge}${dismiss}</div>${say}</li>`;
         })
         .join("");
@@ -387,7 +400,7 @@ function renderRawSource(source) {
   if (!source.available) {
     return `<div class="rawsrc off"><strong>${label}</strong> — ${escapeHtml(clip(source.reason || "not configured", 160))}</div>`;
   }
-  const items = asArray(source.items);
+  const items = asArray(source.items).filter((it) => it && typeof it === "object");
   if (items.length === 0) return `<div class="rawsrc"><strong>${label}</strong> — clear</div>`;
   const lis = items
     .map((it) => {
@@ -434,7 +447,10 @@ export function renderHtml({ context, briefing, meta, fontDataUri, dismissed }) 
 
   const nowMin = hhmmMinutes(meta?.now || meta?.generatedAt);
   const brief = normalizeBriefing(briefing);
-  const dayShape = (brief && brief.dayShape) || classifyDay(events);
+  // Day classification (and thus terrain amplitude) is a deterministic property
+  // of the calendar, not the model — a briefing that mislabels a packed day as
+  // "open" must not flatten the terrain. The model's dayShape is advisory only.
+  const dayShape = classifyDay(events);
 
   const headline = escapeHtml((brief && brief.headline) || fallbackHeadline(dayShape));
   // Trust the model's curation when it ran at all (even an empty list means
@@ -464,7 +480,7 @@ export function renderHtml({ context, briefing, meta, fontDataUri, dismissed }) 
 
   // Filter dismissed follow-ups too, dropping any group left empty.
   const actionGroups = (brief ? brief.actionGroups : [])
-    .map((g) => ({ ...g, items: g.items.filter((it) => !isDismissed(g.kind, it.title)) }))
+    .map((g) => ({ ...g, items: g.items.filter((it) => !isDismissed(groupSource(g), it.title)) }))
     .filter((g) => g.items.length);
   const groupsHtml = actionGroups.length ? renderActionGroups(actionGroups) : "";
 
@@ -530,8 +546,9 @@ h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--so
 .src{color:var(--soft);text-decoration:underline;text-decoration-color:var(--grey);}
 .lks{display:inline;}
 .lk{display:inline-block;min-width:1.1em;text-align:center;font-size:.72rem;color:var(--soft);text-decoration:underline;text-decoration-color:var(--grey);margin:0 .1rem;}
-.dismiss{color:var(--grey);text-decoration:none;font-size:.8rem;margin-left:.4rem;opacity:.5;}
-.dismiss:hover{color:var(--off);opacity:1;}
+form.dismiss{display:inline;margin:0;}
+form.dismiss button{background:none;border:none;padding:0;margin-left:.4rem;cursor:pointer;color:var(--grey);font-size:.8rem;opacity:.5;font-family:inherit;line-height:1;}
+form.dismiss button:hover{color:var(--off);opacity:1;}
 .resolved .line .ttl{color:var(--soft);font-weight:500;}
 .group{border-top:1px solid var(--hair);padding:.5rem 0;}
 .group:first-of-type{border-top:none;}

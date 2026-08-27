@@ -35,7 +35,8 @@ _finalize() {
   local source="$1"
   jq -c --arg s "$source" --argjson max "${DAY_DASHBOARD_MAX_ITEMS:-8}" '
     (if type=="array" then {items:.} else . end)
-    | { source:$s, available:true, items:( (.items // [])[:$max] ) }
+    | { source:$s, available:true,
+        items:( [ (.items // [])[] | select(type=="object") ][:$max] ) }
   ' 2>/dev/null || _unavailable "$source" "collector returned invalid JSON"
 }
 
@@ -85,13 +86,18 @@ _pi_mcp() {
   jq -e --arg s "$server" '.mcpServers[$s]' "$MCP_CONFIG" >/dev/null 2>&1 || return 1
   local cfg="$WORK/mcp-$server.json"
   jq -c --arg s "$server" '{mcpServers: {($s): .mcpServers[$s]}}' "$MCP_CONFIG" >"$cfg" 2>/dev/null || return 1
-  # --no-builtin-tools drops read/bash/edit/write but keeps the MCP `mcp` tool,
-  # so the model can only talk to the one server, nothing else on the box.
-  # A single MCP gather normally finishes in ~90s; cap at 180s so one slow/dead
-  # server degrades that source instead of eating the whole run's budget.
-  timeout "${DAY_DASHBOARD_MCP_TIMEOUT:-180}" pi -p \
+  # `--tools mcp` is an ALLOWLIST: only the MCP tool is enabled. `--no-builtin-tools`
+  # is not enough here — the user's Pi config loads extensions (pi-web-access,
+  # pi-subagents, ...) whose tools would otherwise stay available, so a
+  # prompt-injected Slack/Linear/Rootly response could reach web access, spawn
+  # subagents, or hit other MCP servers. The allowlist + the scoped one-server
+  # mcp-config keep this to exactly the intended read-only source.
+  # A single gather normally finishes in ~60-90s; cap at 120s so three sequential
+  # MCP sources stay within the unit's start timeout while one dead server just
+  # degrades that source.
+  timeout "${DAY_DASHBOARD_MCP_TIMEOUT:-120}" pi -p \
     --no-session --no-skills --no-context-files --no-prompt-templates --no-themes \
-    --no-builtin-tools --mcp-config "$cfg" \
+    --tools mcp --mcp-config "$cfg" \
     --model "${DAY_DASHBOARD_MCP_MODEL:-openai-codex/gpt-5.6-luna}" --thinking off \
     "$instruction" 2>>"$WORK/collect.err"
 }
@@ -279,8 +285,12 @@ collect_confluence() {
     _unavailable confluence "no credentials (create $SECRETS_DIR/atlassian with 'email:api-token')"
     return 0
   fi
-  local resp
-  if ! resp="$(curl -fsS --max-time 25 -u "$creds" -G "$base/rest/api/content/search" \
+  # Pass credentials via a 0600 curl config file, not `-u` on the command line,
+  # so the email:token pair never appears in /proc/<pid>/cmdline (this host has
+  # other local accounts).
+  local resp curlcfg="$WORK/atlassian.curl"
+  ( umask 077; printf 'user = "%s"\n' "$creds" >"$curlcfg" )
+  if ! resp="$(curl -fsS --max-time 25 --config "$curlcfg" -G "$base/rest/api/content/search" \
       -H "Accept: application/json" \
       --data-urlencode "cql=contributor = currentUser() order by lastmodified desc" \
       --data-urlencode "limit=${DAY_DASHBOARD_MAX_ITEMS:-8}" \

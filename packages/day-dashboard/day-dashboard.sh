@@ -59,6 +59,23 @@ mkdir -p "$WORK"
 
 log() { printf '[day-dashboard] %s\n' "$*" >&2; }
 
+# Cross-process mutex shared with the dismiss handler (same mkdir lock) so an
+# hourly publish and a dismiss re-render can't clobber each other's index.html.
+# Best-effort: steals a stale lock (>15s) and proceeds after ~3s rather than hang.
+LOCK_DIR="$STATE_DIR/.publish.lock"
+acquire_lock() {
+  local deadline=$(( $(date +%s) + 3 ))
+  while ! mkdir "$LOCK_DIR" 2>/dev/null; do
+    if [ -d "$LOCK_DIR" ]; then
+      local age=$(( $(date +%s) - $(stat -c %Y "$LOCK_DIR" 2>/dev/null || echo 0) ))
+      [ "$age" -gt 15 ] && rmdir "$LOCK_DIR" 2>/dev/null && continue
+    fi
+    [ "$(date +%s)" -ge "$deadline" ] && return 0
+    sleep 0.1
+  done
+}
+release_lock() { rmdir "$LOCK_DIR" 2>/dev/null || true; }
+
 # shellcheck source=lib/collect.sh
 . "$LIBDIR/collect.sh"
 
@@ -237,15 +254,26 @@ if [ ! -s "$WORK/index.html" ]; then
 fi
 
 # ── 5. publish atomically ───────────────────────────────────────────────────
-install -m 0644 "$WORK/index.html" "$OUT_DIR/.index.html.new"
-mv -f "$OUT_DIR/.index.html.new" "$OUT_DIR/index.html"
-# status.json is machine-readable run metadata (last success, per-source state).
 trackedCount="$(jq -r '[.ledger // {} | to_entries[] | select(.value.status=="ticketed")] | length' <<<"$cache" 2>/dev/null || echo 0)"
-jq -cn --slurpfile ctx "$WORK/context.json" --arg t "$GENERATED_AT" \
-  --argjson brief "$( [ ${#BRIEFING_ARG[@]} -gt 0 ] && echo true || echo false )" \
-  --arg bs "$briefing_source" --argjson tracked "${trackedCount:-0}" \
-  '{lastSuccess:$t, briefing:$brief, briefingSource:$bs, trackedFollowups:$tracked,
-    sources:[$ctx[0].sources[]|{source, available}]}' \
-  >"$OUT_DIR/.status.json.new" 2>/dev/null \
-  && mv -f "$OUT_DIR/.status.json.new" "$OUT_DIR/status.json"
+acquire_lock
+publish_ok=1
+if install -m 0644 "$WORK/index.html" "$OUT_DIR/.index.html.new" \
+  && mv -f "$OUT_DIR/.index.html.new" "$OUT_DIR/index.html"; then
+  # status.json is machine-readable run metadata (last success, per-source state).
+  jq -cn --slurpfile ctx "$WORK/context.json" --arg t "$GENERATED_AT" \
+    --argjson brief "$( [ ${#BRIEFING_ARG[@]} -gt 0 ] && echo true || echo false )" \
+    --arg bs "$briefing_source" --argjson tracked "${trackedCount:-0}" \
+    '{lastSuccess:$t, briefing:$brief, briefingSource:$bs, trackedFollowups:$tracked,
+      sources:[$ctx[0].sources[]|{source, available}]}' \
+    >"$OUT_DIR/.status.json.new" 2>/dev/null \
+    && mv -f "$OUT_DIR/.status.json.new" "$OUT_DIR/status.json"
+else
+  publish_ok=0
+fi
+release_lock
+if [ "$publish_ok" != 1 ]; then
+  rm -f "$OUT_DIR/.index.html.new"
+  log "publish failed — PRESERVING last good page at $OUT_DIR/index.html"
+  exit 1
+fi
 log "published $OUT_DIR/index.html (briefing: $briefing_source, tracked follow-ups: ${trackedCount:-0})"

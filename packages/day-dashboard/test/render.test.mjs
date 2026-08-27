@@ -261,7 +261,9 @@ test("renderHtml adds dismiss links and filters dismissed items", () => {
   assert.ok(before.includes("Keep me"));
   assert.ok(before.includes("Drop me"));
   const key = itemKey("email", "Drop me");
-  assert.ok(before.includes(`/dismiss?k=${key}`)); // dismiss link present with stable key
+  // dismiss control is a no-JS POST form carrying the stable key (not a GET link)
+  assert.ok(before.includes('method="post" action="/dismiss"'));
+  assert.ok(before.includes(`value="${key}"`));
   const after = renderHtml({ ...ctx, briefing, dismissed: { [key]: { dismissedAt: "t" } } });
   assert.ok(after.includes("Keep me"));
   assert.ok(!after.includes("Drop me")); // dismissed item filtered out

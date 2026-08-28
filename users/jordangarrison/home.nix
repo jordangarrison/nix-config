@@ -222,6 +222,10 @@ in
     # pi's keyring, so these are safe in a public repo.
     servers.linear.url = "https://mcp.linear.app/mcp";
     servers.rootly.url = "https://mcp.rootly.com/mcp";
+    # Confluence + Jira. Claude Code points at the older /v1/sse endpoint; this
+    # uses the streamable-HTTP /v1/mcp one so the module's default type=http
+    # applies. Same site as the jira CLI (flocasts.atlassian.net).
+    servers.atlassian.url = "https://mcp.atlassian.com/v1/mcp";
     # scaleops' authorization-server metadata is self-inconsistent: it
     # advertises the AS as "https://mcp.scaleops.com" (no slash) but publishes
     # issuer "https://mcp.scaleops.com/" (slash), violating RFC 8414 §3.3. The

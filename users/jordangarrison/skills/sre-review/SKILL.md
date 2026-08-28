@@ -67,6 +67,13 @@ Trim trailing whitespace; lowercase the first letter of description if user didn
 
 ### 2. Find today's review thread (cached per day)
 
+> **Re-resolve before EVERY post.** Recompute `TZ=America/Chicago date +%F` and
+> re-read the cache each time you post — never hold a `thread_ts` in memory and
+> reuse it across posts. A long-running session (a watch loop, a review
+> back-and-forth, repeated re-pings) can cross the ~07:00 CDT daily rollover, and
+> reusing an earlier `thread_ts` silently posts to *yesterday's* thread. The cache
+> file is per-day and self-corrects; a variable you cached in-session does not.
+
 **First, check the cache.** Read `~/.claude/skills/sre-review/.cache.json` if it exists:
 ```json
 { "date": "YYYY-MM-DD", "thread_ts": "1234567890.123456", "permalink": "https://..." }
@@ -152,6 +159,7 @@ Adding a duplicate succeeds silently, so re-bumping is harmless. Don't post a ne
 | Posting top-level (not in thread) | Always pass `thread_ts`. Refuse to post if step 2 returned no match. |
 | Wrong day's thread | Filter by today's date in America/Chicago TZ, not UTC. Bot posts ~9 AM CDT. |
 | Stale cache from yesterday | Always compare cache `date` to `TZ=America/Chicago date +%F` before reuse. Different = rescan. |
+| Reusing a `thread_ts` resolved earlier in the same session | Re-check the date + re-read the cache before *every* post, not just the first. A session that spans the ~07:00 CDT rollover will otherwise post to the wrong day's thread. |
 | Posting silently | No y/n gate, but always show channel/thread/message as you post — the user must be able to audit what went out under their name. |
 | Auto-detecting on a non-PR branch | If `gh pr view` fails, ask user — don't fall back to a guess. |
 | Multi-line / formatted message | Convention is one line: `<desc>: <url>`. No bullets, no bold, no Slack mentions. |

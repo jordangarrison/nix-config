@@ -168,7 +168,7 @@ let
   };
 
   defaultSettings = {
-    defaultThinkingLevel = "xhigh";
+    defaultThinkingLevel = "medium";
     collapseChangelog = true;
     enableInstallTelemetry = false;
     enableSkillCommands = true;

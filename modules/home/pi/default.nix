@@ -229,6 +229,7 @@ let
 
   settingsFile = jsonFormat.generate "pi-settings.json" settingsWithTheme;
   keybindingsFile = jsonFormat.generate "pi-keybindings.json" keybindings;
+  modelsFile = jsonFormat.generate "pi-models.json" cfg.models;
 
   fileEntryAssertions =
     kind: files:
@@ -274,6 +275,30 @@ in
       type = jsonFormat.type;
       default = { };
       description = "Keybindings written to ~/.pi/agent/keybindings.json.";
+    };
+
+    models = mkOption {
+      type = jsonFormat.type;
+      default = { };
+      example = literalExpression ''
+        {
+          providers.ollama = {
+            baseUrl = "http://127.0.0.1:11434/v1";
+            api = "openai-completions";
+            apiKey = "ollama";
+            models = [ { id = "qwen3.6:35b-a3b-coding"; } ];
+          };
+        }
+      '';
+      description = ''
+        Custom providers and models written to {file}`~/.pi/agent/models.json`
+        — local servers such as Ollama, vLLM or LM Studio, and proxies. See
+        `docs/models.md` in the pi package for the schema.
+
+        Unlike settings.json, pi only ever reads this file, so it is linked
+        read-only from the store rather than merged on activation. Leaving
+        this unset leaves the file unmanaged.
+      '';
     };
 
     prompts = mkOption {
@@ -352,6 +377,9 @@ in
 
     home.file = {
       ".pi/agent/keybindings.json".source = keybindingsFile;
+    }
+    // optionalAttrs (cfg.models != { }) {
+      ".pi/agent/models.json".source = modelsFile;
     }
     // resourceHomeFiles "prompts" promptFiles
     // resourceHomeFiles "themes" themeFiles

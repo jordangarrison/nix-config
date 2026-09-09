@@ -5,6 +5,16 @@
 }:
 
 let
+  # npm's latest release does not yet include Fable 5.1 support. Keep the
+  # released package in package-lock.json for its dependency graph, then replace
+  # its source with a reproducibly pinned revision from upstream's main branch.
+  pi-claude-bridge = fetchFromGitHub {
+    owner = "elidickinson";
+    repo = "pi-claude-bridge";
+    rev = "4a7920ac4f4449b546307b3a53d4a4867f8b6cb5"; # main @ 2026-09-09
+    hash = "sha256-dZEbRahk9Eu6mieVn+Zn5OZDvHRrcuMfsy5Kxa5aHIg=";
+  };
+
   # pi-until is not published to npm, and its committed package-lock.json has
   # entries missing `integrity`, which makes nixpkgs' prefetch-npm-deps panic on
   # a `github:` dependency. So vendor the source directly and let the bundle's
@@ -19,12 +29,12 @@ let
 in
 buildNpmPackage {
   pname = "jordangarrison-pi-extensions";
-  version = "1.3.0";
+  version = "1.4.0";
 
   src = ./.;
   # Refresh with `npm install --package-lock-only --ignore-scripts --legacy-peer-deps`,
   # then recompute using `nix run nixpkgs#prefetch-npm-deps -- package-lock.json`.
-  npmDepsHash = "sha256-ARLazdBoWZy9l3RmGRP7FKKLbqF/LqiUX292qJKKq0c=";
+  npmDepsHash = "sha256-OIvsMRF00Qd4/RjE2wIScz1pRxIYvJMxu+/s8WWazQE=";
 
   dontNpmBuild = true;
   dontNpmPrune = true;
@@ -37,6 +47,14 @@ buildNpmPackage {
   postInstall = ''
     bundle="$out/lib/node_modules/jordangarrison-pi-extensions"
     piUsage="$bundle/node_modules/@narumitw/pi-usage/src"
+
+    # Replace the npm release's source while retaining its already-resolved,
+    # API-compatible dependency graph.
+    rm -rf "$bundle/node_modules/pi-claude-bridge"
+    mkdir -p "$bundle/node_modules/pi-claude-bridge"
+    cp -r ${pi-claude-bridge}/src ${pi-claude-bridge}/package.json \
+      ${pi-claude-bridge}/README.md ${pi-claude-bridge}/CHANGELOG.md ${pi-claude-bridge}/LICENSE \
+      "$bundle/node_modules/pi-claude-bridge/"
 
     # Drop the vendored pi-until where its manifest entry expects it. Its
     # `import "xstate"` resolves by walking up to the bundle's flat node_modules,

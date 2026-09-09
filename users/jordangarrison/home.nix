@@ -188,6 +188,54 @@ in
       # on the next activation — so a rebuild re-collapses the blocks.
       hideThinkingBlock = true;
     };
+
+    # Local models served by ollama on flomac (the work MacBook), reached over
+    # the tailnet rather than the LAN so this works from anywhere. flomac's
+    # `tailscale serve` config and OLLAMA_CONTEXT_LENGTH live in
+    # hosts/flomac/configuration.nix; contextWindow below must stay <= that
+    # value or ollama silently truncates the prompt.
+    #
+    # These stay opt-in per machine: pi only offers a model in /model once it
+    # is in the runtime-owned enabledModels array, which this module
+    # deliberately does not declare.
+    models.providers.flomac = {
+      baseUrl = "https://h952l3dphh.owl-yo.ts.net:11434/v1";
+      api = "openai-completions";
+      # Ollama ignores the key, but pi treats a provider with no auth at all
+      # as unavailable and hides its models.
+      apiKey = "ollama";
+      compat = {
+        supportsDeveloperRole = false;
+        supportsReasoningEffort = false;
+      };
+      models = [
+        {
+          # Picked over dense Qwen3.8-27B and GLM-4.7-Flash by measurement on
+          # this hardware, not by benchmark score. Only ~3B of its 35B params
+          # are active per token, and generation here is memory-bandwidth
+          # bound, so it runs ~8x faster than a dense 27B for comparable
+          # answers: 49s on a representative pi subagent task versus 523s.
+          #
+          # The `-coding` tune is load-bearing, not cosmetic. The base
+          # Qwen3.6-35B-A3B inverted a subtle claim about this very file that
+          # the coding variant got right on every run. There is no MLX build
+          # of the coding variant, which is why this stays on ollama rather
+          # than moving to oMLX.
+          id = "qwen3.6:35b-a3b-coding";
+          name = "Qwen3.6 35B-A3B Coding (flomac)";
+          reasoning = true;
+          input = [ "text" ];
+          contextWindow = 65536;
+          maxTokens = 16384;
+          cost = {
+            input = 0;
+            output = 0;
+            cacheRead = 0;
+            cacheWrite = 0;
+          };
+        }
+      ];
+    };
   };
 
   programs.acp-adapters = {

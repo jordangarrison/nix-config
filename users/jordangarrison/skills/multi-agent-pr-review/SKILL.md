@@ -77,9 +77,10 @@ Watch today's thread continuously rather than running once. Implies `--skip-user
 
 **Loop mechanics** — this composes with [[loop]] in dynamic mode:
 
-- A Slack thread is not `Monitor`-watchable, so the `ScheduleWakeup` cadence is the only wake signal. Poll every 1200-1800s; match it to how fast PRs are actually landing rather than ticking faster than the thread moves.
+- A Slack thread is not `Monitor`-watchable, so the `ScheduleWakeup` cadence is the only wake signal. **Poll every 600s.** Do not stretch the interval just because the thread has gone quiet - a quiet thread is precisely when a 30-minute gap makes a new PR sit unreviewed for half an hour. Jordan asked for 10 minutes explicitly after ticks had drifted out to 25-30.
 - **Do not self-terminate on a quiet poll.** Empty polls are the normal steady state. Keep re-arming.
-- Each tick: re-read the thread from the last-seen `ts` → filter (not the current user, not merged, not a release-please "Production Release" PR, not already reviewed by you) → review what's left → re-arm.
+- Each tick: re-read the thread from the last-seen `ts` → filter (not the current user, not merged, not a release-please "Production Release" PR, not already reviewed by you **at its current head**) → review what's left → re-arm.
+- **The unit of work is the message, not the PR.** A poster who replies again about a PR you already reviewed is asking for a re-review — that is what the second message *means*. Do not filter it out as "already reviewed". Run the "Follow-Up Reviews" flow against it and react on the new message.
 - Spend otherwise-idle ticks on a **drift check** over PRs you already approved: if `headRefOid` moved after your approval, run the "Follow-Up Reviews" flow. An approval on a stale head is the failure this catches.
 - **Stop conditions:** the user says stop, or the thread's day rolls over (a new `:thread:` parent appears → that's tomorrow's thread, and this invocation's date is done). Report a tally when stopping, via `PushNotification` if the user is away.
 
@@ -104,7 +105,8 @@ Reaction vocabulary (emoji → meaning → when the reviewer adds it):
 
 Rules:
 - **Only react when thread-driven.** For ad-hoc PR URLs passed directly (not in today's thread), skip reactions entirely — there's no message to react to. Don't post a new Slack message as a substitute.
-- **Resolve the message `ts` per PR.** Read today's thread (`slack_read_thread` on the cached `thread_ts`, channel `CF7SPS45P`) and match each PR URL to the reply that contains it. Keep a `pr-key → message_ts` map. If a PR URL has no matching reply, skip reactions for that PR.
+- **React per message, not per PR.** Read today's thread (`slack_read_thread` on the cached `thread_ts`, channel `CF7SPS45P`) and keep a `message_ts → pr-key` map, not the reverse — one PR can own several messages. Every non-bot message that references a PR gets its own `eye-twitch` on pickup and its own verdict reaction on post, including the second and third message about a PR you already reviewed. If a message references no PR, skip it. Before re-arming a loop tick, sweep the thread for any non-bot message carrying zero reactions from you and resolve it — that sweep is what catches re-review requests you signalled on GitHub but not in Slack.
+- **A repeat post of the same PR is a re-review request.** Treat it exactly like a fresh one: `eye-twitch`, run the follow-up review, then the verdict reaction on *that* message. Reacting only on the original post leaves the poster with no signal that their second ask was seen.
 - **The verdict reaction mirrors the posted GitHub review** — add it as part of the post step (step 10), after the user has signed off on the verdict. It's the same decision the user already approved, so no separate confirmation is needed. `eye-twitch` is benign and goes on at launch without a prompt.
 - **One verdict reaction per review.** Don't stack `mega-approved` + `dumpsterfire` on the same message. The `eye-twitch` (in-progress) reaction may coexist with the final verdict reaction — leave it; the verdict reaction is the signal that supersedes it.
 
@@ -288,7 +290,8 @@ When the user says "look at this one again" / "rereview this one" / "check if it
 | Repeated a specialist claim that CI already disproves | Check the actual workflow runs before asserting a permissions or config failure. A specialist called an account's discovery leg unauthorized on `ibs#920`; the branch's own CI showed all 13 legs green. |
 | Verdict reaction doesn't match the posted review | The reaction must mirror the GitHub verdict exactly: `APPROVE`→`mega-approved`, `COMMENT`→`reverse`, `REQUEST_CHANGES`→`dumpsterfire`. Re-pick if you downgraded the verdict during sign-off. |
 | Stacked `mega-approved` + `dumpsterfire` on one reply | One verdict reaction per review. The `eye-twitch` may coexist with the verdict; the two verdict reactions must not. |
-| Reacted on the wrong message | Reactions go on the poster's **thread reply** (the message carrying the PR URL), not the bot's parent thread message. Resolve `pr-key → message_ts` from the thread before reacting. |
+| Reacted on the wrong message | Reactions go on the poster's **thread reply** (the message carrying the PR URL), not the bot's parent thread message. Resolve `message_ts → pr-key` from the thread before reacting. |
+| Left a re-review request unreacted | Tracking state per PR instead of per message. The poster posted twice, you reviewed twice, but only the first message got reactions — so from the thread it looks like the second ask was ignored. Sweep for zero-reaction non-bot messages at the end of every tick. |
 
 ## Red Flags — STOP
 

@@ -460,6 +460,10 @@ An intelligent Ruby LSP configuration that automatically detects and uses the be
 
 #+begin_src emacs-lisp
 (after! lsp-mode
+  ;; Avoid nil recursively evaluating every flake input for completion. Large
+  ;; inputs can exhaust Nix's evaluator memory and produce multi-gigabyte cores.
+  (setq lsp-nix-nil-auto-eval-inputs nil)
+
   ;; Register our intelligent Ruby LSP client
   (lsp-register-client
    (make-lsp-client

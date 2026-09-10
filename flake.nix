@@ -94,6 +94,23 @@
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Matt Hartley's read-only diagnostics TUIs. Each upstream repo ships a
+    # flake wrapping its own `package.nix` (rustPlatform.buildRustPackage),
+    # so we consume those outputs instead of re-packaging them here — see
+    # modules/home/watch-tools for the platform gating and the privilege
+    # notes. nixpkgs follows ours so all three share one rustc/libpcap.
+    netwatch = {
+      url = "github:matthart1983/netwatch";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    syswatch = {
+      url = "github:matthart1983/syswatch";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    diskwatch = {
+      url = "github:matthart1983/diskwatch";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -126,6 +143,9 @@
       warp-preview,
       sre-claude-auto-runner,
       disko,
+      netwatch,
+      syswatch,
+      diskwatch,
     }:
     {
       nixosConfigurations = {

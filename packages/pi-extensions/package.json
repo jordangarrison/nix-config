@@ -12,7 +12,7 @@
     "pi-claude-bridge": "0.7.0",
     "pi-mcp-adapter": "2.23.0",
     "pi-foldable-tools": "0.1.0",
-    "pi-subagents": "0.67.0",
+    "pi-subagents": "0.66.0",
     "pi-web-access": "0.22.0",
     "xstate": "5.32.5"
   },

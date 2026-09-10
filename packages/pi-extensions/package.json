@@ -1,6 +1,6 @@
 {
   "name": "jordangarrison-pi-extensions",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "private": true,
   "description": "Reproducible bundle of Pi extensions managed by Nix",
   "files": [
@@ -12,7 +12,7 @@
     "pi-claude-bridge": "0.7.0",
     "pi-mcp-adapter": "2.23.0",
     "pi-foldable-tools": "0.1.0",
-    "pi-subagents": "0.47.1",
+    "pi-subagents": "0.67.0",
     "pi-web-access": "0.22.0",
     "xstate": "5.32.5"
   },

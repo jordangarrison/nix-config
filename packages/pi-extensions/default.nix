@@ -29,12 +29,12 @@ let
 in
 buildNpmPackage {
   pname = "jordangarrison-pi-extensions";
-  version = "1.4.0";
+  version = "1.5.0";
 
   src = ./.;
   # Refresh with `npm install --package-lock-only --ignore-scripts --legacy-peer-deps`,
   # then recompute using `nix run nixpkgs#prefetch-npm-deps -- package-lock.json`.
-  npmDepsHash = "sha256-OIvsMRF00Qd4/RjE2wIScz1pRxIYvJMxu+/s8WWazQE=";
+  npmDepsHash = "sha256-K6214A6jxYucjdT3GnJkuT3dvg3PxioeI3iEGlICHUA=";
 
   dontNpmBuild = true;
   dontNpmPrune = true;

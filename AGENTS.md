@@ -743,13 +743,19 @@ so it covers the NixOS hosts, flomac, and normandy):
 |---------|-------|-----------|
 | `netwatch` | Interfaces, connections, packet capture, L7 decode | Capture + ICMP probes need root |
 | `syswatch` | CPU, memory, disks, procs, GPU, power, services | Never needs sudo |
-| `diskwatch` | Usage, IO, hot files, SMART | Root only for other users' processes / exact per-event pid |
+| `diskwatch` | Usage, IO, hot files, SMART | Root for other users' processes and for SMART attribute reads |
 
 Each tool comes from its own upstream flake (`inputs.netwatch`, `inputs.syswatch`,
 `inputs.diskwatch`) with `nixpkgs` following ours. The module reads each flake's
 `packages.<system>` set rather than hardcoding a platform list, so a tool that
 doesn't publish for a given system is omitted instead of breaking evaluation
 (syswatch, for instance, deliberately does not publish `x86_64-darwin`).
+
+diskwatch is the one package we wrap: its SMART tab shells out to a bare
+`smartctl` and upstream declares no runtime dependency, so the module wraps the
+binary with `smartmontools` prefixed onto `PATH`. Baking it into the wrapper
+(rather than adding smartmontools to `home.packages`) means it also holds when
+diskwatch is invoked by absolute path — which is how it runs under macOS sudo.
 
 **Runtime caveats that are deliberately not automated:**
 
@@ -762,9 +768,21 @@ doesn't publish for a given system is omitted instead of breaking evaluation
 - Without those capabilities netwatch still runs: it skips capture and falls
   back from its eBPF kprobe (the `ebpf` cargo feature, on by default) to
   `ss`/`lsof` process attribution.
+- diskwatch's Hot Files PROCESS column is always an inferred join sampled every
+  2s — inotify/FSEvents events carry no pid. Exact per-event pid attribution
+  (fanotify `FAN_REPORT_PID` or eBPF) is *not implemented upstream*, so sudo
+  does not buy it; what sudo adds is that same inferred join over other users'
+  processes rather than just the current uid. SMART attribute reads need root
+  too (`smartctl` is now always on PATH, but the device open is privileged).
+  Use `sudo diskwatch`, or `sudo "$(command -v diskwatch)"` on macOS.
+- syswatch genuinely never needs sudo: on Apple Silicon its fan, power and
+  GPU-temperature values come from an unprivileged IOReport + SMC sampler (the
+  `macpow` crate), and Linux reads sysfs/RAPL. Only a few per-component power
+  figures are `powermetrics`-gated, and the tab prints a hint instead of
+  prompting.
 - Upstream's own `package.nix` version strings drift from the source, so store
-  paths read `netwatch-tui-0.26.1` and `diskwatch-0.5.0` while the binaries
-  report 0.30.4 and 0.5.2. Cosmetic only — check `<tool> --version`.
+  paths read `netwatch-tui-0.26.1` and `diskwatch-smartctl-0.5.0` while the
+  binaries report 0.30.4 and 0.5.2. Cosmetic only — check `<tool> --version`.
 
 ## Maintenance and Troubleshooting
 

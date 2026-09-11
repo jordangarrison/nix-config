@@ -29,7 +29,8 @@ let
     hash = "sha256-/nOVWOS5uf0qqiap23nlrAqS02T5y5yAcqkA+5eU/7o=";
   };
 
-  # Single source of truth for the bundled pi library version: the lockfile pin.
+  # Single source of truth for the bundled pi library version: the package.json
+  # pin, which npm ci requires package-lock.json to agree with.
   pinnedPiVersion = (lib.importJSON ./package.json).dependencies."@earendil-works/pi-coding-agent";
 in
 # The async runner points background children at the copy of the pi library
@@ -56,8 +57,9 @@ buildNpmPackage {
   src = ./.;
   # Refresh with `npm install --package-lock-only --ignore-scripts --legacy-peer-deps`,
   # then apply both lockfile fix-ups described below — npm regenerates the file
-  # without them and `prefetch-npm-deps` panics on the result — and only then
-  # recompute using `nix run nixpkgs#prefetch-npm-deps -- package-lock.json`.
+  # without them, and the result breaks the build (`prefetch-npm-deps` panics on
+  # fix-up 1's absence; `npm ci` then hits ENOTCACHED without fix-up 2) — and only
+  # then recompute using `nix run nixpkgs#prefetch-npm-deps -- package-lock.json`.
   #
   # @earendil-works/pi-coding-agent (the pi npm package, which pi-subagents needs
   # in order to spawn background children) ships an npm-shrinkwrap.json whose five

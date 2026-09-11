@@ -34,7 +34,24 @@ buildNpmPackage {
   src = ./.;
   # Refresh with `npm install --package-lock-only --ignore-scripts --legacy-peer-deps`,
   # then recompute using `nix run nixpkgs#prefetch-npm-deps -- package-lock.json`.
-  npmDepsHash = "sha256-oL6yvsLwdcvEHFgz8UE5PUguKC4d/LaBoor+CYEx1No=";
+  #
+  # @earendil-works/pi-coding-agent (the pi npm package, which pi-subagents needs
+  # in order to spawn background children) ships an npm-shrinkwrap.json whose five
+  # @earendil-works/* entries have no `integrity`, and its tarball does not
+  # actually contain the `node_modules` its `bundleDependencies` claims. npm
+  # copies those integrity-less entries into our lockfile, which makes
+  # prefetch-npm-deps panic, and then refetches those five tarballs by URL alone
+  # at install time — an integrity-less fetch goes through npm's HTTP cache, which
+  # always misses in the sandbox, so `npm ci` dies with ENOTCACHED. So after every
+  # `npm install --package-lock-only`, fix up package-lock.json:
+  #
+  #   1. add `integrity` (from `npm view <pkg>@<version> dist.integrity`) to every
+  #      `node_modules/@earendil-works/pi-coding-agent/node_modules/*` entry, and
+  #   2. drop `"hasShrinkwrap": true` from the
+  #      `node_modules/@earendil-works/pi-coding-agent` entry, so npm installs the
+  #      subtree our lockfile pins (with integrity, served from the Nix-prefetched
+  #      cache) instead of re-inflating upstream's shrinkwrap over it.
+  npmDepsHash = "sha256-iBUG7yDZC3KzZPlgk7MwecI8WLF0AhxYJoJgvWd2mrc=";
 
   dontNpmBuild = true;
   dontNpmPrune = true;
@@ -106,6 +123,18 @@ buildNpmPackage {
       --replace-fail \
         'ctx.ui.setStatus(STATUS_KEY, value);' \
         'ctx.ui.setStatus(STATUS_KEY, value === undefined ? undefined : value.split(" ").map((token) => { const match = /^(.*?:)(\d+)%$/.exec(token); if (!match) return ctx.ui.theme.fg("dim", token); const percent = Number(match[2]); return ctx.ui.theme.fg("dim", match[1]) + ctx.ui.theme.fg(percent >= 90 ? "error" : percent >= 70 ? "warning" : "success", match[2] + "%"); }).join(" "));'
+
+    # pi's Nix wrapper exports PI_PACKAGE_DIR pointing at the standalone binary's
+    # directory, whose layout (theme/, assets/ at the top level, no dist/) only
+    # makes sense for that bun-compiled binary. The async runner is a plain Node
+    # process that loads the pi library out of the npm package bundled here,
+    # where those assets live under dist/ - so it must not inherit the parent's
+    # PI_PACKAGE_DIR, or every background child dies on a missing dark.json.
+    # Point it at the package the child actually runs.
+    substituteInPlace "$bundle/node_modules/pi-subagents/src/runs/background/async-execution.ts" \
+      --replace-fail \
+        '[JITI_ALIAS_ENV]: JSON.stringify(hostPeerAliases.aliases),' \
+        '[JITI_ALIAS_ENV]: JSON.stringify(hostPeerAliases.aliases), PI_PACKAGE_DIR: piPackageRoot,'
 
     # Claude Bridge always uses the separately Nix-managed Claude Code binary,
     # so omit the Agent SDK's redundant 220+ MiB platform binary from the result.

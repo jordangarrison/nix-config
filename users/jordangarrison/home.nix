@@ -39,6 +39,7 @@ in
     ../../modules/home/agent-workspaces
     ../../modules/home/claude-code
     ../../modules/home/codex
+    ../../modules/home/omp
   ];
 
   programs.agent-skills = {
@@ -47,7 +48,7 @@ in
     liveDir = "${config.home.homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/skills";
   };
 
-  # Agent CLI configs (claude/codex) + workspace routers. Hand-authored
+  # Agent CLI configs (claude/codex/omp) + workspace routers. Hand-authored
   # content lives in ./agents and is symlinked out-of-store from the live
   # checkout; settings/config files that the tools mutate at runtime are
   # merged on activation, never made read-only. See docs/plans/
@@ -289,12 +290,45 @@ in
     };
   };
 
+  # OMP (oh-my-pi). Same ownership split as claude-code/codex above:
+  # AGENTS.md is the live out-of-store symlink, config.yml is merged on
+  # activation because omp writes it at runtime.
+  #
+  # Two omp-specific defaults are load-bearing here:
+  #  - `enabledProviders` defaults to empty, so foreign *user* roots
+  #    (~/.claude/CLAUDE.md, ~/.claude.json, ~/.codex/config.toml) never
+  #    load. The native AGENTS.md and mcp.json below are what omp actually
+  #    reads; without them a session has no user context and no MCP servers.
+  #    Skills are the exception — `skills.enableAgentsUser` defaults true, so
+  #    the ~/.agents/skills fan-out from programs.agent-skills is picked up
+  #    with no extra wiring.
+  #  - `tools.approvalMode` already defaults to `yolo`, so nothing needs
+  #    declaring to match claude's bypassPermissions and codex's
+  #    danger-full-access.
+  programs.omp = {
+    enable = true;
+    instructionsFile = "${agentsLive}/AGENTS.md";
+    # Same generated file pi's adapter reads, so both agents see one
+    # server list. Read-only, so add servers in programs.mcp, not `/mcp add`.
+    mcpConfigSource = lib.mkIf config.programs.mcp.enable config.xdg.configFile."mcp/mcp.json".source;
+    settings = {
+      modelRoles.default = "anthropic/claude-opus-5:medium";
+      symbolPreset = "nerd";
+      composer.shape = "band";
+      theme = {
+        dark = "titanium";
+        light = "light";
+      };
+    };
+  };
+
   programs.herdr = {
     enable = userApps.herdr.enable or false;
     integrations = [
       "claude"
       "codex"
       "pi"
+      "omp"
       "opencode"
     ];
     settings = {

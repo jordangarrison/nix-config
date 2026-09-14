@@ -65,6 +65,38 @@ models-store, auth) unmanaged. **No structural change needed.** Optional:
 point pi at the shared global instructions if/when pi grows a global
 AGENTS.md location.
 
+### `~/.omp/agent` (OMP / oh-my-pi)
+
+Added 2026-09-14 via `modules/home/omp`, same classification rules.
+
+| Path | Class | Disposition |
+|---|---|---|
+| `AGENTS.md` | static, same single source as `~/.claude/CLAUDE.md` | **manage** — out-of-store symlink |
+| `config.yml` | **hybrid**: declarative keys (modelRoles, theme, symbolPreset, composer) + runtime-mutated keys (`setupVersion`, model-role picks from `/model`, anything `/settings` writes) | **managed-merge** (YAML via pyyaml), stays writable, mode 600 — the schema holds `auth.broker.token` |
+| `mcp.json` | static server list, no secrets (OAuth tokens live in `agent.db`) | **manage** — store symlink to the same generated file `programs.mcp` gives pi |
+| `extensions/herdr-omp-agent-state.ts` | herdr-owned (`integration install omp`) | leave |
+| `agent.db`, `models.db`, `history.db`, `sessions/`, `terminal-sessions/`, `cache/` | runtime state / credentials | leave |
+
+Two omp defaults drive the disposition and are easy to get wrong:
+
+- **`enabledProviders` defaults to empty**, so omp loads *no* foreign
+  user-level config: not `~/.claude/CLAUDE.md`, not `~/.claude.json`, not
+  `~/.codex/config.toml`. Before this module omp therefore ran with zero user
+  context and zero user MCP servers even though claude/codex/pi all had both.
+  Native `~/.omp/agent/AGENTS.md` + `~/.omp/agent/mcp.json` are the fix;
+  native also outranks every other provider, so nothing else has to change.
+  Skills are the exception: `skills.enableAgentsUser` defaults true, so the
+  existing `~/.agents/skills` fan-out is picked up with no wiring.
+- **`tools.approvalMode` already defaults to `yolo`**, so unlike codex
+  (`approval_policy`/`sandbox_mode`) and Claude Code
+  (`permissions.defaultMode`) nothing needs declaring for full access.
+
+Read-only `mcp.json` means `/mcp add` cannot write — add servers in
+`programs.mcp`. It does **not** mean the servers work on first launch: these
+are OAuth endpoints and omp has its own keyring, so each needs a one-time
+`/mcp` login inside omp (same as pi did). Unauthenticated servers log
+`MCP tool load failed … HTTP 401` and contribute no tools.
+
 ### Global + workspace instruction files
 
 | Path | Notes |

@@ -22,7 +22,10 @@ let
   emacsPackage = if pkgs.stdenv.isLinux then pkgs.emacs-pgtk else pkgs.emacs;
   # Live-checkout path for hand-authored agent content (see ./agents)
   agentsLive = "${config.home.homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/agents";
-  piExtensions = pkgs.callPackage ../../packages/pi-extensions { };
+  # Pass the same pi that programs.pi installs below: the bundle asserts that its
+  # pinned pi library matches, so background subagents cannot drift onto a
+  # different pi version than the session that spawned them.
+  piExtensions = pkgs.callPackage ../../packages/pi-extensions { pi = pkgs.llm-agents.pi; };
 in
 {
   imports = [

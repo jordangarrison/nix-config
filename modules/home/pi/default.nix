@@ -361,6 +361,13 @@ in
 
     home.packages = [ cfg.package ];
 
+    # The pi wrapper exports this for its own process, but pi-subagents'
+    # background runner (and anything else spawning child pi sessions) needs
+    # it in the ambient environment: a standalone pi binary has no npm
+    # package directory to discover, so async children refuse to launch
+    # without it. Derived from the package so it survives pi upgrades.
+    home.sessionVariables.PI_PACKAGE_DIR = "${cfg.package}/libexec/pi";
+
     home.activation = {
       piSettingsSymlinkMigration = hm.dag.entryBetween [ "linkGeneration" ] [ "writeBoundary" ] (
         migrateManagedSettingsSymlink settingsPath

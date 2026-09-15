@@ -64,6 +64,10 @@
       url = "github:jordangarrison/drawl";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    tic-tac-toe-4-in-a-row = {
+      url = "github:jordangarrison/tic-tac-toe-4-in-a-row";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     lakeline-cg = {
       url = "git+ssh://forgejo@forgejo.jordangarrison.dev/jordangarrison/cg.git";
     };
@@ -119,6 +123,7 @@
       greenlight,
       panko,
       drawl,
+      tic-tac-toe-4-in-a-row,
       lakeline-cg,
       grove,
       floai,
@@ -165,6 +170,7 @@
             ./modules/nixos/panko.nix
             ./modules/nixos/agentsview.nix
             ./modules/nixos/drawl.nix
+            ./modules/nixos/tic-tac-toe-4-in-a-row.nix
             ./modules/nixos/cloudflared.nix
             ./modules/nixos/nginx.nix
             ./modules/nixos/jellyfin.nix
@@ -189,6 +195,7 @@
             greenlight.nixosModules.default
             panko.nixosModules.default
             drawl.nixosModules.default
+            tic-tac-toe-4-in-a-row.nixosModules.default
             lakeline-cg.nixosModules.default
             (
               let

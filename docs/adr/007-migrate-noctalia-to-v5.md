@@ -147,7 +147,9 @@ The implementation must:
 
 4. Visually test at least one VM for Noctalia service startup, bar rendering,
    launcher, emoji search, clipboard panel, settings, notifications, and lock
-   screen behavior.
+   screen behavior. If the VM graphics stack cannot expose a usable compositor
+   output, document the exact limitation and complete the available nonvisual
+   service, configuration, notification ownership, and IPC checks instead.
 
 No `switch`, `test`, commit, or push is part of this migration without separate
 approval.

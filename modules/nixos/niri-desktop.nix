@@ -13,6 +13,10 @@
     package = pkgs.niri-unstable;
   };
 
+  # Noctalia uses ddcutil for external-monitor brightness. This loads i2c-dev
+  # and grants local seat users access to /dev/i2c-* through udev.
+  hardware.i2c.enable = true;
+
   # Essential system packages for niri
   environment.systemPackages = with pkgs; [
     xwayland-satellite # Xwayland support for X11 apps

@@ -101,6 +101,9 @@ in
     networkmanagerapplet
     blueman
 
+    # Noctalia external-monitor brightness backend
+    ddcutil
+
     # Authentication
     polkit_gnome
   ];

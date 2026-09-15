@@ -10,7 +10,8 @@
 
 let
   homeDirectory = config.home.homeDirectory;
-  wallpapersPath = "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/wallpapers";
+  wallpaperName = "a_mountain_range_with_snow_on_top.jpeg";
+  wallpaperSource = ../../../users/jordangarrison/wallpapers/${wallpaperName};
   scriptsPath = "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/hypr/scripts";
 
   sweetNothingsPkg =
@@ -90,6 +91,10 @@ in
       ];
     };
   };
+
+  # Keep swaybg's image available on physical hosts and build-vm guests
+  # without depending on the live Git checkout path.
+  home.file."Pictures/Wallpapers/${wallpaperName}".source = wallpaperSource;
 
   # Packages needed for niri desktop environment
   # (Noctalia is added automatically by programs.noctalia above)
@@ -259,7 +264,7 @@ in
         command = [
           "swaybg"
           "-i"
-          "${wallpapersPath}/a_mountain_range_with_snow_on_top.jpeg"
+          "${homeDirectory}/Pictures/Wallpapers/${wallpaperName}"
           "-m"
           "fill"
         ];

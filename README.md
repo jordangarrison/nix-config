@@ -9,10 +9,13 @@ This repository uses [nh](https://github.com/viperML/nh) for an improved Nix exp
 ### NixOS
 
 ```bash
-# Clone and switch to a configuration
+# Clone and validate a configuration
 git clone https://github.com/jordangarrison/nix-config.git
 cd nix-config
-nh os switch .#<hostname>
+nh os build .#<hostname> --no-nom
+nh os test .#<hostname> --no-nom
+# Review the result before applying it:
+nh os switch .#<hostname> --no-nom
 ```
 
 **Available NixOS hosts:**
@@ -27,7 +30,9 @@ nh os switch .#<hostname>
 ### macOS (nix-darwin)
 
 ```bash
-nh darwin switch .#<hostname>
+nh darwin build .#<hostname> --no-nom
+# Review the result before applying it:
+nh darwin switch .#<hostname> --no-nom
 ```
 
 **Available Darwin hosts:**
@@ -40,7 +45,9 @@ nh darwin switch .#<hostname>
 ### WSL/Ubuntu (Home Manager only)
 
 ```bash
-nh home switch .#<config>
+nh home build .#<config> --no-nom
+# Review the result before applying it:
+nh home switch .#<config> --no-nom
 ```
 
 **Available Home Manager configurations:**
@@ -69,14 +76,14 @@ nh home switch .#<config>
 │   │   ├── forgejo.nix       # Self-hosted Git server
 │   │   ├── jellyfin.nix      # Media server
 │   │   ├── nginx.nix         # Reverse proxy
-│   │   └── ...               # And more (see AGENTS.md)
+│   │   └── ...               # Inspect modules/nixos/ for the current set
 │   ├── home/                 # Home Manager modules (16 modules)
 │   │   ├── niri/             # Niri user configuration
 │   │   ├── tablet-mode/      # Tablet gestures and OSK
 │   │   ├── tea/              # Forgejo CLI
 │   │   ├── zed-editor/       # Zed IDE
 │   │   ├── ghostty/          # Ghostty terminal
-│   │   └── ...               # And more (see AGENTS.md)
+│   │   └── ...               # Inspect modules/home/ for the current set
 │   └── *-overlay.nix         # Package overlays (9 modules)
 ├── packages/                 # Custom package definitions (10 packages)
 ├── users/                    # User configurations
@@ -118,15 +125,21 @@ git diff flake.lock
 ### Rebuild System
 
 ```bash
-# NixOS
-nh os switch .#<hostname>
+# NixOS: validate before applying
+nh os build .#<hostname> --no-nom
+nh os test .#<hostname> --no-nom
+nh os switch .#<hostname> --no-nom
 
-# macOS
-nh darwin switch .#<hostname>
+# macOS: build before applying
+nh darwin build .#<hostname> --no-nom
+nh darwin switch .#<hostname> --no-nom
 
-# Home Manager only
-nh home switch .#<config>
+# Home Manager only: build before applying
+nh home build .#<config> --no-nom
+nh home switch .#<config> --no-nom
 ```
+
+Review successful builds before running a `switch` command.
 
 ### Other Commands
 
@@ -158,7 +171,8 @@ nix develop
 
 ## Documentation
 
-- **[AGENTS.md](./AGENTS.md)** - Comprehensive architecture documentation and AI agent guidance
+- **[AGENTS.md](./AGENTS.md)** - Concise safety rules and path-based guidance for coding agents
+- **[docs/runbooks/](./docs/runbooks/)** - Focused operational procedures
 - **[docs/adr/](./docs/adr/)** - Architecture Decision Records
 - **[docs/plans/](./docs/plans/)** - Implementation plans for features
 - **[docs/lessons-learned/](./docs/lessons-learned/)** - Post-implementation learnings

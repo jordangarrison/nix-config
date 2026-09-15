@@ -1,0 +1,197 @@
+# Declarative Noctalia v5 base configuration.
+# Runtime changes made in Settings are stored in
+# ~/.local/state/noctalia/settings.toml and override these values.
+
+[shell]
+font_family = "FiraCode Nerd Font"
+time_format = "{:%H:%M}"
+date_format = "%a, %b %d"
+telemetry_enabled = false
+settings_show_advanced = true
+avatar_path = "~/.face"
+clipboard_enabled = true
+clipboard_history_max_entries = 100
+clipboard_keep_from_closed_apps = true
+clipboard_auto_paste = "off"
+
+[shell.animation]
+enabled = true
+speed = 1.5
+
+[shell.shadow]
+direction = "down_right"
+alpha = 0.55
+
+[shell.panel]
+transparency_mode = "soft"
+borders = false
+shadow = true
+launcher_placement = "floating"
+clipboard_placement = "floating"
+control_center_placement = "attached"
+launcher_position = "center"
+clipboard_position = "center"
+open_near_click_control_center = true
+open_near_click_launcher = false
+open_near_click_clipboard = false
+
+[shell.launcher]
+categories = true
+show_icons = true
+compact = false
+app_grid = true
+sort_by_usage = true
+pinned = [
+  "todoist",
+  "obsidian",
+  "com.obsproject.Studio",
+  "Session",
+  "brave-fmpnliohjhemenmnlpbfagaolkdacoja-Default",
+  "brave-browser",
+  "brave-dnfpoenibinnbbckgbhendmlljoobcfg-Default",
+  "btop",
+  "LocalSend",
+  "org.wezfurlong.wezterm",
+  "yazi",
+  "gnaural",
+  "emacsclient",
+  "com.github.xournalpp.xournalpp",
+  "1password",
+  "ssh-endeavour",
+  "brave-ifoagfbjcddaonmmdekcjdmeflgghbmp-Default",
+]
+provider_prefix = "/"
+auto_paste = "off"
+
+[shell.launcher.providers.emoji]
+prefix = "emo"
+
+[wallpaper]
+enabled = false
+
+[theme]
+mode = "dark"
+source = "builtin"
+builtin = "Rosé Pine"
+pure_black_dark = false
+
+[theme.templates]
+enable_builtin_templates = true
+builtin_ids = ["helix"]
+enable_community_templates = false
+community_ids = []
+
+[notification]
+enable_daemon = true
+show_app_name = true
+show_actions = true
+keep_dismissed_in_history = true
+layer = "overlay"
+background_opacity = 0.4
+offset_x = 20
+offset_y = 8
+
+[osd]
+position = "top_right"
+orientation = "horizontal"
+background_opacity = 1.0
+offset_x = 20
+offset_y = 8
+
+[osd.kinds]
+volume = true
+volume_output = true
+volume_input = true
+brightness = true
+wifi = true
+bluetooth = true
+power_profile = true
+caffeine = true
+nightlight = true
+dnd = true
+lock_keys = true
+keyboard_layout = true
+privacy = true
+
+[lockscreen]
+enabled = true
+blurred_desktop = false
+blur_intensity = 0.0
+tint_intensity = 0.0
+
+[weather]
+enabled = true
+unit = "fahrenheit"
+effects = true
+
+[location]
+auto_locate = false
+address = "Round Rock, TX"
+custom_schedule = true
+sunrise = "06:30"
+sunset = "18:30"
+
+[nightlight]
+enabled = true
+force = false
+temperature_day = 6500
+temperature_night = 4015
+
+[brightness]
+enable_ddcutil = true
+minimum_brightness = 0.01
+
+[bar.main]
+position = "top"
+thickness = 34
+background_opacity = 0.4
+radius = 12
+margin_ends = 5
+margin_edge = 5
+padding = 8
+widget_spacing = 6
+scale = 1.0
+font_scale = 1.0
+shadow = true
+auto_hide = false
+reserve_space = true
+capsule = true
+capsule_opacity = 0.4
+start = ["launcher", "workspaces"]
+center = ["control-center", "clock", "media"]
+end = ["tray", "notifications", "battery", "volume", "brightness"]
+
+[dock]
+enabled = false
+
+[desktop_widgets]
+enabled = false
+
+[[control_center.shortcuts]]
+type = "wifi"
+
+[[control_center.shortcuts]]
+type = "bluetooth"
+
+[[control_center.shortcuts]]
+type = "nightlight"
+
+[[control_center.shortcuts]]
+type = "notification"
+
+[[control_center.shortcuts]]
+type = "power_profile"
+
+[[control_center.shortcuts]]
+type = "caffeine"
+
+[widget.clock]
+format = "{:%H:%M} {:%a, %b %d}"
+tooltip_format = "{:%A, %B %d, %Y}"
+
+[widget.media]
+hide_album_art = true
+artist_first = true
+max_length = 145
+title_scroll = "on_hover"
+show_progress = true

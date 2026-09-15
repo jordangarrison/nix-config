@@ -13,7 +13,6 @@ let
   wallpapersPath = "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/wallpapers";
   scriptsPath = "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/hypr/scripts";
 
-  noctaliaPkg = inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default;
   sweetNothingsPkg =
     inputs.sweet-nothings.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs
       (_: {
@@ -39,14 +38,14 @@ let
     "-w"
     "timeout"
     "300"
-    "noctalia-shell ipc call lockScreen lock"
+    "noctalia msg session lock"
     "timeout"
     "600"
     "niri msg action power-off-monitors"
     "resume"
     "niri msg action power-on-monitors"
     "before-sleep"
-    "noctalia-shell ipc call lockScreen lock"
+    "noctalia msg session lock"
   ]
   ++ (
     if isLaptop then
@@ -64,20 +63,16 @@ in
   imports = [
     ../desktop-tools
     ../wlr-which-key
-    # Upstream noctalia-shell home-manager module — provides the
-    # systemd.user.services.noctalia-shell unit with ExecStart pinned to the
-    # package store path, so home-manager auto-restarts the service on every
-    # nh os switch that bumps the noctalia-shell package. Without this, the
-    # old quickshell process keeps holding the IPC instance ID and new
-    # `noctalia-shell ipc call ...` invocations fail.
+    # Upstream Noctalia module owns the package, validated configuration, and
+    # systemd user service.
     inputs.noctalia.homeModules.default
     inputs.sweet-nothings.homeManagerModules.default
   ];
 
-  programs.noctalia-shell = {
+  programs.noctalia = {
     enable = true;
     systemd.enable = true;
-    package = noctaliaPkg;
+    settings = ../../../users/jordangarrison/configs/noctalia/config.toml;
   };
 
   programs.sweet-nothings = {
@@ -96,22 +91,8 @@ in
     };
   };
 
-  # Clipboard services via Home Manager (systemd-managed)
-  services.cliphist = {
-    enable = true;
-    allowImages = true;
-    systemdTargets = [ "graphical-session.target" ];
-  };
-
-  # Clipboard persistence - fixes focus-change paste issue
-  services.wl-clip-persist = {
-    enable = true;
-    clipboardType = "regular";
-    systemdTargets = [ "graphical-session.target" ];
-  };
-
   # Packages needed for niri desktop environment
-  # (noctalia-shell is added automatically by programs.noctalia-shell above)
+  # (Noctalia is added automatically by programs.noctalia above)
   home.packages = with pkgs; [
     # Focus Fox - terminal pomodoro timer
     inputs.focus-fox.packages.${pkgs.stdenv.hostPlatform.system}.default
@@ -280,8 +261,7 @@ in
           "fill"
         ];
       }
-      # Noctalia shell is managed via systemd.user.services.noctalia-shell
-      # (see above) so it self-heals across package upgrades.
+      # Noctalia is managed by the upstream noctalia.service user unit.
       # Authentication agent
       {
         command = [
@@ -447,18 +427,17 @@ in
       ];
       "Mod+Shift+F".action.spawn = "nautilus";
       "Mod+Space".action.spawn = [
-        "noctalia-shell"
-        "ipc"
-        "call"
+        "noctalia"
+        "msg"
+        "panel-toggle"
         "launcher"
-        "toggle"
       ];
       "Mod+Semicolon".action.spawn = [
-        "noctalia-shell"
-        "ipc"
-        "call"
+        "noctalia"
+        "msg"
+        "panel-toggle"
         "launcher"
-        "emoji"
+        "/emo "
       ];
 
       # Handy - Voice dictation. Toggles the running instance.
@@ -668,17 +647,15 @@ in
       # SYSTEM
       # ================
       "Mod+Ctrl+Alt+L".action.spawn = [
-        "noctalia-shell"
-        "ipc"
-        "call"
-        "lockScreen"
+        "noctalia"
+        "msg"
+        "session"
         "lock"
       ];
       "Mod+C".action.spawn = [
-        "noctalia-shell"
-        "ipc"
-        "call"
-        "launcher"
+        "noctalia"
+        "msg"
+        "panel-toggle"
         "clipboard"
       ];
       "Mod+Shift+C".action.spawn = [
@@ -737,23 +714,4 @@ in
     screenshot-path = "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png";
   };
 
-  # Noctalia-shell configuration (quickshell-based)
-  # Symlink to repo for live editing and version control
-  xdg.configFile = {
-    "noctalia/settings.json".source =
-      config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/noctalia/settings.json";
-
-    "noctalia/colors.json".source =
-      config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/noctalia/colors.json";
-
-    "noctalia/plugins.json".source =
-      config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/noctalia/plugins.json";
-
-    # Directories for custom colorschemes and plugins
-    "noctalia/colorschemes".source =
-      config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/noctalia/colorschemes";
-
-    "noctalia/plugins".source =
-      config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/noctalia/plugins";
-  };
 }

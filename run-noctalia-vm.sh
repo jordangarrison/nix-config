@@ -53,5 +53,5 @@ Delete that image to start with a clean VM state.
 EOF
 
 export NIX_DISK_IMAGE="$disk"
-export QEMU_OPTS="${QEMU_OPTS:--m 16384 -smp 8 -vga none -device virtio-vga-gl -display gtk,gl=on}"
+export QEMU_OPTS="${QEMU_OPTS:--m 16384 -smp 8 -vga none -device virtio-vga-gl -device virtio-tablet-pci -display gtk,gl=on,grab-on-hover=on}"
 exec "$result/bin/run-${host}-vm"

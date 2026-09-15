@@ -366,6 +366,24 @@
         "type": "github"
       }
     },
+    "flake-utils_11": {
+      "inputs": {
+        "systems": "systems_14"
+      },
+      "locked": {
+        "lastModified": 1731533236,
+        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
     "flake-utils_2": {
       "inputs": {
         "systems": "systems_2"
@@ -1234,6 +1252,7 @@
         "panko": "panko",
         "sre-claude-auto-runner": "sre-claude-auto-runner",
         "sweet-nothings": "sweet-nothings",
+        "tic-tac-toe-4-in-a-row": "tic-tac-toe-4-in-a-row",
         "tuicr": "tuicr",
         "warp-preview": "warp-preview"
       }
@@ -1468,6 +1487,21 @@
         "type": "github"
       }
     },
+    "systems_15": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    },
     "systems_2": {
       "locked": {
         "lastModified": 1681028828,
@@ -1586,6 +1620,27 @@
         "type": "github"
       }
     },
+    "tic-tac-toe-4-in-a-row": {
+      "inputs": {
+        "flake-utils": "flake-utils_11",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789438704,
+        "narHash": "sha256-X3qYxMs4UuZH4mEV1CUr2LjcW8vusduYnO0UtDkwqcU=",
+        "owner": "jordangarrison",
+        "repo": "tic-tac-toe-4-in-a-row",
+        "rev": "f5a64f16cc607ed5ff2fed5a7be050b620e1619b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "jordangarrison",
+        "repo": "tic-tac-toe-4-in-a-row",
+        "type": "github"
+      }
+    },
     "treefmt-nix": {
       "inputs": {
         "nixpkgs": [
@@ -1675,7 +1730,7 @@
     },
     "utils": {
       "inputs": {
-        "systems": "systems_14"
+        "systems": "systems_15"
       },
       "locked": {
         "lastModified": 1731533236,

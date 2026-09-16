@@ -323,38 +323,19 @@ in
           else
             "eDP-1"; # fallback
       in
-      {
-        "1" = {
-          open-on-output = primaryOutput;
-        };
-        "2" = {
-          open-on-output = primaryOutput;
-        };
-        "3" = {
-          open-on-output = primaryOutput;
-        };
-        "4" = {
-          open-on-output = primaryOutput;
-        };
-        "5" = {
-          open-on-output = primaryOutput;
-        };
-        "6" = {
-          open-on-output = primaryOutput;
-        };
-        "7" = {
-          open-on-output = primaryOutput;
-        };
-        "8" = {
-          open-on-output = primaryOutput;
-        };
-        "9" = {
-          open-on-output = primaryOutput;
-        };
-        "10" = {
-          open-on-output = primaryOutput;
-        };
-      };
+      builtins.listToAttrs (
+        map
+          (index: {
+            # Niri creates named workspaces in attribute-key order. Keep those
+            # keys zero-padded while preserving the user-facing numeric names.
+            name = lib.fixedWidthString 2 "0" (toString index);
+            value = {
+              name = toString index;
+              open-on-output = primaryOutput;
+            };
+          })
+          (lib.range 1 10)
+      );
 
     # Window rules
     window-rules = [

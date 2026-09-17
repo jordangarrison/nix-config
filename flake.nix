@@ -391,6 +391,7 @@
                   pup.enable = true;
                   handy.enable = true;
                   herdr.enable = true;
+                  grok-bot.enable = true;
                 };
               };
 

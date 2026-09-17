@@ -18,6 +18,8 @@
     pkgs.llm-agents.claude-desktop # Claude desktop app (Electron)
   ] ++ lib.optionals (userApps.warp.enable or false) [
     inputs.warp-preview.packages.${pkgs.stdenv.hostPlatform.system}.default
+  ] ++ lib.optionals (userApps.grok-bot.enable or false) [
+    inputs.grok-bot.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 
   # KDE Connect for Hyprland/Niri (GSConnect handles GNOME)

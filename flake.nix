@@ -90,6 +90,10 @@
       url = "github:jordangarrison/warp-preview-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    grok-bot = {
+      url = "github:jordangarrison/grok-bot-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     sre-claude-auto-runner = {
       url = "git+ssh://forgejo@forgejo.jordangarrison.dev/jordangarrison/sre-claude-auto-runner.git";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -129,6 +133,7 @@
       floai,
       tuicr,
       warp-preview,
+      grok-bot,
       sre-claude-auto-runner,
       disko,
     }:
@@ -236,6 +241,7 @@
                   handy.enable = true;
                   herdr.enable = true;
                   floai.enable = true;
+                  grok-bot.enable = true;
                 };
               };
 

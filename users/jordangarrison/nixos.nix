@@ -44,6 +44,7 @@ in {
       zed.enable = lib.mkEnableOption "Zed editor";
       vscode.enable = lib.mkEnableOption "VSCode / Cursor editor";
       warp.enable = lib.mkEnableOption "Warp terminal (preview)";
+      grok-bot.enable = lib.mkEnableOption "Grok Bot desktop agent";
 
       # Dev tools (heavy, built from source)
       codiff.enable = lib.mkEnableOption "Codiff local Git diff viewer";

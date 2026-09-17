@@ -595,6 +595,26 @@
         "type": "github"
       }
     },
+    "grok-bot": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789634754,
+        "narHash": "sha256-QG4jKaEy9y6alN9GfA/yCkl3+QwI1nOpdtmgaT2UNmc=",
+        "owner": "jordangarrison",
+        "repo": "grok-bot-flake",
+        "rev": "2b354e1b1b08b2248ff6b57111bfe1b0a146a1b9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "jordangarrison",
+        "repo": "grok-bot-flake",
+        "type": "github"
+      }
+    },
     "grove": {
       "inputs": {
         "crane": "crane",
@@ -1235,6 +1255,7 @@
         "floai": "floai",
         "focus-fox": "focus-fox",
         "greenlight": "greenlight",
+        "grok-bot": "grok-bot",
         "grove": "grove",
         "home-manager": "home-manager",
         "hubctl": "hubctl",

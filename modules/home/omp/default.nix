@@ -27,13 +27,20 @@
 let
   cfg = config.programs.omp;
   yamlFormat = pkgs.formats.yaml { };
-  declaredSettings = yamlFormat.generate "omp-declared-config.yml" cfg.settings;
+  effectiveSettings =
+    lib.recursiveUpdate cfg.settings (
+      lib.optionalAttrs (cfg.extensionPaths != [ ]) {
+        extensions = cfg.extensionPaths;
+      }
+    );
+  declaredSettings = yamlFormat.generate "omp-declared-config.yml" effectiveSettings;
   mkLive = path: config.lib.file.mkOutOfStoreSymlink path;
 
   mergePython = pkgs.python3.withPackages (ps: [ ps.pyyaml ]);
   mergeScript = pkgs.writeText "omp-config-merge.py" ''
     import copy
     import os
+    import shutil
     import sys
 
     import yaml
@@ -89,6 +96,13 @@ let
     # needs correcting.
     if merged == existing and os.path.exists(existing_path):
         sys.exit(0)
+    # Keep the immediately previous runtime-owned file recoverable whenever
+    # declarative keys force a rewrite.
+    if os.path.exists(existing_path):
+        backup = existing_path + ".pre-nix-merge"
+        shutil.copy2(existing_path, backup)
+        os.chmod(backup, 0o600)
+
 
     # 0600 from the first byte — the schema can carry auth.broker.token.
     tmp = existing_path + ".hm-merge"
@@ -143,6 +157,17 @@ in
         Declaring `modelRoles` therefore resets a runtime `/model` pick at
         the next activation, the same way
         `programs.claude-code.settings.model` does.
+      '';
+    };
+
+    extensionPaths = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ ];
+      description = ''
+        Nix-managed extension files or package directories loaded through
+        {file}`~/.omp/agent/config.yml`. Package directories must declare
+        {option}`omp.extensions` or legacy {option}`pi.extensions` in their
+        package manifest.
       '';
     };
 

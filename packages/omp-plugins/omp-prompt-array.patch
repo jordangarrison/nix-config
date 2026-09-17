@@ -1,0 +1,66 @@
+diff --git a/src/prompt-capture.ts b/src/prompt-capture.ts
+index 7f40d09..43137f8 100644
+--- a/src/prompt-capture.ts
++++ b/src/prompt-capture.ts
+@@ -41,5 +41,9 @@ export type PromptCaptureDiagnostic = {
+ 	matches: { key: string; firstDivergent: number }[];
+ };
+ 
++function normalizeSystemPrompt(prompt: string | string[]): string {
++	return Array.isArray(prompt) ? prompt.join("\n\n") : prompt;
++}
++
+ export class PromptCaptures {
+ 	private readonly captures = new Map<string, PromptCapture>();
+@@ -62,6 +66,12 @@ export class PromptCaptures {
+ 		this.onDiagnose = onDiagnose ?? (() => {});
+ 	}
+ 
+-	record(systemPrompt: string, input: PromptCaptureInput): void {
++	record(systemPromptInput: string | string[], input: PromptCaptureInput): void {
++		const systemPrompt = normalizeSystemPrompt(systemPromptInput);
++		// OMP exposes the assembled prompt as string[] and does not expose Pi's
++		// systemPromptOptions decomposition. Preserve the complete assembled prompt.
++		if (Array.isArray(systemPromptInput) && input.custom === undefined) {
++			input = { ...input, custom: systemPrompt };
++		}
+ 		const existing = this.captures.get(systemPrompt);
+ 		const customChanged = existing?.custom !== input.custom;
+@@ -91,7 +101,8 @@ export class PromptCaptures {
+ 	}
+ 
+ 	/** Exact lookup only. Callers serving a query want `resolveOrDerive`. */
+-	resolve(systemPrompt?: string): PromptCapture | undefined {
+-		if (!systemPrompt) return undefined;
++	resolve(systemPromptInput?: string | string[]): PromptCapture | undefined {
++		if (!systemPromptInput) return undefined;
++		const systemPrompt = normalizeSystemPrompt(systemPromptInput);
+ 		const capture = this.captures.get(systemPrompt);
+ 		if (capture) this.touch(systemPrompt, capture);
+@@ -125,6 +136,7 @@ export class PromptCaptures {
+ 	 * a turn that quietly ignored its instructions is not.
+ 	 */
+-	resolveOrDerive(systemPrompt?: string): PromptCapture | undefined {
+-		if (!systemPrompt) return undefined;
++	resolveOrDerive(systemPromptInput?: string | string[]): PromptCapture | undefined {
++		if (!systemPromptInput) return undefined;
++		const systemPrompt = normalizeSystemPrompt(systemPromptInput);
+ 		const exact = this.captures.get(systemPrompt);
+ 		if (exact) {
+@@ -155,13 +167,6 @@ export class PromptCaptures {
+ 		const embedded = this.findInheritedPrompts(systemPrompt, systemPrompt);
+ 		if (embedded.length === 0) {
+-			const matches = this.closestKnown(systemPrompt);
+-			this.onDiagnose({ systemPrompt, matches });
+-			throw new Error(
+-				`prompt-capture: no capture for this ${systemPrompt.length}-char system prompt, and it embeds none of the ${this.captures.size} known. `
+-				+ `Closest known match diverges at offset ${matches[0]?.firstDivergent ?? "?"} (${matches.length ? matches[0].key.length : 0}-char key). `
+-				+ `Claude Code would receive none of this turn's context files, skills or custom instructions. `
+-				+ `The usual cause is an extension loaded after claude-bridge that rewrites the system prompt from before_agent_start — `
+-				+ `one that wraps it is fine, one that rebuilds or strips it leaves nothing to match. `
+-				+ `(Also possible: pi rebuilt the prompt outside before_agent_start — a late-registered tool or fresh resource discovery.)`,
+-			);
++			// OMP creates internal title/maintenance prompts outside before_agent_start.
++			// Forward the complete prompt rather than dropping policy or failing the request.
++			return { assembledPrompt: systemPrompt, custom: systemPrompt, contextFiles: [], skills: [], inherited: [] };
+ 		}

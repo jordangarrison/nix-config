@@ -26,6 +26,10 @@ let
   # pinned pi library matches, so background subagents cannot drift onto a
   # different pi version than the session that spawned them.
   piExtensions = pkgs.callPackage ../../packages/pi-extensions { pi = pkgs.llm-agents.pi; };
+  # OMP can load Pi extensions through its compatibility layer, but Claude
+  # Bridge needs one missing helper adapted locally. Keep that patch and the
+  # complete dependency graph in a Nix package shared by every machine.
+  ompPlugins = pkgs.callPackage ../../packages/omp-plugins { inherit piExtensions; };
 in
 {
   imports = [
@@ -311,15 +315,16 @@ in
     # Same generated file pi's adapter reads, so both agents see one
     # server list. Read-only, so add servers in programs.mcp, not `/mcp add`.
     mcpConfigSource = lib.mkIf config.programs.mcp.enable config.xdg.configFile."mcp/mcp.json".source;
-    settings = {
-      modelRoles.default = "anthropic/claude-opus-5:medium";
-      symbolPreset = "nerd";
-      composer.shape = "band";
-      theme = {
-        dark = "titanium";
-        light = "light";
-      };
+    extensionPaths = [
+      "${ompPlugins}/lib/node_modules/jordangarrison-omp-plugins"
+    ];
+    settings.theme = {
+      dark = "dark-rose-pine";
+      light = "dark-rose-pine";
     };
+    settings.composer.shape = "band";
+    settings.symbolPreset = "nerd";
+    settings.modelRoles.default = "claude-bridge/claude-opus-5:medium";
   };
 
   programs.herdr = {
@@ -1017,6 +1022,18 @@ in
     # Claude Bridge provides Claude Code-backed models to Pi. Point it at the
     # Nix-managed CLI because the Agent SDK's bundled binary may not run on NixOS.
     ".pi/agent/claude-bridge.json".text = builtins.toJSON {
+      askClaude.enabled = false;
+      provider = {
+        plan = "pro";
+        longContextExtraUsage = false;
+        strictMcpConfig = true;
+        pathToClaudeCodeExecutable = "${pkgs.llm-agents.claude-code}/bin/claude";
+      };
+    };
+
+    # OMP's Claude Bridge uses OMP's active agent directory through the Pi
+    # compatibility shim, so it needs a separate global config from Pi.
+    ".omp/agent/claude-bridge.json".text = builtins.toJSON {
       askClaude.enabled = false;
       provider = {
         plan = "pro";

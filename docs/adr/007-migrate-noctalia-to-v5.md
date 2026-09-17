@@ -131,6 +131,25 @@ VM testing provide isolation from the working desktop.
 - A VM can validate composition and shell behavior but cannot reproduce
   host-specific monitor layouts, touchscreen hardware, brightness devices, or
   GPU behavior exactly.
+- Notification toasts lose the previous 2/4/8 second per-urgency durations. v5
+  removed those knobs, honours a client `expire_timeout` of `0` as permanent,
+  and defaults unspecified timeouts to six seconds. Only per-application
+  `[notification.filter.<name>]` entries can override a duration, so the
+  declarative base caps `max_visible` instead.
+- Low-urgency notifications no longer enter the history. v5 hardcodes that
+  exclusion.
+- Clipboard history gains a Secret Service dependency, because v5 encrypts it
+  with a master key from `org.freedesktop.secrets`. The Niri session already
+  starts `gnome-keyring-daemon --components=secrets`.
+- The session panel cannot offer hibernate. v5 has no hibernate action, and
+  `endeavour` disables the hibernate target anyway.
+- The control center shows at most six shortcuts, so the previous seven-item
+  set cannot be carried over in full. The migrated six drop `dark_mode`.
+- The lock screen is locked and shown twice before sleep, because swayidle runs
+  `before-sleep noctalia msg session lock` and v5's
+  `lockscreen.lock_before_suspend` defaults to true with its own logind
+  inhibitor. This is idempotent and preserves the old lock-on-suspend
+  behavior.
 
 ## Validation
 

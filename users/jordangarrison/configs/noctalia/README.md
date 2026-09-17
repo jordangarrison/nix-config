@@ -40,6 +40,15 @@ Use the Noctalia package pinned by this flake for validation when the active
 system still has an older executable. Keep wallpaper rendering disabled here;
 Niri starts `swaybg` separately.
 
+Every value in `config.toml` is either a preference carried over from the old
+v4 setup or an explicit pin where v5's default differs from the previous
+behavior. Keep it that way: do not restate a v5 default, because a future
+upstream default change then becomes invisible in review. Behaviors that v5
+cannot reproduce at all — notification toast durations, low-urgency history,
+hover-only bar labels, a hibernate session action, and the seventh control
+center shortcut — are recorded in
+[ADR 007](../../../../docs/adr/007-migrate-noctalia-to-v5.md).
+
 ## IPC commands
 
 Current integrations use Noctalia v5's canonical message interface:

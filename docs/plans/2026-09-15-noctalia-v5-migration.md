@@ -50,7 +50,7 @@ The architectural decisions and rationale are recorded in
 | Locking | Idle, before-sleep, `Mod+Ctrl+Alt+L`, and which-key use `noctalia msg session lock` |
 | Notifications | Noctalia remains the Niri notification daemon |
 | Weather | Round Rock, Fahrenheit, weather effects enabled |
-| Night light | Enabled with the existing approximate day/night schedule and temperatures |
+| Night light | Enabled with the solar sunrise/sunset schedule derived from the configured location, and the existing temperatures |
 | Runtime customization | GUI changes persist in `~/.local/state/noctalia/settings.toml` |
 
 ## Implementation Steps

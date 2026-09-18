@@ -33,10 +33,7 @@
     llm-agents.url = "github:numtide/llm-agents.nix";
     niri.url = "github:sodiboo/niri-flake";
     noctalia = {
-      # Pinned to the last v4 (QML/quickshell) commit. v5 is a ground-up C++
-      # rewrite (alpha) with an incompatible config schema and no migration
-      # path from our v4 settings.json. Revisit once v5 stabilizes.
-      url = "github:noctalia-dev/noctalia-shell/40dd5f54a0597b77ff78ac6a3a6d2ef42f04d544";
+      url = "github:noctalia-dev/noctalia/v5.1.0";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     sweet-nothings = {

@@ -22,6 +22,12 @@
     inputs.grok-bot.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 
+  # Shared account avatar used by desktop shells and display managers.
+  home.file.".face" = {
+    source = ./profile.jpg;
+    force = true;
+  };
+
   # KDE Connect for Hyprland/Niri (GSConnect handles GNOME)
   services.kdeconnect = {
     enable = true;

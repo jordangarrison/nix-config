@@ -465,16 +465,14 @@ in
       "Mod+Ctrl+Alt+Shift+5".action.spawn = [
         "handy"
         "--toggle-transcription"
+        "--toggle-post-process"
       ];
 
-      # Sweet Nothings - Voice dictation (D for dictation)
+      # Handy - Voice dictation with post-processing (D for dictation)
       "Mod+Shift+D".action.spawn = [
-        "ghostty"
-        "--class=com.sweet-nothings"
-        "--title=Sweet Nothings"
-        "-e"
-        "sweet-nothings"
-        "--paste"
+        "handy"
+        "--toggle-transcription"
+        "--toggle-post-process"
       ];
 
       # Which-key menu (D for discover)

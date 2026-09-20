@@ -698,11 +698,11 @@
         "nixpkgs": "nixpkgs_4"
       },
       "locked": {
-        "lastModified": 1778795479,
-        "narHash": "sha256-awJp4oYMMWx1wgd+zvf9MBCMIFHOmmqHCZUhaeFD0Ig=",
+        "lastModified": 1789938668,
+        "narHash": "sha256-/+R05BKb/wuYmKgquR+aFTlTsSWskSeHV85574JgSOE=",
         "ref": "refs/heads/main",
-        "rev": "224707fa8b227ce24d9cc44bdf8ba667d37e6ace",
-        "revCount": 39,
+        "rev": "20fff44158539d3bcb5786c74e3d62e4d3b76491",
+        "revCount": 46,
         "type": "git",
         "url": "ssh://forgejo@forgejo.jordangarrison.dev/jordangarrison/cg.git"
       },
@@ -1649,11 +1649,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789438704,
-        "narHash": "sha256-X3qYxMs4UuZH4mEV1CUr2LjcW8vusduYnO0UtDkwqcU=",
+        "lastModified": 1789939492,
+        "narHash": "sha256-76Pv4zlqjXVSe/Ur3oY6uyiUGgw/eIoHSiJe6YumPt8=",
         "owner": "jordangarrison",
         "repo": "tic-tac-toe-4-in-a-row",
-        "rev": "f5a64f16cc607ed5ff2fed5a7be050b620e1619b",
+        "rev": "bf03feb62fcec4000cb12f457b1973ec0725c6dc",
         "type": "github"
       },
       "original": {

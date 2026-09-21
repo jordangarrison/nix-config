@@ -63,6 +63,29 @@ runCommand "jordangarrison-omp-plugins-1.0.0"
         "// route through the parent's streamSimple via reentrant QueryContexts." \
         "// The registration is idempotent when a Pi child shares the parent registry."
 
+    # OMP emits session_start only with reason "startup" or "reload". /new, /fork
+    # and /resume arrive as session_switch instead, which upstream Pi never sends.
+    # Without a session_switch handler the bridge keeps the previous
+    # conversation's Claude Code session and cursor. Every turn of the new
+    # conversation then looks like a "shorter context", takes the clean-start
+    # path with no history, and deletes its own Claude Code session afterward.
+    # Only the shared session is reset here: the global streamSimple key must
+    # survive a switch because OMP child sessions register the provider from it.
+    substituteInPlace "$plugins/node_modules/pi-claude-bridge/src/index.ts" \
+      --replace-fail \
+        '	pi.on("session_shutdown", () => {
+		reportLeaks("session_shutdown");
+		clearSession("session_shutdown");
+	});' \
+        '	pi.on("session_shutdown", () => {
+		reportLeaks("session_shutdown");
+		clearSession("session_shutdown");
+	});
+	(pi as any).on("session_switch", (event: { reason?: string }) => {
+		debug(`session_switch:''${event?.reason ?? "unknown"}: clearing session ''${sharedSession?.sessionId?.slice(0, 8) ?? "none"}`);
+		sharedSession = null;
+	});'
+
     substituteInPlace "$plugins/node_modules/pi-claude-bridge/src/skills.ts" \
       --replace-fail \
         'import { formatSkillsForPrompt, type Skill } from "@earendil-works/pi-coding-agent";' \

@@ -80,7 +80,7 @@ buildNpmPackage {
   #      `node_modules/@earendil-works/pi-coding-agent` entry, so npm installs the
   #      subtree our lockfile pins (with integrity, served from the Nix-prefetched
   #      cache) instead of re-inflating upstream's shrinkwrap over it.
-  npmDepsHash = "sha256-AD32Ct5gbuf1ynuTDSWP6n9Y2zwvwfeOJVeacGY2X24=";
+  npmDepsHash = "sha256-47sAYhQMrqAU4ryjWN1+xENxfKeist1+clkuKSIot64=";
 
   dontNpmBuild = true;
   dontNpmPrune = true;

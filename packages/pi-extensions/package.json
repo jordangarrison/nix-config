@@ -10,7 +10,7 @@
     "@earendil-works/pi-coding-agent": "0.85.1",
     "@modelcontextprotocol/sdk": "1.29.0",
     "@narumitw/pi-usage": "0.51.0",
-    "pi-claude-bridge": "0.7.0",
+    "pi-claude-bridge": "0.8.0",
     "pi-mcp-adapter": "2.23.0",
     "pi-foldable-tools": "0.1.0",
     "pi-subagents": "0.66.0",

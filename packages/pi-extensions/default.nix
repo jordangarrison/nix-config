@@ -6,14 +6,15 @@
 }:
 
 let
-  # npm's latest release does not yet include Fable 5.1 support. Keep the
-  # released package in package-lock.json for its dependency graph, then replace
-  # its source with a reproducibly pinned revision from upstream's main branch.
+  # Keep the released package in package-lock.json for its dependency graph,
+  # then replace its source with the matching release tag from GitHub. The npm
+  # tarball omits CHANGELOG.md, which postInstall copies alongside the source,
+  # and a tag pin makes a later move to an unreleased revision a one-line change.
   pi-claude-bridge = fetchFromGitHub {
     owner = "elidickinson";
     repo = "pi-claude-bridge";
-    rev = "4a7920ac4f4449b546307b3a53d4a4867f8b6cb5"; # main @ 2026-09-09
-    hash = "sha256-dZEbRahk9Eu6mieVn+Zn5OZDvHRrcuMfsy5Kxa5aHIg=";
+    rev = "d3cb25e96742c47e77675ba7ff50e181ebb476ef"; # v0.8.0
+    hash = "sha256-/7Ofo9nt74RXaV+01TIzguFxm0FpeNKRXV5Uk67qSGI=";
   };
 
   # pi-until is not published to npm, and its committed package-lock.json has
@@ -79,7 +80,7 @@ buildNpmPackage {
   #      `node_modules/@earendil-works/pi-coding-agent` entry, so npm installs the
   #      subtree our lockfile pins (with integrity, served from the Nix-prefetched
   #      cache) instead of re-inflating upstream's shrinkwrap over it.
-  npmDepsHash = "sha256-iBUG7yDZC3KzZPlgk7MwecI8WLF0AhxYJoJgvWd2mrc=";
+  npmDepsHash = "sha256-AD32Ct5gbuf1ynuTDSWP6n9Y2zwvwfeOJVeacGY2X24=";
 
   dontNpmBuild = true;
   dontNpmPrune = true;

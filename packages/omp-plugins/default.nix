@@ -42,26 +42,24 @@ runCommand "jordangarrison-omp-plugins-1.0.0"
         'keyHint("app.tools.expand", "to expand")' \
         '`''${keyText("app.tools.expand")} to expand`'
 
+    # A later module instance is an OMP child session (task tool). OMP gives it a
+    # distinct model registry and runs its first query before session_start, so
+    # the upstream deferral leaves the child with "No API key found for
+    # claude-bridge". Register at load instead, reusing the parent's stream
+    # function so tool-result routing keeps its state.
     substituteInPlace "$plugins/node_modules/pi-claude-bridge/src/index.ts" \
       --replace-fail \
-        '// Subsequent instance (subagent session): skip registration entirely.' \
-        '// OMP gives child sessions a distinct model registry, so register the provider there too.
-        pi.registerProvider(PROVIDER_ID, {
-          baseUrl: "claude-bridge",
-          apiKey: "not-used",
-          api: "claude-bridge",
-          models: registeredModels,
-          streamSimple: g[ACTIVE_STREAM_SIMPLE_KEY] as any,
-        });' \
-      --replace-fail \
-        '// The subagent already has access to claude-bridge models via the shared' \
-        '// Reuse the parent stream function so tool-result routing retains its state.' \
-      --replace-fail \
-        "// ModelRegistry from the parent's registration. Calls to those models" \
-        "// Re-registering also installs the provider's dummy credential in the child registry." \
-      --replace-fail \
-        "// route through the parent's streamSimple via reentrant QueryContexts." \
-        "// The registration is idempotent when a Pi child shares the parent registry."
+        '		debug(`provider: deferring registration decision to session_start (module=''${moduleInstanceId})`);
+		pi.on("session_start", (_event, ctx) => {
+			if (ctx.modelRegistry.getProvider(PROVIDER_ID)) {
+				debug(`provider: registry already has ''${PROVIDER_ID}, skipping registration (module=''${moduleInstanceId})`);
+				return;
+			}
+			debug(`provider: registry lacks ''${PROVIDER_ID}, registering (module=''${moduleInstanceId})`);
+			pi.registerProvider(PROVIDER_ID, providerConfig);
+		});' \
+        '		pi.registerProvider(PROVIDER_ID, { ...providerConfig, streamSimple: g[ACTIVE_STREAM_SIMPLE_KEY] as any });
+		debug(`provider: registered into child registry with the parent stream function (module=''${moduleInstanceId})`);'
 
     # OMP emits session_start only with reason "startup" or "reload". /new, /fork
     # and /resume arrive as session_switch instead, which upstream Pi never sends.

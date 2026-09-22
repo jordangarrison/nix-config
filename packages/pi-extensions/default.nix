@@ -101,6 +101,17 @@ buildNpmPackage {
     cp -r ${pi-claude-bridge}/src ${pi-claude-bridge}/package.json \
       ${pi-claude-bridge}/README.md ${pi-claude-bridge}/CHANGELOG.md ${pi-claude-bridge}/LICENSE \
       "$bundle/node_modules/pi-claude-bridge/"
+    chmod -R u+w "$bundle/node_modules/pi-claude-bridge"
+
+    # The bridge only sends `<id>[1m]` for ids in MEASURED_ONE_M. Anything else,
+    # including claude-opus-5-5, is requested as the bare id and registered at
+    # 200K. claude-opus-5 is already measured at 1M on every plan; treat 5.5
+    # the same until upstream adds it. OMP copies this tree, so one edit
+    # covers both agents.
+    substituteInPlace "$bundle/node_modules/pi-claude-bridge/src/models.ts" \
+      --replace-fail \
+        '"claude-opus-5",' \
+        '"claude-opus-5", "claude-opus-5-5",'
 
     # Drop the vendored pi-until where its manifest entry expects it. Its
     # `import "xstate"` resolves by walking up to the bundle's flat node_modules,

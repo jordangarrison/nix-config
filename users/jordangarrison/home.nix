@@ -324,7 +324,7 @@ in
     };
     settings.composer.shape = "band";
     settings.symbolPreset = "nerd";
-    settings.modelRoles.default = "claude-bridge/claude-opus-5:medium";
+    settings.modelRoles.default = "cursor/grok-4.7-high";
   };
 
   programs.herdr = {

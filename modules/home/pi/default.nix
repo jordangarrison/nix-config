@@ -195,6 +195,7 @@ let
 
   defaultExtensions = {
     "claude-subscription-usage.ts".source = ./extensions/claude-subscription-usage.ts;
+    "codex-subscription-usage.ts".source = ./extensions/codex-subscription-usage.ts;
     "protected-paths.ts".source = ./extensions/protected-paths.ts;
     "status-line.ts".source = ./extensions/status-line.ts;
   };

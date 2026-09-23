@@ -115,6 +115,16 @@ Before adding a package:
 3. Avoid adding another overlay when an existing one has the correct ownership.
 4. Build the affected output.
 
+### Agent tooling
+
+Take agent CLIs (claude-code, codex, pi, omp, herdr) from `llm-agents` as
+published. Do not add inputs or overlay overrides to get ahead of it; wait for
+the next `llm-agents` update. Do not patch third-party agent code (`patches`,
+`substituteInPlace`, source swaps). pi installs its third-party extensions
+itself from `programs.pi.settings.packages`. Extensions Jordan owns belong in
+`~/dev/jordangarrison/pi-extensions`. `packages/omp-plugins/` is the last
+exception and is removed when that repo ships an OMP bridge.
+
 ### Update flake inputs
 
 ```bash

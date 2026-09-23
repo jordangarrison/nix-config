@@ -22,6 +22,10 @@
     inputs.grok-bot.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 
+  # The package ships its own skill; linked here because the CLI is Linux-only.
+  programs.agent-skills.external.agent-browser =
+    "${pkgs.llm-agents.agent-browser}/share/agent-browser/skills/agent-browser";
+
   # KDE Connect for Hyprland/Niri (GSConnect handles GNOME)
   services.kdeconnect = {
     enable = true;

@@ -1,5 +1,53 @@
 {
   "nodes": {
+    "anthropic-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1789069448,
+        "narHash": "sha256-tI4bTTBfI1ylltklGyiyA7pLoKXEWtrT6lrmwrpLbCw=",
+        "owner": "anthropics",
+        "repo": "skills",
+        "rev": "34040c9c568585f6929bedeaad110ad08f079624",
+        "type": "github"
+      },
+      "original": {
+        "owner": "anthropics",
+        "repo": "skills",
+        "type": "github"
+      }
+    },
+    "archify": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1790133168,
+        "narHash": "sha256-to8YbAWQ+sjhQzmg356+TK287N9RWfFGPqzZl4KFFNI=",
+        "owner": "tt-a1i",
+        "repo": "archify",
+        "rev": "8809b273c278a813a47fa37698864779c0d4cf08",
+        "type": "github"
+      },
+      "original": {
+        "owner": "tt-a1i",
+        "repo": "archify",
+        "type": "github"
+      }
+    },
+    "ash-kindle": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1775530512,
+        "narHash": "sha256-NItGao3GJ965MIYCkRIoyiUHXoYtA3k/n1jVYBswfhk=",
+        "owner": "jordangarrison",
+        "repo": "ash-kindle",
+        "rev": "d425946fe9585f43af2eedf20721f3fdf3779026",
+        "type": "github"
+      },
+      "original": {
+        "owner": "jordangarrison",
+        "repo": "ash-kindle",
+        "type": "github"
+      }
+    },
     "aws-tools": {
       "inputs": {
         "flake-utils": "flake-utils",
@@ -39,6 +87,22 @@
       "original": {
         "owner": "jordangarrison",
         "repo": "aws-use-sso",
+        "type": "github"
+      }
+    },
+    "boristane-agent-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1768956453,
+        "narHash": "sha256-i3pwbHmYm1ezgvSUn5QnnUOZG/T12O8v6GJQ3P448ns=",
+        "owner": "boristane",
+        "repo": "agent-skills",
+        "rev": "8aa14dd16a1340a6049e6d7cd58e2ed52333a550",
+        "type": "github"
+      },
+      "original": {
+        "owner": "boristane",
+        "repo": "agent-skills",
         "type": "github"
       }
     },
@@ -101,6 +165,22 @@
         "owner": "Mic92",
         "ref": "llm-agents",
         "repo": "bun2nix",
+        "type": "github"
+      }
+    },
+    "caveman": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1790038640,
+        "narHash": "sha256-KFfU8LmNajKLZcOXOFisn4beTcg2YL+rpasr39UgSZE=",
+        "owner": "JuliusBrussee",
+        "repo": "caveman",
+        "rev": "2fd153c67988e980fb0b2455c90832159a6a5a25",
+        "type": "github"
+      },
+      "original": {
+        "owner": "JuliusBrussee",
+        "repo": "caveman",
         "type": "github"
       }
     },
@@ -711,6 +791,22 @@
         "url": "ssh://forgejo@forgejo.jordangarrison.dev/jordangarrison/cg.git"
       }
     },
+    "lavish-axi": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1790128997,
+        "narHash": "sha256-9lTpP4tLIMD8QqxqlqBLw4EcpEh6RtVO7w08nZumOSw=",
+        "owner": "kunchenguid",
+        "repo": "lavish-axi",
+        "rev": "69574a88977553385c485c4eccc93999e7ca2793",
+        "type": "github"
+      },
+      "original": {
+        "owner": "kunchenguid",
+        "repo": "lavish-axi",
+        "type": "github"
+      }
+    },
     "lib-aggregate": {
       "inputs": {
         "flake-utils": "flake-utils_4",
@@ -1224,6 +1320,22 @@
         "type": "github"
       }
     },
+    "obsidian-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1789483437,
+        "narHash": "sha256-kyH07EVmwIEC/q6i91Kz8mPE78j9ITga2NZUpU1+nHU=",
+        "owner": "kepano",
+        "repo": "obsidian-skills",
+        "rev": "3ccff5338ea700537839b21900aa5358a0402c98",
+        "type": "github"
+      },
+      "original": {
+        "owner": "kepano",
+        "repo": "obsidian-skills",
+        "type": "github"
+      }
+    },
     "panko": {
       "inputs": {
         "flake-parts": "flake-parts_5",
@@ -1245,10 +1357,31 @@
         "type": "github"
       }
     },
+    "readwise-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1781846831,
+        "narHash": "sha256-237UfiTbQXEnrxPeGHZTVbhTaGU4zBk2N9AaG3s5Fb4=",
+        "owner": "readwiseio",
+        "repo": "readwise-skills",
+        "rev": "2d1ce9627c611d24f510dfc2e05a123fa509d2f6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "readwiseio",
+        "repo": "readwise-skills",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
+        "anthropic-skills": "anthropic-skills",
+        "archify": "archify",
+        "ash-kindle": "ash-kindle",
         "aws-tools": "aws-tools",
         "aws-use-sso": "aws-use-sso",
+        "boristane-agent-skills": "boristane-agent-skills",
+        "caveman": "caveman",
         "disko": "disko",
         "drawl": "drawl",
         "firefox-nightly": "firefox-nightly",
@@ -1260,6 +1393,7 @@
         "home-manager": "home-manager",
         "hubctl": "hubctl",
         "lakeline-cg": "lakeline-cg",
+        "lavish-axi": "lavish-axi",
         "llm-agents": "llm-agents",
         "niri": "niri",
         "nix-darwin": "nix-darwin",
@@ -1270,7 +1404,9 @@
         "nixpkgs-stable": "nixpkgs-stable_2",
         "noctalia": "noctalia",
         "nvf": "nvf",
+        "obsidian-skills": "obsidian-skills",
         "panko": "panko",
+        "readwise-skills": "readwise-skills",
         "sre-claude-auto-runner": "sre-claude-auto-runner",
         "sweet-nothings": "sweet-nothings",
         "tic-tac-toe-4-in-a-row": "tic-tac-toe-4-in-a-row",

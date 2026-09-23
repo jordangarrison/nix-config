@@ -3,7 +3,9 @@
   # SSH and unreachable from credential-less GitHub-hosted runners.
   # It mirrors only the interface this repo consumes (see
   # users/jordangarrison/home.nix): packages.<system>.flo-cli on the
-  # systems CI evaluates. If that surface grows, grow this stub to match.
+  # systems CI evaluates, plus placeholder SKILL.md files under
+  # catalog/skills/ for each floai skill in programs.agent-skills.external.
+  # If that surface grows, grow this stub to match.
   description = "CI stub for the private flocasts/floai flake";
 
   outputs =

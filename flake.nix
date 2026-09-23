@@ -102,6 +102,43 @@
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # Agent skill sources (plain SKILL.md trees, consumed by
+    # programs.agent-skills.external in users/jordangarrison/home.nix).
+    # Skills for CLIs we package come from the package itself instead, so
+    # skill and CLI versions stay in step.
+    anthropic-skills = {
+      url = "github:anthropics/skills";
+      flake = false;
+    };
+    archify = {
+      url = "github:tt-a1i/archify";
+      flake = false;
+    };
+    ash-kindle = {
+      url = "github:jordangarrison/ash-kindle";
+      flake = false;
+    };
+    boristane-agent-skills = {
+      url = "github:boristane/agent-skills";
+      flake = false;
+    };
+    caveman = {
+      url = "github:JuliusBrussee/caveman";
+      flake = false;
+    };
+    lavish-axi = {
+      url = "github:kunchenguid/lavish-axi";
+      flake = false;
+    };
+    obsidian-skills = {
+      url = "github:kepano/obsidian-skills";
+      flake = false;
+    };
+    readwise-skills = {
+      url = "github:readwiseio/readwise-skills";
+      flake = false;
+    };
   };
 
   outputs =
@@ -136,6 +173,8 @@
       grok-bot,
       sre-claude-auto-runner,
       disko,
+      # Skill sources are only read through `inputs` (home.nix).
+      ...
     }:
     {
       nixosConfigurations = {

@@ -6,6 +6,9 @@ name: pr-validation
 # a full module-system evaluation that catches syntax errors, bad option
 # references, missing packages, and broken module wiring without building.
 # See docs/adr/005-pr-ci-nix-validation.md for the trade-offs.
+# One exception: build-skills builds the small agent-skills bundle, whose
+# SKILL.md check only runs at build time (source fetches plus one tiny
+# derivation, no desktop closure).
 
 on:
   pull_request:
@@ -105,4 +108,21 @@ jobs:
         run: >-
           nix eval --raw
           '.#homeConfigurations."jordangarrison@normandy".activationPackage.drvPath'
+          $STUB_OVERRIDES
+
+  build-skills:
+    name: build agent skills bundle
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25 # v22
+      # Catches upstream skill folders that moved or were renamed (e.g. in a
+      # flake-lock bump); endeavour enables every gated skill source.
+      - name: Build external skills bundle
+        run: >-
+          nix build --no-link --print-build-logs
+          ".#nixosConfigurations.endeavour.config.home-manager.users.jordangarrison.programs.agent-skills.bundle"
           $STUB_OVERRIDES

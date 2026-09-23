@@ -49,6 +49,91 @@ in
     enable = true;
     skillsDir = ./skills;
     liveDir = "${config.home.homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/skills";
+    # Upstream skills. Skills for a CLI come from that CLI's package, so
+    # they are gated with it and version-locked to it; the rest come from
+    # `flake = false` inputs. See docs/plans/2026-09-23-declarative-agent-skills.md.
+    external =
+      let
+        fromDir = dir: names: lib.genAttrs names (name: "${dir}/${name}");
+        # pup embeds its skills in the binary. The platform argument is
+        # required but only picks a target directory, which --dir overrides;
+        # the SKILL.md files are identical for every platform.
+        pupSkills = pkgs.runCommand "pup-skills-${pkgs.pup.version}" {
+          nativeBuildInputs = [ pkgs.pup ];
+        } ''
+          export HOME=$TMPDIR
+          pup skills install codex --type=skill --dir $out --no-agent
+        '';
+      in
+      lib.mkMerge [
+        (fromDir "${pkgs.gws.src}/skills" [
+          "gws-shared"
+          "gws-gmail"
+          "gws-gmail-read"
+          "gws-gmail-reply"
+          "gws-gmail-reply-all"
+          "gws-gmail-send"
+          "gws-gmail-triage"
+          "gws-drive"
+          "gws-drive-upload"
+          "gws-docs"
+          "gws-docs-write"
+          "gws-sheets"
+          "gws-sheets-read"
+          "gws-calendar"
+          "gws-calendar-agenda"
+          "gws-people"
+        ])
+        (fromDir "${pkgs.gh-stack.src}/skills" [ "gh-stack" ])
+        (fromDir "${inputs.aws-use-sso}/skills" [ "aws-use-sso" ])
+        (fromDir "${inputs.anthropic-skills}/skills" [ "frontend-design" ])
+        (fromDir "${inputs.archify}" [ "archify" ])
+        (fromDir "${inputs.ash-kindle}/skills" [ "ash-kindle" ])
+        (fromDir "${inputs.boristane-agent-skills}/skills" [ "logging-best-practices" ])
+        (fromDir "${inputs.caveman}/skills" [ "caveman" ])
+        (fromDir "${inputs.lavish-axi}/skills" [ "lavish" ])
+        (fromDir "${inputs.obsidian-skills}/skills" [
+          "obsidian-bases"
+          "obsidian-cli"
+          "obsidian-markdown"
+        ])
+        (fromDir "${inputs.readwise-skills}/skills" [
+          "book-review"
+          "build-persona"
+          "feed-catchup"
+          "highlight-graph"
+          "now-reading-page"
+          "quiz"
+          "reader-recap"
+          "readwise-cli"
+          "surprise-me"
+          "triage"
+        ])
+        (lib.mkIf (userApps.herdr.enable or false) (
+          fromDir "${config.programs.herdr.package.src}/skills" [ "herdr" ]
+        ))
+        (lib.mkIf (userApps.pup.enable or false) (
+          fromDir pupSkills [
+            "dd-apm"
+            "dd-code-generation"
+            "dd-debugger"
+            "dd-docs"
+            "dd-file-issue"
+            "dd-logs"
+            "dd-monitors"
+            "dd-pup"
+            "dd-symdb"
+            "dd-triage-flaky-test"
+            "dd-unblock-pr"
+          ]
+        ))
+        (lib.mkIf (userApps.floai.enable or false) (
+          fromDir "${inputs.floai}/catalog/skills" [
+            "flo-brand-naming"
+            "git-update-pr-description"
+          ]
+        ))
+      ];
   };
 
   # Agent CLI configs (claude/codex/omp) + workspace routers. Hand-authored

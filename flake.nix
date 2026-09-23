@@ -87,6 +87,10 @@
       url = "github:jordangarrison/warp-preview-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    grok-bot = {
+      url = "github:jordangarrison/grok-bot-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     sre-claude-auto-runner = {
       url = "git+ssh://forgejo@forgejo.jordangarrison.dev/jordangarrison/sre-claude-auto-runner.git";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -94,6 +98,43 @@
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # Agent skill sources (plain SKILL.md trees, consumed by
+    # programs.agent-skills.external in users/jordangarrison/home.nix).
+    # Skills for CLIs we package come from the package itself instead, so
+    # skill and CLI versions stay in step.
+    anthropic-skills = {
+      url = "github:anthropics/skills";
+      flake = false;
+    };
+    archify = {
+      url = "github:tt-a1i/archify";
+      flake = false;
+    };
+    ash-kindle = {
+      url = "github:jordangarrison/ash-kindle";
+      flake = false;
+    };
+    boristane-agent-skills = {
+      url = "github:boristane/agent-skills";
+      flake = false;
+    };
+    caveman = {
+      url = "github:JuliusBrussee/caveman";
+      flake = false;
+    };
+    lavish-axi = {
+      url = "github:kunchenguid/lavish-axi";
+      flake = false;
+    };
+    obsidian-skills = {
+      url = "github:kepano/obsidian-skills";
+      flake = false;
+    };
+    readwise-skills = {
+      url = "github:readwiseio/readwise-skills";
+      flake = false;
     };
   };
 
@@ -126,8 +167,11 @@
       floai,
       tuicr,
       warp-preview,
+      grok-bot,
       sre-claude-auto-runner,
       disko,
+      # Skill sources are only read through `inputs` (home.nix).
+      ...
     }:
     {
       nixosConfigurations = {
@@ -233,6 +277,7 @@
                   handy.enable = true;
                   herdr.enable = true;
                   floai.enable = true;
+                  grok-bot.enable = true;
                 };
               };
 
@@ -382,6 +427,7 @@
                   pup.enable = true;
                   handy.enable = true;
                   herdr.enable = true;
+                  grok-bot.enable = true;
                 };
               };
 

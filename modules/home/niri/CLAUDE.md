@@ -45,7 +45,7 @@ managed separately via **swaybg** and is disabled in Noctalia.
 | `Mod+N` | Obsidian |
 | `Mod+F` | Yazi file manager (in Ghostty) |
 | `Mod+Shift+F` | Nautilus file manager |
-| `Mod+Shift+D` | Sweet Nothings voice dictation |
+| `Mod+Shift+D` | Handy voice dictation with post-processing |
 | `Mod+Space` | Noctalia launcher |
 | `Mod+;` | Emoji picker (noctalia) |
 

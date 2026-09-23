@@ -34,6 +34,14 @@ runCommand "jordangarrison-omp-plugins-1.0.0"
     chmod -R u+w "$plugins/node_modules/pi-claude-bridge"
     patch -d "$plugins/node_modules/pi-claude-bridge" -p1 < ${./omp-prompt-array.patch}
 
+    # The bridge only sends `<id>[1m]` for ids in MEASURED_ONE_M, so
+    # claude-opus-5-5 would register at 200K. Treat it like claude-opus-5
+    # until upstream adds it.
+    substituteInPlace "$plugins/node_modules/pi-claude-bridge/src/models.ts" \
+      --replace-fail \
+        '"claude-opus-5",' \
+        '"claude-opus-5", "claude-opus-5-5",'
+
     substituteInPlace "$plugins/node_modules/pi-claude-bridge/src/index.ts" \
       --replace-fail \
         'import { buildSessionContext, compact, generateBranchSummary, keyHint, type BranchSummaryResult, type CompactionEntry, type ExtensionAPI, type ExtensionContext, type ExtensionUIContext } from "@earendil-works/pi-coding-agent";' \
@@ -42,26 +50,47 @@ runCommand "jordangarrison-omp-plugins-1.0.0"
         'keyHint("app.tools.expand", "to expand")' \
         '`''${keyText("app.tools.expand")} to expand`'
 
+    # A later module instance is an OMP child session (task tool). OMP gives it a
+    # distinct model registry and runs its first query before session_start, so
+    # the upstream deferral leaves the child with "No API key found for
+    # claude-bridge". Register at load instead, reusing the parent's stream
+    # function so tool-result routing keeps its state.
     substituteInPlace "$plugins/node_modules/pi-claude-bridge/src/index.ts" \
       --replace-fail \
-        '// Subsequent instance (subagent session): skip registration entirely.' \
-        '// OMP gives child sessions a distinct model registry, so register the provider there too.
-        pi.registerProvider(PROVIDER_ID, {
-          baseUrl: "claude-bridge",
-          apiKey: "not-used",
-          api: "claude-bridge",
-          models: registeredModels,
-          streamSimple: g[ACTIVE_STREAM_SIMPLE_KEY] as any,
-        });' \
+        '		debug(`provider: deferring registration decision to session_start (module=''${moduleInstanceId})`);
+		pi.on("session_start", (_event, ctx) => {
+			if (ctx.modelRegistry.getProvider(PROVIDER_ID)) {
+				debug(`provider: registry already has ''${PROVIDER_ID}, skipping registration (module=''${moduleInstanceId})`);
+				return;
+			}
+			debug(`provider: registry lacks ''${PROVIDER_ID}, registering (module=''${moduleInstanceId})`);
+			pi.registerProvider(PROVIDER_ID, providerConfig);
+		});' \
+        '		pi.registerProvider(PROVIDER_ID, { ...providerConfig, streamSimple: g[ACTIVE_STREAM_SIMPLE_KEY] as any });
+		debug(`provider: registered into child registry with the parent stream function (module=''${moduleInstanceId})`);'
+
+    # OMP emits session_start only with reason "startup" or "reload". /new, /fork
+    # and /resume arrive as session_switch instead, which upstream Pi never sends.
+    # Without a session_switch handler the bridge keeps the previous
+    # conversation's Claude Code session and cursor. Every turn of the new
+    # conversation then looks like a "shorter context", takes the clean-start
+    # path with no history, and deletes its own Claude Code session afterward.
+    # Only the shared session is reset here: the global streamSimple key must
+    # survive a switch because OMP child sessions register the provider from it.
+    substituteInPlace "$plugins/node_modules/pi-claude-bridge/src/index.ts" \
       --replace-fail \
-        '// The subagent already has access to claude-bridge models via the shared' \
-        '// Reuse the parent stream function so tool-result routing retains its state.' \
-      --replace-fail \
-        "// ModelRegistry from the parent's registration. Calls to those models" \
-        "// Re-registering also installs the provider's dummy credential in the child registry." \
-      --replace-fail \
-        "// route through the parent's streamSimple via reentrant QueryContexts." \
-        "// The registration is idempotent when a Pi child shares the parent registry."
+        '	pi.on("session_shutdown", () => {
+		reportLeaks("session_shutdown");
+		clearSession("session_shutdown");
+	});' \
+        '	pi.on("session_shutdown", () => {
+		reportLeaks("session_shutdown");
+		clearSession("session_shutdown");
+	});
+	(pi as any).on("session_switch", (event: { reason?: string }) => {
+		debug(`session_switch:''${event?.reason ?? "unknown"}: clearing session ''${sharedSession?.sessionId?.slice(0, 8) ?? "none"}`);
+		sharedSession = null;
+	});'
 
     substituteInPlace "$plugins/node_modules/pi-claude-bridge/src/skills.ts" \
       --replace-fail \

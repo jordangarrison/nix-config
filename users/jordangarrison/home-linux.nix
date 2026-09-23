@@ -18,6 +18,8 @@
     pkgs.llm-agents.claude-desktop # Claude desktop app (Electron)
   ] ++ lib.optionals (userApps.warp.enable or false) [
     inputs.warp-preview.packages.${pkgs.stdenv.hostPlatform.system}.default
+  ] ++ lib.optionals (userApps.grok-bot.enable or false) [
+    inputs.grok-bot.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 
   # Shared account avatar used by desktop shells and display managers.
@@ -25,6 +27,12 @@
     source = ./profile.jpg;
     force = true;
   };
+
+  # From the package source (same version as the CLI; identical to the copy
+  # the package installs) so building the skill bundle doesn't build the
+  # package. Declared here because the CLI is Linux-only.
+  programs.agent-skills.external.agent-browser =
+    "${pkgs.llm-agents.agent-browser.src}/skills/agent-browser";
 
   # KDE Connect for Hyprland/Niri (GSConnect handles GNOME)
   services.kdeconnect = {

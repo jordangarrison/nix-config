@@ -22,10 +22,9 @@ let
   emacsPackage = if pkgs.stdenv.isLinux then pkgs.emacs-pgtk else pkgs.emacs;
   # Live-checkout path for hand-authored agent content (see ./agents)
   agentsLive = "${config.home.homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/agents";
-  # Pass the same pi that programs.pi installs below: the bundle asserts that its
-  # pinned pi library matches, so background subagents cannot drift onto a
-  # different pi version than the session that spawned them.
-  piExtensions = pkgs.callPackage ../../packages/pi-extensions { pi = pkgs.llm-agents.pi; };
+  # OMP loads pi-claude-bridge from this bundle (see packages/omp-plugins).
+  # pi itself installs its extensions from programs.pi.settings.packages.
+  piExtensions = pkgs.callPackage ../../packages/pi-extensions { };
   # OMP can load Pi extensions through its compatibility layer, but Claude
   # Bridge needs one missing helper adapted locally. Keep that patch and the
   # complete dependency graph in a Nix package shared by every machine.
@@ -50,6 +49,91 @@ in
     enable = true;
     skillsDir = ./skills;
     liveDir = "${config.home.homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/skills";
+    # Upstream skills. Skills for a CLI come from that CLI's package, so
+    # they are gated with it and version-locked to it; the rest come from
+    # `flake = false` inputs. See docs/plans/2026-09-23-declarative-agent-skills.md.
+    external =
+      let
+        fromDir = dir: names: lib.genAttrs names (name: "${dir}/${name}");
+        # pup embeds its skills in the binary. The platform argument is
+        # required but only picks a target directory, which --dir overrides;
+        # the SKILL.md files are identical for every platform.
+        pupSkills = pkgs.runCommand "pup-skills-${pkgs.pup.version}" {
+          nativeBuildInputs = [ pkgs.pup ];
+        } ''
+          export HOME=$TMPDIR
+          pup skills install codex --type=skill --dir $out --no-agent
+        '';
+      in
+      lib.mkMerge [
+        (fromDir "${pkgs.gws.src}/skills" [
+          "gws-shared"
+          "gws-gmail"
+          "gws-gmail-read"
+          "gws-gmail-reply"
+          "gws-gmail-reply-all"
+          "gws-gmail-send"
+          "gws-gmail-triage"
+          "gws-drive"
+          "gws-drive-upload"
+          "gws-docs"
+          "gws-docs-write"
+          "gws-sheets"
+          "gws-sheets-read"
+          "gws-calendar"
+          "gws-calendar-agenda"
+          "gws-people"
+        ])
+        (fromDir "${pkgs.gh-stack.src}/skills" [ "gh-stack" ])
+        (fromDir "${inputs.aws-use-sso}/skills" [ "aws-use-sso" ])
+        (fromDir "${inputs.anthropic-skills}/skills" [ "frontend-design" ])
+        (fromDir "${inputs.archify}" [ "archify" ])
+        (fromDir "${inputs.ash-kindle}/skills" [ "ash-kindle" ])
+        (fromDir "${inputs.boristane-agent-skills}/skills" [ "logging-best-practices" ])
+        (fromDir "${inputs.caveman}/skills" [ "caveman" ])
+        (fromDir "${inputs.lavish-axi}/skills" [ "lavish" ])
+        (fromDir "${inputs.obsidian-skills}/skills" [
+          "obsidian-bases"
+          "obsidian-cli"
+          "obsidian-markdown"
+        ])
+        (fromDir "${inputs.readwise-skills}/skills" [
+          "book-review"
+          "build-persona"
+          "feed-catchup"
+          "highlight-graph"
+          "now-reading-page"
+          "quiz"
+          "reader-recap"
+          "readwise-cli"
+          "surprise-me"
+          "triage"
+        ])
+        (lib.mkIf (userApps.herdr.enable or false) (
+          fromDir "${config.programs.herdr.package.src}/skills" [ "herdr" ]
+        ))
+        (lib.mkIf (userApps.pup.enable or false) (
+          fromDir pupSkills [
+            "dd-apm"
+            "dd-code-generation"
+            "dd-debugger"
+            "dd-docs"
+            "dd-file-issue"
+            "dd-logs"
+            "dd-monitors"
+            "dd-pup"
+            "dd-symdb"
+            "dd-triage-flaky-test"
+            "dd-unblock-pr"
+          ]
+        ))
+        (lib.mkIf (userApps.floai.enable or false) (
+          fromDir "${inputs.floai}/catalog/skills" [
+            "flo-brand-naming"
+            "git-update-pr-description"
+          ]
+        ))
+      ];
   };
 
   # Agent CLI configs (claude/codex/omp) + workspace routers. Hand-authored
@@ -183,9 +267,24 @@ in
     enable = true;
     package = pkgs.llm-agents.pi;
     settings = {
+      # Third-party extensions at their latest release, installed unmodified
+      # by pi itself into ~/.pi/agent/npm on first start. Move them forward
+      # with `pi update --extensions`. Never patch their source: code we own
+      # lives in ~/dev/jordangarrison/pi-extensions.
       packages = [
-        "${piExtensions}/lib/node_modules/jordangarrison-pi-extensions"
+        # Pinned to an upstream main commit that includes claude-opus-5-5 at
+        # 1M (elidickinson/pi-claude-bridge#116, fixed after 0.8.0). When
+        # `npm view pi-claude-bridge version` is newer than 0.8.0, replace
+        # this with "npm:pi-claude-bridge" and run `pi update --extensions`.
+        "git:github.com/elidickinson/pi-claude-bridge@0750748"
+        "npm:pi-subagents"
+        "npm:pi-mcp-adapter"
+        "npm:pi-web-access"
+        "npm:pi-foldable-tools"
+        "git:github.com/joelhooks/pi-until"
       ];
+      # Install with the Nix npm, so package installs do not depend on PATH.
+      npmCommand = [ "${pkgs.nodejs}/bin/npm" ];
       # Thinking at xhigh produces pages of reasoning that push the actual
       # answer off screen. This collapses every thinking block to a single
       # italic "Thinking..." line; the reasoning still happens and is still
@@ -324,7 +423,7 @@ in
     };
     settings.composer.shape = "band";
     settings.symbolPreset = "nerd";
-    settings.modelRoles.default = "claude-bridge/claude-opus-5:medium";
+    settings.modelRoles.default = "cursor/grok-4.7-high";
   };
 
   programs.herdr = {

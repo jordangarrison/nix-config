@@ -14,7 +14,7 @@ Super + F                 → File manager (Yazi)
 Super + Shift + F         → File manager (Nautilus)
 Super + Space             → App launcher (Noctalia)
 Super + Semicolon         → Emoji picker (rofimoji)
-Super + Shift + D         → Voice dictation (Sweet Nothings)
+Super + Shift + D         → Voice dictation with post-processing (Handy)
 Super + Ctrl + Alt + Shift + 5 → Voice dictation toggle (Handy)
 
 [WINDOW CONTROLS]

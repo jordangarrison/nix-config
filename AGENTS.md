@@ -115,6 +115,26 @@ Before adding a package:
 3. Avoid adding another overlay when an existing one has the correct ownership.
 4. Build the affected output.
 
+### Agent tooling
+
+Take agent CLIs (claude-code, codex, pi, omp, herdr) from `llm-agents` as
+published. Do not add inputs or overlay overrides to get ahead of it; wait for
+the next `llm-agents` update. Do not patch third-party agent code (`patches`,
+`substituteInPlace`, source swaps).
+
+pi installs its third-party extensions itself from
+`programs.pi.settings.packages`, unversioned. This is a deliberate trade:
+each machine keeps the release it first installed until
+`pi update --extensions`, and a Nix rollback does not roll them back. Add
+`@<version>` to a spec to hold one back. A spec may pin an upstream commit
+(`git:...@<sha>`) only to take an unreleased fix; its comment must name the
+fix and when to switch back to the npm release.
+
+Extensions Jordan owns belong in `~/dev/jordangarrison/pi-extensions`. Until
+that repo ships, three temporary exceptions stay here and are removed then:
+`packages/omp-plugins/` (patched bridge for omp), `packages/pi-extensions/`
+(its dependency graph), and `modules/home/pi/extensions/` (owned extensions).
+
 ### Update flake inputs
 
 ```bash

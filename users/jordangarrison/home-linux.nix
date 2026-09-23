@@ -22,6 +22,12 @@
     inputs.grok-bot.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 
+  # Shared account avatar used by desktop shells and display managers.
+  home.file.".face" = {
+    source = ./profile.jpg;
+    force = true;
+  };
+
   # From the package source (same version as the CLI; identical to the copy
   # the package installs) so building the skill bundle doesn't build the
   # package. Declared here because the CLI is Linux-only.

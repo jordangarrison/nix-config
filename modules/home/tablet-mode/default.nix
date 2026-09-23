@@ -34,7 +34,7 @@ let
     "-g '3,RL,*,*,R,niri msg action focus-workspace-up'"
 
     # 3-finger swipe up from bottom: toggle launcher
-    "-g '3,DU,B,*,R,noctalia-shell ipc call launcher toggle'"
+    "-g '3,DU,B,*,R,noctalia msg panel-toggle launcher'"
 
     # 3-finger swipe down from top: close window
     "-g '3,UD,T,*,R,niri msg action close-window'"

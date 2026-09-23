@@ -31,17 +31,6 @@
       # inputs.nixpkgs.follows = "nixpkgs";
     };
     llm-agents.url = "github:numtide/llm-agents.nix";
-    # Temporary pin. llm-agents.nix main is still omp 18.2.8 and has no PR
-    # for 18.2.9, which is the release that adds claude-opus-5-5. Drop this
-    # input once that bump is published and flake-update picks it up.
-    oh-my-pi.url = "github:can1357/oh-my-pi/v18.2.9";
-    # Temporary pin. The locked llm-agents input still ships claude-code
-    # 2.1.278; latest release is 2.1.280. Drop this input once flake-update
-    # picks up an llm-agents rev that includes it.
-    claude-code-nix = {
-      url = "github:sadjow/claude-code-nix/v2.1.280";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     niri.url = "github:sodiboo/niri-flake";
     noctalia = {
       # Pinned to the last v4 (QML/quickshell) commit. v5 is a ground-up C++
@@ -129,8 +118,6 @@
       aws-use-sso,
       hubctl,
       llm-agents,
-      oh-my-pi,
-      claude-code-nix,
       niri,
       noctalia,
       sweet-nothings,

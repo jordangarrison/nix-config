@@ -16,8 +16,11 @@
 #    flake inputs or packages they come from.
 #
 # Never install skills imperatively (`npx skills`, `pup skills install`,
-# `readwise skills install`, `flo skills add`, hand copies). Home Manager
-# refuses to overwrite such a directory, so the next switch fails.
+# `readwise skills install`, `flo skills add`, hand copies). If one takes a
+# declared name, the next switch on a NixOS/darwin host moves it aside to
+# `<name>.backup` (home-manager.backupFileExtension), and agents then load
+# that stale copy as a duplicate skill. A conflicting symlink, or any
+# conflict under standalone Home Manager without `-b`, fails the switch.
 {
   config,
   lib,
@@ -84,9 +87,20 @@ in
         Names must not collide with repo-owned skills in `skillsDir`.
       '';
     };
+
+    bundle = lib.mkOption {
+      type = lib.types.package;
+      readOnly = true;
+      description = ''
+        The built bundle of external skills. Exposed so CI can build it:
+        evaluation alone never runs the SKILL.md check.
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
+    programs.agent-skills.bundle = externalBundle;
+
     assertions = [
       {
         assertion = collisions == [ ];

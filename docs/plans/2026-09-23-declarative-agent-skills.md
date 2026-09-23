@@ -78,7 +78,7 @@ its tool.
 | `${pkgs.gws.src}/skills/<n>` | `gws-shared`, `gws-gmail`, `gws-gmail-read`, `gws-gmail-reply`, `gws-gmail-reply-all`, `gws-gmail-send`, `gws-gmail-triage`, `gws-drive`, `gws-drive-upload`, `gws-docs`, `gws-docs-write`, `gws-sheets`, `gws-sheets-read`, `gws-calendar`, `gws-calendar-agenda`, `gws-people` | gws package list |
 | `${herdr.src}/skills/herdr` | `herdr` | `userApps.herdr` |
 | `${pkgs.gh-stack.src}/skills/gh-stack` | `gh-stack` (package 0.0.4 == installed extension) | `programs.gh` |
-| `${agent-browser}/share/agent-browser/skills/agent-browser` | `agent-browser` | Linux only: declare in `home-linux.nix` |
+| `${agent-browser.src}/skills/agent-browser` | `agent-browser` (identical to the packaged copy; `.src` so CI needn't build the package) | Linux only: declare in `home-linux.nix` |
 | pup build step (below) | 11 `dd-*` | `userApps.pup` |
 | `inputs.aws-use-sso` `skills/aws-use-sso` | `aws-use-sso` | — |
 | `inputs.floai` `catalog/skills/<n>` | `flo-brand-naming`, `git-update-pr-description` | `userApps.floai` |
@@ -119,18 +119,29 @@ pupSkills = pkgs.runCommand "pup-skills-${pkgs.pup.version}" {
   every floai skill we consume, and its header comment describes the new
   interface.
 - The new public inputs need no stubs.
+- A `build-skills` job in `pr-validation.yml` builds
+  `programs.agent-skills.bundle` for endeavour (which enables every gated
+  source). Evaluation alone never runs the `SKILL.md` check, so without this
+  job an input bump past an upstream folder rename would still go green. The
+  job only fetches sources and builds two tiny derivations, so it stays within
+  the eval-only budget of ADR 005.
 
 ## Migration (per host)
 
 1. `nh os build . --no-nom` (or the darwin/home equivalent) must pass first.
-2. Remove the hand-installed copies, which Home Manager would refuse to
-   overwrite:
+2. Remove the hand-installed copies. On NixOS/darwin hosts Home Manager
+   does not refuse to overwrite them: `backupFileExtension = "backup"`
+   (`modules/home/defaults.nix`) moves a conflicting directory to
+   `<name>.backup`, and agents load that copy as a duplicate skill. Only
+   conflicting symlinks, and standalone Home Manager (normandy) without
+   `-b`, fail the switch. Remove:
    - Every non-symlink directory in `~/.agents/skills`.
    - The relative symlinks in `~/.claude/skills` that point into
      `~/.agents/skills`.
    - `~/.claude/skills/dd-*` and the 10 Readwise directories.
-   - The 10 Readwise directories in `~/.codex/skills` (codex reads
-     `~/.agents/skills`).
+   - Everything in `~/.codex/skills` except `.system` (codex reads
+     `~/.agents/skills`). On endeavour that was the 10 Readwise
+     directories.
    - All of `~/.pi/agent/skills` (pi reads `~/.agents/skills`; two links are
      already dangling).
    - `~/.agents/.skill-lock.json`.
@@ -155,7 +166,14 @@ pupSkills = pkgs.runCommand "pup-skills-${pkgs.pup.version}" {
    ```
 
 3. Run `nh os test . --no-nom`, then `switch` after approval.
-4. Hosts: endeavour, opportunity, voyager, discovery, H952L3DPHH (darwin) and
+4. After activation, check that nothing was moved aside. This must print
+   nothing; delete (or restore from the tarball and re-plan) anything it
+   lists:
+
+   ```bash
+   find ~/.agents/skills ~/.claude/skills -maxdepth 1 -name '*.backup'
+   ```
+5. Hosts: endeavour, opportunity, voyager, discovery, H952L3DPHH (darwin) and
    normandy (WSL). Check each host's actual state before deleting, because
    manual installs differ per machine.
 

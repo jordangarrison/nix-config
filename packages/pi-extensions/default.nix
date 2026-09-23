@@ -4,10 +4,12 @@
 }:
 
 # Only packages/omp-plugins consumes this bundle now: pi installs its own
-# extensions from the pinned specs in programs.pi.settings.packages. OMP needs
+# extensions (unversioned, latest) from programs.pi.settings.packages. OMP needs
 # pi-claude-bridge plus its resolved dependency graph, which this build keeps.
-# Slated for removal once ~/dev/jordangarrison/pi-extensions ships an
-# omp-native bridge.
+# The other dependencies in package.json are dead weight left in place to avoid
+# a lockfile refresh; nothing loads them. This whole package is deleted once
+# ~/dev/jordangarrison/pi-extensions ships an omp-native bridge, so do not
+# grow it.
 buildNpmPackage {
   pname = "jordangarrison-pi-extensions";
   version = "1.5.0";
@@ -19,8 +21,7 @@ buildNpmPackage {
   # fix-up 1's absence; `npm ci` then hits ENOTCACHED without fix-up 2) — and only
   # then recompute using `nix run nixpkgs#prefetch-npm-deps -- package-lock.json`.
   #
-  # @earendil-works/pi-coding-agent (the pi npm package, which pi-subagents needs
-  # in order to spawn background children) ships an npm-shrinkwrap.json whose five
+  # @earendil-works/pi-coding-agent (the pi npm package) ships an npm-shrinkwrap.json whose five
   # @earendil-works/* entries have no `integrity`, even though the tarball itself
   # carries no node_modules. npm re-inflates that shrinkwrap into our lockfile,
   # integrity-less entries and all, which makes prefetch-npm-deps panic, and then

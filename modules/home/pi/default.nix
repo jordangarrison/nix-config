@@ -362,11 +362,11 @@ in
 
     home.packages = [ cfg.package ];
 
-    # The pi wrapper exports this for its own process, but pi-subagents'
-    # background runner (and anything else spawning child pi sessions) needs
-    # it in the ambient environment: a standalone pi binary has no npm
-    # package directory to discover, so async children refuse to launch
-    # without it. Derived from the package so it survives pi upgrades.
+    # The pi wrapper exports this for its own process. Keep the same value in
+    # the ambient environment so tools that spawn pi outside the wrapper see
+    # the standalone binary's assets. pi-subagents >= 0.70 detects the
+    # standalone binary itself and passes this value on to background
+    # children. Derived from the package so it survives pi upgrades.
     home.sessionVariables.PI_PACKAGE_DIR = "${cfg.package}/libexec/pi";
 
     home.activation = {

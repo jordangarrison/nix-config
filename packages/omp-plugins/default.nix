@@ -34,6 +34,14 @@ runCommand "jordangarrison-omp-plugins-1.0.0"
     chmod -R u+w "$plugins/node_modules/pi-claude-bridge"
     patch -d "$plugins/node_modules/pi-claude-bridge" -p1 < ${./omp-prompt-array.patch}
 
+    # The bridge only sends `<id>[1m]` for ids in MEASURED_ONE_M, so
+    # claude-opus-5-5 would register at 200K. Treat it like claude-opus-5
+    # until upstream adds it.
+    substituteInPlace "$plugins/node_modules/pi-claude-bridge/src/models.ts" \
+      --replace-fail \
+        '"claude-opus-5",' \
+        '"claude-opus-5", "claude-opus-5-5",'
+
     substituteInPlace "$plugins/node_modules/pi-claude-bridge/src/index.ts" \
       --replace-fail \
         'import { buildSessionContext, compact, generateBranchSummary, keyHint, type BranchSummaryResult, type CompactionEntry, type ExtensionAPI, type ExtensionContext, type ExtensionUIContext } from "@earendil-works/pi-coding-agent";' \

@@ -187,7 +187,11 @@ in
       # with `pi update --extensions`. Never patch their source: code we own
       # lives in ~/dev/jordangarrison/pi-extensions.
       packages = [
-        "npm:pi-claude-bridge"
+        # Pinned to an upstream main commit that includes claude-opus-5-5 at
+        # 1M (elidickinson/pi-claude-bridge#116, fixed after 0.8.0). When
+        # `npm view pi-claude-bridge version` is newer than 0.8.0, replace
+        # this with "npm:pi-claude-bridge" and run `pi update --extensions`.
+        "git:github.com/elidickinson/pi-claude-bridge@0750748"
         "npm:pi-subagents"
         "npm:pi-mcp-adapter"
         "npm:pi-web-access"

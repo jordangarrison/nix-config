@@ -22,10 +22,9 @@ let
   emacsPackage = if pkgs.stdenv.isLinux then pkgs.emacs-pgtk else pkgs.emacs;
   # Live-checkout path for hand-authored agent content (see ./agents)
   agentsLive = "${config.home.homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/agents";
-  # Pass the same pi that programs.pi installs below: the bundle asserts that its
-  # pinned pi library matches, so background subagents cannot drift onto a
-  # different pi version than the session that spawned them.
-  piExtensions = pkgs.callPackage ../../packages/pi-extensions { pi = pkgs.llm-agents.pi; };
+  # OMP loads pi-claude-bridge from this bundle (see packages/omp-plugins).
+  # pi itself installs its extensions from programs.pi.settings.packages.
+  piExtensions = pkgs.callPackage ../../packages/pi-extensions { };
   # OMP can load Pi extensions through its compatibility layer, but Claude
   # Bridge needs one missing helper adapted locally. Keep that patch and the
   # complete dependency graph in a Nix package shared by every machine.
@@ -183,9 +182,20 @@ in
     enable = true;
     package = pkgs.llm-agents.pi;
     settings = {
+      # Third-party extensions at their latest release, installed unmodified
+      # by pi itself into ~/.pi/agent/npm on first start. Move them forward
+      # with `pi update --extensions`. Never patch their source: code we own
+      # lives in ~/dev/jordangarrison/pi-extensions.
       packages = [
-        "${piExtensions}/lib/node_modules/jordangarrison-pi-extensions"
+        "npm:pi-claude-bridge"
+        "npm:pi-subagents"
+        "npm:pi-mcp-adapter"
+        "npm:pi-web-access"
+        "npm:pi-foldable-tools"
+        "git:github.com/joelhooks/pi-until"
       ];
+      # Install with the Nix npm, so package installs do not depend on PATH.
+      npmCommand = [ "${pkgs.nodejs}/bin/npm" ];
       # Thinking at xhigh produces pages of reasoning that push the actual
       # answer off screen. This collapses every thinking block to a single
       # italic "Thinking..." line; the reasoning still happens and is still

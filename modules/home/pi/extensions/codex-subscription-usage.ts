@@ -44,8 +44,12 @@ function usageColor(percent: number): UsageColor {
   return "success";
 }
 
+function finiteNumber(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
 function windowLabel(seconds: number | undefined, fallback: string): string {
-  if (!seconds || seconds <= 0) return fallback;
+  if (!seconds || seconds < 3600) return fallback;
   const hours = Math.round(seconds / 3600);
   if (hours % 24 === 0) return `${hours / 24}d`;
   return `${hours}h`;
@@ -54,14 +58,13 @@ function windowLabel(seconds: number | undefined, fallback: string): string {
 function parseWindow(raw: unknown, fallback: string): UsageWindow | undefined {
   if (!raw || typeof raw !== "object") return undefined;
   const value = raw as Record<string, unknown>;
-  const used = Number(value.used_percent);
-  if (!Number.isFinite(used)) return undefined;
-  const seconds = Number(value.limit_window_seconds);
-  const resetAt = Number(value.reset_at);
+  // A null or missing field means "no data", never 0% or "resets now".
+  const used = finiteNumber(value.used_percent);
+  if (used === undefined) return undefined;
   return {
-    label: windowLabel(Number.isFinite(seconds) ? seconds : undefined, fallback),
+    label: windowLabel(finiteNumber(value.limit_window_seconds), fallback),
     percent: clampPercent(used),
-    resetsAt: Number.isFinite(resetAt) ? resetAt : undefined,
+    resetsAt: finiteNumber(value.reset_at),
   };
 }
 

@@ -1802,11 +1802,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789939492,
-        "narHash": "sha256-76Pv4zlqjXVSe/Ur3oY6uyiUGgw/eIoHSiJe6YumPt8=",
+        "lastModified": 1790313045,
+        "narHash": "sha256-GWiqCD1hkCo9goBGG3a4BEDLSHL4sFk7gd5tFLsoGSk=",
         "owner": "jordangarrison",
         "repo": "tic-tac-toe-4-in-a-row",
-        "rev": "bf03feb62fcec4000cb12f457b1973ec0725c6dc",
+        "rev": "5da5b1ed5a306f095d6f784d96de88af6072a816",
         "type": "github"
       },
       "original": {

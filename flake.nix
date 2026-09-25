@@ -195,6 +195,7 @@
             ./modules/readwise-cli-overlay.nix
             ./modules/varlock-overlay.nix
             ./modules/pup-overlay.nix
+            ./modules/namespace-cli-overlay.nix
             ./modules/sidecar-overlay.nix
             ./modules/codiff-overlay.nix
             ./modules/plannotator-overlay.nix
@@ -281,6 +282,7 @@
                   azure-cli.enable = true;
                   okta.enable = true;
                   pup.enable = true;
+                  namespace.enable = true;
                   handy.enable = true;
                   herdr.enable = true;
                   floai.enable = true;
@@ -380,6 +382,7 @@
             ./modules/readwise-cli-overlay.nix
             ./modules/varlock-overlay.nix
             ./modules/pup-overlay.nix
+            ./modules/namespace-cli-overlay.nix
             ./modules/sidecar-overlay.nix
             ./modules/codiff-overlay.nix
             ./modules/plannotator-overlay.nix
@@ -487,6 +490,7 @@
             ./modules/readwise-cli-overlay.nix
             ./modules/varlock-overlay.nix
             ./modules/pup-overlay.nix
+            ./modules/namespace-cli-overlay.nix
             ./modules/sidecar-overlay.nix
             ./modules/codiff-overlay.nix
             ./modules/plannotator-overlay.nix
@@ -566,6 +570,7 @@
             ./modules/readwise-cli-overlay.nix
             ./modules/varlock-overlay.nix
             ./modules/pup-overlay.nix
+            ./modules/namespace-cli-overlay.nix
             ./modules/sidecar-overlay.nix
             ./modules/codiff-overlay.nix
             ./modules/plannotator-overlay.nix
@@ -627,6 +632,7 @@
             ./modules/readwise-cli-overlay.nix
             ./modules/varlock-overlay.nix
             ./modules/pup-overlay.nix
+            ./modules/namespace-cli-overlay.nix
             ./modules/sidecar-overlay.nix
             ./modules/codiff-overlay.nix
             ./modules/plannotator-overlay.nix
@@ -649,6 +655,7 @@
                     azure-cli.enable = true;
                     plannotator.enable = true;
                     pup.enable = true;
+                    namespace.enable = true;
                     herdr.enable = true;
                     floai.enable = true;
                   };
@@ -679,6 +686,7 @@
             ./modules/readwise-cli-overlay.nix
             ./modules/varlock-overlay.nix
             ./modules/pup-overlay.nix
+            ./modules/namespace-cli-overlay.nix
             ./modules/sidecar-overlay.nix
             ./modules/codiff-overlay.nix
             ./modules/plannotator-overlay.nix

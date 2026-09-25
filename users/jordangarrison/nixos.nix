@@ -57,6 +57,7 @@ in {
       okta.enable = lib.mkEnableOption "Okta CLI client";
       plannotator.enable = lib.mkEnableOption "Plannotator agent plan/code review surface";
       pup.enable = lib.mkEnableOption "Datadog pup CLI";
+      namespace.enable = lib.mkEnableOption "Namespace (namespace.so) nsc CLI";
       floai.enable = lib.mkEnableOption "FloSports flo CLI";
       handy.enable = lib.mkEnableOption "Handy push-to-talk speech-to-text";
       herdr.enable = lib.mkEnableOption "Herdr terminal workspace manager for AI coding agents";

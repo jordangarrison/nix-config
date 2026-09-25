@@ -623,6 +623,9 @@ in
     ++ lib.optionals (userApps.pup.enable or false) [
       pup # AI-agent-ready CLI for Datadog's observability platform
     ]
+    ++ lib.optionals (userApps.namespace.enable or false) [
+      namespace-cli # nsc/ns CLIs for Namespace (namespace.so)
+    ]
     ++ lib.optionals (userApps.floai.enable or false) [
       inputs.floai.packages.${pkgs.stdenv.hostPlatform.system}.flo-cli
     ]

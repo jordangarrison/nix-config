@@ -92,6 +92,23 @@ in
         (fromDir "${inputs.boristane-agent-skills}/skills" [ "logging-best-practices" ])
         (fromDir "${inputs.caveman}/skills" [ "caveman" ])
         (fromDir "${inputs.lavish-axi}/skills" [ "lavish" ])
+        (fromDir "${inputs.mattpocock-skills}/skills/engineering" [
+          "codebase-design"
+          "diagnosing-bugs"
+          "domain-modeling"
+          "grill-with-docs"
+          "improve-codebase-architecture"
+          "tdd"
+          "wizard"
+        ])
+        (fromDir "${inputs.mattpocock-skills}/skills/productivity" [
+          "grill-me"
+          "grilling"
+          "handoff"
+          "to-questionnaire"
+          "wait-what"
+          "writing-for-agents"
+        ])
         (fromDir "${inputs.obsidian-skills}/skills" [
           "obsidian-bases"
           "obsidian-cli"

@@ -131,6 +131,10 @@
       url = "github:kunchenguid/lavish-axi";
       flake = false;
     };
+    mattpocock-skills = {
+      url = "github:mattpocock/skills";
+      flake = false;
+    };
     obsidian-skills = {
       url = "github:kepano/obsidian-skills";
       flake = false;

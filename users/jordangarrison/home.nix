@@ -42,6 +42,7 @@ in
     ../../modules/home/agent-workspaces
     ../../modules/home/claude-code
     ../../modules/home/codex
+    ../../modules/home/cursor-agent
     ../../modules/home/omp
   ];
 
@@ -189,6 +190,17 @@ in
     };
   };
 
+  # Cursor Agent CLI. cli-config.json is merge-on-activation (auth, model,
+  # and the permissions allowlist stay mutable). unrestricted + disabled
+  # sandbox match claude's bypassPermissions and codex's danger-full-access.
+  programs.cursor-agent = {
+    enable = true;
+    settings = {
+      approvalMode = "unrestricted";
+      sandbox.mode = "disabled";
+    };
+  };
+
   programs.codex = {
     enable = true;
     instructionsFile = "${agentsLive}/AGENTS.md";
@@ -196,7 +208,7 @@ in
     config = {
       approval_policy = "never";
       sandbox_mode = "danger-full-access";
-      model = "gpt-5.6-sol";
+      model = "gpt-6-sol";
       model_reasoning_effort = "high";
       plan_mode_reasoning_effort = "xhigh";
       personality = "pragmatic";
@@ -284,6 +296,8 @@ in
     enable = true;
     package = pkgs.llm-agents.pi;
     settings = {
+      defaultProvider = "openai-codex";
+      defaultModel = "gpt-6-sol";
       # Third-party extensions at their latest release, installed unmodified
       # by pi itself into ~/.pi/agent/npm on first start. Move them forward
       # with `pi update --extensions`. Never patch their source: code we own
@@ -298,6 +312,7 @@ in
         "npm:pi-mcp-adapter"
         "npm:pi-web-access"
         "npm:pi-foldable-tools"
+        "npm:@pixu1980/pi-cursor"
         "git:github.com/joelhooks/pi-until"
       ];
       # Install with the Nix npm, so package installs do not depend on PATH.
@@ -487,6 +502,7 @@ in
 
       # LLM Agents (available via overlay as pkgs.llm-agents.*)
       llm-agents.claude-code
+      llm-agents.cursor-agent
       sox # Audio playback/recording, used by Claude Code
       otel-tui # Terminal OpenTelemetry viewer
       stack-cli # Squash-safe stacked PR/MR repair CLI (kitlangton/stack), installs `stack`

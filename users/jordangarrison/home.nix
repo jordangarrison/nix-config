@@ -85,7 +85,7 @@ in
           "gws-calendar-agenda"
           "gws-people"
         ])
-        (fromDir "${pkgs.gh-stack.src}/skills" [ "gh-stack" ])
+        (fromDir "${pkgs.master.gh-stack.src}/skills" [ "gh-stack" ])
         (fromDir "${inputs.aws-use-sso}/skills" [ "aws-use-sso" ])
         (fromDir "${inputs.anthropic-skills}/skills" [ "frontend-design" ])
         (fromDir "${inputs.archify}" [ "archify" ])
@@ -782,7 +782,7 @@ in
     };
     extensions = with pkgs; [
       gh-dash
-      gh-stack
+      master.gh-stack
     ];
   };
 

@@ -309,7 +309,10 @@ in
         # this with "npm:pi-claude-bridge" and run `pi update --extensions`.
         "git:github.com/elidickinson/pi-claude-bridge@07507489c0c54f7f978ab752eb9beb5cc0960f24"
         "npm:pi-subagents"
-        "npm:pi-mcp-adapter"
+        # Temporarily pinned because 3.x mcpScript workers cannot resolve
+        # quickjs-wasi under Pi's compiled Bun runtime (upstream #720).
+        # Return to "npm:pi-mcp-adapter" after the upstream fix is released.
+        "npm:pi-mcp-adapter@2.38.0"
         "npm:pi-web-access"
         "npm:pi-foldable-tools"
         "npm:@pixu1980/pi-cursor"

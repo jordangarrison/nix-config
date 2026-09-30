@@ -3,10 +3,9 @@ import type {
   ExtensionContext,
 } from "@earendil-works/pi-coding-agent";
 
-// Sibling of claude-subscription-usage.ts and cursor-subscription-usage.ts:
-// same "[usage] …%" footer (quota used, colored per window), shown while an
-// openai-codex model is active. Pi sorts footer statuses by key, so "0-"
-// keeps it leftmost.
+// Sibling of claude-subscription-usage.ts: same "[usage] 5h:NN% 7d:NN%" footer
+// (quota used, colored per window), shown while an openai-codex model is
+// active. Pi sorts footer statuses by key, so "0-" keeps it leftmost.
 const STATUS_KEY = "0-usage-codex";
 const PROVIDER = "openai-codex";
 const USAGE_URL = "https://chatgpt.com/backend-api/wham/usage";

@@ -19,7 +19,7 @@
 #   DAY_DASHBOARD_MAX_ITEMS    per-source item cap (default: 8)
 #   DAY_DASHBOARD_TZ           display timezone (default: system)
 #   DAY_DASHBOARD_SOURCES      space list (default: "calendar email notes slack linear confluence")
-#   DAY_DASHBOARD_MCP_CONFIG   MCP config for Slack/Linear (default: ~/.config/mcp/mcp.json)
+#   DAY_DASHBOARD_MCP_CONFIG   native Pi MCP config (default: ~/.pi/agent/mcp.json)
 #   DAY_DASHBOARD_SKIP_MODEL   if set, skip the synthesis model and render raw only
 #   DAY_DASHBOARD_MCP_TTL_MIN  reuse cached Slack/Linear results this many minutes (default 120)
 #   DAY_DASHBOARD_BRIEF_MAX_MIN  max age to reuse a cached briefing on unchanged context (default 360)
@@ -51,7 +51,7 @@ export DAY_DASHBOARD_MCP_MODEL="${DAY_DASHBOARD_MCP_MODEL:-openai-codex/gpt-5.6-
 SOURCES="${DAY_DASHBOARD_SOURCES:-calendar email notes slack linear github rootly confluence}"
 SOURCES="${SOURCES//,/ }"
 TZ_DISPLAY="${DAY_DASHBOARD_TZ:-$(date +%Z)}"
-export MCP_CONFIG="${DAY_DASHBOARD_MCP_CONFIG:-$HOME/.config/mcp/mcp.json}"
+export MCP_CONFIG="${DAY_DASHBOARD_MCP_CONFIG:-$HOME/.pi/agent/mcp.json}"
 
 mkdir -p "$OUT_DIR"
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/day-dashboard.XXXXXX")"

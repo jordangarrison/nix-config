@@ -83,7 +83,7 @@ It is declarative. Change and rebuild — do not hand-edit `/var/lib`:
 ## Credentials & health
 
 Slack/Linear/email/calendar/notes need **nothing committed** — they reuse the
-Pi MCP keyring and the `gws` Google login. Only Confluence needs a token file
+native Pi MCP OAuth store and the `gws` Google login. Only Confluence needs a token file
 (`/var/lib/day-dashboard/secrets/atlassian` = `email:api-token`; base URL is
 already set to `flocasts.atlassian.net/wiki`). Full matrix in the package README.
 
@@ -92,7 +92,8 @@ Quick checks:
 ```bash
 journalctl --user -u day-dashboard.service -n 30 --no-pager
 cat /var/lib/day-dashboard/www/status.json          # last success + per-source state
-pi -p --mcp-config ~/.config/mcp/mcp.json 'List one Linear issue via MCP'  # MCP auth
+pi mcp list                                              # native MCP connections
+# Authenticate missing servers interactively: pi mcp login linear
 gws gmail users messages list --params '{"userId":"me","maxResults":1}'    # gws auth
 ```
 

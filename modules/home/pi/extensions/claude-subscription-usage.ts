@@ -9,7 +9,8 @@ import {
 } from "@earendil-works/pi-coding-agent";
 
 // Pi sorts footer statuses by key, so the leading "0-" keeps usage leftmost.
-// codex-subscription-usage.ts uses the sibling key "0-usage-codex".
+// codex-subscription-usage.ts uses "0-usage-codex".
+// cursor-subscription-usage.ts uses "0-usage-cursor".
 const STATUS_KEY = "0-usage-claude";
 const USAGE_URL = "https://api.anthropic.com/api/oauth/usage";
 const OAUTH_BETA = "oauth-2025-04-20";

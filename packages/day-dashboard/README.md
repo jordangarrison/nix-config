@@ -174,18 +174,17 @@ login.
 | `mcpModel` (collectors) | `openai-codex/gpt-5.6-luna` - cheap extraction |
 | `sources` | `[calendar email slack linear confluence]` |
 | `schedule` | `*-*-* 06..21:00:00` |
-| `mcpConfig` | `~/.config/mcp/mcp.json` |
+| `mcpConfig` | `~/.pi/agent/mcp.json` |
 | `environment` | `{}` (e.g. Confluence base URL) |
 
 ## Credentials
 
-Slack, Linear, email, and calendar need **nothing committed** — they reuse the
-OAuth tokens already in your Pi keyring (Slack/Linear MCP) and your `gws` Google
-login. Just make sure those are set up:
+Slack, Linear, email, and calendar need **nothing committed** — they use
+native Pi's OAuth store (MCP) and your `gws` Google login. Set those up first:
 
-- **Slack / Linear**: the MCP servers in `~/.config/mcp/mcp.json` must have been
-  authenticated once interactively (`pi` runs the OAuth flow on first use). Verify:
-  `pi -p --mcp-config ~/.config/mcp/mcp.json 'List one of my Linear issues via MCP'`.
+- **Slack / Linear / Rootly**: authenticate native Pi with `pi mcp login <server>`;
+  the old adapter's credentials do not transfer. Verify with `pi mcp list`.
+  Each dashboard collector runs in a temporary project limited to one server.
 - **Email / Calendar / Meeting notes**: `gws` must be logged in (`gws gmail
   users messages list ...` should return data). Meeting-note action items look
   for lines owned by `DAY_DASHBOARD_ME` (default "Jordan Garrison") in recent

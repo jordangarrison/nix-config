@@ -309,10 +309,6 @@ in
         # this with "npm:pi-claude-bridge" and run `pi update --extensions`.
         "git:github.com/elidickinson/pi-claude-bridge@07507489c0c54f7f978ab752eb9beb5cc0960f24"
         "npm:pi-subagents"
-        # Temporarily pinned because 3.x mcpScript workers cannot resolve
-        # quickjs-wasi under Pi's compiled Bun runtime (upstream #720).
-        # Return to "npm:pi-mcp-adapter" after the upstream fix is released.
-        "npm:pi-mcp-adapter@2.38.0"
         "npm:pi-web-access"
         "npm:pi-foldable-tools"
         "npm:@pixu1980/pi-cursor"
@@ -384,13 +380,13 @@ in
     enable = true;
   };
 
-  # MCP servers written to ~/.config/mcp/mcp.json (read by pi-mcp-adapter,
-  # and any other MCP client). Gated to the coding-agent hosts via herdr,
+  # Shared MCP servers for OMP and other clients. Native Pi gets a converted
+  # copy at ~/.pi/agent/mcp.json below. Gated to coding-agent hosts via herdr,
   # which is enabled on exactly the machines that run agents (endeavour,
   # opportunity, flomac) and off on the servers (voyager, discovery). Slack
   # is a remote OAuth endpoint hosted by Slack, so there is no local daemon
-  # to run — pi runs the browser OAuth flow on first use and stores tokens in
-  # its own keyring, not in this file. The clientId is Slack's public MCP
+  # to run — each client runs browser OAuth and stores its own tokens, not in
+  # this file. The clientId is Slack's public MCP
   # OAuth client, safe to commit.
   programs.mcp = {
     enable = userApps.herdr.enable or false;
@@ -398,11 +394,8 @@ in
       url = "https://mcp.slack.com/mcp";
       oauth = {
         clientId = "1601185624273.8899143856786";
-        # pi-mcp-adapter reads oauth.redirectUri (a full URI), not the
-        # plugin's callbackPort field. Slack's pre-registered OAuth client
-        # only accepts port 3118, so pin the exact registered redirect URI
-        # — otherwise pi falls back to its default port 19876 and Slack
-        # rejects it with "redirect_uri did not match any configured URIs".
+        # The shared client accepts redirectUri; the native Pi copy below
+        # converts it to callbackUrl. Slack only accepts this registered URI.
         redirectUri = "http://localhost:3118/callback";
       };
     };
@@ -428,6 +421,26 @@ in
     };
   };
 
+  # Native Pi reads only ~/.pi/agent/mcp.json, not the shared config path.
+  # Translate the two OAuth fields that differ without duplicating the server
+  # inventory. ScaleOps needs the shared client's issuer-validation bypass;
+  # native Pi does not offer one, so keep it visible but disabled until the
+  # server fixes its issuer metadata (rather than failing every Pi startup).
+  home.file.".pi/agent/mcp.json" = lib.mkIf config.programs.mcp.enable {
+    text = builtins.toJSON {
+      mcpServers = lib.mapAttrs (name: server:
+        (removeAttrs server [ "type" "oauth" ])
+        // lib.optionalAttrs (server ? oauth) {
+          oauth = (removeAttrs server.oauth [ "redirectUri" "skipIssuerMetadataValidation" ])
+            // lib.optionalAttrs (server.oauth ? redirectUri) {
+              callbackUrl = server.oauth.redirectUri;
+            };
+        }
+        // lib.optionalAttrs (name == "scaleops") { enabled = false; }
+      ) config.programs.mcp.servers;
+    };
+  };
+
   # OMP (oh-my-pi). Same ownership split as claude-code/codex above:
   # AGENTS.md is the live out-of-store symlink, config.yml is merged on
   # activation because omp writes it at runtime.
@@ -446,8 +459,8 @@ in
   programs.omp = {
     enable = true;
     instructionsFile = "${agentsLive}/AGENTS.md";
-    # Same generated file pi's adapter reads, so both agents see one
-    # server list. Read-only, so add servers in programs.mcp, not `/mcp add`.
+    # Same server inventory as native Pi, with OMP's own config format.
+    # Read-only, so add servers in programs.mcp, not `/mcp add`.
     mcpConfigSource = lib.mkIf config.programs.mcp.enable config.xdg.configFile."mcp/mcp.json".source;
     extensionPaths = [
       "${ompPlugins}/lib/node_modules/jordangarrison-omp-plugins"

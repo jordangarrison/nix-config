@@ -15,8 +15,8 @@
 # Data paths (all depend on the user's unlocked login keyring / session bus,
 # which is why the job runs as a systemd *user* service, not a system one):
 #   * Slack, Linear   → the Pi CLI driving the already-authenticated MCP servers
-#                       in $MCP_CONFIG (~/.config/mcp/mcp.json). Tokens live in
-#                       Pi's keyring, so no secrets files are needed.
+#                       in $MCP_CONFIG (~/.pi/agent/mcp.json). OAuth tokens
+#                       stay in Pi's private credential store.
 #   * Email, Calendar → the `gws` Google Workspace CLI (keyring-backed).
 #   * Confluence      → Atlassian REST with a token file (no MCP server exists).
 #
@@ -77,29 +77,29 @@ _gh() {
   timeout "${DAY_DASHBOARD_GH_TIMEOUT:-30}" gh "$@"
 }
 
-# Drive a single MCP server through the Pi CLI. Writes a scoped one-server
-# mcp-config so only that server's tools load (cheaper, no rootly/scaleops
-# noise). $1=server  $2=instruction  → prints Pi's stdout (expected: a JSON obj)
+# Native Pi reads global + trusted project MCP config. Run in a temporary
+# project whose overrides disable every server except the requested one.
+# $1=server  $2=instruction  → prints Pi's stdout (expected: a JSON obj)
 _pi_mcp() {
   local server="$1" instruction="$2"
   [ -r "$MCP_CONFIG" ] || return 1
-  jq -e --arg s "$server" '.mcpServers[$s]' "$MCP_CONFIG" >/dev/null 2>&1 || return 1
-  local cfg="$WORK/mcp-$server.json"
-  jq -c --arg s "$server" '{mcpServers: {($s): .mcpServers[$s]}}' "$MCP_CONFIG" >"$cfg" 2>/dev/null || return 1
-  # `--tools mcp` is an ALLOWLIST: only the MCP tool is enabled. `--no-builtin-tools`
-  # is not enough here — the user's Pi config loads extensions (pi-web-access,
-  # pi-subagents, ...) whose tools would otherwise stay available, so a
-  # prompt-injected Slack/Linear/Rootly response could reach web access, spawn
-  # subagents, or hit other MCP servers. The allowlist + the scoped one-server
-  # mcp-config keep this to exactly the intended read-only source.
+  jq -e --arg s "$server" '.mcpServers[$s] | select(.enabled != false)' "$MCP_CONFIG" >/dev/null 2>&1 || return 1
+  local project="$WORK/mcp-$server"
+  mkdir -p "$project/.pi"
+  jq -c --arg s "$server" '{mcpServers: (.mcpServers | with_entries(
+    if .key == $s then . else .value = {enabled:false} end
+  ))}' "$MCP_CONFIG" >"$project/.pi/mcp.json" 2>/dev/null || return 1
+  # Exclude all installed extensions, then load only native MCP and its
+  # codemode tool. The project overrides prevent calls to other MCP servers;
+  # --tools is an allowlist that prevents access to bash, web, and subagents.
   # A single gather normally finishes in ~60-90s; cap at 120s so three sequential
   # MCP sources stay within the unit's start timeout while one dead server just
   # degrades that source.
-  timeout "${DAY_DASHBOARD_MCP_TIMEOUT:-120}" pi -p \
+  ( cd "$project" && timeout "${DAY_DASHBOARD_MCP_TIMEOUT:-120}" pi -p -a \
     --no-session --no-skills --no-context-files --no-prompt-templates --no-themes \
-    --tools mcp --mcp-config "$cfg" \
+    --no-extensions -e builtin:mcp -e builtin:codemode --tools codemode \
     --model "${DAY_DASHBOARD_MCP_MODEL:-openai-codex/gpt-5.6-luna}" --thinking off \
-    "$instruction" 2>>"$WORK/collect.err"
+    "$instruction" ) 2>>"$WORK/collect.err"
 }
 
 # ── Linear (via MCP) ────────────────────────────────────────────────────────

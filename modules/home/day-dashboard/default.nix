@@ -61,7 +61,7 @@ in
 
     mcpConfig = lib.mkOption {
       type = lib.types.str;
-      default = "${config.home.homeDirectory}/.config/mcp/mcp.json";
+      default = "${config.home.homeDirectory}/.pi/agent/mcp.json";
       description = "MCP config the Slack/Linear collectors drive via the Pi CLI.";
     };
 

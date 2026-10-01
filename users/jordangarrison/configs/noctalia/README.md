@@ -1,152 +1,105 @@
-# Noctalia Shell Configuration
+# Noctalia Configuration
 
-This directory contains shared noctalia-shell configuration for the Niri compositor across all hosts.
+This directory contains the shared declarative configuration for Noctalia v5,
+the native C++/OpenGL ES shell used by Niri on `endeavour` and `opportunity`.
+Noctalia provides the status bar, notification daemon, launcher, emoji search,
+clipboard history, lock screen, OSDs, and session controls. `swaybg` remains the
+wallpaper owner.
 
-## What is Noctalia?
+## Configuration ownership
 
-[Noctalia-shell](https://github.com/noctalia-dev/noctalia-shell) is a unified desktop shell for Wayland compositors, built on top of [quickshell](https://github.com/outfoxxed/quickshell). It provides:
+`modules/home/niri/default.nix` imports Noctalia's upstream Home Manager module
+and passes `config.toml` to `programs.noctalia.settings`. Home Manager:
 
-- Status bar with system information
-- Notification daemon
-- Application launcher (Super+Space)
-- Lock screen (Mod+Ctrl+Alt+L)
-- Power menu
+- installs the pinned Noctalia package;
+- validates the TOML during the build;
+- creates the read-only `~/.config/noctalia/config.toml` symlink; and
+- manages `noctalia.service` in the user session.
 
-## Configuration Files
+Noctalia merges settings in this order:
 
-- **settings.json**: Main configuration (appearance, behavior, widgets)
-- **colors.json**: Color scheme customization
-- **plugins.json**: Plugin configuration and state
-- **colorschemes/**: Custom color schemes (optional)
-- **plugins/**: Custom plugins (optional)
+1. built-in defaults;
+2. the repository's declarative `config.toml`; and
+3. mutable GUI overrides in `~/.local/state/noctalia/settings.toml`.
 
-## How This Works
+The state file intentionally wins. Settings changed in the GUI persist locally,
+but are not written back to this repository or shared with other hosts.
 
-### Symlink Setup
+## Changing the shared configuration
 
-These configuration files are symlinked from `~/.config/noctalia/` to this directory via Home Manager:
+Edit `config.toml`, validate it, and rebuild the affected host. Unlike the old
+v4 out-of-store JSON setup, repository edits do not take effect until a Home
+Manager/NixOS rebuild installs the generated configuration.
 
-```nix
-# modules/home/niri/default.nix
-xdg.configFile = {
-  "noctalia/settings.json".source =
-    config.lib.file.mkOutOfStoreSymlink
-      "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/noctalia/settings.json";
-  # ... (colors.json, plugins.json, etc.)
-};
-```
-
-This means:
-- `~/.config/noctalia/settings.json` → `~/dev/jordangarrison/nix-config/users/jordangarrison/configs/noctalia/settings.json`
-- Changes to either location affect the same file
-- Edits are immediately reflected in noctalia-shell
-- Changes are tracked in git
-
-### Live Editing
-
-**Edit via noctalia UI:**
-1. Use noctalia's built-in settings UI
-2. Changes write to `~/.config/noctalia/settings.json`
-3. Since it's a symlink, changes go to this repo
-4. Run `git diff` to see changes
-5. Commit and push to share with other hosts
-
-**Edit directly in repo:**
-1. Edit files in this directory
-2. Noctalia-shell picks up changes immediately
-3. Commit and push when ready
-
-**No rebuild required!** Changes apply instantly without `nh os switch`.
-
-## Sharing Across Hosts
-
-### Initial Setup (Already Done)
-
-Configuration was copied from endeavour:
 ```bash
-scp -r 'endeavour:.config/noctalia/*' ~/.config/noctalia/
+noctalia config validate users/jordangarrison/configs/noctalia/config.toml
+nh os build . --no-nom -H opportunity
 ```
 
-Then committed to this repo for sharing.
+Use the Noctalia package pinned by this flake for validation when the active
+system still has an older executable. Keep wallpaper rendering disabled here;
+Niri starts `swaybg` separately.
 
-### Syncing Updates
+Every value in `config.toml` is either a preference carried over from the old
+v4 setup or an explicit pin where v5's default differs from the previous
+behavior. Keep it that way: do not restate a v5 default, because a future
+upstream default change then becomes invisible in review. Behaviors that v5
+cannot reproduce at all — notification toast durations, low-urgency history,
+hover-only bar labels, a hibernate session action, and the seventh control
+center shortcut — are recorded in
+[ADR 007](../../../../docs/adr/007-migrate-noctalia-to-v5.md).
 
-**On any host:**
-1. Make changes to noctalia config (via UI or direct edit)
-2. `git add users/jordangarrison/configs/noctalia/`
-3. `git commit -m "feat(noctalia): update xyz setting"`
-4. `git push`
+## IPC commands
 
-**On other hosts:**
-1. `git pull`
-2. Changes apply immediately (symlinks already point to repo)
+Current integrations use Noctalia v5's canonical message interface:
 
-## Multi-Desktop Setup
-
-This configuration works alongside Hyprland without conflicts:
-
-**Notification Daemon Handling:**
-- Hyprland: Uses mako (started via `autostart.conf`)
-- Niri: Uses noctalia-shell (started via `spawn-at-startup`)
-- Mako systemd service is disabled to prevent conflicts
-
-You can switch between desktops at login without issues.
-
-## Customization
-
-### Settings UI
-
-Launch noctalia settings via the launcher or:
 ```bash
-noctalia-shell ipc call settings toggle
+noctalia msg panel-toggle launcher
+noctalia msg panel-toggle launcher "/emo "
+noctalia msg panel-toggle clipboard
+noctalia msg session lock
+noctalia msg settings-toggle
 ```
 
-### Manual Editing
+These commands are also used by the Niri bindings, idle locker, tablet launcher
+gesture, and wlr-which-key lock action.
 
-Edit `settings.json` directly for advanced customization. Format is JSON with nested objects for each component.
+## Runtime overrides
 
-### Color Schemes
+To see whether the GUI is overriding a declarative value, inspect:
 
-Modify `colors.json` or add custom schemes to `colorschemes/` directory.
+```bash
+less ~/.local/state/noctalia/settings.toml
+```
 
-### Plugins
+To test the base configuration without deleting local changes, stop Noctalia,
+move the override aside, and start it again:
 
-Add custom plugins to `plugins/` directory. See [noctalia documentation](https://github.com/noctalia-dev/noctalia-shell) for plugin development.
+```bash
+systemctl --user stop noctalia.service
+mv ~/.local/state/noctalia/settings.toml \
+  ~/.local/state/noctalia/settings.toml.backup
+systemctl --user start noctalia.service
+```
+
+Restore the backup if needed. Incorporate intentional settings into
+`config.toml` explicitly rather than editing the Nix-managed symlink.
 
 ## Troubleshooting
 
-**Noctalia not starting:**
 ```bash
-# Check if running
-pgrep quickshell
-
-# View logs
-journalctl --user -u niri -n 50 --no-pager | grep -i noctalia
-
-# Restart manually
-pkill quickshell && noctalia-shell &
+systemctl --user status noctalia.service
+journalctl --user -u noctalia.service -b --no-pager
+noctalia msg status
+noctalia msg --help
+noctalia config validate ~/.config/noctalia/config.toml
 ```
 
-**Notification conflicts:**
-```bash
-# Check for conflicting notification daemons
-pgrep -a mako
-pgrep -a dunst
-
-# Kill conflicting daemon
-pkill mako
-```
-
-**Config not updating:**
-```bash
-# Verify symlinks
-ls -l ~/.config/noctalia/
-
-# Should show symlinks to this repo, not regular files
-```
+Under Niri, Noctalia owns notifications and native clipboard history and
+persistence. Hyprland retains its separate mako/clipboard setup.
 
 ## Resources
 
-- [Noctalia GitHub](https://github.com/noctalia-dev/noctalia-shell)
-- [Quickshell Documentation](https://github.com/outfoxxed/quickshell)
-- [Niri Configuration](../../niri/default.nix)
+- [Noctalia documentation](https://docs.noctalia.dev/)
+- [Noctalia source](https://github.com/noctalia-dev/noctalia)
+- [Niri configuration](../../../../modules/home/niri/default.nix)

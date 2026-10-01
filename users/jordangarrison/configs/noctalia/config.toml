@@ -1,0 +1,278 @@
+# Declarative Noctalia v5 base configuration.
+# Runtime changes made in Settings are stored in
+# ~/.local/state/noctalia/settings.toml and override these values.
+#
+# Values here are either deliberate preferences carried over from the previous
+# v4 setup or explicit pins where v5's default differs from the old behavior.
+
+[shell]
+font_family = "FiraCode Nerd Font"
+time_format = "{:%H:%M}"
+date_format = "%a, %b %d"
+telemetry_enabled = false
+settings_show_advanced = true
+avatar_path = "~/.face"
+clipboard_enabled = true
+clipboard_history_max_entries = 100
+clipboard_keep_from_closed_apps = true
+clipboard_auto_paste = "off"
+
+[shell.animation]
+enabled = true
+speed = 1.5
+
+[shell.shadow]
+direction = "down_right"
+alpha = 0.55
+
+[shell.screen_corners]
+# v4 drew rounded, forced-black screen corners. v5 defaults these off and
+# always paints them black, so one key expresses both old flags.
+enabled = true
+
+[shell.panel]
+# v4 detached every panel from the bar. "glass" (0.55) is the closest v5 step
+# to the old numeric panel opacity of 0.40; "soft" resolves to 0.80.
+transparency_mode = "glass"
+borders = false
+shadow = true
+launcher_placement = "floating"
+clipboard_placement = "floating"
+control_center_placement = "floating"
+launcher_position = "center"
+clipboard_position = "center"
+open_near_click_control_center = true
+open_near_click_launcher = false
+open_near_click_clipboard = false
+
+[shell.launcher]
+categories = true
+show_icons = true
+compact = false
+app_grid = true
+sort_by_usage = true
+pinned = [
+  "todoist",
+  "obsidian",
+  "com.obsproject.Studio",
+  "Session",
+  "brave-fmpnliohjhemenmnlpbfagaolkdacoja-Default",
+  "brave-browser",
+  "brave-dnfpoenibinnbbckgbhendmlljoobcfg-Default",
+  "btop",
+  "LocalSend",
+  "org.wezfurlong.wezterm",
+  "yazi",
+  "gnaural",
+  "emacsclient",
+  "com.github.xournalpp.xournalpp",
+  "1password",
+  "ssh-endeavour",
+  "brave-ifoagfbjcddaonmmdekcjdmeflgghbmp-Default",
+]
+provider_prefix = "/"
+auto_paste = "off"
+
+[shell.launcher.providers.emoji]
+prefix = "emo"
+
+# Only the calculator opts into unprefixed search in v5. Session actions and
+# windows answered bare queries before, so opt them back in.
+[shell.launcher.providers.session]
+global = true
+
+[shell.launcher.providers.windows]
+global = true
+
+# v5 defaults to `lock, logout, lock_and_suspend, reboot, shutdown` with no
+# countdown, so shutdown fires immediately and sits where logout used to.
+# Restore the previous order and the 10 s cancel window on power actions.
+# Declaring this array replaces the built-in list wholesale.
+# Hibernate is deliberately absent: v5 has no hibernate action and
+# `hosts/endeavour/configuration.nix` disables the hibernate target.
+[[shell.session.actions]]
+action = "lock"
+shortcut = "1"
+
+[[shell.session.actions]]
+action = "lock_and_suspend"
+shortcut = "2"
+countdown_seconds = 10
+
+[[shell.session.actions]]
+action = "reboot"
+shortcut = "3"
+countdown_seconds = 10
+
+[[shell.session.actions]]
+action = "logout"
+shortcut = "4"
+countdown_seconds = 10
+
+[[shell.session.actions]]
+action = "shutdown"
+shortcut = "5"
+countdown_seconds = 10
+variant = "destructive"
+
+[wallpaper]
+enabled = false
+
+[plugins]
+# No plugin is installed or enabled; keep the declarative base offline.
+auto_update = "none"
+
+[theme]
+mode = "dark"
+source = "builtin"
+builtin = "Rosé Pine"
+pure_black_dark = false
+
+[theme.templates]
+enable_builtin_templates = true
+builtin_ids = ["helix"]
+enable_community_templates = false
+community_ids = []
+
+[notification]
+enable_daemon = true
+show_app_name = true
+show_actions = true
+# v5's key is the inverse of v4's "clear on dismissed"; false preserves the
+# old behavior of dropping a notification from history when its toast is
+# dismissed.
+keep_dismissed_in_history = false
+layer = "overlay"
+background_opacity = 0.4
+offset_x = 20
+offset_y = 8
+# v5 removed per-urgency toast durations and honors `expire_timeout = 0` as
+# permanent. Cap the stack so pinned toasts cannot fill the screen.
+max_visible = 3
+
+[osd]
+position = "top_right"
+orientation = "horizontal"
+background_opacity = 1.0
+offset_x = 20
+offset_y = 8
+
+[osd.kinds]
+# Every kind defaults to true in v5. Pin only the two that were off before:
+# lock-key OSDs were never enabled (and the toggle gates lock-key polling),
+# and media toasts were explicitly disabled.
+lock_keys = false
+media = false
+
+[lockscreen]
+enabled = true
+blurred_desktop = false
+blur_intensity = 0.0
+tint_intensity = 0.0
+
+[weather]
+enabled = true
+# v5 accepts only "metric" or "imperial"; any other value falls back to metric.
+unit = "imperial"
+effects = true
+
+[location]
+# `address` with `auto_locate = false` geocodes on its own. Leaving
+# `custom_schedule` unset keeps the solar night-light schedule v4 used.
+auto_locate = false
+address = "Round Rock, TX"
+
+[nightlight]
+enabled = true
+force = false
+temperature_day = 6500
+temperature_night = 4015
+
+[brightness]
+enable_ddcutil = true
+minimum_brightness = 0.01
+
+[bar.main]
+position = "top"
+thickness = 34
+# v4 rendered the bar strip fully transparent and showed only the 0.4 capsules.
+background_opacity = 0.0
+radius = 12
+margin_ends = 5
+margin_edge = 5
+padding = 2
+widget_spacing = 6
+scale = 1.0
+font_scale = 1.0
+shadow = true
+auto_hide = false
+reserve_space = true
+capsule = true
+capsule_opacity = 0.4
+start = ["launcher", "workspaces"]
+center = ["control-center", "clock", "media"]
+end = ["tray", "notifications", "battery", "volume", "brightness"]
+
+[dock]
+enabled = false
+
+[desktop_widgets]
+enabled = false
+
+[[control_center.shortcuts]]
+type = "wifi"
+
+[[control_center.shortcuts]]
+type = "bluetooth"
+
+[[control_center.shortcuts]]
+type = "nightlight"
+
+[[control_center.shortcuts]]
+type = "notification"
+
+[[control_center.shortcuts]]
+type = "power_profile"
+
+[[control_center.shortcuts]]
+type = "caffeine"
+
+[widget.clock]
+format = "{:%H:%M} {:%a, %b %d}"
+tooltip_format = "{:%A, %B %d, %Y}"
+
+[widget.control-center]
+glyph = "components"
+
+[widget.launcher]
+glyph = "rocket"
+
+[widget.media]
+hide_album_art = true
+artist_first = true
+max_length = 145
+title_scroll = "on_hover"
+show_progress = true
+
+[widget.tray]
+# v5 flips both defaults: without these, the drawer disappears and tray items
+# that report themselves Passive are hidden with no indication.
+drawer = true
+hide_passive = false
+
+[widget.workspaces]
+labels_only_when_occupied = true
+
+# v4 showed volume, brightness, and battery percentages only on hover. v5 has
+# no hover mode, so hide the labels instead of pinning three numbers to the bar.
+[widget.volume]
+show_label = false
+
+[widget.volume.actions]
+middle = "exec pwvucontrol || pavucontrol"
+
+[widget.brightness]
+show_label = false
+
+[widget.battery]
+show_label = false

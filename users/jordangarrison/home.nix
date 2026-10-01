@@ -38,6 +38,7 @@ in
     ../../modules/home/pi
     ../../modules/home/herdr
     ../../modules/home/tuicr
+    ../../modules/home/bb
     ../../modules/home/agent-skills
     ../../modules/home/agent-workspaces
     ../../modules/home/claude-code

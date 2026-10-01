@@ -181,6 +181,15 @@
       ...
     }:
     {
+      nixosModules.bb = ./modules/nixos/bb.nix;
+
+      checks.x86_64-linux.bb-module =
+        self.nixosConfigurations.endeavour.pkgs.runCommand "bb-module-tests" {
+          results = builtins.toJSON (import ./tests/bb-module.nix { flake = self; });
+        } ''
+          printf '%s\n' "$results" > "$out"
+        '';
+
       nixosConfigurations = {
         "endeavour" = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs; };
@@ -218,6 +227,7 @@
             ./modules/nixos/greenlight.nix
             ./modules/nixos/panko.nix
             ./modules/nixos/agentsview.nix
+            ./modules/nixos/bb.nix
             ./modules/nixos/drawl.nix
             ./modules/nixos/tic-tac-toe-4-in-a-row.nix
             ./modules/nixos/cloudflared.nix
@@ -309,6 +319,19 @@
               virtualization.virt-manager = {
                 enable = true;
                 users = [ "jordangarrison" ];
+              };
+
+              # bb owns its server + host daemon; Nix owns its version.
+              services.bb = {
+                enable = true;
+                user = "jordangarrison";
+                environment.BB_APP_URL = "https://bb.jordangarrison.dev";
+                providers = {
+                  cursor.enable = true;
+                  codex.enable = true;
+                  pi.enable = true;
+                  claude.enable = true;
+                };
               };
 
               # Enable FreeRDP

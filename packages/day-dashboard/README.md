@@ -88,7 +88,7 @@ Where the data comes from (all keyring-backed, hence a **user** service):
 
 | Source | How it's gathered |
 | --- | --- |
-| **Slack**, **Linear**, **Rootly** | the Pi CLI driving the already-authenticated MCP servers in `~/.config/mcp/mcp.json` (tokens live in Pi's keyring) |
+| **Slack**, **Linear**, **Rootly** | native Pi MCP servers in `~/.pi/agent/mcp.json` (OAuth tokens stay in Pi's credential store) |
 | **Email**, **Calendar** | the `gws` Google Workspace CLI (Gmail unread + today's events) |
 | **Meeting notes** | `gws`/Google Docs — recent "Notes by Gemini" docs; extracts follow-ups/action items assigned to you (Gemini tags owners as `[Full Name]`) and the model turns them into concrete next actions |
 | **GitHub** | the `gh` CLI (file auth) — PRs review-requested-from or @-mentioning you; the model keeps only architecture/infra/deploy-relevant ones and flags changes that may deviate from the playbooks (playbooks.flokubernetes.com). Deliberately NOT everything — GitHub is high-volume. |

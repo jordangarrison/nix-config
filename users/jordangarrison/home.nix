@@ -296,7 +296,7 @@ in
     package = pkgs.llm-agents.pi;
     settings = {
       defaultProvider = "openai-codex";
-      defaultModel = "gpt-6-sol";
+      defaultModel = "gpt-6.1-sol";
       # Third-party extensions at their latest release, installed unmodified
       # by pi itself into ~/.pi/agent/npm on first start. Move them forward
       # with `pi update --extensions`. Never patch their source: code we own

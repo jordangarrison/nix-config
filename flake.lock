@@ -778,11 +778,11 @@
         "nixpkgs": "nixpkgs_4"
       },
       "locked": {
-        "lastModified": 1789938668,
-        "narHash": "sha256-/+R05BKb/wuYmKgquR+aFTlTsSWskSeHV85574JgSOE=",
+        "lastModified": 1790821715,
+        "narHash": "sha256-4t9vqmFsg8KtwcxysAHpOOE0UUPnHNnV6nR/tkMPybc=",
         "ref": "refs/heads/main",
-        "rev": "20fff44158539d3bcb5786c74e3d62e4d3b76491",
-        "revCount": 46,
+        "rev": "6a2330ec7bcf57f96e8f30b14e50a5bd570d5588",
+        "revCount": 48,
         "type": "git",
         "url": "ssh://forgejo@forgejo.jordangarrison.dev/jordangarrison/cg.git"
       },
@@ -835,11 +835,11 @@
         "treefmt-nix": "treefmt-nix_2"
       },
       "locked": {
-        "lastModified": 1790724431,
-        "narHash": "sha256-TiRnh+o2PoCAiQo8s/RoaJ6aEKseAbTLBDBZ4LWZxc8=",
+        "lastModified": 1790864162,
+        "narHash": "sha256-7utF8CsnM21wifMSyKO/E/5VmdK8lkgMKID1toZStIo=",
         "owner": "numtide",
         "repo": "llm-agents.nix",
-        "rev": "ca2e9d5f14679c3fce79fa812c1cbd3a6d2ba745",
+        "rev": "681f29a6bd028afc6f454bf11411295a80403281",
         "type": "github"
       },
       "original": {

@@ -45,6 +45,7 @@ in {
       vscode.enable = lib.mkEnableOption "VSCode / Cursor editor";
       warp.enable = lib.mkEnableOption "Warp terminal (preview)";
       grok-bot.enable = lib.mkEnableOption "Grok Bot desktop agent";
+      bb-desktop.enable = lib.mkEnableOption "BB desktop app";
 
       # Dev tools (heavy, built from source)
       codiff.enable = lib.mkEnableOption "Codiff local Git diff viewer";

@@ -39,6 +39,7 @@ in
     ../../modules/home/herdr
     ../../modules/home/tuicr
     ../../modules/home/bb
+    ../../modules/home/bb-desktop
     ../../modules/home/agent-skills
     ../../modules/home/agent-workspaces
     ../../modules/home/claude-code
@@ -46,6 +47,11 @@ in
     ../../modules/home/cursor-agent
     ../../modules/home/omp
   ];
+
+  programs.bb-desktop = {
+    enable = userApps.bb-desktop.enable or false;
+    defaultServerUrl = "https://bb.jordangarrison.dev";
+  };
 
   programs.agent-skills = {
     enable = true;

@@ -182,6 +182,13 @@
     }:
     {
       nixosModules.bb = ./modules/nixos/bb.nix;
+      homeManagerModules.bb-desktop = ./modules/home/bb-desktop;
+
+      packages.x86_64-linux.bb-desktop =
+        let
+          pkgs = import nixpkgs { system = "x86_64-linux"; };
+        in
+        pkgs.callPackage ./packages/bb-desktop { };
 
       checks.x86_64-linux.bb-module =
         self.nixosConfigurations.endeavour.pkgs.runCommand "bb-module-tests" {
@@ -297,6 +304,7 @@
                   herdr.enable = true;
                   floai.enable = true;
                   grok-bot.enable = true;
+                  bb-desktop.enable = true;
                 };
               };
 

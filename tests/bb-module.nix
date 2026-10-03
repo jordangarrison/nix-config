@@ -69,6 +69,52 @@ let
     (base.extendModules {
       modules = [ { services.bb.extraArgs = [ "--in-app-updates" ]; } ];
     }).config;
+  hostMachine = mkSystem [
+    {
+      services.bb = {
+        enable = true;
+        user = "developer";
+        role = "host";
+        serverUrl = "https://bb.jordangarrison.dev";
+        hostDaemonPort = 38888;
+      };
+    }
+  ];
+  hostMachineConfig = hostMachine.config;
+  hostTrailingSlash = mkSystem [
+    {
+      services.bb = {
+        enable = true;
+        user = "developer";
+        role = "host";
+        serverUrl = "https://bb.jordangarrison.dev/";
+      };
+    }
+  ];
+  hostTrailingSlashConfig = hostTrailingSlash.config;
+  enrollScript = lib.findFirst (
+    package: lib.hasPrefix "bb-host-enroll" (package.name or "")
+  ) null hostTrailingSlashConfig.environment.systemPackages;
+  hostMissingUrl =
+    (mkSystem [
+      {
+        services.bb = {
+          enable = true;
+          user = "developer";
+          role = "host";
+        };
+      }
+    ]).config;
+  serverWithUrl =
+    (mkSystem [
+      {
+        services.bb = {
+          enable = true;
+          user = "developer";
+          serverUrl = "https://bb.jordangarrison.dev";
+        };
+      }
+    ]).config;
   host = flake.nixosConfigurations.endeavour.config;
   bbProxy = host.services.nginx.virtualHosts."bb.jordangarrison.dev";
   tests = {
@@ -120,6 +166,47 @@ let
     noWarnings = defaults.warnings == [ ] && enabled.warnings == [ ] && custom.warnings == [ ];
     oneSupervisor =
       !(enabled.systemd.services ? bb-server) && !(enabled.systemd.services ? bb-host-daemon);
+    roleDefaultsServer = defaults.services.bb.role == "server";
+    hostDaemonSeparateState =
+      hostMachineConfig.services.bb.dataDir
+      == "/home/developer/.bb-machines/bb.jordangarrison.dev";
+    hostStateParentOwnedByUser =
+      let
+        parent = hostMachineConfig.systemd.tmpfiles.settings."10-bb"."/home/developer/.bb-machines".d;
+      in
+      parent.mode == "0700" && parent.user == "developer" && parent.group == "users";
+    serverDoesNotCreateHostStateParent =
+      !(defaults.systemd.tmpfiles.settings."10-bb" ? "/home/developer/.bb-machines");
+    hostDaemonExecutable =
+      lib.hasInfix "bb-host-daemon" hostMachineConfig.systemd.services.bb.serviceConfig.ExecStart
+      && lib.hasInfix ''"--server-url" "https://bb.jordangarrison.dev"'' hostMachineConfig.systemd.services.bb.serviceConfig.ExecStart
+      && lib.hasInfix ''"--host-daemon-port" "38888"'' hostMachineConfig.systemd.services.bb.serviceConfig.ExecStart
+      && !(lib.hasInfix ''"start" "--bundled"'' hostMachineConfig.systemd.services.bb.serviceConfig.ExecStart);
+    hostTrailingSlashNormalized =
+      enrollScript != null
+      && lib.hasInfix "https://bb.jordangarrison.dev/install.sh" enrollScript.text
+      && !(lib.hasInfix "https://bb.jordangarrison.dev//install.sh" enrollScript.text)
+      && lib.hasInfix ''"--server-url" "https://bb.jordangarrison.dev"'' hostTrailingSlashConfig.systemd.services.bb.serviceConfig.ExecStart
+      && hostTrailingSlashConfig.services.bb.dataDir == "/home/developer/.bb-machines/bb.jordangarrison.dev";
+    hostDaemonWaitsForEnrollment =
+      hostMachineConfig.systemd.services.bb.unitConfig.ConditionPathExists
+      == "/home/developer/.bb-machines/bb.jordangarrison.dev/auth.json";
+    hostDaemonLoopbackOnly = !(lib.elem 38886 hostMachineConfig.networking.firewall.allowedTCPPorts);
+    hostEnrollCommand = lib.any (
+      package: lib.hasPrefix "bb-host-enroll" package.name
+    ) hostMachineConfig.environment.systemPackages;
+    hostDaemonUpdatesDisabled =
+      hostMachineConfig.systemd.services.bb.environment.BB_HOST_DAEMON_AUTO_UPDATE == "0"
+      && !(lib.hasInfix "--auto-update" hostMachineConfig.systemd.services.bb.serviceConfig.ExecStart);
+    hostRequiresServerUrl = lib.any (
+      a: !a.assertion && a.message == "services.bb.serverUrl is required when role is host."
+    ) hostMissingUrl.assertions;
+    serverRejectsRemoteUrl = lib.any (
+      a: !a.assertion && a.message == "services.bb.serverUrl applies only when role is host."
+    ) serverWithUrl.assertions;
+    serverHasNoEnrollCommand = !(
+      lib.any (package: lib.hasPrefix "bb-host-enroll" package.name) defaults.environment.systemPackages
+    );
   };
 in
 assert lib.assertMsg (lib.all (result: result) (lib.attrValues tests))

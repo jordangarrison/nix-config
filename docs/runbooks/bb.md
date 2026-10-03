@@ -1,8 +1,10 @@
 # bb on NixOS
 
-`modules/nixos/bb.nix` manages **one** system service: `bb-app start` supervises
-both the server and host daemon. Endeavour enables it as `jordangarrison`.
-The module is also exported as `nixosModules.bb`.
+`modules/nixos/bb.nix` manages **one** system service. `role = "server"` (the
+default) runs `bb-app start`, which supervises both the server and host daemon.
+Endeavour enables that as `jordangarrison`. `role = "host"` runs only the
+Nix-packaged `bb-host-daemon` and connects it to `serverUrl`. The module is
+also exported as `nixosModules.bb`.
 
 ## Configuration
 
@@ -77,8 +79,46 @@ URL. `services.bb.environment.BB_APP_URL` sets the HTTPS origin for browser
 checks and generated links. This uses the existing nginx/ACME infrastructure,
 not Tailscale Serve.
 
+## Host machines
+
+A laptop that should run tasks uses the host role. Opportunity does.
+It does not start a second bb server, and it does not use the upstream
+installer (that installer downloads its own `bb-app` with npm and turns on
+daemon auto-update). The desktop app stays a client and keeps its own daemon on port 38887.
+The enrolled daemon uses another loopback port. Opportunity uses 38888.
+The daemon state lives under `~/.bb-machines/<server-host>`, not `~/.bb`.
+
+```nix
+services.bb = {
+  enable = true;
+  role = "host";
+  user = "jordangarrison";
+  serverUrl = "https://bb.jordangarrison.dev";
+  hostDaemonPort = 38888;
+};
+```
+
+The service stays stopped until this machine is enrolled. On the server:
+
+```bash
+bb machine create --provider manual
+```
+
+On the host, pass the `X-BB-Enrollment` value from that command to the
+Nix-provided helper. It exchanges the token, writes the enrollment with the
+packaged `bb` CLI, and starts the daemon:
+
+```bash
+bb-host-enroll <enrollment-token>
+```
+
+The token is single-use and short-lived. Generate a new command if it expires.
+Tailscale has to reach `serverUrl`. Later rebuilds keep the enrollment in the
+data directory.
+
 The pinned llm-agents bb-app 0.44.0 supports `start --bundled --data-dir
---server-port --server-bind-host`. In-app updates require `--in-app-updates`,
+--server-port --server-bind-host`, and `bb-host-daemon --data-dir --server-url
+--host-daemon-port`. In-app updates require `--in-app-updates`,
 which is deliberately absent; `--bundled` selects the packaged code.
 Host-daemon auto-update is disabled too. Do not enable updates via extraArgs,
 manual launcher commands or environment files. Update the existing llm-agents

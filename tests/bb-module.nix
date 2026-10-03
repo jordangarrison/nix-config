@@ -169,6 +169,13 @@ let
     hostDaemonSeparateState =
       hostMachineConfig.services.bb.dataDir
       == "/home/developer/.bb-machines/bb.jordangarrison.dev";
+    hostStateParentOwnedByUser =
+      let
+        parent = hostMachineConfig.systemd.tmpfiles.settings."10-bb"."/home/developer/.bb-machines".d;
+      in
+      parent.mode == "0700" && parent.user == "developer" && parent.group == "users";
+    serverDoesNotCreateHostStateParent =
+      !(defaults.systemd.tmpfiles.settings."10-bb" ? "/home/developer/.bb-machines");
     hostDaemonExecutable =
       lib.hasInfix "bb-host-daemon" hostMachineConfig.systemd.services.bb.serviceConfig.ExecStart
       && lib.hasInfix ''"--server-url" "https://bb.jordangarrison.dev"'' hostMachineConfig.systemd.services.bb.serviceConfig.ExecStart

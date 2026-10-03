@@ -262,10 +262,20 @@ in
 
     environment.systemPackages = lib.mkIf (isHost && cfg.serverUrl != null) [ bbHostEnroll ];
 
-    systemd.tmpfiles.settings."10-bb".${cfg.dataDir}.d = {
-      mode = "0700";
-      user = cfg.user;
-      group = cfg.group;
+    systemd.tmpfiles.settings."10-bb" = {
+      ${cfg.dataDir}.d = {
+        mode = "0700";
+        user = cfg.user;
+        group = cfg.group;
+      };
+    } // lib.optionalAttrs (isHost && lib.hasPrefix "${cfg.home}/.bb-machines/" cfg.dataDir) {
+      # Implicit parents are created root-owned by tmpfiles. Enrollment runs
+      # as the user and must be able to create per-server directories here.
+      "${cfg.home}/.bb-machines".d = {
+        mode = "0700";
+        user = cfg.user;
+        group = cfg.group;
+      };
     };
 
     systemd.services.bb = {

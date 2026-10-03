@@ -435,6 +435,7 @@
             ./modules/nixos/audio/pipewire.nix
             ./modules/nixos/audio/speech-dispatcher.nix
             ./modules/nixos/development.nix
+            ./modules/nixos/bb.nix
             ./modules/nixos/virtualization.nix
             ./modules/nixos/tablet-mode.nix
             ./users/jordangarrison/nixos.nix
@@ -510,6 +511,21 @@
 
               # Enable tablet mode for Framework 12 touchscreen
               tablet-mode.enable = true;
+
+              # Desktop app is a client. This daemon runs tasks for the server
+              # on endeavour. Enroll once with bb-host-enroll; see docs/runbooks/bb.md.
+              services.bb = {
+                enable = true;
+                role = "host";
+                user = "jordangarrison";
+                serverUrl = "https://bb.jordangarrison.dev";
+                providers = {
+                  cursor.enable = true;
+                  codex.enable = true;
+                  pi.enable = true;
+                  claude.enable = true;
+                };
+              };
             }
           ];
 

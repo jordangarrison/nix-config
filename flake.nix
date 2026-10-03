@@ -519,6 +519,8 @@
                 role = "host";
                 user = "jordangarrison";
                 serverUrl = "https://bb.jordangarrison.dev";
+                # The desktop app binds its own daemon to 38887.
+                hostDaemonPort = 38888;
                 providers = {
                   cursor.enable = true;
                   codex.enable = true;

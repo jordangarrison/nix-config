@@ -160,7 +160,8 @@ in
       default = 38887;
       description = ''
         Loopback port for a role = "host" daemon. The server role chooses its own
-        daemon port inside bb-app.
+        daemon port inside bb-app. The desktop app binds its own daemon to 38887,
+        so a host that also runs the desktop app needs a different port.
       '';
     };
 

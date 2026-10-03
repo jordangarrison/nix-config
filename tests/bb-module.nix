@@ -76,6 +76,7 @@ let
         user = "developer";
         role = "host";
         serverUrl = "https://bb.jordangarrison.dev";
+        hostDaemonPort = 38888;
       };
     }
   ];
@@ -179,6 +180,7 @@ let
     hostDaemonExecutable =
       lib.hasInfix "bb-host-daemon" hostMachineConfig.systemd.services.bb.serviceConfig.ExecStart
       && lib.hasInfix ''"--server-url" "https://bb.jordangarrison.dev"'' hostMachineConfig.systemd.services.bb.serviceConfig.ExecStart
+      && lib.hasInfix ''"--host-daemon-port" "38888"'' hostMachineConfig.systemd.services.bb.serviceConfig.ExecStart
       && !(lib.hasInfix ''"start" "--bundled"'' hostMachineConfig.systemd.services.bb.serviceConfig.ExecStart);
     hostTrailingSlashNormalized =
       enrollScript != null

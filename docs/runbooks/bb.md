@@ -84,8 +84,9 @@ not Tailscale Serve.
 A laptop that should run tasks uses the host role. Opportunity does.
 It does not start a second bb server, and it does not use the upstream
 installer (that installer downloads its own `bb-app` with npm and turns on
-daemon auto-update). The desktop app stays a client. The daemon state lives
-under `~/.bb-machines/<server-host>`, not `~/.bb`.
+daemon auto-update). The desktop app stays a client and keeps its own daemon on port 38887.
+The enrolled daemon uses another loopback port. Opportunity uses 38888.
+The daemon state lives under `~/.bb-machines/<server-host>`, not `~/.bb`.
 
 ```nix
 services.bb = {
@@ -93,6 +94,7 @@ services.bb = {
   role = "host";
   user = "jordangarrison";
   serverUrl = "https://bb.jordangarrison.dev";
+  hostDaemonPort = 38888;
 };
 ```
 

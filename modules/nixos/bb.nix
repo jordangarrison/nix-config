@@ -18,6 +18,10 @@ let
     lib.filterAttrs (name: _: cfg.providers.${name}.enable) providerPackages
   );
   isHost = cfg.role == "host";
+  # One trailing slash is a valid origin, but concatenating it with /install.sh
+  # requests //install.sh, which serves the web app instead of the installer.
+  normalizedServerUrl =
+    if cfg.serverUrl == null then null else lib.removeSuffix "/" cfg.serverUrl;
   # Match URL.host, then the installer's directory sanitizer.
   sanitizeServerHost = url:
     let
@@ -70,7 +74,7 @@ let
     trap 'rm -f "$bundle" "$response"' EXIT
     if ! ${lib.getExe pkgs.curl} --silent --show-error --fail-with-body \
       -H "X-BB-Enrollment: $token" \
-      ${lib.escapeShellArg "${cfg.serverUrl}/install.sh"} \
+      ${lib.escapeShellArg "${normalizedServerUrl}/install.sh"} \
       -o "$response"; then
       echo "Could not download an enrollment bundle. The token may be used or expired." >&2
       exit 1
@@ -319,9 +323,9 @@ in
                 "--host-daemon-port"
                 (toString cfg.hostDaemonPort)
               ]
-              ++ lib.optionals (cfg.serverUrl != null) [
+              ++ lib.optionals (normalizedServerUrl != null) [
                 "--server-url"
-                cfg.serverUrl
+                normalizedServerUrl
               ]
             else
               [

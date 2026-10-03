@@ -80,6 +80,20 @@ let
     }
   ];
   hostMachineConfig = hostMachine.config;
+  hostTrailingSlash = mkSystem [
+    {
+      services.bb = {
+        enable = true;
+        user = "developer";
+        role = "host";
+        serverUrl = "https://bb.jordangarrison.dev/";
+      };
+    }
+  ];
+  hostTrailingSlashConfig = hostTrailingSlash.config;
+  enrollScript = lib.findFirst (
+    package: lib.hasPrefix "bb-host-enroll" (package.name or "")
+  ) null hostTrailingSlashConfig.environment.systemPackages;
   hostMissingUrl =
     (mkSystem [
       {
@@ -159,6 +173,12 @@ let
       lib.hasInfix "bb-host-daemon" hostMachineConfig.systemd.services.bb.serviceConfig.ExecStart
       && lib.hasInfix ''"--server-url" "https://bb.jordangarrison.dev"'' hostMachineConfig.systemd.services.bb.serviceConfig.ExecStart
       && !(lib.hasInfix ''"start" "--bundled"'' hostMachineConfig.systemd.services.bb.serviceConfig.ExecStart);
+    hostTrailingSlashNormalized =
+      enrollScript != null
+      && lib.hasInfix "https://bb.jordangarrison.dev/install.sh" enrollScript.text
+      && !(lib.hasInfix "https://bb.jordangarrison.dev//install.sh" enrollScript.text)
+      && lib.hasInfix ''"--server-url" "https://bb.jordangarrison.dev"'' hostTrailingSlashConfig.systemd.services.bb.serviceConfig.ExecStart
+      && hostTrailingSlashConfig.services.bb.dataDir == "/home/developer/.bb-machines/bb.jordangarrison.dev";
     hostDaemonWaitsForEnrollment =
       hostMachineConfig.systemd.services.bb.unitConfig.ConditionPathExists
       == "/home/developer/.bb-machines/bb.jordangarrison.dev/auth.json";

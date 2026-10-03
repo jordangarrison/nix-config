@@ -32,6 +32,7 @@ let
 in
 {
   imports = [
+    inputs.try.homeModules.default
     ./tools/nvim/nvf.nix
     ../../modules/home/acp-adapters
     ../../modules/home/languages
@@ -610,6 +611,7 @@ in
       lua
       nixpkgs-fmt
       nodejs
+      ruby # try init calls the unwrapped Ruby script from its shell function
       bash-language-server
       prettier
       typescript
@@ -742,6 +744,11 @@ in
       plannotator
     ];
 
+  programs.try = {
+    enable = true;
+    path = "~/dev/tries";
+  };
+
   programs.gpg = {
     enable = pkgs.stdenv.isLinux;
   };
@@ -774,6 +781,28 @@ in
       fi
 
       alias fd="fd --color=never"
+
+      # try has no upstream completion script; offer commands and existing tries.
+      _try_completion() {
+        local dir
+        local -a commands tries
+        commands=(
+          'clone:Clone a Git repository'
+          'worktree:Create a Git worktree'
+          '.:Create a worktree from the current directory'
+          '--help:Show help'
+        )
+        if (( CURRENT == 2 )); then
+          for dir in "$HOME${lib.removePrefix "~" config.programs.try.path}"/*(N/); do
+            tries+=( "''${dir:t}" )
+          done
+          _describe -t commands 'try command' commands
+          _describe -t tries 'experiment' tries
+        elif [[ ''${words[2]} == worktree ]]; then
+          _files -/
+        fi
+      }
+      compdef _try_completion try
 
       # Load user secrets if present
       [ -f "$HOME/.env" ] && source "$HOME/.env"

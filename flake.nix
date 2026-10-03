@@ -469,6 +469,7 @@
                   handy.enable = true;
                   herdr.enable = true;
                   grok-bot.enable = true;
+                  bb-desktop.enable = true;
                 };
               };
 

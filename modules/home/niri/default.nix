@@ -307,6 +307,9 @@ in
       { command = [ "blueman-applet" ]; }
       # Ghostty terminal (gtk-single-instance needs a running instance)
       { command = [ "ghostty" ]; }
+    ]
+    # Keep Endeavour's desktop available to Grokbot when idle.
+    ++ lib.optionals (hostname != "endeavour") [
       # Idle management (lock screen, monitor power, suspend on laptops)
       { command = swayidleCommand; }
     ];

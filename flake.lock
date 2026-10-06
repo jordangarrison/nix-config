@@ -700,11 +700,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789634754,
-        "narHash": "sha256-QG4jKaEy9y6alN9GfA/yCkl3+QwI1nOpdtmgaT2UNmc=",
+        "lastModified": 1791196685,
+        "narHash": "sha256-xjURNgi1Yu+X+yFQJW4Ra91C2G5PdCJ1GQa7BvqC15c=",
         "owner": "jordangarrison",
         "repo": "grok-bot-flake",
-        "rev": "2b354e1b1b08b2248ff6b57111bfe1b0a146a1b9",
+        "rev": "9fc97aa9542071bd4073e0cabe718833e22f5d71",
         "type": "github"
       },
       "original": {
@@ -853,11 +853,11 @@
         "treefmt-nix": "treefmt-nix_2"
       },
       "locked": {
-        "lastModified": 1790947657,
-        "narHash": "sha256-Qhw25MEtJdqzYshdaLc1EPGpIQOwxI++D50w/A7p1rs=",
+        "lastModified": 1791175671,
+        "narHash": "sha256-1szYaEAFYPApOgy2HGLbqtVys8SIqk5mlvz9agPFLr0=",
         "owner": "numtide",
         "repo": "llm-agents.nix",
-        "rev": "54b915b290377072e2903d2fcdae122dd37f64fc",
+        "rev": "ba24820b562c0e1ff95d283a2e2e1debcbcbad83",
         "type": "github"
       },
       "original": {
@@ -869,11 +869,11 @@
     "mattpocock-skills": {
       "flake": false,
       "locked": {
-        "lastModified": 1789726349,
-        "narHash": "sha256-L3CpIT2DeI+fUFl9fcygojtQo2DzEen69rMD1XqR1vM=",
+        "lastModified": 1791199038,
+        "narHash": "sha256-oN3OQPouK6wrrGzmgNdvdOVLsOJVGaK7cy3BZoE10AA=",
         "owner": "mattpocock",
         "repo": "skills",
-        "rev": "c55ee46073ed923f86ce59a5eb3b6d895095d1b7",
+        "rev": "4588b32ecab9ecc9fc8cc6b6c5e7d675b6004b0d",
         "type": "github"
       },
       "original": {

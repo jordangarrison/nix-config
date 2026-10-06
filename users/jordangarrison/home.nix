@@ -102,11 +102,16 @@ in
         (fromDir "${inputs.caveman}/skills" [ "caveman" ])
         (fromDir "${inputs.lavish-axi}/skills" [ "lavish" ])
         (fromDir "${inputs.mattpocock-skills}/skills/engineering" [
+          "code-review"
           "codebase-design"
           "diagnosing-bugs"
           "domain-modeling"
           "grill-with-docs"
+          "implement-spec"
           "improve-codebase-architecture"
+          "pr"
+          "retro"
+          "setup-matt-pocock-skills"
           "tdd"
           "wizard"
         ])
@@ -305,6 +310,16 @@ in
     settings = {
       defaultProvider = "openai-codex";
       defaultModel = "gpt-6.1-sol";
+      # Keep model cycling scoped to these exact provider/model IDs. Activation
+      # replaces any runtime scope saved by /scoped-models.
+      enabledModels = [
+        "openai-codex/gpt-6.1-sol"
+        "openai-codex/gpt-6-luna"
+        "openai-codex/gpt-6-astra"
+        "claude-bridge/claude-opus-5-5"
+        "claude-bridge/claude-fable-5-1"
+        "cursor/grok-4.7@256k"
+      ];
       # Third-party extensions at their latest release, installed unmodified
       # by pi itself into ~/.pi/agent/npm on first start. Move them forward
       # with `pi update --extensions`. Never patch their source: code we own
@@ -340,9 +355,8 @@ in
     # hosts/flomac/configuration.nix; contextWindow below must stay <= that
     # value or ollama silently truncates the prompt.
     #
-    # These stay opt-in per machine: pi only offers a model in /model once it
-    # is in the runtime-owned enabledModels array, which this module
-    # deliberately does not declare.
+    # These remain available through /model, but are excluded from the
+    # declarative model-cycling scope above.
     models.providers.flomac = {
       baseUrl = "https://h952l3dphh.owl-yo.ts.net:11434/v1";
       api = "openai-completions";
@@ -674,9 +688,12 @@ in
       llm-agents.codex
       llm-agents.opencode
     ]
-    ++ lib.optionals (userApps.handy.enable or false) [
-      llm-agents.handy
-    ]
+    ++ lib.optionals (userApps.handy.enable or false) (
+      [ llm-agents.handy ]
+      # Handy needs a native Wayland typing tool; its Enigo/X11 fallback
+      # cannot reliably type into Niri clients and can also prevent copying.
+      ++ lib.optionals pkgs.stdenv.isLinux [ wtype ]
+    )
     ++ lib.optionals (userApps.todoist.enable or false) [
       todoist
     ]

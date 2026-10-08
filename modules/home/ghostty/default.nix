@@ -27,6 +27,8 @@ let
     # Keybindings
     # Shift+Enter sends newline for Claude Code multiline input
     keybind = shift+enter=text:\n
+    # Free Ctrl+Enter (default: toggle_fullscreen) so it passes through to apps
+    keybind = ctrl+enter=unbind
   '';
 in
 lib.mkMerge [

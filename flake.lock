@@ -700,11 +700,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1791196685,
-        "narHash": "sha256-xjURNgi1Yu+X+yFQJW4Ra91C2G5PdCJ1GQa7BvqC15c=",
+        "lastModified": 1791282610,
+        "narHash": "sha256-NtLvS7V3Z7mxbuvUZeN9R6oWLPImu+MS5bjkpbT/wJw=",
         "owner": "jordangarrison",
         "repo": "grok-bot-flake",
-        "rev": "9fc97aa9542071bd4073e0cabe718833e22f5d71",
+        "rev": "d275c70e99402dbc123e372683415211f042b649",
         "type": "github"
       },
       "original": {

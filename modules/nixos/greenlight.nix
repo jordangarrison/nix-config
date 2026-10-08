@@ -1,9 +1,22 @@
 { config, inputs, lib, pkgs, ... }:
 
 {
+  # nixpkgs' Greenlight is the unrelated BigBlueButton frontend; use our
+  # GitHub dashboard module from inputs.greenlight instead.
+  disabledModules = [ "services/web-apps/greenlight.nix" ];
+  # Apply the same exclusion when generating option docs; otherwise the
+  # upstream module's descriptions look up database options our app lacks.
+  documentation.nixos.includeAllModules = true;
+
   services.greenlight = {
     enable = true;
-    package = inputs.greenlight.packages.${pkgs.stdenv.hostPlatform.system}.default;
+    package = inputs.greenlight.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs (old: {
+      # mixRelease uses structured attrs now: top-level variables aren't
+      # exported to Mix. Keep Tailwind offline using the packaged binary.
+      preBuild = ''
+        export MIX_TAILWIND_PATH=${lib.escapeShellArg old.MIX_TAILWIND_PATH}
+      '' + (old.preBuild or "");
+    });
     host = "endeavour";
     port = 4444;
     listenAddress = "0.0.0.0";

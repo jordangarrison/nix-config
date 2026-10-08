@@ -19,7 +19,7 @@ let
     text = builtins.readFile ./tools/scripts/binaural-beats.sh;
   };
   # Use pgtk variant on Linux for native Wayland support
-  emacsPackage = if pkgs.stdenv.isLinux then pkgs.emacs-pgtk else pkgs.emacs;
+  emacsPackage = if pkgs.stdenv.hostPlatform.isLinux then pkgs.emacs-pgtk else pkgs.emacs;
   # Live-checkout path for hand-authored agent content (see ./agents)
   agentsLive = "${config.home.homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/agents";
   # OMP loads pi-claude-bridge from this bundle (see packages/omp-plugins).
@@ -293,7 +293,7 @@ in
     "$HOME/.emacs.d/bin"
     "$HOME/.cargo/bin"
   ]
-  ++ lib.optionals pkgs.stdenv.isDarwin [ "/opt/homebrew/bin" ];
+  ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [ "/opt/homebrew/bin" ];
 
   # Environment variables
   home.sessionVariables = {
@@ -692,13 +692,13 @@ in
       [ llm-agents.handy ]
       # Handy needs a native Wayland typing tool; its Enigo/X11 fallback
       # cannot reliably type into Niri clients and can also prevent copying.
-      ++ lib.optionals pkgs.stdenv.isLinux [ wtype ]
+      ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [ wtype ]
     )
     ++ lib.optionals (userApps.todoist.enable or false) [
       todoist
     ]
     ++ (
-      if pkgs.stdenv.isDarwin then
+      if pkgs.stdenv.hostPlatform.isDarwin then
         [
           glibtool
         ]
@@ -712,9 +712,6 @@ in
           # emacs
           emacsPackages.sqlite3
           glibc
-          # gnaural was removed from unstable (unmaintained, gtk2); still in 25.11
-          stable.gnaural
-          grip
           pavucontrol
           pinentry-gnome3
           remmina
@@ -728,10 +725,10 @@ in
           ghostty
         ]
     )
-    ++ lib.optionals ((userApps.discord.enable or false) && pkgs.stdenv.isLinux) [
+    ++ lib.optionals ((userApps.discord.enable or false) && pkgs.stdenv.hostPlatform.isLinux) [
       discord
     ]
-    ++ lib.optionals ((userApps.signal.enable or false) && pkgs.stdenv.isLinux) [
+    ++ lib.optionals ((userApps.signal.enable or false) && pkgs.stdenv.hostPlatform.isLinux) [
       (pkgs.symlinkJoin {
         name = "signal-desktop";
         paths = [ pkgs.signal-desktop ];
@@ -742,7 +739,7 @@ in
         '';
       })
     ]
-    ++ lib.optionals ((userApps.obs.enable or false) && pkgs.stdenv.isLinux) [
+    ++ lib.optionals ((userApps.obs.enable or false) && pkgs.stdenv.hostPlatform.isLinux) [
       obs-studio
     ]
     ++ lib.optionals (userApps.spotify.enable or false) [
@@ -754,7 +751,7 @@ in
     ++ lib.optionals (userApps.freelens.enable or false) [
       freelens-bin
     ]
-    ++ lib.optionals ((userApps.codiff.enable or false) && pkgs.stdenv.isLinux) [
+    ++ lib.optionals ((userApps.codiff.enable or false) && pkgs.stdenv.hostPlatform.isLinux) [
       codiff
     ]
     ++ lib.optionals (userApps.plannotator.enable or false) [
@@ -767,10 +764,10 @@ in
   };
 
   programs.gpg = {
-    enable = pkgs.stdenv.isLinux;
+    enable = pkgs.stdenv.hostPlatform.isLinux;
   };
 
-  # services.gpg-agent = { enable = pkgs.stdenv.isLinux; };
+  # services.gpg-agent = { enable = pkgs.stdenv.hostPlatform.isLinux; };
 
   programs.zsh = {
     enable = true;
@@ -986,7 +983,7 @@ in
   # Doom caches Emacs' absolute load-path, including Nix store paths, in an
   # init file keyed only by the Emacs version. Rebuild that cache when Nix
   # changes the store path without changing the version.
-  home.activation.doomSyncOnEmacsChange = lib.mkIf pkgs.stdenv.isLinux (
+  home.activation.doomSyncOnEmacsChange = lib.mkIf pkgs.stdenv.hostPlatform.isLinux (
     lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       doom_cli="${homeDirectory}/.emacs.d/bin/doom"
       doom_init="${homeDirectory}/.emacs.d/.local/etc/@/init.${lib.versions.majorMinor emacsPackage.version}.el"
@@ -1155,9 +1152,11 @@ in
       "--height 40%"
       "--border"
     ];
-    fileWidgetCommand = "fd --type f";
-    fileWidgetOptions = [ "--preview 'bat --style=numbers --color=always --line-range :500 {}'" ];
-    changeDirWidgetCommand = "fd --type d";
+    fileWidget.command = "fd --type f";
+    fileWidget.options = [ "--preview 'bat --style=numbers --color=always --line-range :500 {}'" ];
+    changeDirWidget.command = "fd --type d";
+    # Atuin already owns Ctrl-R in zsh; avoid installing a competing binding.
+    historyWidget.zsh.command = "";
   };
 
   # Starship prompt
@@ -1281,20 +1280,20 @@ in
 
     # Claude Desktop
     # "Library/Application Support/Claude/claude_desktop_config.json" =
-    #   lib.mkIf pkgs.stdenv.isDarwin {
+    #   lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
     #     source = ./tools/claude-desktop/claude_desktop_config.json;
     #   };
 
     # Espanso
-    ".config/espanso/match/base.yml" = lib.mkIf (!pkgs.stdenv.isDarwin) {
+    ".config/espanso/match/base.yml" = lib.mkIf (!pkgs.stdenv.hostPlatform.isDarwin) {
       source = ./tools/espanso/match/base.yml;
     };
-    "Library/Application Support/espanso/match/base.yml" = lib.mkIf pkgs.stdenv.isDarwin {
+    "Library/Application Support/espanso/match/base.yml" = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
       source = ./tools/espanso/match/base.yml;
     };
 
     # LinearMouse
-    # ".config/linearmouse/linearmouse.json" = lib.mkIf pkgs.stdenv.isDarwin {
+    # ".config/linearmouse/linearmouse.json" = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
     #   source = ./tools/linearmouse/linearmouse.json;
     # };
 
@@ -1317,7 +1316,7 @@ in
   # `handy --toggle-transcription` bind hits something. Pinning ExecStart to
   # the store path means home-manager restarts the unit on package bumps.
   # Linux-only: systemd.user.services doesn't exist in home-manager on darwin.
-  systemd.user.services = lib.mkIf (pkgs.stdenv.isLinux && (userApps.handy.enable or false)) {
+  systemd.user.services = lib.mkIf (pkgs.stdenv.hostPlatform.isLinux && (userApps.handy.enable or false)) {
     handy = {
       Unit = {
         Description = "Handy - push-to-talk speech-to-text";

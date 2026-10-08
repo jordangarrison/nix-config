@@ -3,8 +3,8 @@
 {
   services.emacs = {
     enable = true;
-    package = if pkgs.stdenv.isLinux then pkgs.emacs-pgtk else pkgs.emacs;
+    package = if pkgs.stdenv.hostPlatform.isLinux then pkgs.emacs-pgtk else pkgs.emacs;
   };
   environment.systemPackages = with pkgs;
-    if stdenv.isLinux then [ wl-clipboard xclip ] else [ ];
+    if stdenv.hostPlatform.isLinux then [ wl-clipboard xclip ] else [ ];
 }

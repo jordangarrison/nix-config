@@ -12,7 +12,7 @@ let
     url = "https://github.com/get-bb/bb/releases/download/desktop-v${version}/bb-${version}-x86_64.AppImage";
     hash = "sha256-JH9z7oRLa2N4kWt4jqh2qgxmHFT+c2umlx8NHI0SzaU=";
   };
-  contents = appimageTools.extractType2 { inherit pname version src; };
+  contents = appimageTools.extract { inherit pname version src; };
 in
 appimageTools.wrapType2 {
   inherit pname version src;

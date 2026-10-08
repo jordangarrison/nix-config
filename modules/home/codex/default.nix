@@ -83,7 +83,7 @@ in
   # Upstream home-manager ships a programs.codex that writes config.toml as
   # a read-only store symlink — incompatible with codex/herdr runtime writes
   # (trust entries, hook state). This module replaces it.
-  disabledModules = [ "programs/codex.nix" ];
+  disabledModules = [ "programs/codex" ];
 
   options.programs.codex = {
     enable = lib.mkEnableOption "Codex declarative configuration";

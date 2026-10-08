@@ -12,6 +12,9 @@ let
   tomlFormat = pkgs.formats.toml { };
 in
 {
+  # Keep our llm-agents package and activation-time integration ownership.
+  disabledModules = [ "programs/herdr.nix" ];
+
   options.programs.herdr = {
     enable = mkEnableOption "herdr terminal workspace manager for AI coding agents";
 

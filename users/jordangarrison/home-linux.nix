@@ -35,7 +35,7 @@
   };
 
   # Install brave.
-  programs.brave = if pkgs.stdenv.isLinux then {
+  programs.brave = if pkgs.stdenv.hostPlatform.isLinux then {
     enable = true;
     extensions = [
       "aeblfdkhhhdcdjpifhhbdiojplfjncoa" # 1Password
@@ -195,7 +195,7 @@
     workspaceAssignment = 8; # Assign to workspace 8
   };
 
-  programs.gnome-shell = lib.mkIf pkgs.stdenv.isLinux {
+  programs.gnome-shell = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
     enable = true;
     extensions = [
       { package = pkgs.gnomeExtensions.appindicator; }

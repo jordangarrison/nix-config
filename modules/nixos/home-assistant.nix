@@ -49,7 +49,6 @@ in
 
   services.home-assistant = {
     enable          = true;
-    openFirewall    = false;             # nginx is the only ingress
     configWritable  = true;              # HA can edit configuration.yaml at runtime;
                                          # nh os switch reasserts the Nix-rendered version.
     extraComponents = [

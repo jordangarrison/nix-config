@@ -91,7 +91,7 @@
 
   # Enable Logitech Unifying Receiver (endeavour-specific hardware)
   hardware.logitech.wireless.enable = true;
-  hardware.logitech.wireless.enableGraphical = true;
+  programs.solaar.enable = true;
 
   # User configuration now handled by user modules in flake.nix
 

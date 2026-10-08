@@ -7,7 +7,7 @@
       pkgs.noto-fonts-color-emoji
       pkgs.noto-fonts
     ];
-  } // lib.optionalAttrs pkgs.stdenv.isLinux {
+  } // lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
     enableDefaultPackages = true;
     fontconfig = {
       defaultFonts = {

@@ -102,7 +102,7 @@
         projects.project-nvim.enable = true; # projectile equivalent
         statusline.lualine = {
           enable = true;
-          theme = "auto";
+          setupOpts.options.theme = "auto";
         };
         tabline.nvimBufferline = {
           enable = true; # doom tabs module

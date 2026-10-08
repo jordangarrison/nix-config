@@ -115,7 +115,7 @@ in {
     }];
 
     # Home Manager configuration for Jordan
-    home-manager.users.${cfg.username} = if pkgs.stdenv.isLinux then
+    home-manager.users.${cfg.username} = if pkgs.stdenv.hostPlatform.isLinux then
       import ./home-linux.nix
     else
       import ./home-darwin.nix;

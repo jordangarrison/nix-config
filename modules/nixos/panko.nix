@@ -3,7 +3,14 @@
 {
   services.panko = {
     enable = true;
-    package = inputs.panko.packages.${pkgs.stdenv.hostPlatform.system}.default;
+    package = inputs.panko.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs (old: {
+      # mixRelease's structured attrs don't export top-level variables.
+      # Use the packaged asset tools instead of downloading in the sandbox.
+      preBuild = ''
+        export MIX_TAILWIND_PATH=${lib.escapeShellArg old.MIX_TAILWIND_PATH}
+        export MIX_ESBUILD_PATH=${lib.escapeShellArg old.MIX_ESBUILD_PATH}
+      '' + (old.preBuild or "");
+    });
     host = "panko.jordangarrison.dev";
     port = 4001;
     listenAddress = "127.0.0.1";

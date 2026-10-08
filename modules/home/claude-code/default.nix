@@ -33,7 +33,12 @@ in
   # Code/herdr runtime writes (permissions, hooks, plugins). This module
   # replaces it. If a home-manager bump moves/renames the upstream file,
   # eval fails loudly with an option collision — update this path then.
-  disabledModules = [ "programs/claude-code.nix" ];
+  disabledModules = [
+    "programs/claude-code"
+    # Unused here; its Claude integration declares upstream-only `skills`
+    # even when disabled. Shared skills are owned by programs.agent-skills.
+    "programs/worktrunk.nix"
+  ];
 
   options.programs.claude-code = {
     enable = lib.mkEnableOption "Claude Code declarative configuration";

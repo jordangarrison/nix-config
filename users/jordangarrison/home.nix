@@ -113,6 +113,8 @@ in
           "retro"
           "setup-matt-pocock-skills"
           "tdd"
+          "to-spec"
+          "to-tickets"
           "wizard"
         ])
         (fromDir "${inputs.mattpocock-skills}/skills/productivity" [

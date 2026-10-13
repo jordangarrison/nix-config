@@ -88,7 +88,7 @@ Where the data comes from (all keyring-backed, hence a **user** service):
 
 | Source | How it's gathered |
 | --- | --- |
-| **Slack**, **Linear**, **Rootly** | native Pi MCP servers in `~/.pi/agent/mcp.json` (OAuth tokens stay in Pi's credential store) |
+| **Slack**, **Linear**, **Rootly** | the FloSports Executor gateway (`executor-flo` in `~/.pi/agent/mcp.json`) through native Pi; Pi's OAuth token stays in its credential store and the service accounts live in Executor |
 | **Email**, **Calendar** | the `gws` Google Workspace CLI (Gmail unread + today's events) |
 | **Meeting notes** | `gws`/Google Docs — recent "Notes by Gemini" docs; extracts follow-ups/action items assigned to you (Gemini tags owners as `[Full Name]`) and the model turns them into concrete next actions |
 | **GitHub** | the `gh` CLI (file auth) — PRs review-requested-from or @-mentioning you; the model keeps only architecture/infra/deploy-relevant ones and flags changes that may deviate from the playbooks (playbooks.flokubernetes.com). Deliberately NOT everything — GitHub is high-volume. |
@@ -182,9 +182,10 @@ login.
 Slack, Linear, email, and calendar need **nothing committed** — they use
 native Pi's OAuth store (MCP) and your `gws` Google login. Set those up first:
 
-- **Slack / Linear / Rootly**: authenticate native Pi with `pi mcp login <server>`;
-  the old adapter's credentials do not transfer. Verify with `pi mcp list`.
-  Each dashboard collector runs in a temporary project limited to one server.
+- **Slack / Linear / Rootly**: authenticate native Pi with `pi mcp login executor-flo`
+  and connect each service in the FloSports Executor dashboard. Verify with
+  `pi mcp list`. Each dashboard collector runs in a temporary project limited
+  to that one server (`DAY_DASHBOARD_EXECUTOR_SERVER`, default `executor-flo`).
 - **Email / Calendar / Meeting notes**: `gws` must be logged in (`gws gmail
   users messages list ...` should return data). Meeting-note action items look
   for lines owned by `DAY_DASHBOARD_ME` (default "Jordan Garrison") in recent

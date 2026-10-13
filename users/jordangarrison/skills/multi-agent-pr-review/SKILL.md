@@ -91,7 +91,8 @@ When the review is driven off the daily SRE thread (the common case via [[sre-re
 Constants:
 - Channel ID: `CF7SPS45P` (Flocasts `#infra-private`)
 - SRE thread cache: `~/.claude/skills/sre-review/.cache.json` (managed by [[sre-review]]) — **verify its `date` matches today** before trusting `thread_ts`; the cache goes stale when [[sre-review]] hasn't run today. If stale, find the thread by reading `CF7SPS45P` and matching today's `:thread:` parent from the `SRE Review Thread` bot.
-- Tool: `slack_add_reaction` (emoji name **without** colons; adding a duplicate succeeds silently). The server prefix varies by which Slack MCP is connected — `mcp__plugin_slack_slack__*` and `mcp__claude_ai_Slack__*` have both been live. Resolve it with `ToolSearch` rather than hardcoding.
+- Tool: `slack_add_reaction` with `channel_id`, `message_ts`, `emoji` (emoji name **without** colons; adding a duplicate succeeds silently).
+- Slack goes through the `executor-flo` MCP server, not a direct Slack server. Run every Slack call as JavaScript inside its `execute` tool, as `tools.slack_mcp.user[<account>].<tool>({ ... })`. Resolve `<account>` once per session: `tools.search({ query: "slack_read_thread", limit: 10 })`, take the path matching `slack_mcp.user.<account>.slack_read_thread`. Calls return `{ ok, data }` instead of throwing; on `ok: false`, `error.code` says why (`oauth_reauth_required` means reconnect Slack in the FloSports Executor dashboard). No `slack_mcp` path means Slack isn't connected in Executor: stop and say so.
 
 Reaction vocabulary (emoji → meaning → when the reviewer adds it):
 

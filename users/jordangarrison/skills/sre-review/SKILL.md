@@ -24,7 +24,19 @@ Post a PR link as a reply to today's SRE review thread in Flocasts `#infra-priva
 - Bot author marker: message text contains both `:thread:` and `review thread` (case-insensitive)
 - Message convention: `<short description>: <PR url>` — one reply per PR
 - Cache file: `~/.claude/skills/sre-review/.cache.json` (per-day thread lookup cache)
-- Bump reaction: `travolta` — "this PR isn't getting the love it deserves, reminding everyone" (added via `mcp__claude_ai_Slack__slack_add_reaction`, emoji name without colons)
+- Bump reaction: `travolta` — "this PR isn't getting the love it deserves, reminding everyone" (added via `slack_add_reaction`, emoji name without colons)
+
+## Slack calls
+
+Slack goes through the `executor-flo` MCP server, not a direct Slack server. Run every Slack call as JavaScript inside its `execute` tool. The account segment of the tool path differs per user, so resolve it once at the start:
+
+```js
+const { items } = await tools.search({ query: "slack_read_thread", limit: 10 });
+const path = items.map(i => i.path).find(p => /^slack_mcp\.user\.[^.]+\.slack_read_thread$/.test(p));
+return path.split(".")[2]; // <account>
+```
+
+Then call `tools.slack_mcp.user[<account>].<tool>({ ... })`; one `execute` program can make several calls. A call returns `{ ok, data }` instead of throwing. On `ok: false`, `error.code` and `error.message` say why (`oauth_reauth_required` means Slack needs reconnecting in the FloSports Executor dashboard). On success, `data.content[0].text` holds Slack's response text. If the search finds no `slack_mcp` path, Slack isn't connected in Executor: stop and say so.
 
 ## When to Use
 
@@ -89,7 +101,7 @@ TZ=America/Chicago date +%F
 
 **Scan logic** (only on cache miss):
 
-Use `mcp__claude_ai_Slack__slack_read_channel` with channel `CF7SPS45P`, limit 30 (covers a full workday).
+Call `slack_read_channel` with `channel_id: "CF7SPS45P"`, `limit: 30` (covers a full workday).
 
 Filter for the most recent message where ALL hold:
 - Posted today (compare `ts` against today's date in America/Chicago)
@@ -124,11 +136,12 @@ Only pause for input if the user explicitly asked for a dry-run/preview, or if s
 
 ### 4. Post
 
-```
-mcp__claude_ai_Slack__slack_send_message
-  channel_id: CF7SPS45P
-  thread_ts:  <ts from step 2>
-  text:       <description>: <url>
+```js
+await tools.slack_mcp.user[account].slack_send_message({
+  channel_id: "CF7SPS45P",
+  thread_ts: "<ts from step 2>",
+  message: "<description>: <url>",
+});
 ```
 
 Confirm posted; share the reply permalink if the response includes one.
@@ -138,16 +151,17 @@ Confirm posted; share the reply permalink if the response includes one.
 When a PR you already posted to the thread isn't getting reviewed, you can react `:travolta:` on **your own reply** to remind everyone — it's the channel's "this PR isn't getting the love it deserves" nudge. This is a separate action from the initial post; trigger it when the user says "bump my PR", "nobody's reviewed X", or "give it a travolta".
 
 **Gate it on genuine starvation — never auto-add it to a fresh post.** Before reacting, confirm the PR actually lacks review love:
-- The reply has no review reactions yet (`eye-twitch`, `mega-approved`, `reverse`, `dumpsterfire`) — check the `reactions` array via `slack_read_thread`.
+- The reply has no review reactions yet (`eye-twitch`, `mega-approved`, `reverse`, `dumpsterfire`) — check the reply's `Reactions:` line in the `slack_read_thread` output (e.g. `Reactions: eye-twitch (2), mega-approved (1)`).
 - `gh pr view <url> --json reviewDecision,reviews` shows no review activity (`reviewDecision` null / `REVIEW_REQUIRED`, no review threads).
 - Enough time has passed that silence is real, not just "posted five minutes ago."
 
 If all hold, react:
-```
-mcp__claude_ai_Slack__slack_add_reaction
-  channel_id: CF7SPS45P
-  message_ts: <ts of your reply carrying the PR url>
-  emoji:      travolta
+```js
+await tools.slack_mcp.user[account].slack_add_reaction({
+  channel_id: "CF7SPS45P",
+  message_ts: "<ts of your reply carrying the PR url>",
+  emoji: "travolta",
+});
 ```
 
 Adding a duplicate succeeds silently, so re-bumping is harmless. Don't post a new "please review" message as a substitute — the reaction *is* the bump. For rolling over yesterday's starved PRs into today's thread, use [[sre-review-rollover]] instead.

@@ -63,6 +63,18 @@ PRs with `:reverse:` reaction ("I left a comment") are also **kept** — multipl
 - Workspace root: `/home/jordangarrison/dev/flocasts/`
 - Worktree convention: `<workspace>/.worktrees/<repo>/<slug>/` where `slug` is the PR head branch (slashes replaced with `-`) or the ticket id.
 
+## Slack calls
+
+Slack goes through the `executor-flo` MCP server, not a direct Slack server. Run every Slack call as JavaScript inside its `execute` tool. The account segment of the tool path differs per user, so resolve it once at the start:
+
+```js
+const { items } = await tools.search({ query: "slack_read_thread", limit: 10 });
+const path = items.map(i => i.path).find(p => /^slack_mcp\.user\.[^.]+\.slack_read_thread$/.test(p));
+return path.split(".")[2]; // <account>
+```
+
+Then call `tools.slack_mcp.user[<account>].<tool>({ ... })`; one `execute` program can make several calls. A call returns `{ ok, data }` instead of throwing. On `ok: false`, `error.code` and `error.message` say why (`oauth_reauth_required` means Slack needs reconnecting in the FloSports Executor dashboard). On success, `data.content[0].text` holds Slack's response text. If the search finds no `slack_mcp` path, Slack isn't connected in Executor: stop and say so.
+
 ## Steps
 
 ### 1. Find today's thread
@@ -74,11 +86,12 @@ Reuse [[sre-review]]'s exact thread detection:
 
 ### 2. Read thread replies
 
-```
-mcp__claude_ai_Slack__slack_read_thread
-  channel_id: CF7SPS45P
-  message_ts: <thread_ts>
-  limit: 100
+```js
+await tools.slack_mcp.user[account].slack_read_thread({
+  channel_id: "CF7SPS45P",
+  message_ts: "<thread_ts>",
+  limit: 100,
+});
 ```
 
 ### 3. Parse PR URLs + apply Slack-side filters
@@ -86,7 +99,7 @@ mcp__claude_ai_Slack__slack_read_thread
 For each reply (skip the parent message):
 - **Skip if `user.name == "Jordan Garrison"`** (the workspace user). Match by name as it appears in `From: Jordan Garrison (UQ69UGHKM)` in the slack_read_thread output. Don't ship Jordan's own PRs into the worktree fan-out.
 - **Skip if the message is from a bot** (`bot_id` set or `subtype: bot_message`).
-- **Skip if the message has a `:mega-approved:` reaction** — the channel convention treats this as "already approved" and another review adds noise. Check the `reactions` array in the slack_read_thread output for `name == "mega-approved"` (count ≥ 1).
+- **Skip if the message has a `:mega-approved:` reaction** — the channel convention treats this as "already approved" and another review adds noise. Check the reply's `Reactions:` line in the slack_read_thread output (e.g. `Reactions: eye-twitch (2), mega-approved (1)`) for `mega-approved`.
 - Extract every match of `https?://github\.com/([^/]+)/([^/]+)/pull/(\d+)` — most replies have exactly one. Slack wraps URLs in `<...>`; strip the angle brackets.
 - If a reply has multiple PR URLs, treat them as separate PR entries from the same author (rare; usually one PR per reply per the channel rules).
 

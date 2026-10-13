@@ -4,11 +4,11 @@
   # Import niri-flake NixOS module
   imports = [ inputs.niri.nixosModules.niri ];
 
-  # Use niri-flake's package with its matching nixpkgs dependencies. Its
-  # overlay requires libdisplay-info_0_2, removed from our newer nixpkgs.
+  # Use the host nixpkgs package so its glibc can load the system Mesa
+  # drivers from /run/opengl-driver. Keep niri-flake for configuration only.
   programs.niri = {
     enable = true;
-    package = inputs.niri.packages.${pkgs.stdenv.hostPlatform.system}.niri-unstable;
+    package = pkgs.niri;
   };
 
   # Essential system packages for niri

@@ -238,6 +238,7 @@
             ./modules/nixos/greenlight.nix
             ./modules/nixos/panko.nix
             ./modules/nixos/agentsview.nix
+            ./modules/nixos/executor.nix
             ./modules/nixos/bb.nix
             ./modules/nixos/drawl.nix
             ./modules/nixos/tic-tac-toe-4-in-a-row.nix

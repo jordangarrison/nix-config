@@ -14,6 +14,15 @@ let
   host = "executor.jordangarrison.dev";
   port = 4400;
   dataDir = "/var/lib/executor";
+  # Same tailnet boundary as bb and day-dashboard. endeavour's host firewall
+  # is off, so without this any LAN client sending this Host/SNI gets through.
+  tailnetOnly = ''
+    allow 127.0.0.1;
+    allow ::1;
+    allow 100.64.0.0/10;
+    allow fd7a:115c:a1e0::/48;
+    deny all;
+  '';
 in
 {
   virtualisation.oci-containers.backend = "docker";
@@ -56,10 +65,11 @@ in
     locations."/" = {
       proxyPass = "http://127.0.0.1:${toString port}";
       proxyWebsockets = true;
+      extraConfig = tailnetOnly;
     };
     locations."= /api/dashboard/batch" = {
       proxyPass = "http://127.0.0.1:${toString port}";
-      extraConfig = ''
+      extraConfig = tailnetOnly + ''
         proxy_set_header Origin $executor_batch_origin;
       '';
     };

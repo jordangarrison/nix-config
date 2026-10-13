@@ -420,14 +420,16 @@ in
   # here. Both are OAuth with dynamic client registration; tokens land in
   # each client's keyring, not this file.
   #
-  # Gated to coding-agent hosts via herdr, which is enabled on exactly the
-  # machines that run agents (endeavour, opportunity, flomac) and off on the
-  # servers (voyager, discovery). Fanned out to each agent's own format
-  # below: pi, omp, Claude Code, Codex, Cursor and OpenCode.
+  # On every host, so agents never fall back to direct servers. The work
+  # gateway only goes to hosts allowed to reach work (userApps.work: endeavour,
+  # opportunity, flomac). Fanned out to each agent's own format below: pi,
+  # omp, Claude Code, Codex, Cursor and OpenCode.
   programs.mcp = {
-    enable = userApps.herdr.enable or false;
-    servers.executor-flo.url = "https://executor.flostag-us-west-2.flokubernetes.com/mcp";
+    enable = true;
     servers.executor.url = "https://executor.jordangarrison.dev/mcp";
+    servers.executor-flo = lib.mkIf (userApps.work.enable or false) {
+      url = "https://executor.flostag-us-west-2.flokubernetes.com/mcp";
+    };
   };
 
   # Native Pi reads only ~/.pi/agent/mcp.json, not the shared config path.
@@ -453,7 +455,8 @@ in
   # store symlinks. Replace just the user-level server map on activation,
   # which drops anything not declared above. Claude Code's per-project
   # servers (`claude mcp add -s local`) are left alone for local dev
-  # servers such as tidewave. Files that don't exist yet are skipped.
+  # servers such as tidewave. A missing file is created holding only the
+  # server map; the agent fills in the rest on first run.
   home.activation.mcpClientSync = lib.mkIf config.programs.mcp.enable (
     let
       servers = config.programs.mcp.servers;
@@ -467,9 +470,14 @@ in
     lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       mcpSet() {
         local file="$1" key="$2" servers="$3"
-        [[ -e "$file" ]] || return 0
         if [[ -v DRY_RUN ]]; then
           echo "Would set .$key in $file"
+        elif [[ ! -e "$file" ]]; then
+          mkdir -p "$(dirname "$file")"
+          (
+            umask 077
+            ${pkgs.jq}/bin/jq -n --arg k "$key" --slurpfile s "$servers" '{($k): $s[0]}' > "$file"
+          )
         elif ${pkgs.jq}/bin/jq empty "$file" 2>/dev/null; then
           (
             umask 077

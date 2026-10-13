@@ -62,6 +62,9 @@ in {
       floai.enable = lib.mkEnableOption "FloSports flo CLI";
       handy.enable = lib.mkEnableOption "Handy push-to-talk speech-to-text";
       herdr.enable = lib.mkEnableOption "Herdr terminal workspace manager for AI coding agents";
+
+      # Access
+      work.enable = lib.mkEnableOption "FloSports work integrations (the executor-flo MCP gateway)";
     };
   };
 

@@ -307,6 +307,7 @@
                   namespace.enable = true;
                   handy.enable = true;
                   herdr.enable = true;
+                  work.enable = true;
                   floai.enable = true;
                   grok-bot.enable = true;
                   bb-desktop.enable = true;
@@ -474,6 +475,7 @@
                   pup.enable = true;
                   handy.enable = true;
                   herdr.enable = true;
+                  work.enable = true;
                   grok-bot.enable = true;
                   bb-desktop.enable = true;
                 };
@@ -712,6 +714,7 @@
                     pup.enable = true;
                     namespace.enable = true;
                     herdr.enable = true;
+                    work.enable = true;
                     floai.enable = true;
                   };
                 };

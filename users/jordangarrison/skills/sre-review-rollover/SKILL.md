@@ -46,7 +46,19 @@ Companion to the [[sre-review]] skill. This skill never creates a top-level mess
   The `<url|text>` mrkdwn syntax keeps Slack from rendering a message preview of the original post. The GitHub PR URL will still unfurl normally.
 - Identity cache: `~/.claude/skills/sre-review-rollover/.identity.json` → `{ "slack_user_id": "U…", "email": "…" }`
 - Day cache: `~/.claude/skills/sre-review/.cache.json` (shared with `sre-review` for today's thread lookup)
-- Bump reaction: `travolta` — "this PR isn't getting the love it deserves, reminding everyone" (added via `mcp__claude_ai_Slack__slack_add_reaction`, emoji name without colons)
+- Bump reaction: `travolta` — "this PR isn't getting the love it deserves, reminding everyone" (added via `slack_add_reaction`, emoji name without colons)
+
+## Slack calls
+
+Slack goes through the `executor-flo` MCP server, not a direct Slack server. Run every Slack call as JavaScript inside its `execute` tool. The account segment of the tool path differs per user, so resolve it once at the start:
+
+```js
+const { items } = await tools.search({ query: "slack_read_thread", limit: 10 });
+const path = items.map(i => i.path).find(p => /^slack_mcp\.user\.[^.]+\.slack_read_thread$/.test(p));
+return path.split(".")[2]; // <account>
+```
+
+Then call `tools.slack_mcp.user[<account>].<tool>({ ... })`; one `execute` program can make several calls. A call returns `{ ok, data }` instead of throwing. On `ok: false`, `error.code` and `error.message` say why (`oauth_reauth_required` means Slack needs reconnecting in the FloSports Executor dashboard). On success, `data.content[0].text` holds Slack's response text. If the search finds no `slack_mcp` path, Slack isn't connected in Executor: stop and say so.
 
 ## Steps
 
@@ -56,7 +68,7 @@ Read `~/.claude/skills/sre-review-rollover/.identity.json`. If present and `slac
 
 If missing or invalid:
 - Read the user's email from CLAUDE memory (`userEmail` in the system context) or ask if absent.
-- Call `mcp__claude_ai_Slack__slack_search_users` with the email.
+- Call `slack_search_users` with `keywords: ["<email>"]`.
 - Persist:
   ```bash
   cat > ~/.claude/skills/sre-review-rollover/.identity.json <<EOF
@@ -71,7 +83,7 @@ Compute yesterday in America/Chicago:
 TZ=America/Chicago date -d 'yesterday' +%F
 ```
 
-Call `mcp__claude_ai_Slack__slack_read_channel` on `CF7SPS45P` with `limit: 80` (covers ~2 workdays).
+Call `slack_read_channel` with `channel_id: "CF7SPS45P"`, `limit: 80` (covers ~2 workdays).
 
 Filter for the most recent message where ALL hold:
 - Posted on yesterday's date (compare `ts` against yesterday in America/Chicago)
@@ -84,7 +96,7 @@ Save yesterday's `thread_ts` and `permalink`.
 
 ### 3. Read yesterday's thread, extract my PR posts
 
-Call `mcp__claude_ai_Slack__slack_read_thread` with channel `CF7SPS45P` and `thread_ts` from step 2.
+Call `slack_read_thread` with `channel_id: "CF7SPS45P"` and `message_ts` set to the thread ts from step 2.
 
 For each reply, keep only those where `user == <slack_user_id from step 1>`. For each kept reply, extract:
 - `description` = text before the last `: https://github.com/...` segment
@@ -160,11 +172,12 @@ Only pause for input if the user explicitly asked for a dry-run/preview, or if s
 ### 8. Post (one reply per eligible PR)
 
 For each eligible PR, call:
-```
-mcp__claude_ai_Slack__slack_send_message
-  channel_id: CF7SPS45P
-  thread_ts:  <today's thread_ts from step 5>
-  text:       [rollover from <ORIGINAL_PERMALINK|yesterday>] <description>: <pr-url>
+```js
+await tools.slack_mcp.user[account].slack_send_message({
+  channel_id: "CF7SPS45P",
+  thread_ts: "<today's thread_ts from step 5>",
+  message: "[rollover from <ORIGINAL_PERMALINK|yesterday>] <description>: <pr-url>",
+});
 ```
 
 Post sequentially, not in parallel — keeps the order in-thread deterministic and avoids rate-limit thrash.
@@ -178,11 +191,12 @@ Report final status with reply permalinks if the API returns them.
 A full rollover re-posts the PR into today's thread. When a PR is only mildly stale — or the user just wants to nudge without adding a new reply — reacting `:travolta:` on the **original** post is the lighter touch: it's the channel's "this PR isn't getting the love it deserves, reminding everyone" signal. Use it when the user says "just bump them" / "give them a travolta" instead of a re-post.
 
 Same eligibility gate as a rollover applies — only bump PRs that genuinely need review (step 4 classified them "needs review"). React on the message carrying the PR URL:
-```
-mcp__claude_ai_Slack__slack_add_reaction
-  channel_id: CF7SPS45P
-  message_ts: <ts of the post you're bumping>
-  emoji:      travolta
+```js
+await tools.slack_mcp.user[account].slack_add_reaction({
+  channel_id: "CF7SPS45P",
+  message_ts: "<ts of the post you're bumping>",
+  emoji: "travolta",
+});
 ```
 
 This and a re-post are alternatives, not both — pick one per PR with the user. A `:travolta:` on yesterday's post keeps the conversation in the original thread; a rollover surfaces it in today's. The single-PR bump-in-place case is also covered by [[sre-review]]'s "Bumping a stale post" section.

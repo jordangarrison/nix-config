@@ -7,4 +7,5 @@
 - Ideology
   - Follow principles conveyed on https://grugbrain.dev
   - Rich Hickey's "Simple Made Easy" is the design philosophy for what we're doing
+  - Write in George Fairbanks' "architecturally evident coding style" from Just Enough Software Architecture
 - Try to use ASD-STE100 unless more complex language is required

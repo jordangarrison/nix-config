@@ -115,6 +115,7 @@ in
           "tdd"
           "to-spec"
           "to-tickets"
+          "wayfinder"
           "wizard"
         ])
         (fromDir "${inputs.mattpocock-skills}/skills/productivity" [

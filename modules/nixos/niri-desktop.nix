@@ -4,13 +4,11 @@
   # Import niri-flake NixOS module
   imports = [ inputs.niri.nixosModules.niri ];
 
-  # Apply niri overlay for package access
-  nixpkgs.overlays = [ inputs.niri.overlays.niri ];
-
-  # Enable niri compositor
+  # Use the host nixpkgs package so its glibc can load the system Mesa
+  # drivers from /run/opengl-driver. Keep niri-flake for configuration only.
   programs.niri = {
     enable = true;
-    package = pkgs.niri-unstable;
+    package = pkgs.niri;
   };
 
   # Noctalia uses ddcutil for external-monitor brightness. This loads i2c-dev
@@ -23,6 +21,16 @@
     swaybg # Wallpaper
     swaylock # Lock screen
     swayidle # Idle management
+  ];
+
+  # niri-flake's default package uses the host pkgs; keep option docs from
+  # evaluating that unused default against dependencies removed upstream.
+  documentation.nixos.extraModules = [
+    {
+      options.programs.niri.package = lib.mkOption {
+        defaultText = lib.literalExpression "(inputs.niri.lib.make-package-set pkgs).niri-stable";
+      };
+    }
   ];
 
   # XDG portal configuration for screen sharing support

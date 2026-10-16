@@ -27,10 +27,12 @@ let
     # Keybindings
     # Shift+Enter sends newline for Claude Code multiline input
     keybind = shift+enter=text:\n
+    # Free Ctrl+Enter (default: toggle_fullscreen) so it passes through to apps
+    keybind = ctrl+enter=unbind
   '';
 in
 lib.mkMerge [
-  (lib.mkIf pkgs.stdenv.isLinux {
+  (lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
     # NixOS class: tiling WM manages decorations
     home.file.".config/ghostty/config".text = commonConfig + ''
       # Linux/NixOS: tiling WM manages decorations
@@ -38,7 +40,7 @@ lib.mkMerge [
       gtk-titlebar = false
     '';
   })
-  (lib.mkIf pkgs.stdenv.isDarwin {
+  (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
     # Darwin class: native tab bar
     home.file.".config/ghostty/config".text = commonConfig + ''
       # macOS/Darwin: native tab bar

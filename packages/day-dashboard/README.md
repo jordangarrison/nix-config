@@ -88,7 +88,7 @@ Where the data comes from (all keyring-backed, hence a **user** service):
 
 | Source | How it's gathered |
 | --- | --- |
-| **Slack**, **Linear**, **Rootly** | the Pi CLI driving the already-authenticated MCP servers in `~/.config/mcp/mcp.json` (tokens live in Pi's keyring) |
+| **Slack**, **Linear**, **Rootly** | the FloSports Executor gateway (`executor-flo` in `~/.pi/agent/mcp.json`) through native Pi; Pi's OAuth token stays in its credential store and the service accounts live in Executor |
 | **Email**, **Calendar** | the `gws` Google Workspace CLI (Gmail unread + today's events) |
 | **Meeting notes** | `gws`/Google Docs — recent "Notes by Gemini" docs; extracts follow-ups/action items assigned to you (Gemini tags owners as `[Full Name]`) and the model turns them into concrete next actions |
 | **GitHub** | the `gh` CLI (file auth) — PRs review-requested-from or @-mentioning you; the model keeps only architecture/infra/deploy-relevant ones and flags changes that may deviate from the playbooks (playbooks.flokubernetes.com). Deliberately NOT everything — GitHub is high-volume. |
@@ -174,18 +174,18 @@ login.
 | `mcpModel` (collectors) | `openai-codex/gpt-5.6-luna` - cheap extraction |
 | `sources` | `[calendar email slack linear confluence]` |
 | `schedule` | `*-*-* 06..21:00:00` |
-| `mcpConfig` | `~/.config/mcp/mcp.json` |
+| `mcpConfig` | `~/.pi/agent/mcp.json` |
 | `environment` | `{}` (e.g. Confluence base URL) |
 
 ## Credentials
 
-Slack, Linear, email, and calendar need **nothing committed** — they reuse the
-OAuth tokens already in your Pi keyring (Slack/Linear MCP) and your `gws` Google
-login. Just make sure those are set up:
+Slack, Linear, email, and calendar need **nothing committed** — they use
+native Pi's OAuth store (MCP) and your `gws` Google login. Set those up first:
 
-- **Slack / Linear**: the MCP servers in `~/.config/mcp/mcp.json` must have been
-  authenticated once interactively (`pi` runs the OAuth flow on first use). Verify:
-  `pi -p --mcp-config ~/.config/mcp/mcp.json 'List one of my Linear issues via MCP'`.
+- **Slack / Linear / Rootly**: authenticate native Pi with `pi mcp login executor-flo`
+  and connect each service in the FloSports Executor dashboard. Verify with
+  `pi mcp list`. Each dashboard collector runs in a temporary project limited
+  to that one server (`DAY_DASHBOARD_EXECUTOR_SERVER`, default `executor-flo`).
 - **Email / Calendar / Meeting notes**: `gws` must be logged in (`gws gmail
   users messages list ...` should return data). Meeting-note action items look
   for lines owned by `DAY_DASHBOARD_ME` (default "Jordan Garrison") in recent

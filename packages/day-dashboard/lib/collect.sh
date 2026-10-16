@@ -14,9 +14,10 @@
 #
 # Data paths (all depend on the user's unlocked login keyring / session bus,
 # which is why the job runs as a systemd *user* service, not a system one):
-#   * Slack, Linear   → the Pi CLI driving the already-authenticated MCP servers
-#                       in $MCP_CONFIG (~/.config/mcp/mcp.json). Tokens live in
-#                       Pi's keyring, so no secrets files are needed.
+#   * Slack, Linear,  → the Pi CLI driving the FloSports Executor gateway
+#     Rootly            (executor-flo in $MCP_CONFIG, ~/.pi/agent/mcp.json).
+#                       Pi's OAuth token for it stays in Pi's private
+#                       credential store; the service accounts live in Executor.
 #   * Email, Calendar → the `gws` Google Workspace CLI (keyring-backed).
 #   * Confluence      → Atlassian REST with a token file (no MCP server exists).
 #
@@ -77,37 +78,47 @@ _gh() {
   timeout "${DAY_DASHBOARD_GH_TIMEOUT:-30}" gh "$@"
 }
 
-# Drive a single MCP server through the Pi CLI. Writes a scoped one-server
-# mcp-config so only that server's tools load (cheaper, no rootly/scaleops
-# noise). $1=server  $2=instruction  → prints Pi's stdout (expected: a JSON obj)
+# Native Pi reads global + trusted project MCP config. Run in a temporary
+# project whose overrides disable every server except the requested one.
+# $1=server  $2=instruction  → prints Pi's stdout (expected: a JSON obj)
 _pi_mcp() {
   local server="$1" instruction="$2"
   [ -r "$MCP_CONFIG" ] || return 1
-  jq -e --arg s "$server" '.mcpServers[$s]' "$MCP_CONFIG" >/dev/null 2>&1 || return 1
-  local cfg="$WORK/mcp-$server.json"
-  jq -c --arg s "$server" '{mcpServers: {($s): .mcpServers[$s]}}' "$MCP_CONFIG" >"$cfg" 2>/dev/null || return 1
-  # `--tools mcp` is an ALLOWLIST: only the MCP tool is enabled. `--no-builtin-tools`
-  # is not enough here — the user's Pi config loads extensions (pi-web-access,
-  # pi-subagents, ...) whose tools would otherwise stay available, so a
-  # prompt-injected Slack/Linear/Rootly response could reach web access, spawn
-  # subagents, or hit other MCP servers. The allowlist + the scoped one-server
-  # mcp-config keep this to exactly the intended read-only source.
+  jq -e --arg s "$server" '.mcpServers[$s] | select(.enabled != false)' "$MCP_CONFIG" >/dev/null 2>&1 || return 1
+  local project="$WORK/mcp-$server"
+  mkdir -p "$project/.pi"
+  jq -c --arg s "$server" '{mcpServers: (.mcpServers | with_entries(
+    if .key == $s then . else .value = {enabled:false} end
+  ))}' "$MCP_CONFIG" >"$project/.pi/mcp.json" 2>/dev/null || return 1
+  # Exclude all installed extensions, then load only native MCP and its
+  # codemode tool. The project overrides prevent calls to other MCP servers;
+  # --tools is an allowlist that prevents access to bash, web, and subagents.
   # A single gather normally finishes in ~60-90s; cap at 120s so three sequential
   # MCP sources stay within the unit's start timeout while one dead server just
   # degrades that source.
-  timeout "${DAY_DASHBOARD_MCP_TIMEOUT:-120}" pi -p \
+  ( cd "$project" && timeout "${DAY_DASHBOARD_MCP_TIMEOUT:-120}" pi -p -a \
     --no-session --no-skills --no-context-files --no-prompt-templates --no-themes \
-    --tools mcp --mcp-config "$cfg" \
+    --no-extensions -e builtin:mcp -e builtin:codemode --tools codemode \
     --model "${DAY_DASHBOARD_MCP_MODEL:-openai-codex/gpt-5.6-luna}" --thinking off \
-    "$instruction" 2>>"$WORK/collect.err"
+    "$instruction" ) 2>>"$WORK/collect.err"
+}
+
+# Work integrations sit behind one Executor gateway rather than one MCP server
+# each. Tell the model which integration namespace to use inside it.
+# $1=integration slug (e.g. slack_mcp)
+EXECUTOR_SERVER="${DAY_DASHBOARD_EXECUTOR_SERVER:-executor-flo}"
+_executor_hint() {
+  # The model does not know today's date; "the last day" needs it.
+  printf 'Today is %s (America/Chicago). Use the %s MCP server'"'"'s execute tool. Inside execute, these tools live under tools.%s.user.<account>; first find the exact paths with tools.search({ query: "%s", limit: 20 }), then call them. Calls return { ok, data } instead of throwing; data.content[0].text holds the response.' \
+    "$(TZ=America/Chicago date +%F)" "$EXECUTOR_SERVER" "$1" "${1%_mcp}"
 }
 
 # ── Linear (via MCP) ────────────────────────────────────────────────────────
 collect_linear() {
   _run_override linear && return 0
   local n="${DAY_DASHBOARD_MAX_ITEMS:-8}" out
-  if ! out="$(_pi_mcp linear "Use the Linear MCP tools to list up to $n of my active (not done, not canceled) assigned issues, most recently updated first. Output ONLY a JSON object {\"items\":[{\"title\":\"IDENT — title\",\"url\":\"issue url\",\"priority\":\"high|medium|low\",\"state\":\"state name\"}]} and nothing else. If you cannot reach Linear, output {\"items\":[]}.")"; then
-    _unavailable linear "linear mcp unavailable (no server in $MCP_CONFIG or Pi/keyring not reachable)"
+  if ! out="$(_pi_mcp "$EXECUTOR_SERVER" "$(_executor_hint linear_mcp) Use the Linear tools to list up to $n of my active (not done, not canceled) assigned issues, most recently updated first. Output ONLY a JSON object {\"items\":[{\"title\":\"IDENT — title\",\"url\":\"issue url\",\"priority\":\"high|medium|low\",\"state\":\"state name\"}]} and nothing else. If you cannot reach Linear, output {\"items\":[]}.")"; then
+    _unavailable linear "linear unavailable ($EXECUTOR_SERVER not in $MCP_CONFIG, or Pi/keyring not reachable)"
     return 0
   fi
   printf '%s' "$out" | _extract_obj | _finalize linear \
@@ -118,8 +129,8 @@ collect_linear() {
 collect_slack() {
   _run_override slack && return 0
   local n="${DAY_DASHBOARD_MAX_ITEMS:-8}" out
-  if ! out="$(_pi_mcp slack "Use the Slack MCP tools to find up to $n recent Slack items from the last day: (a) messages that @-mention me or are unread DMs I have NOT answered, and (b) a few recent messages I SENT that answer or acknowledge a request. For type (b), begin the detail with 'ALREADY HANDLED BY ME: ' so a duplicate notification elsewhere can be dropped. Output ONLY a JSON object {\"items\":[{\"title\":\"#channel · sender\",\"detail\":\"message text\",\"url\":\"permalink\"}]} and nothing else. If you cannot reach Slack, output {\"items\":[]}.")"; then
-    _unavailable slack "slack mcp unavailable (no server in $MCP_CONFIG or Pi/keyring not reachable)"
+  if ! out="$(_pi_mcp "$EXECUTOR_SERVER" "$(_executor_hint slack_mcp) Use the Slack tools to find up to $n recent Slack items from the last day: (a) messages that @-mention me or are unread DMs I have NOT answered, and (b) a few recent messages I SENT that answer or acknowledge a request. For type (b), begin the detail with 'ALREADY HANDLED BY ME: ' so a duplicate notification elsewhere can be dropped. Output ONLY a JSON object {\"items\":[{\"title\":\"#channel · sender\",\"detail\":\"message text\",\"url\":\"permalink\"}]} and nothing else. If you cannot reach Slack, output {\"items\":[]}.")"; then
+    _unavailable slack "slack unavailable ($EXECUTOR_SERVER not in $MCP_CONFIG, or Pi/keyring not reachable)"
     return 0
   fi
   printf '%s' "$out" | _extract_obj | _finalize slack \
@@ -130,8 +141,8 @@ collect_slack() {
 collect_rootly() {
   _run_override rootly && return 0
   local n="${DAY_DASHBOARD_MAX_ITEMS:-8}" out
-  if ! out="$(_pi_mcp rootly "Use the Rootly MCP tools to list up to $n active or ongoing incidents that involve me or need my attention (started/mitigating, not resolved). Output ONLY a JSON object {\"items\":[{\"title\":\"incident title\",\"url\":\"incident url\",\"state\":\"status\"}]} and nothing else. If you cannot reach Rootly, output {\"items\":[]}.")"; then
-    _unavailable rootly "rootly mcp unavailable (no server in $MCP_CONFIG or Pi/keyring not reachable)"
+  if ! out="$(_pi_mcp "$EXECUTOR_SERVER" "$(_executor_hint rootly_mcp) Use the Rootly tools to list up to $n active or ongoing incidents that involve me or need my attention (started/mitigating, not resolved). Output ONLY a JSON object {\"items\":[{\"title\":\"incident title\",\"url\":\"incident url\",\"state\":\"status\"}]} and nothing else. If you cannot reach Rootly, output {\"items\":[]}.")"; then
+    _unavailable rootly "rootly unavailable ($EXECUTOR_SERVER not in $MCP_CONFIG, or Pi/keyring not reachable)"
     return 0
   fi
   printf '%s' "$out" | _extract_obj | _finalize rootly \

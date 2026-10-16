@@ -19,7 +19,7 @@ let
     text = builtins.readFile ./tools/scripts/binaural-beats.sh;
   };
   # Use pgtk variant on Linux for native Wayland support
-  emacsPackage = if pkgs.stdenv.isLinux then pkgs.emacs-pgtk else pkgs.emacs;
+  emacsPackage = if pkgs.stdenv.hostPlatform.isLinux then pkgs.emacs-pgtk else pkgs.emacs;
   # Live-checkout path for hand-authored agent content (see ./agents)
   agentsLive = "${config.home.homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/agents";
   # OMP loads pi-claude-bridge from this bundle (see packages/omp-plugins).
@@ -32,18 +32,27 @@ let
 in
 {
   imports = [
+    inputs.try.homeModules.default
     ./tools/nvim/nvf.nix
     ../../modules/home/acp-adapters
     ../../modules/home/languages
     ../../modules/home/pi
     ../../modules/home/herdr
     ../../modules/home/tuicr
+    ../../modules/home/bb
+    ../../modules/home/bb-desktop
     ../../modules/home/agent-skills
     ../../modules/home/agent-workspaces
     ../../modules/home/claude-code
     ../../modules/home/codex
+    ../../modules/home/cursor-agent
     ../../modules/home/omp
   ];
+
+  programs.bb-desktop = {
+    enable = userApps.bb-desktop.enable or false;
+    defaultServerUrl = "https://bb.jordangarrison.dev";
+  };
 
   programs.agent-skills = {
     enable = true;
@@ -84,7 +93,7 @@ in
           "gws-calendar-agenda"
           "gws-people"
         ])
-        (fromDir "${pkgs.gh-stack.src}/skills" [ "gh-stack" ])
+        (fromDir "${pkgs.master.gh-stack.src}/skills" [ "gh-stack" ])
         (fromDir "${inputs.aws-use-sso}/skills" [ "aws-use-sso" ])
         (fromDir "${inputs.anthropic-skills}/skills" [ "frontend-design" ])
         (fromDir "${inputs.archify}" [ "archify" ])
@@ -92,6 +101,31 @@ in
         (fromDir "${inputs.boristane-agent-skills}/skills" [ "logging-best-practices" ])
         (fromDir "${inputs.caveman}/skills" [ "caveman" ])
         (fromDir "${inputs.lavish-axi}/skills" [ "lavish" ])
+        (fromDir "${inputs.mattpocock-skills}/skills/engineering" [
+          "code-review"
+          "codebase-design"
+          "diagnosing-bugs"
+          "domain-modeling"
+          "grill-with-docs"
+          "implement-spec"
+          "improve-codebase-architecture"
+          "pr"
+          "retro"
+          "setup-matt-pocock-skills"
+          "tdd"
+          "to-spec"
+          "to-tickets"
+          "wayfinder"
+          "wizard"
+        ])
+        (fromDir "${inputs.mattpocock-skills}/skills/productivity" [
+          "grill-me"
+          "grilling"
+          "handoff"
+          "to-questionnaire"
+          "wait-what"
+          "writing-for-agents"
+        ])
         (fromDir "${inputs.obsidian-skills}/skills" [
           "obsidian-bases"
           "obsidian-cli"
@@ -149,8 +183,7 @@ in
       "statusline.sh" = "${agentsLive}/claude/statusline.sh";
     };
     settings = {
-      model = "fable";
-      effortLevel = "high";
+      model = "claude-opus-5-5";
       theme = "auto";
       tui = "fullscreen";
       editorMode = "normal";
@@ -169,6 +202,22 @@ in
         type = "command";
         command = ''bash "$HOME/.claude/statusline.sh"'';
       };
+      # MCP comes only from programs.mcp (the Executor gateways). The Slack
+      # plugin and claude.ai account connectors would each add direct
+      # servers for integrations Executor already covers.
+      enabledPlugins."slack@claude-plugins-official" = false;
+      disableClaudeAiConnectors = true;
+    };
+  };
+
+  # Cursor Agent CLI. cli-config.json is merge-on-activation (auth, model,
+  # and the permissions allowlist stay mutable). unrestricted + disabled
+  # sandbox match claude's bypassPermissions and codex's danger-full-access.
+  programs.cursor-agent = {
+    enable = true;
+    settings = {
+      approvalMode = "unrestricted";
+      sandbox.mode = "disabled";
     };
   };
 
@@ -179,11 +228,16 @@ in
     config = {
       approval_policy = "never";
       sandbox_mode = "danger-full-access";
-      model = "gpt-5.6-sol";
+      model = "gpt-6-sol";
       model_reasoning_effort = "high";
       plan_mode_reasoning_effort = "xhigh";
       personality = "pragmatic";
       approvals_reviewer = "user";
+      # Same list as programs.mcp. A deep merge, so servers codex or the
+      # ChatGPT app add themselves (node_repl) stay.
+      mcp_servers = lib.mkIf config.programs.mcp.enable (
+        lib.mapAttrs (_: s: { inherit (s) url; }) config.programs.mcp.servers
+      );
       tui = {
         status_line = [
           "model-with-reasoning"
@@ -252,7 +306,7 @@ in
     "$HOME/.emacs.d/bin"
     "$HOME/.cargo/bin"
   ]
-  ++ lib.optionals pkgs.stdenv.isDarwin [ "/opt/homebrew/bin" ];
+  ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [ "/opt/homebrew/bin" ];
 
   # Environment variables
   home.sessionVariables = {
@@ -267,6 +321,18 @@ in
     enable = true;
     package = pkgs.llm-agents.pi;
     settings = {
+      defaultProvider = "openai-codex";
+      defaultModel = "gpt-6.1-sol";
+      # Keep model cycling scoped to these exact provider/model IDs. Activation
+      # replaces any runtime scope saved by /scoped-models.
+      enabledModels = [
+        "openai-codex/gpt-6.1-sol"
+        "openai-codex/gpt-6-luna"
+        "openai-codex/gpt-6-astra"
+        "claude-bridge/claude-opus-5-5"
+        "claude-bridge/claude-fable-5-1"
+        "cursor/grok-4.7@256k"
+      ];
       # Third-party extensions at their latest release, installed unmodified
       # by pi itself into ~/.pi/agent/npm on first start. Move them forward
       # with `pi update --extensions`. Never patch their source: code we own
@@ -276,11 +342,11 @@ in
         # 1M (elidickinson/pi-claude-bridge#116, fixed after 0.8.0). When
         # `npm view pi-claude-bridge version` is newer than 0.8.0, replace
         # this with "npm:pi-claude-bridge" and run `pi update --extensions`.
-        "git:github.com/elidickinson/pi-claude-bridge@0750748"
+        "git:github.com/elidickinson/pi-claude-bridge@07507489c0c54f7f978ab752eb9beb5cc0960f24"
         "npm:pi-subagents"
-        "npm:pi-mcp-adapter"
         "npm:pi-web-access"
         "npm:pi-foldable-tools"
+        "npm:@pixu1980/pi-cursor"
         "git:github.com/joelhooks/pi-until"
       ];
       # Install with the Nix npm, so package installs do not depend on PATH.
@@ -302,9 +368,8 @@ in
     # hosts/flomac/configuration.nix; contextWindow below must stay <= that
     # value or ollama silently truncates the prompt.
     #
-    # These stay opt-in per machine: pi only offers a model in /model once it
-    # is in the runtime-owned enabledModels array, which this module
-    # deliberately does not declare.
+    # These remain available through /model, but are excluded from the
+    # declarative model-cycling scope above.
     models.providers.flomac = {
       baseUrl = "https://h952l3dphh.owl-yo.ts.net:11434/v1";
       api = "openai-completions";
@@ -343,55 +408,107 @@ in
         }
       ];
     };
+
+    # pi-subagents agents used by the PR review skills. Each definition lives
+    # beside the skill that runs it; @HOME@ stands in for paths pi installs at
+    # run time (skills fan-out, npm extensions).
+    agents.files =
+      let
+        withHome =
+          path:
+          builtins.replaceStrings [ "@HOME@" ] [ config.home.homeDirectory ] (builtins.readFile path);
+      in
+      {
+        "pr-review-specialist.md".text = withHome ./skills/multi-agent-pr-review/pi-agents/specialist.md;
+        "pr-review-consolidator.md".text = withHome ./skills/multi-agent-pr-review/pi-agents/consolidator.md;
+        "pr-review-slack-watcher.md".text = withHome ./skills/slack-pr-review/pi-agents/slack-watcher.md;
+      };
   };
 
   programs.acp-adapters = {
     enable = true;
   };
 
-  # MCP servers written to ~/.config/mcp/mcp.json (read by pi-mcp-adapter,
-  # and any other MCP client). Gated to the coding-agent hosts via herdr,
-  # which is enabled on exactly the machines that run agents (endeavour,
-  # opportunity, flomac) and off on the servers (voyager, discovery). Slack
-  # is a remote OAuth endpoint hosted by Slack, so there is no local daemon
-  # to run — pi runs the browser OAuth flow on first use and stores tokens in
-  # its own keyring, not in this file. The clientId is Slack's public MCP
-  # OAuth client, safe to commit.
+  # The one MCP server list for every agent. Integrations live behind two
+  # Executor gateways instead of per-agent servers: FloSports' for work
+  # connections, and the self-hosted one on endeavour (modules/nixos/executor.nix,
+  # tailnet-only) for personal ones. Add new integrations in Executor, not
+  # here. Both are OAuth with dynamic client registration; tokens land in
+  # each client's keyring, not this file.
+  #
+  # On every host, so agents never fall back to direct servers. The work
+  # gateway only goes to hosts allowed to reach work (userApps.work: endeavour,
+  # opportunity, flomac). Fanned out to each agent's own format below: pi,
+  # omp, Claude Code, Codex, Cursor and OpenCode.
   programs.mcp = {
-    enable = userApps.herdr.enable or false;
-    servers.slack = {
-      url = "https://mcp.slack.com/mcp";
-      oauth = {
-        clientId = "1601185624273.8899143856786";
-        # pi-mcp-adapter reads oauth.redirectUri (a full URI), not the
-        # plugin's callbackPort field. Slack's pre-registered OAuth client
-        # only accepts port 3118, so pin the exact registered redirect URI
-        # — otherwise pi falls back to its default port 19876 and Slack
-        # rejects it with "redirect_uri did not match any configured URIs".
-        redirectUri = "http://localhost:3118/callback";
-      };
-    };
-    # SRE/dev remote MCP servers. All OAuth with dynamic client registration,
-    # so pi's default callback works and no clientId/redirectUri pin is needed
-    # (unlike Slack's pre-registered client above). No secrets — tokens land in
-    # pi's keyring, so these are safe in a public repo.
-    servers.linear.url = "https://mcp.linear.app/mcp";
-    servers.rootly.url = "https://mcp.rootly.com/mcp";
-    # Confluence + Jira. Claude Code points at the older /v1/sse endpoint; this
-    # uses the streamable-HTTP /v1/mcp one so the module's default type=http
-    # applies. Same site as the jira CLI (flocasts.atlassian.net).
-    servers.atlassian.url = "https://mcp.atlassian.com/v1/mcp";
-    # scaleops' authorization-server metadata is self-inconsistent: it
-    # advertises the AS as "https://mcp.scaleops.com" (no slash) but publishes
-    # issuer "https://mcp.scaleops.com/" (slash), violating RFC 8414 §3.3. The
-    # MCP SDK's one-directional slash tolerance can't bridge it and rejects the
-    # server, so relax the issuer echo check for this server only (a config
-    # bug on scaleops' side, not ours). Revisit/remove once they fix it.
-    servers.scaleops = {
-      url = "https://mcp.scaleops.com";
-      oauth.skipIssuerMetadataValidation = true;
+    enable = true;
+    servers.executor.url = "https://executor.jordangarrison.dev/mcp";
+    servers.executor-flo = lib.mkIf (userApps.work.enable or false) {
+      url = "https://executor.flostag-us-west-2.flokubernetes.com/mcp";
     };
   };
+
+  # Native Pi reads only ~/.pi/agent/mcp.json, not the shared config path.
+  # Translate the OAuth field that differs without duplicating the server
+  # inventory.
+  home.file.".pi/agent/mcp.json" = lib.mkIf config.programs.mcp.enable {
+    text = builtins.toJSON {
+      mcpServers = lib.mapAttrs (name: server:
+        { inherit (server) url; }
+        // lib.optionalAttrs (server.headers != { }) { inherit (server) headers; }
+        // lib.optionalAttrs (server ? oauth) {
+          oauth = (removeAttrs server.oauth [ "redirectUri" ])
+            // lib.optionalAttrs (server.oauth ? redirectUri) {
+              callbackUrl = server.oauth.redirectUri;
+            };
+        }
+      ) config.programs.mcp.servers;
+    };
+  };
+
+  # Claude Code, Cursor and OpenCode keep their MCP lists inside files they
+  # also write at runtime (session state, settings), so they can't be
+  # store symlinks. Replace just the user-level server map on activation,
+  # which drops anything not declared above. Claude Code's per-project
+  # servers (`claude mcp add -s local`) are left alone for local dev
+  # servers such as tidewave. A missing file is created holding only the
+  # server map; the agent fills in the rest on first run.
+  home.activation.mcpClientSync = lib.mkIf config.programs.mcp.enable (
+    let
+      servers = config.programs.mcp.servers;
+      claude = pkgs.writeText "claude-mcp-servers.json" (builtins.toJSON (
+        lib.mapAttrs (_: s: { type = "http"; inherit (s) url; }) servers));
+      cursor = pkgs.writeText "cursor-mcp-servers.json" (builtins.toJSON (
+        lib.mapAttrs (_: s: { inherit (s) url; }) servers));
+      opencode = pkgs.writeText "opencode-mcp-servers.json" (builtins.toJSON (
+        lib.mapAttrs (_: s: { type = "remote"; inherit (s) url; enabled = true; }) servers));
+    in
+    lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      mcpSet() {
+        local file="$1" key="$2" servers="$3"
+        if [[ -v DRY_RUN ]]; then
+          echo "Would set .$key in $file"
+        elif [[ ! -e "$file" ]]; then
+          mkdir -p "$(dirname "$file")"
+          (
+            umask 077
+            ${pkgs.jq}/bin/jq -n --arg k "$key" --slurpfile s "$servers" '{($k): $s[0]}' > "$file"
+          )
+        elif ${pkgs.jq}/bin/jq empty "$file" 2>/dev/null; then
+          (
+            umask 077
+            ${pkgs.jq}/bin/jq --arg k "$key" --slurpfile s "$servers" '.[$k] = $s[0]' "$file" \
+              > "$file.hm-mcp"
+          ) && mv "$file.hm-mcp" "$file"
+        else
+          warnEcho "$file is not valid JSON; skipping MCP server sync"
+        fi
+      }
+      mcpSet "$HOME/.claude.json" mcpServers ${claude}
+      mcpSet "$HOME/.cursor/mcp.json" mcpServers ${cursor}
+      mcpSet "$HOME/.config/opencode/opencode.json" mcp ${opencode}
+    ''
+  );
 
   # OMP (oh-my-pi). Same ownership split as claude-code/codex above:
   # AGENTS.md is the live out-of-store symlink, config.yml is merged on
@@ -411,8 +528,8 @@ in
   programs.omp = {
     enable = true;
     instructionsFile = "${agentsLive}/AGENTS.md";
-    # Same generated file pi's adapter reads, so both agents see one
-    # server list. Read-only, so add servers in programs.mcp, not `/mcp add`.
+    # Same server inventory as native Pi, with OMP's own config format.
+    # Read-only, so add servers in programs.mcp, not `/mcp add`.
     mcpConfigSource = lib.mkIf config.programs.mcp.enable config.xdg.configFile."mcp/mcp.json".source;
     extensionPaths = [
       "${ompPlugins}/lib/node_modules/jordangarrison-omp-plugins"
@@ -470,6 +587,7 @@ in
 
       # LLM Agents (available via overlay as pkgs.llm-agents.*)
       llm-agents.claude-code
+      llm-agents.cursor-agent
       sox # Audio playback/recording, used by Claude Code
       otel-tui # Terminal OpenTelemetry viewer
       stack-cli # Squash-safe stacked PR/MR repair CLI (kitlangton/stack), installs `stack`
@@ -554,6 +672,7 @@ in
       lua
       nixpkgs-fmt
       nodejs
+      ruby # try init calls the unwrapped Ruby script from its shell function
       bash-language-server
       prettier
       typescript
@@ -606,6 +725,9 @@ in
     ++ lib.optionals (userApps.pup.enable or false) [
       pup # AI-agent-ready CLI for Datadog's observability platform
     ]
+    ++ lib.optionals (userApps.namespace.enable or false) [
+      namespace-cli # nsc/ns CLIs for Namespace (namespace.so)
+    ]
     ++ lib.optionals (userApps.floai.enable or false) [
       inputs.floai.packages.${pkgs.stdenv.hostPlatform.system}.flo-cli
     ]
@@ -613,14 +735,17 @@ in
       llm-agents.codex
       llm-agents.opencode
     ]
-    ++ lib.optionals (userApps.handy.enable or false) [
-      llm-agents.handy
-    ]
+    ++ lib.optionals (userApps.handy.enable or false) (
+      [ llm-agents.handy ]
+      # Handy needs a native Wayland typing tool; its Enigo/X11 fallback
+      # cannot reliably type into Niri clients and can also prevent copying.
+      ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [ wtype ]
+    )
     ++ lib.optionals (userApps.todoist.enable or false) [
       todoist
     ]
     ++ (
-      if pkgs.stdenv.isDarwin then
+      if pkgs.stdenv.hostPlatform.isDarwin then
         [
           glibtool
         ]
@@ -634,9 +759,6 @@ in
           # emacs
           emacsPackages.sqlite3
           glibc
-          # gnaural was removed from unstable (unmaintained, gtk2); still in 25.11
-          stable.gnaural
-          grip
           pavucontrol
           pinentry-gnome3
           remmina
@@ -650,10 +772,10 @@ in
           ghostty
         ]
     )
-    ++ lib.optionals ((userApps.discord.enable or false) && pkgs.stdenv.isLinux) [
+    ++ lib.optionals ((userApps.discord.enable or false) && pkgs.stdenv.hostPlatform.isLinux) [
       discord
     ]
-    ++ lib.optionals ((userApps.signal.enable or false) && pkgs.stdenv.isLinux) [
+    ++ lib.optionals ((userApps.signal.enable or false) && pkgs.stdenv.hostPlatform.isLinux) [
       (pkgs.symlinkJoin {
         name = "signal-desktop";
         paths = [ pkgs.signal-desktop ];
@@ -664,7 +786,7 @@ in
         '';
       })
     ]
-    ++ lib.optionals ((userApps.obs.enable or false) && pkgs.stdenv.isLinux) [
+    ++ lib.optionals ((userApps.obs.enable or false) && pkgs.stdenv.hostPlatform.isLinux) [
       obs-studio
     ]
     ++ lib.optionals (userApps.spotify.enable or false) [
@@ -676,18 +798,23 @@ in
     ++ lib.optionals (userApps.freelens.enable or false) [
       freelens-bin
     ]
-    ++ lib.optionals ((userApps.codiff.enable or false) && pkgs.stdenv.isLinux) [
+    ++ lib.optionals ((userApps.codiff.enable or false) && pkgs.stdenv.hostPlatform.isLinux) [
       codiff
     ]
     ++ lib.optionals (userApps.plannotator.enable or false) [
       plannotator
     ];
 
-  programs.gpg = {
-    enable = pkgs.stdenv.isLinux;
+  programs.try = {
+    enable = true;
+    path = "~/dev/tries";
   };
 
-  # services.gpg-agent = { enable = pkgs.stdenv.isLinux; };
+  programs.gpg = {
+    enable = pkgs.stdenv.hostPlatform.isLinux;
+  };
+
+  # services.gpg-agent = { enable = pkgs.stdenv.hostPlatform.isLinux; };
 
   programs.zsh = {
     enable = true;
@@ -715,6 +842,28 @@ in
       fi
 
       alias fd="fd --color=never"
+
+      # try has no upstream completion script; offer commands and existing tries.
+      _try_completion() {
+        local dir
+        local -a commands tries
+        commands=(
+          'clone:Clone a Git repository'
+          'worktree:Create a Git worktree'
+          '.:Create a worktree from the current directory'
+          '--help:Show help'
+        )
+        if (( CURRENT == 2 )); then
+          for dir in "$HOME${lib.removePrefix "~" config.programs.try.path}"/*(N/); do
+            tries+=( "''${dir:t}" )
+          done
+          _describe -t commands 'try command' commands
+          _describe -t tries 'experiment' tries
+        elif [[ ''${words[2]} == worktree ]]; then
+          _files -/
+        fi
+      }
+      compdef _try_completion try
 
       # Load user secrets if present
       [ -f "$HOME/.env" ] && source "$HOME/.env"
@@ -746,7 +895,7 @@ in
     };
     extensions = with pkgs; [
       gh-dash
-      gh-stack
+      master.gh-stack
     ];
   };
 
@@ -881,7 +1030,7 @@ in
   # Doom caches Emacs' absolute load-path, including Nix store paths, in an
   # init file keyed only by the Emacs version. Rebuild that cache when Nix
   # changes the store path without changing the version.
-  home.activation.doomSyncOnEmacsChange = lib.mkIf pkgs.stdenv.isLinux (
+  home.activation.doomSyncOnEmacsChange = lib.mkIf pkgs.stdenv.hostPlatform.isLinux (
     lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       doom_cli="${homeDirectory}/.emacs.d/bin/doom"
       doom_init="${homeDirectory}/.emacs.d/.local/etc/@/init.${lib.versions.majorMinor emacsPackage.version}.el"
@@ -1050,9 +1199,11 @@ in
       "--height 40%"
       "--border"
     ];
-    fileWidgetCommand = "fd --type f";
-    fileWidgetOptions = [ "--preview 'bat --style=numbers --color=always --line-range :500 {}'" ];
-    changeDirWidgetCommand = "fd --type d";
+    fileWidget.command = "fd --type f";
+    fileWidget.options = [ "--preview 'bat --style=numbers --color=always --line-range :500 {}'" ];
+    changeDirWidget.command = "fd --type d";
+    # Atuin already owns Ctrl-R in zsh; avoid installing a competing binding.
+    historyWidget.zsh.command = "";
   };
 
   # Starship prompt
@@ -1176,20 +1327,20 @@ in
 
     # Claude Desktop
     # "Library/Application Support/Claude/claude_desktop_config.json" =
-    #   lib.mkIf pkgs.stdenv.isDarwin {
+    #   lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
     #     source = ./tools/claude-desktop/claude_desktop_config.json;
     #   };
 
     # Espanso
-    ".config/espanso/match/base.yml" = lib.mkIf (!pkgs.stdenv.isDarwin) {
+    ".config/espanso/match/base.yml" = lib.mkIf (!pkgs.stdenv.hostPlatform.isDarwin) {
       source = ./tools/espanso/match/base.yml;
     };
-    "Library/Application Support/espanso/match/base.yml" = lib.mkIf pkgs.stdenv.isDarwin {
+    "Library/Application Support/espanso/match/base.yml" = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
       source = ./tools/espanso/match/base.yml;
     };
 
     # LinearMouse
-    # ".config/linearmouse/linearmouse.json" = lib.mkIf pkgs.stdenv.isDarwin {
+    # ".config/linearmouse/linearmouse.json" = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
     #   source = ./tools/linearmouse/linearmouse.json;
     # };
 
@@ -1212,7 +1363,7 @@ in
   # `handy --toggle-transcription` bind hits something. Pinning ExecStart to
   # the store path means home-manager restarts the unit on package bumps.
   # Linux-only: systemd.user.services doesn't exist in home-manager on darwin.
-  systemd.user.services = lib.mkIf (pkgs.stdenv.isLinux && (userApps.handy.enable or false)) {
+  systemd.user.services = lib.mkIf (pkgs.stdenv.hostPlatform.isLinux && (userApps.handy.enable or false)) {
     handy = {
       Unit = {
         Description = "Handy - push-to-talk speech-to-text";

@@ -91,7 +91,7 @@
 
   # Enable Logitech Unifying Receiver (endeavour-specific hardware)
   hardware.logitech.wireless.enable = true;
-  hardware.logitech.wireless.enableGraphical = true;
+  programs.solaar.enable = true;
 
   # User configuration now handled by user modules in flake.nix
 
@@ -104,6 +104,26 @@
       # Windows virtualized
       # winboat # 2025-11-18 Currently broken
     ];
+
+  # Private tailnet access to bb; the reusable service stays loopback-only.
+  security.acme.certs."bb.jordangarrison.dev".group = "nginx";
+  services.nginx.virtualHosts."bb.jordangarrison.dev" = {
+    forceSSL = true;
+    useACMEHost = "bb.jordangarrison.dev";
+    locations."/" = {
+      proxyPass = "http://127.0.0.1:${toString config.services.bb.port}";
+      proxyWebsockets = true;
+      extraConfig = ''
+        allow 127.0.0.1;
+        allow ::1;
+        allow 100.64.0.0/10;
+        allow fd7a:115c:a1e0::/48;
+        deny all;
+        proxy_read_timeout 3600s;
+        proxy_buffering off;
+      '';
+    };
+  };
 
   # Or disable the firewall altogether.
   networking.firewall.enable = false;

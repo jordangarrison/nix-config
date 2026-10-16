@@ -3,7 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11";
+    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-26.05";
     nixpkgs-master.url = "github:nixos/nixpkgs/master";
     nixos-hardware.url = "github:nixos/nixos-hardware";
     nix-darwin = {
@@ -83,6 +83,10 @@
       url = "github:agavra/tuicr";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    try = {
+      url = "github:tobi/try";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     warp-preview = {
       url = "github:jordangarrison/warp-preview-flake";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -126,6 +130,10 @@
     };
     lavish-axi = {
       url = "github:kunchenguid/lavish-axi";
+      flake = false;
+    };
+    mattpocock-skills = {
+      url = "github:mattpocock/skills";
       flake = false;
     };
     obsidian-skills = {
@@ -174,6 +182,22 @@
       ...
     }:
     {
+      nixosModules.bb = ./modules/nixos/bb.nix;
+      homeManagerModules.bb-desktop = ./modules/home/bb-desktop;
+
+      packages.x86_64-linux.bb-desktop =
+        let
+          pkgs = import nixpkgs { system = "x86_64-linux"; };
+        in
+        pkgs.callPackage ./packages/bb-desktop { };
+
+      checks.x86_64-linux.bb-module =
+        self.nixosConfigurations.endeavour.pkgs.runCommand "bb-module-tests" {
+          results = builtins.toJSON (import ./tests/bb-module.nix { flake = self; });
+        } ''
+          printf '%s\n' "$results" > "$out"
+        '';
+
       nixosConfigurations = {
         "endeavour" = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs; };
@@ -188,6 +212,7 @@
             ./modules/readwise-cli-overlay.nix
             ./modules/varlock-overlay.nix
             ./modules/pup-overlay.nix
+            ./modules/namespace-cli-overlay.nix
             ./modules/sidecar-overlay.nix
             ./modules/codiff-overlay.nix
             ./modules/plannotator-overlay.nix
@@ -210,6 +235,8 @@
             ./modules/nixos/greenlight.nix
             ./modules/nixos/panko.nix
             ./modules/nixos/agentsview.nix
+            ./modules/nixos/executor.nix
+            ./modules/nixos/bb.nix
             ./modules/nixos/drawl.nix
             ./modules/nixos/tic-tac-toe-4-in-a-row.nix
             ./modules/nixos/cloudflared.nix
@@ -274,10 +301,13 @@
                   azure-cli.enable = true;
                   okta.enable = true;
                   pup.enable = true;
+                  namespace.enable = true;
                   handy.enable = true;
                   herdr.enable = true;
+                  work.enable = true;
                   floai.enable = true;
                   grok-bot.enable = true;
+                  bb-desktop.enable = true;
                 };
               };
 
@@ -300,6 +330,19 @@
               virtualization.virt-manager = {
                 enable = true;
                 users = [ "jordangarrison" ];
+              };
+
+              # bb owns its server + host daemon; Nix owns its version.
+              services.bb = {
+                enable = true;
+                user = "jordangarrison";
+                environment.BB_APP_URL = "https://bb.jordangarrison.dev";
+                providers = {
+                  cursor.enable = true;
+                  codex.enable = true;
+                  pi.enable = true;
+                  claude.enable = true;
+                };
               };
 
               # Enable FreeRDP
@@ -373,6 +416,7 @@
             ./modules/readwise-cli-overlay.nix
             ./modules/varlock-overlay.nix
             ./modules/pup-overlay.nix
+            ./modules/namespace-cli-overlay.nix
             ./modules/sidecar-overlay.nix
             ./modules/codiff-overlay.nix
             ./modules/plannotator-overlay.nix
@@ -390,6 +434,7 @@
             ./modules/nixos/audio/pipewire.nix
             ./modules/nixos/audio/speech-dispatcher.nix
             ./modules/nixos/development.nix
+            ./modules/nixos/bb.nix
             ./modules/nixos/virtualization.nix
             ./modules/nixos/tablet-mode.nix
             ./users/jordangarrison/nixos.nix
@@ -427,7 +472,9 @@
                   pup.enable = true;
                   handy.enable = true;
                   herdr.enable = true;
+                  work.enable = true;
                   grok-bot.enable = true;
+                  bb-desktop.enable = true;
                 };
               };
 
@@ -464,6 +511,23 @@
 
               # Enable tablet mode for Framework 12 touchscreen
               tablet-mode.enable = true;
+
+              # Desktop app is a client. This daemon runs tasks for the server
+              # on endeavour. Enroll once with bb-host-enroll; see docs/runbooks/bb.md.
+              services.bb = {
+                enable = true;
+                role = "host";
+                user = "jordangarrison";
+                serverUrl = "https://bb.jordangarrison.dev";
+                # The desktop app binds its own daemon to 38887.
+                hostDaemonPort = 38888;
+                providers = {
+                  cursor.enable = true;
+                  codex.enable = true;
+                  pi.enable = true;
+                  claude.enable = true;
+                };
+              };
             }
           ];
 
@@ -480,6 +544,7 @@
             ./modules/readwise-cli-overlay.nix
             ./modules/varlock-overlay.nix
             ./modules/pup-overlay.nix
+            ./modules/namespace-cli-overlay.nix
             ./modules/sidecar-overlay.nix
             ./modules/codiff-overlay.nix
             ./modules/plannotator-overlay.nix
@@ -559,6 +624,7 @@
             ./modules/readwise-cli-overlay.nix
             ./modules/varlock-overlay.nix
             ./modules/pup-overlay.nix
+            ./modules/namespace-cli-overlay.nix
             ./modules/sidecar-overlay.nix
             ./modules/codiff-overlay.nix
             ./modules/plannotator-overlay.nix
@@ -620,6 +686,7 @@
             ./modules/readwise-cli-overlay.nix
             ./modules/varlock-overlay.nix
             ./modules/pup-overlay.nix
+            ./modules/namespace-cli-overlay.nix
             ./modules/sidecar-overlay.nix
             ./modules/codiff-overlay.nix
             ./modules/plannotator-overlay.nix
@@ -642,7 +709,9 @@
                     azure-cli.enable = true;
                     plannotator.enable = true;
                     pup.enable = true;
+                    namespace.enable = true;
                     herdr.enable = true;
+                    work.enable = true;
                     floai.enable = true;
                   };
                 };
@@ -672,6 +741,7 @@
             ./modules/readwise-cli-overlay.nix
             ./modules/varlock-overlay.nix
             ./modules/pup-overlay.nix
+            ./modules/namespace-cli-overlay.nix
             ./modules/sidecar-overlay.nix
             ./modules/codiff-overlay.nix
             ./modules/plannotator-overlay.nix

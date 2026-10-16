@@ -6,7 +6,7 @@ in
 {
   # The day-dashboard generator as a systemd **user** service + timer. It runs
   # inside the graphical session so the collectors can reach the user's login
-  # keyring — which is where both the Pi MCP OAuth tokens (Slack/Linear) and the
+  # keyring — which is where both the Pi MCP OAuth token (executor-flo) and the
   # `gws` Google credentials (email/calendar) live. A bare system service can't
   # see that keyring, so this deliberately lives in Home Manager, not NixOS.
   #
@@ -61,8 +61,8 @@ in
 
     mcpConfig = lib.mkOption {
       type = lib.types.str;
-      default = "${config.home.homeDirectory}/.config/mcp/mcp.json";
-      description = "MCP config the Slack/Linear collectors drive via the Pi CLI.";
+      default = "${config.home.homeDirectory}/.pi/agent/mcp.json";
+      description = "MCP config holding the executor-flo gateway the Slack/Linear/Rootly collectors drive via the Pi CLI.";
     };
 
     schedule = lib.mkOption {

@@ -73,7 +73,7 @@ Autonomy is not silence. After posting, report per PR: verdict, inline count, he
 
 ## Run Flow (per PR)
 
-1. **Triage** — `gh pr view <url> --json state,isDraft,mergedAt,author,headRefOid,baseRefName,title,body`. Skip merged, closed, drafts (unless asked), and PRs authored by the current user (`gh api user -q .login`; GitHub returns 422 on self-approve). Record the skip reason.
+1. **Triage** — `gh pr view <url> --json state,isDraft,mergedAt,author,headRefOid,baseRefName,title,body`. Skip merged, closed, and drafts (unless asked). Record the skip reason. **Your own PRs are reviewed like any other** — compare `author.login` to `gh api user -q .login` and, if it matches, mark the PR *self-authored*: its posted event is always `COMMENT` (see "Your Own PRs").
 2. **Review worktree** — see "Review Worktrees". Cache the PR body at `/tmp/pr-review-<date>/<pr-key>/pr-body.md`.
 3. **Plan the team** — derive specialists from PR domain + size (see "Team Composition"); always add Hickey and Fairbanks.
 4. **Launch phase 1 in parallel, in the background.** One reviewer per role, each with a self-contained prompt from `reviewers/`. In Claude Code use the `Agent` tool with `run_in_background: true`; in pi use the `subagent` tool with the `pr-review.specialist` agent (lens reviewers use the same agent with the Hickey/Fairbanks template as the task). Re-check `mergedAt` right before launching.
@@ -183,6 +183,15 @@ Pick specialist roles from the catalog in `reviewers/specialist.md`.
 
 If unsure between two: attended → ask the user; `--yolo` → pick the less severe one and say why in the body.
 
+### Your Own PRs
+
+GitHub rejects `APPROVE` and `REQUEST_CHANGES` on a PR you authored (422), but accepts `COMMENT`. So a self-authored PR gets the full review, posted as `COMMENT`:
+
+- Run the whole flow (worktree, fan-out, consolidator, verification) as normal.
+- Pick the verdict as normal, then post with `event: "COMMENT"`. Open the body with the verdict the review reached, e.g. `**Self-review — would be: APPROVE**` or `**Self-review — would be: REQUEST_CHANGES**`, so the outcome is still on the record.
+- In `result.json`, `verdict` is the posted event (`COMMENT`); add `"self_authored": true` and `"intended_verdict": "<APPROVE|REQUEST_CHANGES|COMMENT>"`.
+- Attended mode still previews before posting. `--yolo` posts.
+
 ## Posting Mechanics
 
 Build the payload with `jq --rawfile` from body/comment files on disk rather than inlining markdown into a JSON string — bodies contain backticks, quotes and newlines that break hand-rolled JSON:
@@ -239,7 +248,7 @@ When asked to re-review ("look at this one again", "check if it's addressed"), o
 | **1x1 sign-off, never batch-post** | Attended mode: the user adjusts per-PR verdicts. **Waived by `--yolo`** — but still post and report per PR, not as one lump. |
 | **Re-check `mergedAt` right before the fan-out** | Flo PRs get admin-merged within minutes of being posted — three floarena-api PRs merged between triage and fan-out on 2026-07-29. |
 | **Re-fetch before posting** | The author may have pushed during the fan-out. Three of four findings on `ibs#920` were fixed by commits that landed mid-review. |
-| **Don't self-approve** | Author == current user → GitHub returns 422. Filter at triage. |
+| **Own PRs post as `COMMENT`** | Author == current user → GitHub returns 422 on `APPROVE`/`REQUEST_CHANGES`. Review fully, post `COMMENT`, state the intended verdict at the top of the body. Never skip a PR for being yours. |
 | **Drop nits in the consolidator** | Style/preference/cosmetic = drop. Hickey and Fairbanks design notes go in the summary, not inline. |
 | **Autonomy is not silence** | Under `--yolo`, report every posted review after the fact. |
 
@@ -248,6 +257,7 @@ When asked to re-review ("look at this one again", "check if it's addressed"), o
 | Mistake | Fix |
 |---|---|
 | Inline anchored on a line that's not in the diff hunk | Re-pick an anchor inside the hunk, or fold into the summary body. |
+| Skipped my own PR as "can't self-review" | Wrong. Only `APPROVE`/`REQUEST_CHANGES` are blocked. Review it and post `COMMENT`. |
 | Posted REQUEST_CHANGES on docs polish | Blocking only for real regressions. Downgrade. |
 | Repeated a specialist claim that CI already disproves | Check the actual workflow runs before asserting a permissions or config failure (`ibs#920`: a specialist called a leg unauthorized; CI showed all 13 legs green). |
 | Asked a question under `--yolo` | `--yolo` means don't ask. Post the conservative version and list the question under "Needs your attention". |

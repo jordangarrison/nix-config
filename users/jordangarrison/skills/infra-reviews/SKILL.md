@@ -3,7 +3,7 @@ name: infra-reviews
 description: >-
   Use for the Flocasts #infra-reviews Slack channel, where each PR is its own
   top-level message. Modes: `post` (post my PR in the format the channel canvas
-  defines), `bump` (gated `:travolta:`-style nudge on my PRs nobody has
+  defines, then [[pr-watch]] it), `bump` (gated `:travolta:`-style nudge on my PRs nobody has
   reviewed), `merged` (mark my merged PRs), and `review` (review other people's
   PRs via [[slack-pr-review]] + [[multi-agent-pr-review]]; `--watch` to keep
   watching). Every rule — post format, reaction meanings — is read from the
@@ -36,7 +36,7 @@ If the canvas can't be read: stop and say so. Don't post or react from memory.
 
 | Invocation | Mode |
 |---|---|
-| `/infra-reviews` or `/infra-reviews post [<desc>] [<pr-url>]` | post |
+| `/infra-reviews` or `/infra-reviews post [<desc>] [<pr-url>] [--no-watch]` | post |
 | `/infra-reviews bump [<pr-url>]` | bump |
 | `/infra-reviews merged` | merged |
 | `/infra-reviews review [--yolo] [--watch …]` | review |
@@ -54,6 +54,7 @@ If the canvas can't be read: stop and say so. Don't post or react from memory.
    Message:  <exact text>
    ```
    `slack_send_message` with `channel_id: "C0C9Q4HNVV3"` and **no** `thread_ts` — in this channel, PRs are top-level. Report the permalink.
+5. **Watch for reviews.** Unless `--no-watch`, start [[pr-watch]] on the PR from this session with `--on-stop "if the PR merged, run /infra-reviews merged"`, passing `--yolo` through. It addresses reviewers' feedback as it arrives and runs until the PR merges.
 
 ### bump — nudge my PRs nobody has reviewed
 

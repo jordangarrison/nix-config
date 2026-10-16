@@ -212,6 +212,8 @@ let
   promptFiles = resolveResources defaultPrompts cfg.prompts;
   themeFiles = resolveResources defaultThemes cfg.themes;
   extensionFiles = resolveResources defaultExtensions cfg.extensions;
+  # No module defaults: subagent definitions are personal, not generic pi setup.
+  agentFiles = resolveResources { } cfg.agents;
 
   fileToHomeFile =
     directory: name: file:
@@ -336,6 +338,17 @@ in
       description = "Extension files written to ~/.pi/agent/extensions/.";
     };
 
+    agents = mkOption {
+      type = types.submodule {
+        options = resourceOptions "subagent definitions";
+      };
+      default = { };
+      description = ''
+        pi-subagents agent definition files written to ~/.pi/agent/agents/
+        (user scope). The module ships none; declare them in `files`.
+      '';
+    };
+
     tmux = {
       enable = mkOption {
         type = types.bool;
@@ -350,6 +363,7 @@ in
       fileEntryAssertions "prompts" cfg.prompts.files
       ++ fileEntryAssertions "themes" cfg.themes.files
       ++ fileEntryAssertions "extensions" cfg.extensions.files
+      ++ fileEntryAssertions "agents" cfg.agents.files
       ++ [
         {
           assertion = !(cfg.themes.enable && cfg.themes.active != null && cfg.settings ? theme);
@@ -392,7 +406,8 @@ in
     }
     // resourceHomeFiles "prompts" promptFiles
     // resourceHomeFiles "themes" themeFiles
-    // resourceHomeFiles "extensions" extensionFiles;
+    // resourceHomeFiles "extensions" extensionFiles
+    // resourceHomeFiles "agents" agentFiles;
 
     programs.tmux.extraConfig = mkIf (cfg.tmux.enable && config.programs.tmux.enable) (mkAfter ''
       set -g extended-keys on

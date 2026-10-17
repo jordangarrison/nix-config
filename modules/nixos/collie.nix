@@ -34,11 +34,28 @@ let
     # nginx owns the front door; Collie must not run `tailscale serve`.
     serve.skip_serve = true;
   };
+
+  # Shared by the service and the interactive CLI. Without HERDR_PLUGIN_CONFIG_DIR
+  # the CLI asks `herdr plugin config-dir`, so `collie push-keys` would write an
+  # .env under ~/.config/herdr/plugins/config that the service never reads.
+  collieEnv = {
+    COLLIE_CONFIG = "/etc/collie/config.toml";
+    HERDR_PLUGIN_CONFIG_DIR = "${home}/.config/collie";
+  };
+
+  # The CLI on PATH, pointed at the same config as the service. A wrapper
+  # rather than session variables so it also works in shells opened before a
+  # switch. It execs the real binary by path, so Collie still resolves its
+  # install root from it.
+  cli = pkgs.writeShellScriptBin "collie" ''
+    ${lib.toShellVars collieEnv}
+    export ${lib.concatStringsSep " " (lib.attrNames collieEnv)}
+    exec ${root}/bin/collie "$@"
+  '';
 in
 {
   environment.etc."collie/config.toml".source = configFile;
-  environment.sessionVariables.COLLIE_CONFIG = "/etc/collie/config.toml";
-  environment.systemPackages = [ package ];
+  environment.systemPackages = [ cli ];
 
   # A system unit running as the user, like agentsview: it reads the user's
   # herdr socket and agent logs, but runs without a login session.
@@ -48,19 +65,21 @@ in
     after = [ "network.target" ];
     restartTriggers = [ configFile ];
 
-    # git: the Changes view. herdr: the multiplexer CLI.
+    # git: the Changes view. herdr: the multiplexer CLI. The per-user profile
+    # holds the agent CLIs (pi, claude, codex, omp): Collie runs
+    # `<agent> --version` to trust an agent's input profile, and without it
+    # sends into a running agent are held instead of queued.
     path = [
       pkgs.llm-agents.herdr
       pkgs.git
       pkgs.coreutils
+      "/etc/profiles/per-user/${user}"
     ];
 
-    environment = {
+    environment = collieEnv // {
       HOME = home;
-      COLLIE_CONFIG = "/etc/collie/config.toml";
       COLLIE_PLUGIN_ROOT = root;
       HERDR_SOCKET_PATH = "${home}/.config/herdr/herdr.sock";
-      HERDR_PLUGIN_CONFIG_DIR = "${home}/.config/collie";
     };
 
     serviceConfig = {

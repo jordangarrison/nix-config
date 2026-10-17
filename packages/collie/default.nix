@@ -69,11 +69,15 @@ stdenv.mkDerivation {
     runHook postInstall
   '';
 
-  # Proves the patched binary still reads its embedded bundle.
+  # Proves the patched binary still reads its embedded bundle and resolves its
+  # install root: with a broken layout or missing web bundle, --version still
+  # exits 0 but prints `unknown` or `<version> (manifest; web not built)`.
   doInstallCheck = true;
   installCheckPhase = ''
     runHook preInstallCheck
-    "$out/bin/collie" --version
+    v=$("$out/bin/collie" --version)
+    echo "collie --version: $v"
+    [[ "$v" == ${version}+* ]]
     runHook postInstallCheck
   '';
 

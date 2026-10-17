@@ -78,6 +78,9 @@ in
 
   security.acme.certs.${host} = {
     group = "nginx";
+    # The system resolver (Tailscale -> blocky) caches the challenge record's
+    # NXDOMAIN, so lego's propagation check times out. Check via Cloudflare.
+    dnsResolver = "1.1.1.1:53";
   };
 
   services.nginx.virtualHosts.${host} = {

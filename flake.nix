@@ -401,6 +401,21 @@
                   sshAgent = true;
                 };
               };
+
+              # Collie: phone web UI for the herdr agents on this box, reached
+              # at https://endeavour.owl-yo.ts.net:8443 over the tailnet only.
+              # Not 443: nginx answers there for the self-hosted services, and
+              # `tailscale serve` on 443 would shadow it for tailnet clients.
+              home-manager.users.jordangarrison.programs.herdr.collie = {
+                enable = true;
+                trustedUser = "garrisonsbygrace@gmail.com";
+                tailscaleHosts = [ "endeavour.owl-yo.ts.net" ];
+                publicUrl = "https://endeavour.owl-yo.ts.net:8443";
+                tailscaleServe.port = 8443;
+              };
+              # Lets the user-level collie-tailscale-serve unit run
+              # `tailscale serve` without sudo.
+              services.tailscale.extraSetFlags = [ "--operator=jordangarrison" ];
             }
             )
           ];

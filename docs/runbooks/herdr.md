@@ -108,26 +108,21 @@ Do not delete or overwrite the quarantined history until recovery is confirmed.
 
 ## Collie (phone web UI)
 
-`programs.herdr.collie` runs [Collie](https://github.com/AltanS/collie) as the
-`collie` systemd user service, bound to `127.0.0.1:8787`. The
-`collie-tailscale-serve` user oneshot publishes it on the tailnet with
-`tailscale serve --https=8443`. Endeavour enables it in `flake.nix`.
+`modules/nixos/collie.nix` runs [Collie](https://github.com/AltanS/collie) on
+endeavour. It runs as the `collie` system service with `User=jordangarrison`,
+bound to `127.0.0.1:8787`, behind the nginx vhost
+`https://collie.jordangarrison.dev`. That name is a tailnet-only A record to
+`100.118.65.11`, and nginx admits only localhost and `100.64.0.0/10`.
 
 Collie is remote shell access: a paired device can read every pane and type
-into it as you. Never `tailscale funnel` it.
+into it as Jordan. Never route it through the Cloudflare tunnel.
 
-- The URL is `https://endeavour.owl-yo.ts.net:8443`. Only the
-  `trustedUser` tailnet login gets through.
 - Pair a device on the host with `collie pair` (code is valid for 10 minutes),
   then enter the code under Settings → Paired devices. Add `--expires 30d` to
   limit the token's lifetime.
 - `collie devices list` and `collie devices revoke <label>` take effect live.
-- Manage the service with `systemctl --user`, not `collie start`/`stop`/
-  `update`; those write their own unit or update outside Nix.
-- Settings live in the Nix-managed `~/.config/collie/config.toml`. Secrets,
-  such as push keys from `collie push-keys`, go in the mutable
-  `~/.config/collie/.env`.
-- The serve unit needs the user to be the tailscaled operator
-  (`services.tailscale.extraSetFlags`).
-- User services stop when the user manager does. Without lingering, Collie is
-  down whenever Jordan has no session on the host.
+- Manage the service with `systemctl`, not `collie start`/`stop`/`update`;
+  those write a user unit or update outside Nix.
+- Settings live in `/etc/collie/config.toml` (`COLLIE_CONFIG`). Secrets, such
+  as push keys from `collie push-keys`, go in `~/.config/collie/.env`; restart
+  `collie.service` afterwards.

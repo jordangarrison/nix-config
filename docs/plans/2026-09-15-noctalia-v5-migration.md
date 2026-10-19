@@ -1,11 +1,14 @@
 # Noctalia v5 Migration Plan
 
+Status: implemented on the `feat-noctalia-v5` branch and verified in VMs; not
+yet activated on any host. See "After activation" for the hardware checks left.
+
 ## Goal
 
 Replace the pinned Noctalia v4/Quickshell setup with stable Noctalia v5.3.0 for
 the shared Niri desktop while preserving current behavior where v5 provides an
 equivalent. Validate the migration in isolated NixOS VMs for both supported Niri
-hosts without activating or committing the configuration.
+hosts without activating it on the running system.
 
 The architectural decisions and rationale are recorded in
 [`../adr/007-migrate-noctalia-to-v5.md`](../adr/007-migrate-noctalia-to-v5.md).
@@ -15,7 +18,8 @@ The architectural decisions and rationale are recorded in
 ### In scope
 
 - Stable Noctalia v5 flake input and lock data.
-- Upstream Home Manager module, package, and systemd user service integration.
+- Home Manager's `programs.noctalia` module, the flake package, and the
+  systemd user service.
 - Curated v5 TOML configuration.
 - Niri keybindings and idle lock commands.
 - Opportunity's tablet launcher gesture.
@@ -32,7 +36,6 @@ The architectural decisions and rationale are recorded in
 - Redesigning keybindings unrelated to Noctalia.
 - Migrating v4 plugins that are not currently enabled.
 - Activating with `nh os test` or `nh os switch`.
-- Committing or pushing changes.
 - Hardware validation for physical monitors, touchscreen gestures, DDC
   brightness, fingerprint authentication, or GPU-specific behavior.
 
@@ -76,9 +79,10 @@ git diff -- flake.nix flake.lock
 
 In `modules/home/niri/default.nix`:
 
-- Continue importing `inputs.noctalia.homeModules.default`.
+- Stop importing `inputs.noctalia.homeModules.default`; use Home Manager's own
+  `programs.noctalia` module with `package` set from the flake input (ADR 007).
 - Rename `programs.noctalia-shell` to `programs.noctalia`.
-- Enable the upstream systemd user service.
+- Enable the module's systemd user service and limit it to Niri sessions.
 - Supply the v5 TOML file through `programs.noctalia.settings`.
 - Leave `checkConfig` enabled so the package validates TOML during builds.
 - Remove v4 package-selection and Quickshell-specific service comments where
@@ -211,7 +215,9 @@ Expected host-specific caveats:
 
 ### 9. Visual VM walkthrough
 
-Run at least one generated VM and select the Niri session. Check:
+Run `./run-noctalia-vm.sh opportunity` (or `endeavour`). It adds Niri
+autologin and a virgl GPU; the plain `build-vm` runner's display gives Niri no
+usable output. Check:
 
 - `noctalia.service` starts and remains active.
 - The bar appears and does not conflict with another notification/tray host.
@@ -237,16 +243,30 @@ Record any VM-only limitations separately from actual migration failures.
 
 ## Completion Criteria
 
-- [ ] Flake resolves Noctalia v5.3.0 with no legacy Quickshell input.
-- [ ] Home Manager uses `programs.noctalia` and `noctalia.service`.
-- [ ] The curated TOML passes v5 validation without migration warnings.
-- [ ] All executable Noctalia IPC references use `noctalia msg`.
-- [ ] Niri no longer starts duplicate clipboard history/persistence services.
-- [ ] Focused documentation describes v5 accurately.
-- [ ] `opportunity` VM builds successfully with `--no-nom`.
-- [ ] `endeavour` VM builds successfully with `--no-nom`.
-- [ ] Visual VM checks are completed or blocked limitations are documented.
-- [ ] No system activation, commit, or push occurred.
+- [x] Flake resolves Noctalia v5.3.0 with no legacy Quickshell input.
+- [x] Home Manager uses `programs.noctalia` and `noctalia.service`.
+- [x] The curated TOML passes v5 validation without migration warnings.
+- [x] All executable Noctalia IPC references use `noctalia msg`.
+- [x] Niri no longer starts duplicate clipboard history/persistence services.
+- [x] Focused documentation describes v5 accurately.
+- [x] `opportunity` VM builds successfully with `--no-nom`.
+- [x] `endeavour` VM builds successfully with `--no-nom`.
+- [x] Visual VM checks are completed or blocked limitations are documented.
+- [x] No system activation (`nh os test` or `switch`) occurred.
+
+## After activation
+
+A VM cannot cover these; check them on each host after an approved switch:
+
+- Monitor layout and bar placement (endeavour's three outputs, opportunity
+  docked and undocked).
+- DDC brightness on endeavour's external monitors.
+- The three-finger launcher gesture on opportunity's touchscreen.
+- A Wi-Fi password prompt and a Bluetooth pairing: Noctalia's agents run next
+  to `nm-applet` and `blueman-applet` (ADR 007).
+- Idle lock and before-sleep lock on opportunity; no idle lock on endeavour.
+- `~/.local/state/noctalia/settings.toml` holds no stale override of a
+  declarative value.
 
 ## Rollback
 

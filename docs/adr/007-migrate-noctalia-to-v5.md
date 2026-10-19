@@ -32,14 +32,16 @@ Migrate the shared Niri shell configuration to Noctalia v5.3.0 with the
 following architecture:
 
 1. Pin the flake input to the stable `github:noctalia-dev/noctalia/v5.3.0`
-   release rather than tracking the development branch. v5.3.0 is the oldest
-   release that works with the current Home Manager. Home Manager now ships
-   its own `programs/noctalia` module directory, and only v5.3.0's module
-   disables it. Earlier releases fail evaluation because `checkConfig` is
-   declared twice.
-2. Import `inputs.noctalia.homeModules.default` and configure
-   `programs.noctalia` through Home Manager.
-3. Let the upstream Home Manager module own the `noctalia.service` user unit,
+   release rather than tracking the development branch. v5.3.0 stops
+   calculator expressions from running programs or reading files and fixes
+   endless lock-screen authentication retries. nixpkgs carries only v5.2.1.
+2. Configure Noctalia through Home Manager's own `programs.noctalia` module
+   and take only the package from the flake input. Do not import
+   `inputs.noctalia.homeModules.default`. That module replaces Home Manager's
+   by naming its file path in `disabledModules`; when Home Manager turned
+   `programs/noctalia.nix` into a directory, the v5.1.0 module no longer
+   disabled it and evaluation failed with `checkConfig` declared twice.
+3. Let Home Manager's module own the `noctalia.service` user unit,
    package installation, build-time configuration validation, and
    `~/.config/noctalia/config.toml`. Add only
    `ConditionEnvironment=XDG_CURRENT_DESKTOP=niri` to that unit. Both hosts
@@ -149,8 +151,17 @@ VM testing provide isolation from the working desktop.
 - Clipboard history gains a Secret Service dependency, because v5 encrypts it
   with a master key from `org.freedesktop.secrets`. The Niri session already
   starts `gnome-keyring-daemon --components=secrets`.
-- The session panel cannot offer hibernate. v5 has no hibernate action, and
-  `endeavour` disables the hibernate target anyway.
+- The session panel no longer offers hibernate. v5 has no built-in hibernate
+  action. A `command` action could run `systemctl hibernate`, but `endeavour`
+  disables the hibernate target and hibernation is untested on `opportunity`,
+  so it is not re-added. `endeavour` also disables suspend, so its
+  `lock_and_suspend` entry only locks; v4 offered suspend there the same way.
+- Inside Niri, Noctalia always registers a NetworkManager secret agent and a
+  BlueZ pairing agent, with no setting to turn them off, while `nm-applet` and
+  `blueman-applet` register their own. NetworkManager falls back to
+  `nm-applet` for secrets Noctalia does not handle (anything but Wi-Fi PSK and
+  802.1x), and BlueZ uses whichever agent last asked to be the default. Wi-Fi
+  and pairing prompts on hardware decide whether the applets stay.
 - The control center shows at most six shortcuts, so the previous seven-item
   set cannot be carried over in full. The migrated six drop `dark_mode`.
 - On hosts that run swayidle (every Niri host except `endeavour`, which turns
@@ -175,12 +186,10 @@ The implementation must:
 
 4. Visually test at least one VM for Noctalia service startup, bar rendering,
    launcher, emoji search, clipboard panel, settings, notifications, and lock
-   screen behavior. If the VM graphics stack cannot expose a usable compositor
-   output, document the exact limitation and complete the available nonvisual
-   service, configuration, notification ownership, and IPC checks instead.
+   screen behavior. `run-noctalia-vm.sh` provides the Niri autologin and virgl
+   GPU this needs; the default QEMU display gives Niri no usable output.
 
-No `switch`, `test`, commit, or push is part of this migration without separate
-approval.
+Activating with `test` or `switch` needs separate approval.
 
 ## Superseded Documentation
 

@@ -23,8 +23,9 @@ Niri uses native **Noctalia v5** as its unified desktop shell:
 - Lock screen (replaces swaylock)
 - Power menu (replaces wlogout)
 
-The upstream Home Manager module manages `noctalia.service`, installs the
-package, and validates the declarative TOML in
+Home Manager's own `programs.noctalia` module (with the package from the
+`noctalia` flake input) manages `noctalia.service`, installs the package, and
+validates the declarative TOML in
 `users/jordangarrison/configs/noctalia/config.toml`. This module limits that
 unit to Niri sessions with `ConditionEnvironment=XDG_CURRENT_DESKTOP=niri`;
 GNOME logins on the same hosts skip it. Noctalia's mutable GUI
@@ -204,7 +205,8 @@ Noctalia is a systemd user service rather than a Niri startup command:
 systemctl --user status noctalia.service
 journalctl --user -u noctalia.service -b --no-pager
 noctalia msg status
-noctalia config validate ~/.config/noctalia/config.toml
+noctalia config validate        # base TOML plus settings.toml overrides
+noctalia config export merged   # effective user settings
 ```
 
 If declarative changes appear ignored, inspect
@@ -217,7 +219,9 @@ keep a backup until the desired settings are incorporated into the repository.
 - `modules/nixos/niri-desktop.nix` - System-level niri configuration
 - `flake.nix` - Niri and noctalia flake inputs
 - `users/jordangarrison/configs/hypr/scripts/niri-keybinds-help.sh` - Keybindings help script (keep in sync!)
+- `users/jordangarrison/configs/noctalia/` - Noctalia TOML and its README
 - `docs/adr/003-add-niri-scrolling-compositor.md` - Architecture decision record
+- `docs/adr/007-migrate-noctalia-to-v5.md` - Noctalia v5 decision (supersedes ADR 003's shell details)
 
 ## Resources
 

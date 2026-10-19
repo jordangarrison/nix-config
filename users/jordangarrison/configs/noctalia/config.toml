@@ -10,6 +10,9 @@ font_family = "FiraCode Nerd Font"
 time_format = "{:%H:%M}"
 date_format = "%a, %b %d"
 telemetry_enabled = false
+# This file already makes the wizard's choices; on a fresh state directory it
+# would otherwise open on first start and copy them into settings.toml.
+setup_wizard_enabled = false
 settings_show_advanced = true
 avatar_path = "~/.face"
 clipboard_enabled = true
@@ -115,12 +118,21 @@ shortcut = "5"
 countdown_seconds = 10
 variant = "destructive"
 
+[audio]
+# v5.2 turned UI sounds on by default. v4 had volume feedback and
+# notification sounds off; this master toggle keeps every UI sound off.
+enable_sounds = false
+
 [wallpaper]
 enabled = false
 
 [plugins]
 # No plugin is installed or enabled; keep the declarative base offline.
 auto_update = "none"
+# The default official/community sources are cloned at every startup even
+# with nothing enabled, and the global insteadOf rewrite sends that over SSH.
+# An explicit empty array replaces the defaults.
+source = []
 
 [theme]
 mode = "dark"

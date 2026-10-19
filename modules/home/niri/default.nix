@@ -76,6 +76,12 @@ in
     settings = ../../../users/jordangarrison/configs/noctalia/config.toml;
   };
 
+  # The upstream unit follows graphical-session.target, which the GNOME session
+  # on these hosts also reaches. Without a layer shell Noctalia draws nothing
+  # there, but it still registers NetworkManager and BlueZ agents beside GNOME
+  # Shell's. Niri imports XDG_CURRENT_DESKTOP before that target is reached.
+  systemd.user.services.noctalia.Unit.ConditionEnvironment = "XDG_CURRENT_DESKTOP=niri";
+
   programs.sweet-nothings = {
     enable = true;
     package = sweetNothingsPkg;

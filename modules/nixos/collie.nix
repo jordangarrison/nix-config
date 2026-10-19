@@ -59,6 +59,9 @@ in
   environment.etc."collie/config.toml".source = configFile;
   environment.systemPackages = [ cli ];
 
+  # `collie push-keys` writes its .env here but won't create the directory.
+  systemd.tmpfiles.rules = [ "d ${home}/.config/collie 0700 ${user} users - -" ];
+
   # A system unit running as the user, like agentsview: it reads the user's
   # herdr socket and agent logs, but runs without a login session.
   systemd.services.collie = {

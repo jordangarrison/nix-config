@@ -64,19 +64,21 @@ in
   imports = [
     ../desktop-tools
     ../wlr-which-key
-    # Upstream Noctalia module owns the package, validated configuration, and
-    # systemd user service.
-    inputs.noctalia.homeModules.default
     inputs.sweet-nothings.homeManagerModules.default
   ];
 
+  # Home Manager's own programs.noctalia module owns the validated config and
+  # the systemd user service; the flake input supplies only the package. The
+  # flake's module replaces Home Manager's through hard-coded disabledModules
+  # paths, which broke evaluation when Home Manager restructured its module.
   programs.noctalia = {
     enable = true;
+    package = inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default;
     systemd.enable = true;
     settings = ../../../users/jordangarrison/configs/noctalia/config.toml;
   };
 
-  # The upstream unit follows graphical-session.target, which the GNOME session
+  # The Home Manager unit follows graphical-session.target, which the GNOME session
   # on these hosts also reaches. Without a layer shell Noctalia draws nothing
   # there, but it still registers NetworkManager and BlueZ agents beside GNOME
   # Shell's. Niri imports XDG_CURRENT_DESKTOP before that target is reached.

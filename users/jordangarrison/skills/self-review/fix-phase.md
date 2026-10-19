@@ -4,6 +4,8 @@ Runs in the author session when the watcher wakes it. Inputs from the wake: `URL
 
 ## 1. Read the outcome
 
+pi: first `until` `action: "complete"` on the watch that woke you, so it doesn't wake again while this phase runs.
+
 First match wins:
 
 | State | Action |

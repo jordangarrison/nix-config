@@ -59,9 +59,11 @@ The gate is `check.sh` in this skill's directory (`~/.agents/skills/pr-watch/che
 
 | Harness | Watcher |
 |---|---|
-| pi | `until` with `action: "start"`, `condition`: `<check.sh> <state-file>`, `intervalSeconds`: the interval, `timeoutSeconds`: seconds to `deadline`, `wake: "agent"`, `instruction`: "pr-watch woke for `<URL>`. Follow pr-watch SKILL.md step 4 with state file `<path>`." |
+| pi | `until` with `action: "repeat"`, `condition`: `<check.sh> <state-file>`, `intervalSeconds`: the interval, `timeoutSeconds`: seconds to `deadline`, `immediate: true`, `label`: `pr-watch <owner>/<repo>#<num>`, `instruction`: "pr-watch woke for `<URL>`. Follow pr-watch SKILL.md step 4 with state file `<path>`." Arm it once; it stays armed between wakes. |
 | Claude Code | `Bash` with `run_in_background: true`: `timeout <secs-to-deadline> sh -c 'until <check.sh> <state-file>; do sleep <interval-secs>; done'`. Its completion notification is the wake. |
 | Other | Run the same loop in the foreground. |
+
+`repeat`, not `start`: a `start` watch ignores `instruction`, so its wake names only the label. Write the watcher id to the state file's `watch_id`.
 
 Report: PR, state file, watcher id, stop condition. Then return control — this session keeps working until the wake.
 
@@ -73,12 +75,14 @@ Run `check.sh <state-file>` again (the wake may be stale). First match wins:
 |---|---|
 | Past `deadline` | Stop (step 5). |
 | `pr:MERGED` / `pr:CLOSED` | Stop (step 5). |
-| `feedback:` + ids | Follow `address.md` in this skill's directory with those ids. Then: `until: approved` and `gh pr view --json reviewDecision` is `APPROVED` → stop; otherwise re-arm (step 3). If `address.md` stopped on a dirty checkout, stop without re-arming. |
-| exit 1 (nothing new) | Re-arm (step 3). |
+| `feedback:` + ids | Follow `address.md` in this skill's directory with those ids. Then: `until: approved` and `gh pr view --json reviewDecision` is `APPROVED` → stop; otherwise keep watching. If `address.md` stopped on a dirty checkout, stop. |
+| exit 1 (nothing new) | Keep watching. |
+
+Keep watching: pi, end the turn (the watch stays armed); Claude Code, re-arm (step 3).
 
 ### 5. Stop and report
 
-Run `on_stop`, if set. Keep the state file (a later `/pr-watch` resumes from it); delete it when the PR is merged or closed.
+pi: if the watch is still running, `until` `action: "complete"` on `watch_id` (`cancel` on a dirty-checkout stop). Run `on_stop`, if set. Keep the state file (a later `/pr-watch` resumes from it); delete it when the PR is merged or closed.
 
 ```
 PR:        <URL>  (<open | merged | closed>, <reviewDecision>)

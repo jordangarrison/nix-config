@@ -34,6 +34,13 @@ let
         services.displayManager.defaultSession = lib.mkForce \"niri\";
         users.users.jordangarrison.initialPassword = lib.mkForce \"${vm_password}\";
 
+        # The VM's memory backend is sized from this option; a QEMU -m flag
+        # that disagrees with it aborts startup.
+        virtualisation.vmVariant.virtualisation = {
+          memorySize = 16384;
+          cores = 8;
+        };
+
         # The VM does not contain the canonical live checkout used by the
         # agent-workspaces activation check.
         systemd.services.home-manager-jordangarrison.environment.AGENTS_LIVE_ALLOW_DANGLING = \"1\";
@@ -53,5 +60,5 @@ Delete that image to start with a clean VM state.
 EOF
 
 export NIX_DISK_IMAGE="$disk"
-export QEMU_OPTS="${QEMU_OPTS:--m 16384 -smp 8 -vga none -device virtio-vga-gl -device virtio-tablet-pci -display gtk,gl=on,grab-on-hover=on}"
+export QEMU_OPTS="${QEMU_OPTS:--vga none -device virtio-vga-gl -device virtio-tablet-pci -display gtk,gl=on,grab-on-hover=on}"
 exec "$result/bin/run-${host}-vm"

@@ -22,7 +22,9 @@ let
   # Collie's machine-level config layer. The service and interactive verbs
   # (`collie pair`, `collie devices`) both read it via COLLIE_CONFIG, so the
   # pairing QR and `collie url` name the same front door the bridge serves.
-  # Secrets (push VAPID keys) go in ~/.config/collie/.env, which wins over this.
+  # This is the lowest file layer: ~/.config/collie/config.toml and .env both
+  # win over it. Keep .env to secrets (push VAPID keys) and don't create that
+  # config.toml, or they can silently replace the pinned hosts and origins.
   configFile = (pkgs.formats.toml { }).generate "collie-config.toml" {
     network = {
       host = "127.0.0.1";

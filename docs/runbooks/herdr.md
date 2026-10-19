@@ -121,8 +121,13 @@ into it as Jordan. Never route it through the Cloudflare tunnel.
   then enter the code under Settings → Paired devices. Add `--expires 30d` to
   limit the token's lifetime.
 - `collie devices list` and `collie devices revoke <label>` take effect live.
-- Manage the service with `systemctl`, not `collie start`/`stop`/`update`;
-  those write a user unit or update outside Nix.
+- Manage the service with `sudo systemctl`, not `collie start`/`stop`.
+  `start` writes and starts a second, user-level bridge on the same port, and
+  `stop` only touches that user unit. `collie update` refuses on a Nix store
+  path; update by bumping `packages/collie`.
 - Settings live in `/etc/collie/config.toml` (`COLLIE_CONFIG`). Secrets, such
   as push keys from `collie push-keys`, go in `~/.config/collie/.env`; restart
   `collie.service` afterwards.
+- Keep `~/.config/collie/.env` to secrets, and don't create
+  `~/.config/collie/config.toml`. Both override `/etc/collie/config.toml`, so
+  either could silently change the pinned `public_hosts` or `allowed_origins`.

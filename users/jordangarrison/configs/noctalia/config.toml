@@ -4,6 +4,8 @@
 #
 # Values here are either deliberate preferences carried over from the previous
 # v4 setup or explicit pins where v5's default differs from the old behavior.
+# Some pins equal today's default on purpose: an unpinned preference follows
+# upstream's defaults, which change between releases (v5.2 turned UI sounds on).
 
 [shell]
 font_family = "FiraCode Nerd Font"
@@ -49,16 +51,18 @@ open_near_click_launcher = false
 open_near_click_clipboard = false
 
 [shell.launcher]
-categories = true
+# The v5.3 launcher opens on recently used apps. v4 opened on the pinned set.
+default_view = "pinned"
 show_icons = true
 compact = false
 app_grid = true
 sort_by_usage = true
+# IDs are desktop-file names without `.desktop`; an ID that matches nothing is
+# silently dropped.
 pinned = [
   "todoist",
-  "obsidian",
+  "md.obsidian.Obsidian",
   "com.obsproject.Studio",
-  "Session",
   "brave-fmpnliohjhemenmnlpbfagaolkdacoja-Default",
   "brave-browser",
   "brave-dnfpoenibinnbbckgbhendmlljoobcfg-Default",
@@ -66,10 +70,9 @@ pinned = [
   "LocalSend",
   "org.wezfurlong.wezterm",
   "yazi",
-  "gnaural",
   "emacsclient",
   "com.github.xournalpp.xournalpp",
-  "1password",
+  "com.onepassword.OnePassword",
   "ssh-endeavour",
   "brave-ifoagfbjcddaonmmdekcjdmeflgghbmp-Default",
 ]
@@ -91,8 +94,10 @@ global = true
 # countdown, so shutdown fires immediately and sits where logout used to.
 # Restore the previous order and the 10 s cancel window on power actions.
 # Declaring this array replaces the built-in list wholesale.
-# Hibernate is deliberately absent: v5 has no hibernate action and
-# `hosts/endeavour/configuration.nix` disables the hibernate target.
+# Hibernate is deliberately absent. v5 has no built-in hibernate action; a
+# `command` action could run `systemctl hibernate`, but endeavour disables the
+# target and hibernation is untested on opportunity. Endeavour also disables
+# suspend, so lock_and_suspend only locks there; v4 offered it the same way.
 [[shell.session.actions]]
 action = "lock"
 shortcut = "1"
@@ -170,14 +175,26 @@ offset_x = 20
 offset_y = 8
 
 [osd.kinds]
-# Every kind defaults to true in v5. Pin only the two that were off before:
-# lock-key OSDs were never enabled (and the toggle gates lock-key polling),
-# and media toasts were explicitly disabled.
+# Every kind defaults to true in v5. v4 showed only volume, input volume, and
+# brightness popups, so turn off the rest: lock keys (the toggle also gates
+# lock-key polling), media, and the kinds v5 added.
 lock_keys = false
 media = false
+wifi = false
+bluetooth = false
+power_profile = false
+caffeine = false
+nightlight = false
+dnd = false
+keyboard_layout = false
+keyboard_backlight = false
+privacy = false
 
 [lockscreen]
 enabled = true
+# v5.2 added a random 1.5 s lock and unlock transition, which Lock & Suspend
+# also waits for. v4 had lock-screen animations off.
+transition = []
 blurred_desktop = false
 blur_intensity = 0.0
 tint_intensity = 0.0

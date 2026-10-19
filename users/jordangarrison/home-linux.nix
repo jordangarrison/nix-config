@@ -22,11 +22,10 @@
     inputs.grok-bot.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 
-  # Shared account avatar used by desktop shells and display managers.
-  home.file.".face" = {
-    source = ./profile.jpg;
-    force = true;
-  };
+  # Shared account avatar used by desktop shells and display managers. An
+  # identical existing ~/.face is left alone; a different one is moved to
+  # ~/.face.backup by backupFileExtension.
+  home.file.".face".source = ./profile.jpg;
 
   # From the package source (same version as the CLI; identical to the copy
   # the package installs) so building the skill bundle doesn't build the

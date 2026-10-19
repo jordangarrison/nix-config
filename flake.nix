@@ -33,7 +33,7 @@
     llm-agents.url = "github:numtide/llm-agents.nix";
     niri.url = "github:sodiboo/niri-flake";
     noctalia = {
-      url = "github:noctalia-dev/noctalia/v5.1.0";
+      url = "github:noctalia-dev/noctalia/v5.3.0";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     sweet-nothings = {

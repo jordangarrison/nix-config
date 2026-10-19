@@ -25,7 +25,9 @@ Niri uses native **Noctalia v5** as its unified desktop shell:
 
 The upstream Home Manager module manages `noctalia.service`, installs the
 package, and validates the declarative TOML in
-`users/jordangarrison/configs/noctalia/config.toml`. Noctalia's mutable GUI
+`users/jordangarrison/configs/noctalia/config.toml`. This module limits that
+unit to Niri sessions with `ConditionEnvironment=XDG_CURRENT_DESKTOP=niri`;
+GNOME logins on the same hosts skip it. Noctalia's mutable GUI
 overrides live in `~/.local/state/noctalia/settings.toml` and take precedence
 over that base. Rebuild after changing the repository TOML; do not edit the
 Nix-managed `~/.config/noctalia/config.toml` symlink.

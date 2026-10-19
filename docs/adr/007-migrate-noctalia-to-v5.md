@@ -22,22 +22,30 @@ in-place Quickshell upgrade. It has a different package and executable, Home
 Manager option namespace, TOML configuration model, IPC interface, and native
 clipboard implementation. Upstream does not migrate v4 JSON configuration.
 
-Noctalia v5.1.0 is the current stable release. Continuing to use v4 leaves the
+Noctalia v5.3.0 is the current stable release. Continuing to use v4 leaves the
 desktop on an obsolete architecture and prevents adoption of the supported v5
 configuration and IPC interfaces.
 
 ## Decision
 
-Migrate the shared Niri shell configuration to Noctalia v5.1.0 with the
+Migrate the shared Niri shell configuration to Noctalia v5.3.0 with the
 following architecture:
 
-1. Pin the flake input to the stable `github:noctalia-dev/noctalia/v5.1.0`
-   release rather than tracking the development branch.
+1. Pin the flake input to the stable `github:noctalia-dev/noctalia/v5.3.0`
+   release rather than tracking the development branch. v5.3.0 is the oldest
+   release that works with the current Home Manager. Home Manager now ships
+   its own `programs/noctalia` module directory, and only v5.3.0's module
+   disables it. Earlier releases fail evaluation because `checkConfig` is
+   declared twice.
 2. Import `inputs.noctalia.homeModules.default` and configure
    `programs.noctalia` through Home Manager.
 3. Let the upstream Home Manager module own the `noctalia.service` user unit,
    package installation, build-time configuration validation, and
-   `~/.config/noctalia/config.toml`.
+   `~/.config/noctalia/config.toml`. Add only
+   `ConditionEnvironment=XDG_CURRENT_DESKTOP=niri` to that unit. Both hosts
+   also offer GNOME, which reaches the same `graphical-session.target`. There
+   Noctalia has no layer shell and draws nothing, yet it still registers
+   NetworkManager and BlueZ agents beside GNOME Shell's.
 4. Express the curated, version-controlled base configuration as v5 TOML.
    Noctalia may keep mutable GUI overrides in
    `~/.local/state/noctalia/settings.toml`, which intentionally take precedence
@@ -145,8 +153,9 @@ VM testing provide isolation from the working desktop.
   `endeavour` disables the hibernate target anyway.
 - The control center shows at most six shortcuts, so the previous seven-item
   set cannot be carried over in full. The migrated six drop `dark_mode`.
-- The lock screen is locked and shown twice before sleep, because swayidle runs
-  `before-sleep noctalia msg session lock` and v5's
+- On hosts that run swayidle (every Niri host except `endeavour`, which turns
+  off idle handling), the lock screen is locked and shown twice before sleep,
+  because swayidle runs `before-sleep noctalia msg session lock` and v5's
   `lockscreen.lock_before_suspend` defaults to true with its own logind
   inhibitor. This is idempotent and preserves the old lock-on-suspend
   behavior.

@@ -16,6 +16,10 @@ and passes `config.toml` to `programs.noctalia.settings`. Home Manager:
 - creates the read-only `~/.config/noctalia/config.toml` symlink; and
 - manages `noctalia.service` in the user session.
 
+The Niri module adds `ConditionEnvironment=XDG_CURRENT_DESKTOP=niri` to that
+unit, so a GNOME login on the same host skips Noctalia instead of running it
+headless next to GNOME Shell.
+
 Noctalia merges settings in this order:
 
 1. built-in defaults;
@@ -61,8 +65,9 @@ noctalia msg session lock
 noctalia msg settings-toggle
 ```
 
-These commands are also used by the Niri bindings, idle locker, tablet launcher
-gesture, and wlr-which-key lock action.
+These commands are also used by the Niri bindings, the swayidle locker (every
+Niri host except `endeavour`), the tablet launcher gesture, and the
+wlr-which-key lock action.
 
 ## Runtime overrides
 
@@ -94,6 +99,9 @@ noctalia msg status
 noctalia msg --help
 noctalia config validate ~/.config/noctalia/config.toml
 ```
+
+A status of `start condition unmet` means the session is not Niri; that is the
+expected result under GNOME.
 
 Under Niri, Noctalia owns notifications and native clipboard history and
 persistence. Hyprland retains its separate mako/clipboard setup.

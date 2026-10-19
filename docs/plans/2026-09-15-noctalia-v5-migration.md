@@ -2,7 +2,7 @@
 
 ## Goal
 
-Replace the pinned Noctalia v4/Quickshell setup with stable Noctalia v5.1.0 for
+Replace the pinned Noctalia v4/Quickshell setup with stable Noctalia v5.3.0 for
 the shared Niri desktop while preserving current behavior where v5 provides an
 equivalent. Validate the migration in isolated NixOS VMs for both supported Niri
 hosts without activating or committing the configuration.
@@ -40,14 +40,14 @@ The architectural decisions and rationale are recorded in
 
 | Feature | Intended v5 behavior |
 | --- | --- |
-| Shell startup | Home Manager-managed `noctalia.service` |
+| Shell startup | Home Manager-managed `noctalia.service`, started only in Niri sessions |
 | Theme | Dark built-in Rosé Pine palette |
 | Wallpaper | Disabled in Noctalia; existing `swaybg` startup remains authoritative |
 | Bar | Floating-style top bar with the current core launcher, workspace, clock, media, tray, notification, battery, volume, brightness, and control-center functions |
 | Launcher | `Mod+Space`, usage sorting, categories, and migrated pinned applications |
 | Emoji | `Mod+Semicolon` opens the launcher with the `/emo` provider query |
 | Clipboard | `Mod+C` opens Noctalia's native clipboard panel |
-| Locking | Idle, before-sleep, `Mod+Ctrl+Alt+L`, and which-key use `noctalia msg session lock` |
+| Locking | Idle and before-sleep (swayidle hosts; not `endeavour`), `Mod+Ctrl+Alt+L`, and which-key use `noctalia msg session lock` |
 | Notifications | Noctalia remains the Niri notification daemon |
 | Weather | Round Rock, Fahrenheit, weather effects enabled |
 | Night light | Enabled with the solar sunrise/sunset schedule derived from the configured location, and the existing temperatures |
@@ -58,7 +58,8 @@ The architectural decisions and rationale are recorded in
 ### 1. Update the flake input
 
 - Replace the final-v4 commit pin with
-  `github:noctalia-dev/noctalia/v5.1.0`.
+  `github:noctalia-dev/noctalia/v5.3.0`. Earlier v5 releases collide with
+  Home Manager's in-tree `programs/noctalia` module (see ADR 007).
 - Keep `inputs.nixpkgs.follows = "nixpkgs"` for consistency with the repository's
   package set, accepting that this may bypass upstream's binary cache.
 - Update only the Noctalia lock input.
@@ -236,7 +237,7 @@ Record any VM-only limitations separately from actual migration failures.
 
 ## Completion Criteria
 
-- [ ] Flake resolves Noctalia v5.1.0 with no legacy Quickshell input.
+- [ ] Flake resolves Noctalia v5.3.0 with no legacy Quickshell input.
 - [ ] Home Manager uses `programs.noctalia` and `noctalia.service`.
 - [ ] The curated TOML passes v5 validation without migration warnings.
 - [ ] All executable Noctalia IPC references use `noctalia msg`.

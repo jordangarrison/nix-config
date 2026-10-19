@@ -44,7 +44,7 @@ This skill is the **review mechanism** only. It does not read Slack, add reactio
 - Optional per-PR author note (e.g. the Slack message that posted it). Passed to every reviewer as `{AUTHOR_NOTE_OR_NONE}`.
 - Optional team overrides ("skip Hickey on this one", "skip Fairbanks", "add an auth-security specialist").
 - Optional `--yolo` (see below). `--skip-user-confirmation` is an accepted alias.
-- Optional `--thinking <level>` (pi only): reviewer thinking level for this run, one of pi's `off`, `minimal`, `low`, `medium`, `high`, `xhigh`, `max`. Default: the session's own level. See "Reviewer Thinking (pi)".
+- Optional `--thinking <level>` (pi only): reviewer thinking level for this run, one of pi's `off`, `minimal`, `low`, `medium`, `high`, `xhigh`, `max`. Default: the session's own level, so a session started without `--thinking` gets pi's `defaultThinkingLevel` (`medium`); pass `--thinking high` for the old fixed level. See "Reviewer Thinking (pi)".
 
 ## `--yolo` — don't ask me, just post the review
 
@@ -92,10 +92,10 @@ Autonomy is not silence. After posting, report per PR: verdict, inline count, he
 pi-subagents does not hand the parent's thinking level to a child: without one, the child runs at its frontmatter `thinking` (`high` in `pi-agents/`) or its own settings default. So every pi `subagent` launch here passes the level as a model suffix, which overrides frontmatter `thinking`:
 
 1. `LEVEL` = the `--thinking` value if given, else `$PI_REASONING_LEVEL` (pi sets it in every bash command to the session's current level).
-2. `MODEL` = the `model:` line of the agent's frontmatter: `sed -n 's/^model: //p' pi-agents/specialist.md` (or `consolidator.md`).
-3. Launch with `model: "<MODEL>:<LEVEL>"`. The full id is required: a bare `:<LEVEL>` is not a model for pi children, and the tool's `thinking` field is ignored on dispatch.
+2. `MODEL` = the `model:` line of the agent file pi loads: `sed -n 's/^model: //p' ~/.pi/agent/agents/pr-review-specialist.md` (or `pr-review-consolidator.md`).
+3. Launch with `model: "<MODEL>:<LEVEL>"`. The full id is required: a bare `:<LEVEL>` is not a model for pi children, and the tool's `thinking` field is ignored on dispatch. In a batched `tasks` launch, pass `model` once at the top level; task items accept only `agent` and `task`.
 
-If `LEVEL` is empty, omit `model` and the frontmatter level applies. `subagent({action: "status", id})` shows each run's `<model> · thinking <level>`; report it if it differs from `LEVEL`. In Claude Code this section does not apply and `--thinking` is ignored.
+If `MODEL` or `LEVEL` is empty, omit `model` and the frontmatter level applies. In Claude Code this section does not apply and `--thinking` is ignored.
 
 ## Review Worktrees
 

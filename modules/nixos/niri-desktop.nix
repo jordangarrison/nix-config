@@ -11,8 +11,15 @@
     package = pkgs.niri;
   };
 
+  # The Niri session spawns polkit-gnome, which registers first, so niri-flake's
+  # polkit-kde unit failed on every login until systemd stopped restarting it.
+  systemd.user.services.niri-flake-polkit.enable = false;
+
   # Noctalia uses ddcutil for external-monitor brightness. This loads i2c-dev
-  # and grants local seat users access to /dev/i2c-* through udev.
+  # and, through udev uaccess, gives whoever holds the active seat read/write
+  # access to every /dev/i2c-* bus, not only the monitors' DDC channels. That
+  # includes other local accounts on these hosts. Narrowing it to DDC buses
+  # needs each host's GPU bus layout checked on hardware first.
   hardware.i2c.enable = true;
 
   # Essential system packages for niri

@@ -235,6 +235,7 @@
             ./modules/nixos/greenlight.nix
             ./modules/nixos/panko.nix
             ./modules/nixos/agentsview.nix
+            ./modules/nixos/collie.nix
             ./modules/nixos/executor.nix
             ./modules/nixos/bb.nix
             ./modules/nixos/drawl.nix

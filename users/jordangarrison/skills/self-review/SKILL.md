@@ -43,7 +43,7 @@ Record: `URL`, `OWNER/REPO`, `NUM`, `HEAD` (`gh pr view --json headRefOid`), `DA
 
 ### 2. Clear stale results
 
-A `result.json` from an earlier run fires the watcher at once. If `$RESULT` exists, rename it to `result.<unix-ts>.json`.
+A `result.json` from an earlier run fires the watcher at once. If `$RESULT` exists, rename it to `result.<unix-ts>.json`. Then `mkdir -p` its directory and `touch` `.watch-start` in it: the watcher's stall test (step 5) counts from that file.
 
 ### 3. Staff the reviewer tab
 
@@ -83,12 +83,14 @@ Then confirm it is `working` (`herdr agent get "$NAME"` → `.result.agent.agent
 
 ### 5. Arm the watcher
 
-The watcher fires when the reviewer has a result for this head, or when the reviewer stops without one (finished, asking a question, or gone):
+The watcher fires when the reviewer has a result for this head, or when it stops without one (asking a question, gone, or silent for 20 minutes). `idle` or `done` alone is not stopped: the reviewer's specialists keep running in the background after its turn ends.
 
 ```sh
+D=$(dirname "$RESULT")
 test -s "$RESULT" && jq -e --arg h "$HEAD" '.status == "skipped" or .head_sha == $h' "$RESULT" >/dev/null && exit 0
 s=$(herdr agent get "$NAME" 2>/dev/null | jq -r '.result.agent.agent_status' 2>/dev/null)
-case "${s:-gone}" in idle|done|blocked|gone) exit 0 ;; esac
+case "${s:-gone}" in blocked|gone) exit 0 ;; esac
+test -z "$(find "$D" -newermt '-20 minutes' 2>/dev/null | head -1)" && exit 0
 exit 1
 ```
 
@@ -96,7 +98,7 @@ Substitute the real values into the condition (it runs in a fresh shell). Arm it
 
 | Harness | Watcher |
 |---|---|
-| pi | `until` with `action: "start"`, `condition`: the check above, `intervalSeconds: 60`, `timeoutSeconds: 7200`, `wake: "agent"`, `instruction`: "Self-review of `<URL>` finished. Run the fix phase in the self-review skill's `fix-phase.md` with: URL, HEAD, RESULT, NAME, tab id, rounds left, push mode." |
+| pi | `until` with `action: "repeat"`, `condition`: the check above, `intervalSeconds: 60`, `timeoutSeconds: 7200`, `immediate: false`, `label`: `self-review <owner>/<repo>#<num>`, `instruction`: "Self-review of `<URL>` finished. Run the fix phase in the self-review skill's `fix-phase.md` with: URL, HEAD, RESULT, NAME, tab id, rounds left, push mode", each filled in with its value. `repeat`, not `start`: a `start` watch ignores `instruction`, so its wake would name only the label. |
 | Claude Code | Write the check to `/tmp/pr-review-$DATE/$PR_KEY/watch.sh`, then `Bash` with `run_in_background: true`: `timeout 7200 sh -c 'until sh <watch.sh>; do sleep 60; done'`. Its completion notification is the wake. |
 | Other | Run the same loop in the foreground. |
 

@@ -18,9 +18,9 @@ Then call `tools.slack_mcp.user[<account>].<tool>({ ... })`; one `execute` progr
 |---|---|---|
 | `slack_read_channel` | `channel_id`, `limit`, optional `oldest` / `cursor` | Top-level messages, newest first. Each shows `Message TS`, author `(U…)`, `Reactions:` line, and `Thread: N replies`. |
 | `slack_read_thread` | `channel_id`, `message_ts`, `limit`, optional `cursor` | Thread parent + replies. Page with `cursor` until "no more messages". |
-| `slack_read_canvas` | `canvas_id` | Canvas markdown (channel instructions). |
+| `slack_read_canvas` | `canvas_id` | Canvas markdown (channel instructions). The response text is JSON: `JSON.parse` it and read `markdown_content` before matching lines, or a pattern runs across the escaped `\n` and picks the wrong emoji. |
 | `slack_send_message` | `channel_id`, `message`, optional `thread_ts` | Post. Pass `thread_ts` to reply in a thread. |
-| `slack_add_reaction` | `channel_id`, `message_ts`, `emoji` | Emoji name **without** colons. A duplicate succeeds silently. |
+| `slack_add_reaction` | `channel_id`, `message_ts`, `emoji` | Emoji name **without** colons. A duplicate succeeds silently. There is no remove-reaction tool: a reaction, once added, stays. |
 | `slack_get_reactions` | `channel_id`, `message_ts` | Who reacted with what: `:eye-twitch: × 1 — Jordan Garrison (UQ69UGHKM)`. |
 | `slack_search_users` | `keywords: ["<email>"]` | Resolve the current user's Slack ID from `userEmail`. |
 

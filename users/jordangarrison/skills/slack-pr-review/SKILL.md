@@ -5,8 +5,8 @@ description: >-
   following that location's own instructions (a channel canvas or the thread's
   parent message) for which reactions and replies mean what. One invocation runs
   one pass: read the instructions, find PR messages that still need my review,
-  react "reviewing", hand the PRs to [[multi-agent-pr-review]], then react with
-  the verdict. `--watch` repeats the pass on a harness schedule (default every
+  react "reviewing", hand the PRs to [[multi-agent-pr-review]], react with the
+  verdict, and hand non-approving reviews to [[review-watch]] for follow-ups. `--watch` repeats the pass on a harness schedule (default every
   5 minutes). Not tied to one team: [[infra-reviews]] and [[sre-review-thread]]
   call it with their locations, and any team's review channel or thread works the
   same way. Pass `--yolo` to post reviews without asking. Triggered by
@@ -78,27 +78,27 @@ Channel mode with a canvas: `slack_read_canvas`. Thread mode: the parent message
 
 ### 4. Decide each message
 
-For each PR: `gh pr view <url> --json state,isDraft,mergedAt,author,headRefOid,reviewDecision,title`. For messages that have a `Reactions:` line, `slack_get_reactions` to see who reacted. My last review's head: `gh api repos/<o>/<r>/pulls/<n>/reviews -q '[.[] | select(.user.login=="<me>")] | last | .commit_id'`.
+For each PR: `gh pr view <url> --json state,isDraft,mergedAt,author,headRefOid,reviewDecision,title`. For messages that have a `Reactions:` line, `slack_get_reactions` to see who reacted. My last verdict review (inline-thread replies are empty-body `COMMENTED` reviews; skip them): `gh api repos/<o>/<r>/pulls/<n>/reviews -q '[.[] | select(.user.login=="<me>" and (.state != "COMMENTED" or (.body // "") != ""))] | last | {state, commit_id}'`.
 
 | Condition (first match wins) | Decision |
 |---|---|
 | PR merged, closed, or draft | skip |
 | Release PR (title starts with "Production Release" or similar release-please title) | skip |
 | PR author is me | skip — note it in the report |
+| [[review-watch]] owns the PR (`~/.cache/review-watch/<owner>-<repo>-<num>.json` exists) | skip — it runs the follow-ups |
 | I reacted `reviewing` but not a verdict, and `/tmp/pr-review-<date>/<pr-key>/` changed within 60 min with no `result.json` | in progress (another pass) — skip |
-| I added a verdict reaction and my last review's `commit_id == headRefOid` | done — skip |
-| I added a verdict reaction and the head has moved since my review | **follow-up review** (drift) |
+| I added a verdict reaction | My last verdict is `APPROVE` → done, skip: the approval stands. Otherwise **hand off** (step 8), whether or not the head has moved. Scheduled tick instead: done when my last review's `commit_id == headRefOid`, otherwise **follow-up review** (drift); see "Watching". |
 | No reaction from me, I already reviewed this PR | **follow-up review** — a repeat post is a re-review request |
 | No reaction from me, someone else added the `approved` reaction or `reviewDecision == APPROVED` | skip unless `--include-approved` |
 | No reaction from me | **review** |
 
 ### 5. Signal pickup
 
-Add the `reviewing` reaction to every message picked in step 4, before the fan-out, so posters see someone picked it up.
+Add the `reviewing` reaction to every message step 4 picked for a review or follow-up review, before the fan-out, so posters see someone picked it up.
 
 ### 6. Review
 
-Call [[multi-agent-pr-review]] once with the deduped PR list. Pass each message's text as the author note and pass `--yolo` through. Drift and repeat messages go through its "Follow-Up Reviews" flow.
+Call [[multi-agent-pr-review]] once with the deduped PR list. Pass each message's text as the author note and pass `--yolo` through. Repeat messages (and drift, on a scheduled tick) go through its "Follow-Up Reviews" flow.
 
 ### 7. Signal the result
 
@@ -107,7 +107,19 @@ For each message, read that PR's `result.json`:
 - `skipped` → no verdict reaction. Reply if the rules below call for it.
 - Empty slot in the signal map → no reaction for that verdict.
 
-### 8. Thread replies
+### 8. Hand off follow-ups
+
+[[review-watch]] owns every follow-up review. Hand it each PR this pass posted `COMMENT` or `REQUEST_CHANGES` on, and each PR step 4 marked **hand off**: run [[review-watch]] on the PR URL, passing `--yolo` and
+
+```
+--on-round "Read <the instructions: canvas id, or thread parent channel+ts> for the signal map, then add the reaction for this round's verdict on <channel-id> messages <ts, ...>, as slack-pr-review step 7 maps it."
+```
+
+It arms in this session, re-reviews on each push, and adds each new verdict's reaction through that instruction, after this watch stops too. Reactions can't be removed (`slack-calls.md`), so a changed verdict sits beside the old one; the newest is current. From the next pass, step 4 skips the PR as owned.
+
+**Scheduled tick:** skip this step. The tick's agent exits after the pass and cannot own a watch; step 4's drift branch covers follow-ups instead.
+
+### 9. Thread replies
 
 The GitHub review is the artifact. Reply in the thread only when:
 - the location's `replies` slot asks for one, or
@@ -117,14 +129,15 @@ The GitHub review is the artifact. Reply in the thread only when:
 
 Rules: reply in the submission's thread (channel mode: `thread_ts` = the message; thread mode: `thread_ts` = the parent), never a top-level message. Link the GitHub review, don't restate it: two or three sentences and a URL. One reply per PR per pass, and don't re-notify about the same finding on later passes. Never `@channel` / `@here` / subteam tags, never DMs as a substitute ([[feedback_slack_no_fanout_dms]]). Replies go out under Jordan's name: [[feedback_writing_as_jordan]], [[reference_ai_smells_to_avoid]]. Attended: preview replies with the review sign-off. `--yolo`: send.
 
-### 9. Report
+### 10. Report
 
 ```
 Location:   <channel or thread permalink>
 Signal map: reviewing=eye-twitch approved=mega-approved commented=reverse changes=dumpsterfire
 Reviewed:   <pr> → APPROVE <review url> (reacted on <n> messages)
-Follow-ups: <pr> → COMMENT <review url> (head moved <old>..<new>)
-Skipped:    <pr> (merged) · <pr> (my PR) · <pr> (approved by someone else)
+Follow-ups: <pr> → COMMENT <review url> (repeat post)
+Handed off: <pr> → review-watch <watch id>
+Skipped:    <pr> (merged) · <pr> (my PR) · <pr> (approved by someone else) · <pr> (review-watch)
 Needs your attention: <items from result.json>
 ```
 
@@ -136,11 +149,13 @@ A quiet pass reports one line: "nothing new".
 
 | Harness | How |
 |---|---|
-| pi | `until` with `action: "repeat"`, `intervalSeconds: 300`, `immediate: true`, instruction = one pass with the same arguments. Or the `pr-review.slack-watcher` pi agent on a pi-subagents schedule (`every: "5m"`), one fresh pass per tick. |
+| pi | `until` with `action: "repeat"`, `intervalSeconds: 300`, `immediate: true`, instruction = one pass with the same arguments. |
+| pi, scheduled ticks (legacy, [[sre-review-thread]] only) | The `pr-review.slack-watcher` pi agent on a pi-subagents schedule (`every: "5m"`), one fresh pass per tick. It can't own [[review-watch]] watches, so it keeps the drift branch in step 4 and skips step 8. Remove this row and those branches with [[sre-review-thread]]. |
 | Claude Code | `/loop 5m /slack-pr-review <args>` |
 
 Rules:
 - Every pass starts from Slack reactions and GitHub reviews, so nothing carries between passes and a restart loses nothing.
+- Follow-ups outlive the watch: each handed-off PR stays with [[review-watch]] until I approve, it merges or closes, or it goes quiet.
 - **Keep the cadence.** A quiet location is the normal case; don't stretch the interval or stop because a pass found nothing.
 - Never start a pass while the previous one is still running (pi-subagents schedules skip overlap; with `until`, the next wake comes after the turn ends).
 - **Stop** when the user says stop, at `--until`, or when the caller's end condition fires (e.g. [[sre-review-thread]] stops when tomorrow's thread appears). Report a tally of the session on stop.

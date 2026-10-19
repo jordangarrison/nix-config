@@ -13,7 +13,7 @@ description: >-
 
 # SRE Review Thread (legacy)
 
-**Temporary.** Exists only until the rest of the team moves to #infra-reviews ([[infra-reviews]]). To retire: delete this directory, drop `sre-review-thread` from the `skills:` list in `../slack-pr-review/pi-agents/slack-watcher.md`, remove the [[sre-review-thread]] mentions in [[slack-pr-review]] and [[multi-agent-pr-review]], and rebuild.
+**Temporary.** Exists only until the rest of the team moves to #infra-reviews ([[infra-reviews]]). To retire: delete this directory, drop `sre-review-thread` from the `skills:` list in `../slack-pr-review/pi-agents/slack-watcher.md`, remove the [[sre-review-thread]] mentions in [[slack-pr-review]] and [[multi-agent-pr-review]], and rebuild. It is the only user of scheduled ticks: also delete `../slack-pr-review/pi-agents/slack-watcher.md` and its `agents.files` entry in `users/jordangarrison/home.nix`, and the scheduled-tick row and drift branches in [[slack-pr-review]] (steps 4 and 8, "Watching").
 
 This skill only *locates* today's thread. Selection, reactions, replies, and watching are [[slack-pr-review]]; the review is [[multi-agent-pr-review]].
 

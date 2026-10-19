@@ -25,6 +25,7 @@ This skill is the **review mechanism** only. It does not read Slack, add reactio
 | How a PR is reviewed (team, prompts, gates, verdict, posting) | this skill |
 | Which PRs to review, and how to tell the poster | [[slack-pr-review]] (generic), via [[infra-reviews]] or [[sre-review-thread]] |
 | Repeating on a cadence | the harness scheduler, as described in [[slack-pr-review]] |
+| Re-reviewing a PR I didn't approve after each new push | [[review-watch]] |
 
 ## When to Use
 
@@ -222,8 +223,10 @@ When asked to re-review ("look at this one again", "check if it's addressed"), o
    ```
 2. Map each new commit against your prior asks. Call out addressing commits by short SHA.
 3. All prior asks addressed → post a fresh `APPROVE` referencing the addressing commits ("thanks for `<sha>` — the drift concern from my prior review is addressed").
-4. New asks arose from the new commits → post a `COMMENT` with the new findings; no need to re-fan-out unless changes are large.
-5. **Recompute any quantitative claim** you made (memory headroom math, safety ratios) against the new state. If the math improved, say so — the author put work in.
+4. Prior asks still open, or new asks arose from the new commits → pick the verdict with "Verdict Selection" and say which asks are still open, which commits fixed the rest, and what is new. No need to re-fan-out unless changes are large.
+5. **A `COMMENT` never lifts my earlier `REQUEST_CHANGES`**: GitHub keeps the PR blocked on my last `APPROVE`/`REQUEST_CHANGES`. Once no blocker remains, post `APPROVE`, with any non-blocking findings in the same review.
+6. **Recompute any quantitative claim** you made (memory headroom math, safety ratios) against the new state. If the math improved, say so — the author put work in.
+7. Finish with Run Flow steps 7-11: verify, re-fetch, sign-off (attended only), post, and write `result.json` for the reviewed head.
 
 ## Special Cases
 

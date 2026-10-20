@@ -59,6 +59,9 @@ Open **Settings → Sync**, turn on **Enable syncing**, choose **WebDAV** as the
 
 Press **Test Connection**, then save.
 
+The pre-fill only applies while no sync provider is saved. A device that
+already saved a different Base URL keeps it; correct the field by hand.
+
 - **Linux desktop app** (`app.nix`) and the **web app**
   (`https://superproductivity.jordangarrison.dev`, installable as a PWA): the
   form opens pre-filled for the first `webdavUsers` entry. Type the password.
@@ -87,8 +90,8 @@ already TLS on the tailnet, so this only protects the copy on endeavour's disk.
 
 | Symptom | Cause |
 | --- | --- |
-| Test Connection: 401 | Wrong password, or the URL names another login's folder |
-| Test Connection: 403 | URL is `/webdav/` without the `<user>/` folder |
+| Test Connection: 401 | Wrong username or password |
+| Test Connection: 403 | Right password, wrong folder: the Base URL is missing `<user>/`, names another login's folder, or the login isn't in `webdavUsers` |
 | Site shows another service's certificate | This config isn't active on endeavour; build/test/switch it |
 | Sync unit not running | `/var/lib/super-productivity-secrets/htpasswd` is missing |
 

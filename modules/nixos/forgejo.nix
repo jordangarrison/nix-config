@@ -48,7 +48,7 @@
     forceSSL = true;
     useACMEHost = "forgejo.jordangarrison.dev";
     locations."/" = {
-      proxyPass = "http://localhost:7770";
+      proxyPass = "http://127.0.0.1:7770";
     };
   };
 }

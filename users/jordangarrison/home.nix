@@ -410,9 +410,9 @@ in
       ];
     };
 
-    # pi-subagents agents used by the PR review skills. Each definition lives
-    # beside the skill that runs it; @HOME@ stands in for paths pi installs at
-    # run time (skills fan-out, npm extensions).
+    # pi-subagents agents. PR review agents live beside the skill that runs
+    # them; @HOME@ stands in for paths pi installs at run time (skills
+    # fan-out, npm extensions). Generic agents live in agents/pi/.
     agents.files =
       let
         withHome =
@@ -423,6 +423,8 @@ in
         "pr-review-specialist.md".text = withHome ./skills/multi-agent-pr-review/pi-agents/specialist.md;
         "pr-review-consolidator.md".text = withHome ./skills/multi-agent-pr-review/pi-agents/consolidator.md;
         "pr-review-slack-watcher.md".text = withHome ./skills/slack-pr-review/pi-agents/slack-watcher.md;
+        # Not `researcher`: that name is a pi-subagents builtin (web research).
+        "mcp-researcher.md".source = ./agents/pi/mcp-researcher.md;
       };
   };
 

@@ -37,8 +37,10 @@ let
     deny all;
   '';
   # Executor runs on Docker's default bridge and reaches this vhost through
-  # the host, so its requests arrive from that subnet. Only the API, which
-  # needs an API key, is open to it.
+  # the host, so its requests arrive from that subnet. Only /api/v1/ is open
+  # to it: key-authenticated except /health. It also admits every other
+  # default-bridge container. The other half is EXECUTOR_APPS_ALLOW_PRIVATE_FETCH
+  # in executor.nix.
   dockerBridge = "172.17.0.0/16";
 in
 {

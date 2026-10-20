@@ -36,7 +36,9 @@ in
       BETTER_AUTH_URL = "https://${host}";
       DO_NOT_TRACK = "1";
       # Apps may fetch private addresses, so the Norish app can reach
-      # norish.garrisonsbygrace.com on the tailnet IP. This applies to every app.
+      # norish.garrisonsbygrace.com on the tailnet IP. This applies to every
+      # app: any of them can reach the LAN, tailnet peers and endeavour's
+      # 0.0.0.0 listeners. The other half is the /api/v1/ allow in norish.nix.
       EXECUTOR_APPS_ALLOW_PRIVATE_FETCH = "true";
     };
   };

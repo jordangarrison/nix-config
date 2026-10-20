@@ -51,7 +51,8 @@ let
 
   webRoot = pkgs.symlinkJoin {
     name = "super-productivity-web-root";
-    paths = [ web syncDefaults ];
+    # First path wins: the build ships a placeholder at the same path.
+    paths = [ syncDefaults web ];
   };
 
   httpdConf = pkgs.writeText "super-productivity-webdav.conf" ''

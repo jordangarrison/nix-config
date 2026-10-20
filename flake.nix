@@ -240,6 +240,7 @@
             ./modules/nixos/agentsview.nix
             ./modules/nixos/collie.nix
             ./modules/nixos/executor.nix
+            ./modules/nixos/norish.nix
             ./modules/nixos/bb.nix
             ./modules/nixos/drawl.nix
             ./modules/nixos/tic-tac-toe-4-in-a-row.nix

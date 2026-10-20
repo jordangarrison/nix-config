@@ -175,6 +175,7 @@ Read the focused guidance before changing the corresponding subsystem:
 | Noctalia | `users/jordangarrison/configs/noctalia/README.md` |
 | Doom Emacs | `users/jordangarrison/tools/doom.d/AGENTS.md` |
 | nvf/Neovim | `users/jordangarrison/tools/nvim/README.md` |
+| Super Productivity server, app, or sync | `modules/super-productivity/README.md` |
 | Herdr persistence, updates, or recovery | `docs/runbooks/herdr.md` and `modules/home/herdr/` |
 | Agent configuration and routing | `users/jordangarrison/agents/AGENTS.md` |
 | Skills | `users/jordangarrison/skills/CLAUDE.md` |

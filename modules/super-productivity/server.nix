@@ -1,7 +1,7 @@
 { config, lib, pkgs, ... }:
 
-# Self-hosted Super Productivity: the static web app plus a WebDAV sync
-# backend, both on superproductivity.jordangarrison.dev (Tailscale-only DNS).
+# Self-hosted Super Productivity server: the static web app plus a WebDAV
+# sync backend on one tailnet-only vhost. The desktop app is app.nix.
 #
 # The app keeps its data in the browser; WebDAV is only the sync target, so
 # desktop/mobile clients can point at the same URL. WebDAV lives on the same
@@ -13,16 +13,13 @@
 # and hacdias ignores If-Match (upstream #10590). Upstream's own E2E server
 # is mod_dav with `FileETag Digest` for the same reason.
 #
-# One-time secret setup (bcrypt htpasswd; add more users with the same
-# command minus -c). htpasswd isn't on PATH, so take it from apacheHttpd:
-#   sudo install -d -m 700 /var/lib/super-productivity-secrets
-#   sudo "$(nix build --no-link --print-out-paths nixpkgs#apacheHttpd)/bin/htpasswd" \
-#     -B -c /var/lib/super-productivity-secrets/htpasswd jordangarrison
+# Server and client setup, including the htpasswd file: README.md.
 let
-  domain = "superproductivity.jordangarrison.dev";
-  davPort = 8790;
+  cfg = config.services.super-productivity;
+  inherit (cfg) domain;
+  davPort = cfg.webdavPort;
   stateDir = "/var/lib/super-productivity-webdav";
-  htpasswdFile = "/var/lib/super-productivity-secrets/htpasswd";
+  prefillUser = builtins.head cfg.webdavUsers;
 
   # Same tailnet boundary as executor and norish. endeavour's host firewall is
   # off, so without this any LAN client sending this Host/SNI gets through.
@@ -43,8 +40,8 @@ let
     (builtins.toJSON {
       syncProvider = "WebDAV";
       webDav = {
-        baseUrl = "https://${domain}/webdav/";
-        userName = "jordangarrison";
+        baseUrl = "https://${domain}/webdav/${prefillUser}/";
+        userName = prefillUser;
         syncFolderPath = "/";
       };
     });
@@ -90,6 +87,8 @@ let
       Require all denied
     </Directory>
 
+    # One folder per login: /webdav/<user>/ is open only to <user>, and the
+    # shared root is closed, so logins can't read or clobber each other's data.
     Alias /webdav/ ${stateDir}/data/
     <Directory ${stateDir}/data>
       Dav On
@@ -97,11 +96,48 @@ let
       AuthName "Super Productivity"
       AuthBasicProvider file
       AuthUserFile ''${CREDENTIALS_DIRECTORY}/htpasswd
-      Require valid-user
+      Require all denied
     </Directory>
+    <DirectoryMatch "^${stateDir}/data/(?<owner>[^/]+)">
+      Require expr "%{REMOTE_USER} == %{env:MATCH_OWNER}"
+    </DirectoryMatch>
   '';
 in
 {
+  options.services.super-productivity = {
+    enable = lib.mkEnableOption "the self-hosted Super Productivity web app and WebDAV sync server";
+
+    domain = lib.mkOption {
+      type = lib.types.str;
+      # Keep in step with programs.super-productivity.serverUrl's default.
+      default = "superproductivity.jordangarrison.dev";
+      description = "Public (tailnet) hostname for the nginx vhost and ACME cert.";
+    };
+
+    webdavPort = lib.mkOption {
+      type = lib.types.port;
+      default = 8790;
+      description = "Loopback port for the Apache WebDAV backend.";
+    };
+
+    webdavUsers = lib.mkOption {
+      type = lib.types.nonEmptyListOf lib.types.str;
+      default = [ "jordangarrison" ];
+      description = ''
+        WebDAV logins, each synced to its own /webdav/<user>/ folder. Each
+        needs an entry in htpasswdFile. The first is pre-filled in the app's
+        sync settings; anyone else edits the URL and username once.
+      '';
+    };
+
+    htpasswdFile = lib.mkOption {
+      type = lib.types.path;
+      default = "/var/lib/super-productivity-secrets/htpasswd";
+      description = "bcrypt htpasswd file for WebDAV basic auth. Kept out of the store; the unit is skipped until it exists.";
+    };
+  };
+
+  config = lib.mkIf cfg.enable {
   users.users.super-productivity = {
     isSystemUser = true;
     group = "super-productivity";
@@ -111,19 +147,20 @@ in
   systemd.tmpfiles.rules = [
     "d ${stateDir}/data 0750 super-productivity super-productivity -"
     "d ${stateDir}/lock 0750 super-productivity super-productivity -"
-  ];
+  ] ++ map (user: "d ${stateDir}/data/${user} 0750 super-productivity super-productivity -")
+    cfg.webdavUsers;
 
   systemd.services.super-productivity-webdav = {
     description = "Super Productivity WebDAV sync (Apache mod_dav)";
     wantedBy = [ "multi-user.target" ];
     after = [ "network.target" ];
-    unitConfig.ConditionPathExists = htpasswdFile;
+    unitConfig.ConditionPathExists = cfg.htpasswdFile;
     serviceConfig = {
       ExecStart = "${pkgs.apacheHttpd}/bin/httpd -f ${httpdConf} -DFOREGROUND";
       ExecReload = "${pkgs.coreutils}/bin/kill -HUP $MAINPID";
       User = "super-productivity";
       Group = "super-productivity";
-      LoadCredential = "htpasswd:${htpasswdFile}";
+      LoadCredential = "htpasswd:${cfg.htpasswdFile}";
       StateDirectory = "super-productivity-webdav";
       StateDirectoryMode = "0750";
       RuntimeDirectory = "super-productivity-webdav";
@@ -180,5 +217,6 @@ in
         proxy_request_buffering off;
       '';
     };
+  };
   };
 }

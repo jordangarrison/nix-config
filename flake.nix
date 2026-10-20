@@ -234,6 +234,7 @@
             ./modules/nixos/audio/speech-dispatcher.nix
             ./modules/nixos/development.nix
             ./modules/nixos/searx.nix
+            ./modules/nixos/super-productivity.nix
             ./modules/nixos/postgres.nix
             ./modules/nixos/greenlight.nix
             ./modules/nixos/panko.nix

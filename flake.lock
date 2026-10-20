@@ -199,6 +199,22 @@
         "type": "github"
       }
     },
+    "diagram-design": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1792454463,
+        "narHash": "sha256-e/mIbo62GcsktrtYIXtIt1FH0AGGfgs+2r93fHlVE5c=",
+        "owner": "cathrynlavery",
+        "repo": "diagram-design",
+        "rev": "f2f4d49ea8d632f17cf196ba26599277a93f767b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "cathrynlavery",
+        "repo": "diagram-design",
+        "type": "github"
+      }
+    },
     "disko": {
       "inputs": {
         "nixpkgs": [
@@ -1392,6 +1408,7 @@
         "aws-use-sso": "aws-use-sso",
         "boristane-agent-skills": "boristane-agent-skills",
         "caveman": "caveman",
+        "diagram-design": "diagram-design",
         "disko": "disko",
         "drawl": "drawl",
         "firefox-nightly": "firefox-nightly",

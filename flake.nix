@@ -131,6 +131,10 @@
       url = "github:JuliusBrussee/caveman";
       flake = false;
     };
+    diagram-design = {
+      url = "github:cathrynlavery/diagram-design";
+      flake = false;
+    };
     lavish-axi = {
       url = "github:kunchenguid/lavish-axi";
       flake = false;

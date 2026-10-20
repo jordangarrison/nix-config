@@ -6,14 +6,14 @@
 show_keybinds() {
   cat << 'EOF'
 [LAUNCHERS]
-Super + Return            → Terminal (WezTerm)
+Super + Return            → Terminal (Ghostty)
 Super + B                 → Browser (Brave)
 Super + E                 → Emacs
 Super + N                 → Obsidian
 Super + F                 → File manager (Yazi)
 Super + Shift + F         → File manager (Nautilus)
 Super + Space             → App launcher (Noctalia)
-Super + Semicolon         → Emoji picker (rofimoji)
+Super + Semicolon         → Emoji search (Noctalia launcher)
 Super + Shift + D         → Voice dictation with post-processing (Handy)
 Super + Ctrl + Alt + Shift + 5 → Voice dictation toggle (Handy)
 
@@ -84,7 +84,7 @@ Print                     → Screenshot (niri built-in)
 Shift + Print             → Screenshot window (niri built-in)
 
 [SYSTEM]
-Super + C                 → Clipboard history
+Super + C                 → Clipboard history (Noctalia)
 Super + Ctrl + Alt + L    → Lock screen
 Super + Shift + C         → Reload niri config
 Super + Shift + Q         → Quit niri

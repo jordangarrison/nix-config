@@ -10,10 +10,10 @@
 
 let
   homeDirectory = config.home.homeDirectory;
-  wallpapersPath = "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/wallpapers";
+  wallpaperName = "a_mountain_range_with_snow_on_top.jpeg";
+  wallpaperSource = ../../../users/jordangarrison/wallpapers/${wallpaperName};
   scriptsPath = "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/hypr/scripts";
 
-  noctaliaPkg = inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default;
   sweetNothingsPkg =
     inputs.sweet-nothings.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs
       (_: {
@@ -39,14 +39,14 @@ let
     "-w"
     "timeout"
     "300"
-    "noctalia-shell ipc call lockScreen lock"
+    "noctalia msg session lock"
     "timeout"
     "600"
     "niri msg action power-off-monitors"
     "resume"
     "niri msg action power-on-monitors"
     "before-sleep"
-    "noctalia-shell ipc call lockScreen lock"
+    "noctalia msg session lock"
   ]
   ++ (
     if isLaptop then
@@ -64,21 +64,25 @@ in
   imports = [
     ../desktop-tools
     ../wlr-which-key
-    # Upstream noctalia-shell home-manager module — provides the
-    # systemd.user.services.noctalia-shell unit with ExecStart pinned to the
-    # package store path, so home-manager auto-restarts the service on every
-    # nh os switch that bumps the noctalia-shell package. Without this, the
-    # old quickshell process keeps holding the IPC instance ID and new
-    # `noctalia-shell ipc call ...` invocations fail.
-    inputs.noctalia.homeModules.default
     inputs.sweet-nothings.homeManagerModules.default
   ];
 
-  programs.noctalia-shell = {
+  # Home Manager's own programs.noctalia module owns the validated config and
+  # the systemd user service; the flake input supplies only the package. The
+  # flake's module replaces Home Manager's through hard-coded disabledModules
+  # paths, which broke evaluation when Home Manager restructured its module.
+  programs.noctalia = {
     enable = true;
+    package = inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default;
     systemd.enable = true;
-    package = noctaliaPkg;
+    settings = ../../../users/jordangarrison/configs/noctalia/config.toml;
   };
+
+  # The Home Manager unit follows graphical-session.target, which the GNOME session
+  # on these hosts also reaches. Without a layer shell Noctalia draws nothing
+  # there, but it still registers NetworkManager and BlueZ agents beside GNOME
+  # Shell's. Niri imports XDG_CURRENT_DESKTOP before that target is reached.
+  systemd.user.services.noctalia.Unit.ConditionEnvironment = "XDG_CURRENT_DESKTOP=niri";
 
   programs.sweet-nothings = {
     enable = true;
@@ -96,22 +100,12 @@ in
     };
   };
 
-  # Clipboard services via Home Manager (systemd-managed)
-  services.cliphist = {
-    enable = true;
-    allowImages = true;
-    systemdTargets = [ "graphical-session.target" ];
-  };
-
-  # Clipboard persistence - fixes focus-change paste issue
-  services.wl-clip-persist = {
-    enable = true;
-    clipboardType = "regular";
-    systemdTargets = [ "graphical-session.target" ];
-  };
+  # Keep swaybg's image available on physical hosts and build-vm guests
+  # without depending on the live Git checkout path.
+  home.file."Pictures/Wallpapers/${wallpaperName}".source = wallpaperSource;
 
   # Packages needed for niri desktop environment
-  # (noctalia-shell is added automatically by programs.noctalia-shell above)
+  # (Noctalia is added automatically by programs.noctalia above)
   home.packages = with pkgs; [
     # Focus Fox - terminal pomodoro timer
     inputs.focus-fox.packages.${pkgs.stdenv.hostPlatform.system}.default
@@ -119,6 +113,9 @@ in
     # System tray applets
     networkmanagerapplet
     blueman
+
+    # Noctalia external-monitor brightness backend
+    ddcutil
 
     # Authentication
     polkit_gnome
@@ -275,13 +272,12 @@ in
         command = [
           "swaybg"
           "-i"
-          "${wallpapersPath}/a_mountain_range_with_snow_on_top.jpeg"
+          "${homeDirectory}/Pictures/Wallpapers/${wallpaperName}"
           "-m"
           "fill"
         ];
       }
-      # Noctalia shell is managed via systemd.user.services.noctalia-shell
-      # (see above) so it self-heals across package upgrades.
+      # Noctalia is managed by the upstream noctalia.service user unit.
       # Authentication agent
       {
         command = [
@@ -338,38 +334,19 @@ in
           else
             "eDP-1"; # fallback
       in
-      {
-        "1" = {
-          open-on-output = primaryOutput;
-        };
-        "2" = {
-          open-on-output = primaryOutput;
-        };
-        "3" = {
-          open-on-output = primaryOutput;
-        };
-        "4" = {
-          open-on-output = primaryOutput;
-        };
-        "5" = {
-          open-on-output = primaryOutput;
-        };
-        "6" = {
-          open-on-output = primaryOutput;
-        };
-        "7" = {
-          open-on-output = primaryOutput;
-        };
-        "8" = {
-          open-on-output = primaryOutput;
-        };
-        "9" = {
-          open-on-output = primaryOutput;
-        };
-        "10" = {
-          open-on-output = primaryOutput;
-        };
-      };
+      builtins.listToAttrs (
+        map
+          (index: {
+            # Niri creates named workspaces in attribute-key order. Keep those
+            # keys zero-padded while preserving the user-facing numeric names.
+            name = lib.fixedWidthString 2 "0" (toString index);
+            value = {
+              name = toString index;
+              open-on-output = primaryOutput;
+            };
+          })
+          (lib.range 1 10)
+      );
 
     # Window rules
     window-rules = [
@@ -450,18 +427,17 @@ in
       ];
       "Mod+Shift+F".action.spawn = "nautilus";
       "Mod+Space".action.spawn = [
-        "noctalia-shell"
-        "ipc"
-        "call"
+        "noctalia"
+        "msg"
+        "panel-toggle"
         "launcher"
-        "toggle"
       ];
       "Mod+Semicolon".action.spawn = [
-        "noctalia-shell"
-        "ipc"
-        "call"
+        "noctalia"
+        "msg"
+        "panel-toggle"
         "launcher"
-        "emoji"
+        "/emo "
       ];
 
       # Handy - Voice dictation. Toggles the running instance.
@@ -669,17 +645,15 @@ in
       # SYSTEM
       # ================
       "Mod+Ctrl+Alt+L".action.spawn = [
-        "noctalia-shell"
-        "ipc"
-        "call"
-        "lockScreen"
+        "noctalia"
+        "msg"
+        "session"
         "lock"
       ];
       "Mod+C".action.spawn = [
-        "noctalia-shell"
-        "ipc"
-        "call"
-        "launcher"
+        "noctalia"
+        "msg"
+        "panel-toggle"
         "clipboard"
       ];
       "Mod+Shift+C".action.spawn = [
@@ -738,23 +712,4 @@ in
     screenshot-path = "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png";
   };
 
-  # Noctalia-shell configuration (quickshell-based)
-  # Symlink to repo for live editing and version control
-  xdg.configFile = {
-    "noctalia/settings.json".source =
-      config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/noctalia/settings.json";
-
-    "noctalia/colors.json".source =
-      config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/noctalia/colors.json";
-
-    "noctalia/plugins.json".source =
-      config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/noctalia/plugins.json";
-
-    # Directories for custom colorschemes and plugins
-    "noctalia/colorschemes".source =
-      config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/noctalia/colorschemes";
-
-    "noctalia/plugins".source =
-      config.lib.file.mkOutOfStoreSymlink "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/noctalia/plugins";
-  };
 }

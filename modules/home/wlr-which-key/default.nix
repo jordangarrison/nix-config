@@ -26,7 +26,7 @@ let
         (entry "s" "Suspend" "systemctl suspend")
         (entry "r" "Reboot" "systemctl reboot")
         (entry "o" "Shutdown" "systemctl poweroff")
-        (entry "l" "Lock Screen" "noctalia-shell ipc call lockScreen lock")
+        (entry "l" "Lock Screen" "noctalia msg session lock")
       ])
 
       # [s] Screenshots

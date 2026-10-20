@@ -15,18 +15,26 @@ Niri is a scrollable-tiling compositor where workspaces scroll horizontally and 
 
 ## Shell Components
 
-Currently using **noctalia-shell** for unified desktop shell:
+Niri uses native **Noctalia v5** as its unified desktop shell:
 - Status bar (replaces waybar)
 - Notifications (replaces mako)
-- Application launcher (replaces walker/rofi)
-- Emoji picker (replaces rofimoji)
-- Clipboard history (replaces rofi+cliphist script)
+- Application launcher and emoji provider (replaces walker/rofi and rofimoji)
+- Native clipboard history and persistence (replaces cliphist and wl-clip-persist)
 - Lock screen (replaces swaylock)
 - Power menu (replaces wlogout)
 
-**Note:** Rofi is only used for keybindings help display (`Mod+/`).
+Home Manager's own `programs.noctalia` module (with the package from the
+`noctalia` flake input) manages `noctalia.service`, installs the package, and
+validates the declarative TOML in
+`users/jordangarrison/configs/noctalia/config.toml`. This module limits that
+unit to Niri sessions with `ConditionEnvironment=XDG_CURRENT_DESKTOP=niri`;
+GNOME logins on the same hosts skip it. Noctalia's mutable GUI
+overrides live in `~/.local/state/noctalia/settings.toml` and take precedence
+over that base. Rebuild after changing the repository TOML; do not edit the
+Nix-managed `~/.config/noctalia/config.toml` symlink.
 
-Wallpaper is managed separately via **swaybg**.
+**Note:** Rofi is only used for keybindings help display (`Mod+/`). Wallpaper is
+managed separately via **swaybg** and is disabled in Noctalia.
 
 ## Keybindings
 
@@ -148,10 +156,10 @@ binds = {
   # Niri actions (empty list for no-arg actions)
   "Mod+Z".action.close-window = [ ];
 
-  # Noctalia IPC commands
-  "Mod+Space".action.spawn = [ "noctalia-shell" "ipc" "call" "launcher" "toggle" ];
-  "Mod+Semicolon".action.spawn = [ "noctalia-shell" "ipc" "call" "launcher" "emoji" ];
-  "Mod+C".action.spawn = [ "noctalia-shell" "ipc" "call" "launcher" "clipboard" ];
+  # Noctalia v5 message commands
+  "Mod+Space".action.spawn = [ "noctalia" "msg" "panel-toggle" "launcher" ];
+  "Mod+Semicolon".action.spawn = [ "noctalia" "msg" "panel-toggle" "launcher" "/emo " ];
+  "Mod+C".action.spawn = [ "noctalia" "msg" "panel-toggle" "clipboard" ];
 };
 ```
 
@@ -165,15 +173,13 @@ Keep both files in sync to ensure users can discover all available keybindings.
 ## Testing Changes
 
 ```bash
-# Build without switching (validates config)
-nh os build .
-
-# Test configuration (switch temporarily)
-nh os test .
-
-# Apply permanently
-nh os switch .
+# Build without activating (validates Niri and Noctalia configuration)
+nh os build . --no-nom -H opportunity
+nh os build . --no-nom -H endeavour
 ```
+
+Follow the repository's guarded build → test → switch process for later
+activation, and never run `test` or `switch` without the required approval.
 
 ## Troubleshooting
 
@@ -192,18 +198,34 @@ workspaces = {
 ```
 
 ### Noctalia not starting
-Check if noctalia-shell is in spawn-at-startup and the package is installed from the flake input.
+
+Noctalia is a systemd user service rather than a Niri startup command:
+
+```bash
+systemctl --user status noctalia.service
+journalctl --user -u noctalia.service -b --no-pager
+noctalia msg status
+noctalia config validate        # base TOML plus settings.toml overrides
+noctalia config export merged   # effective user settings
+```
+
+If declarative changes appear ignored, inspect
+`~/.local/state/noctalia/settings.toml` for a newer GUI override. Stop the
+service and move that file aside before restarting to test the base config;
+keep a backup until the desired settings are incorporated into the repository.
 
 ## Related Files
 
 - `modules/nixos/niri-desktop.nix` - System-level niri configuration
 - `flake.nix` - Niri and noctalia flake inputs
 - `users/jordangarrison/configs/hypr/scripts/niri-keybinds-help.sh` - Keybindings help script (keep in sync!)
+- `users/jordangarrison/configs/noctalia/` - Noctalia TOML and its README
 - `docs/adr/003-add-niri-scrolling-compositor.md` - Architecture decision record
+- `docs/adr/007-migrate-noctalia-to-v5.md` - Noctalia v5 decision (supersedes ADR 003's shell details)
 
 ## Resources
 
 - [niri GitHub](https://github.com/YaLTeR/niri)
 - [niri-flake](https://github.com/sodiboo/niri-flake)
-- [noctalia-shell](https://github.com/noctalia-dev/noctalia-shell)
-- [noctalia docs](https://docs.noctalia.dev/)
+- [Noctalia](https://github.com/noctalia-dev/noctalia)
+- [Noctalia docs](https://docs.noctalia.dev/)

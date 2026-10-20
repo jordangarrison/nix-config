@@ -17,7 +17,7 @@
 # tag, dump the norish database and read the release's upgrade notes. A Nix
 # rollback doesn't roll back the schema; restore the dump instead.
 let
-  host = "nourish.garrisonsbygrace.com";
+  host = "norish.garrisonsbygrace.com";
   port = 3010;
   # Embedded parser API, loopback-only on the host network. Off the default
   # 8001 to avoid colliding with other local services.

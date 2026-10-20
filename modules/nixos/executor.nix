@@ -35,6 +35,9 @@ in
       # Must match the origin the browser uses or sign-in is rejected.
       BETTER_AUTH_URL = "https://${host}";
       DO_NOT_TRACK = "1";
+      # Apps may fetch private addresses, so the Norish app can reach
+      # norish.garrisonsbygrace.com on the tailnet IP. This applies to every app.
+      EXECUTOR_APPS_ALLOW_PRIVATE_FETCH = "true";
     };
   };
 

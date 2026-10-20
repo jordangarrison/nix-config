@@ -36,6 +36,10 @@ let
     allow fd7a:115c:a1e0::/48;
     deny all;
   '';
+  # Executor runs on Docker's default bridge and reaches this vhost through
+  # the host, so its requests arrive from that subnet. Only the API, which
+  # needs an API key, is open to it.
+  dockerBridge = "172.17.0.0/16";
 in
 {
   virtualisation.oci-containers.backend = "docker";
@@ -153,6 +157,12 @@ in
       extraConfig = tailnetOnly + ''
         client_max_body_size 50m;
       '';
+    };
+    locations."/api/v1/" = {
+      proxyPass = "http://127.0.0.1:${toString port}";
+      extraConfig = ''
+        allow ${dockerBridge};
+      '' + tailnetOnly;
     };
   };
 }

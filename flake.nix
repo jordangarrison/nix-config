@@ -234,6 +234,8 @@
             ./modules/nixos/audio/speech-dispatcher.nix
             ./modules/nixos/development.nix
             ./modules/nixos/searx.nix
+            ./modules/super-productivity/server.nix
+            ./modules/super-productivity/app.nix
             ./modules/nixos/postgres.nix
             ./modules/nixos/greenlight.nix
             ./modules/nixos/panko.nix
@@ -356,6 +358,10 @@
               # Enable DNS-level ad blocking
               services.dns-blocking.enable = true;
 
+              # Super Productivity: sync server + web app, and the desktop app.
+              services.super-productivity.enable = true;
+              programs.super-productivity.enable = true;
+
               # Hourly private personal day/work dashboard (06:00–21:00).
               # This enables the system side: state dirs + the private nginx
               # vhost (needs a `day.jordangarrison.dev` A record → 100.118.65.11
@@ -447,6 +453,7 @@
             ./users/jane/nixos.nix
             ./users/isla/nixos.nix
             ./hosts/opportunity/configuration.nix
+            ./modules/super-productivity/app.nix
             nixos-hardware.nixosModules.framework-12-13th-gen-intel
             home-manager.nixosModules.home-manager
             ./modules/home/defaults.nix
@@ -517,6 +524,8 @@
               # Enable tablet mode for Framework 12 touchscreen
               tablet-mode.enable = true;
 
+              programs.super-productivity.enable = true;
+
               # Desktop app is a client. This daemon runs tasks for the server
               # on endeavour. Enroll once with bb-host-enroll; see docs/runbooks/bb.md.
               services.bb = {
@@ -574,12 +583,15 @@
             ./users/jane/nixos.nix
             ./users/isla/nixos.nix
             ./hosts/voyager/configuration.nix
+            ./modules/super-productivity/app.nix
             inputs.disko.nixosModules.disko
             (import ./hosts/voyager/disko.nix { })
             nixos-hardware.nixosModules.apple-macbook-pro-12-1
             home-manager.nixosModules.home-manager
             ./modules/home/defaults.nix
             {
+              programs.super-productivity.enable = true;
+
               # Configure users for voyager
               users.jordangarrison = {
                 enable = true;
@@ -647,11 +659,14 @@
             ./users/jane/nixos.nix
             ./users/isla/nixos.nix
             ./hosts/discovery/configuration.nix
+            ./modules/super-productivity/app.nix
             nixos-hardware.nixosModules.common-cpu-amd
             nixos-hardware.nixosModules.common-pc-ssd
             home-manager.nixosModules.home-manager
             ./modules/home/defaults.nix
             {
+              programs.super-productivity.enable = true;
+
               # Configure users for discovery
               users.jordangarrison = {
                 enable = true;
@@ -699,10 +714,12 @@
             ./modules/nixos/emacs.nix
             ./modules/nixos/fonts.nix
             ./hosts/flomac/configuration.nix
+            ./modules/super-productivity/app.nix
             home-manager.darwinModules.home-manager
             ./modules/home/defaults.nix
             {
               nix.enable = false;
+              programs.super-productivity.enable = true;
               nixpkgs.config.allowUnfree = true;
               home-manager = {
                 users."jordan.garrison" = import ./users/jordangarrison/home-darwin.nix;

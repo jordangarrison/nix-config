@@ -37,10 +37,11 @@ let
     deny all;
   '';
   # Executor runs on Docker's default bridge and reaches this vhost through
-  # the host, so its requests arrive from that subnet. Only /api/v1/ is open
-  # to it: key-authenticated except /health. It also admits every other
-  # default-bridge container. The other half is EXECUTOR_APPS_ALLOW_PRIVATE_FETCH
-  # in executor.nix.
+  # the host, so its requests arrive from that subnet. Only /api/v1/ and
+  # /api/trpc/ are open to it: the REST API (key-authenticated except /health)
+  # and the tRPC API for household and admin settings, which accepts the same
+  # key as a session. It also admits every other default-bridge container.
+  # The other half is EXECUTOR_APPS_ALLOW_PRIVATE_FETCH in executor.nix.
   dockerBridge = "172.17.0.0/16";
 in
 {
@@ -165,6 +166,15 @@ in
       extraConfig = ''
         allow ${dockerBridge};
       '' + tailnetOnly;
+    };
+    # The web app's tRPC calls also land here, so keep the 50m upload limit.
+    locations."/api/trpc/" = {
+      proxyPass = "http://127.0.0.1:${toString port}";
+      extraConfig = ''
+        allow ${dockerBridge};
+      '' + tailnetOnly + ''
+        client_max_body_size 50m;
+      '';
     };
   };
 }

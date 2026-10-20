@@ -100,6 +100,7 @@ in
         (fromDir "${inputs.ash-kindle}/skills" [ "ash-kindle" ])
         (fromDir "${inputs.boristane-agent-skills}/skills" [ "logging-best-practices" ])
         (fromDir "${inputs.caveman}/skills" [ "caveman" ])
+        (fromDir "${inputs.diagram-design}/skills" [ "diagram-design" ])
         (fromDir "${inputs.lavish-axi}/skills" [ "lavish" ])
         (fromDir "${inputs.mattpocock-skills}/skills/engineering" [
           "code-review"

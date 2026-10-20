@@ -37,7 +37,10 @@
       # rewrite (alpha) with an incompatible config schema and no migration
       # path from our v4 settings.json. Revisit once v5 stabilizes.
       url = "github:noctalia-dev/noctalia-shell/40dd5f54a0597b77ff78ac6a3a6d2ef42f04d544";
-      inputs.nixpkgs.follows = "nixpkgs";
+      # v4's quickshell fork (noctalia-qs) no longer builds against Qt 6.12
+      # in unstable, and upstream has stopped fixing it. Build it against
+      # stable's Qt until we move to v5.
+      inputs.nixpkgs.follows = "nixpkgs-stable";
     };
     sweet-nothings = {
       url = "github:jordangarrison/sweet-nothings";

@@ -6,11 +6,16 @@
 # as root-managed Docker containers. Postgres and Redis are the host's own.
 #
 # The app container uses host networking so it reaches Postgres and Redis on
-# 127.0.0.1 under the existing localhost trust rule; it binds 127.0.0.1 only.
+# 127.0.0.1; it binds 127.0.0.1 only. It connects as the passwordless norish
+# role, which postgres.nix's trust rules admit from localhost and the tailnet.
+# It runs as its own norish uid, not the image's 1000, which is jordangarrison
+# here and would reach his X11 session over the shared network namespace.
 #
 # /var/lib/norish/secrets holds the generated MASTER_KEY. Back it up with the
 # norish database; losing it makes encrypted data unreadable. Back up uploads/
-# too. Stop the container before bumping the image tag.
+# too. Every start migrates the database forward. Before bumping the image
+# tag, dump the norish database and read the release's upgrade notes. A Nix
+# rollback doesn't roll back the schema; restore the dump instead.
 let
   host = "nourish.garrisonsbygrace.com";
   port = 3010;
@@ -19,6 +24,7 @@ let
   parserPort = 3011;
   obscuraPort = 3012;
   redisPort = 6390;
+  uid = 970;
   dataDir = "/var/lib/norish";
   secretsDir = "${dataDir}/secrets";
   # Same tailnet boundary as executor. endeavour's host firewall is off, so
@@ -38,6 +44,7 @@ in
     image = "docker.io/norishapp/norish:v0.25.1-beta";
     extraOptions = [
       "--network=host"
+      "--user=${toString uid}:${toString uid}"
       # The image's healthcheck hardcodes localhost:3000; probe our port.
       "--health-cmd=node -e \"require('http').get('http://127.0.0.1:${toString port}/api/v1/health', r => process.exit(r.statusCode===200?0:1)).on('error', () => process.exit(1))\""
     ];
@@ -48,13 +55,10 @@ in
       HOST = "127.0.0.1";
       PORT = toString port;
       PARSER_API_PORT = toString parserPort;
-      DATABASE_URL = "postgres://norish@127.0.0.1:5432/norish";
+      DATABASE_URL = "postgres://norish@127.0.0.1:${toString config.services.postgresql.settings.port}/norish";
       REDIS_URL = "redis://127.0.0.1:${toString redisPort}";
       OBSCURA_ENDPOINT = "ws://127.0.0.1:${toString obscuraPort}";
       UPLOADS_DIR = "/app/uploads";
-      # First user signs up with a password and becomes admin; further auth
-      # providers are configured in Settings => Admin.
-      PASSWORD_AUTH_ENABLED = "true";
     };
   };
 
@@ -71,33 +75,49 @@ in
     description = "Generate Norish secrets";
     serviceConfig.Type = "oneshot";
     serviceConfig.RemainAfterExit = true;
-    path = [ pkgs.openssl pkgs.coreutils ];
+    path = [ pkgs.openssl pkgs.coreutils pkgs.gnugrep ];
+    # Each file has its own guard and is written atomically, so an interrupted
+    # run or a deleted obscura.env repairs itself from norish.env.
     script = ''
       umask 077
       mkdir -p ${secretsDir}
       if [ ! -s ${secretsDir}/norish.env ]; then
-        token=$(openssl rand -hex 32)
         printf 'MASTER_KEY=%s\nOBSCURA_CDP_TOKEN=%s\n' \
-          "$(openssl rand -base64 32)" "$token" > ${secretsDir}/norish.env
-        printf 'OBSCURA_CDP_TOKEN=%s\n' "$token" > ${secretsDir}/obscura.env
+          "$(openssl rand -base64 32)" "$(openssl rand -hex 32)" > ${secretsDir}/norish.env.tmp
+        mv ${secretsDir}/norish.env.tmp ${secretsDir}/norish.env
+      fi
+      if [ ! -s ${secretsDir}/obscura.env ]; then
+        grep '^OBSCURA_CDP_TOKEN=' ${secretsDir}/norish.env > ${secretsDir}/obscura.env.tmp
+        mv ${secretsDir}/obscura.env.tmp ${secretsDir}/obscura.env
       fi
     '';
   };
 
+  # postgresql.target waits for postgresql-setup, which creates the role and
+  # database.
   systemd.services.docker-norish = {
-    requires = [ "norish-secrets.service" "postgresql.service" "redis-norish.service" ];
-    after = [ "norish-secrets.service" "postgresql.service" "redis-norish.service" "docker-norish-obscura.service" ];
+    requires = [ "norish-secrets.service" "postgresql.target" "redis-norish.service" ];
+    after = [ "norish-secrets.service" "postgresql.target" "redis-norish.service" "docker-norish-obscura.service" ];
+    # Admin => "Restart server" exits 0 and expects the runtime to bring it back.
+    serviceConfig.Restart = lib.mkForce "always";
   };
   systemd.services.docker-norish-obscura = {
     requires = [ "norish-secrets.service" ];
     after = [ "norish-secrets.service" ];
   };
 
+  users.users.norish = {
+    inherit uid;
+    group = "norish";
+    isSystemUser = true;
+  };
+  users.groups.norish.gid = uid;
+
+  # Started as a non-root user, the entrypoint skips its chown, so the
+  # uploads dir must already belong to norish.
   systemd.tmpfiles.rules = [
     "d ${dataDir} 0750 root root -"
-    # The entrypoint hands uploads to the image's uid/gid 1000 on every start;
-    # match it so tmpfiles doesn't flip ownership back.
-    "d ${dataDir}/uploads 0750 1000 1000 -"
+    "d ${dataDir}/uploads 0750 norish norish -"
   ];
 
   services.postgresql = {

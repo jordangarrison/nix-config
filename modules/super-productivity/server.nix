@@ -52,7 +52,7 @@ let
     paths = [ syncDefaults web ];
   };
 
-  httpdConf = pkgs.writeText "super-productivity-webdav.conf" ''
+  httpdConf = pkgs.writeText "super-productivity-webdav.conf" (''
     ServerRoot ${pkgs.apacheHttpd}
     # Matches the public URL so mod_dav's absolute hrefs line up behind nginx.
     ServerName https://${domain}:443
@@ -89,6 +89,8 @@ let
 
     # One folder per login: /webdav/<user>/ is open only to <user>, and the
     # shared root is closed, so logins can't read or clobber each other's data.
+    # A wrong password is 401; a right password on the wrong folder (e.g. a
+    # base URL missing <user>/) is 403.
     Alias /webdav/ ${stateDir}/data/
     <Directory ${stateDir}/data>
       Dav On
@@ -96,12 +98,20 @@ let
       AuthName "Super Productivity"
       AuthBasicProvider file
       AuthUserFile ''${CREDENTIALS_DIRECTORY}/htpasswd
-      Require all denied
+      # Logged in but not allowed here: 403. Apache's default is 401, to
+      # invite a different login, which reads as a bad password in the app.
+      AuthzSendForbiddenOnFailure On
+      # Any login, then refuse: a wrong password still gets 401 here.
+      <RequireAll>
+        Require valid-user
+        Require not valid-user
+      </RequireAll>
     </Directory>
-    <DirectoryMatch "^${stateDir}/data/(?<owner>[^/]+)">
-      Require expr "%{REMOTE_USER} == %{env:MATCH_OWNER}"
-    </DirectoryMatch>
-  '';
+  '' + lib.concatMapStrings (user: ''
+    <Directory ${stateDir}/data/${user}>
+      Require user ${user}
+    </Directory>
+  '') cfg.webdavUsers);
 in
 {
   options.services.super-productivity = {

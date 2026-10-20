@@ -44,6 +44,7 @@ This skill is the **review mechanism** only. It does not read Slack, add reactio
 - Optional per-PR author note (e.g. the Slack message that posted it). Passed to every reviewer as `{AUTHOR_NOTE_OR_NONE}`.
 - Optional team overrides ("skip Hickey on this one", "skip Fairbanks", "add an auth-security specialist").
 - Optional `--yolo` (see below). `--skip-user-confirmation` is an accepted alias.
+- Optional `--thinking <level>` (pi only): reviewer thinking level for this run, one of pi's `off`, `minimal`, `low`, `medium`, `high`, `xhigh`, `max`. Default: the session's own level, so a session started without `--thinking` gets pi's `defaultThinkingLevel` (`medium`); pass `--thinking high` for the old fixed level. See "Reviewer Thinking (pi)".
 
 ## `--yolo` — don't ask me, just post the review
 
@@ -77,14 +78,24 @@ Autonomy is not silence. After posting, report per PR: verdict, inline count, he
 1. **Triage** — `gh pr view <url> --json state,isDraft,mergedAt,author,headRefOid,baseRefName,title,body`. Skip merged, closed, and drafts (unless asked). Record the skip reason. **Your own PRs are reviewed like any other** — compare `author.login` to `gh api user -q .login` and, if it matches, mark the PR *self-authored*: its posted event is always `COMMENT` (see "Your Own PRs").
 2. **Review worktree** — see "Review Worktrees". Cache the PR body at `/tmp/pr-review-<date>/<pr-key>/pr-body.md`.
 3. **Plan the team** — derive specialists from PR domain + size (see "Team Composition"); always add Hickey and Fairbanks.
-4. **Launch phase 1 in parallel, in the background.** One reviewer per role, each with a self-contained prompt from `reviewers/`. In Claude Code use the `Agent` tool with `run_in_background: true`; in pi use the `subagent` tool with the `pr-review.specialist` agent (lens reviewers use the same agent with the Hickey/Fairbanks template as the task). Re-check `mergedAt` right before launching.
+4. **Launch phase 1 in parallel, in the background.** One reviewer per role, each with a self-contained prompt from `reviewers/`. In Claude Code use the `Agent` tool with `run_in_background: true`; in pi use the `subagent` tool with the `pr-review.specialist` agent (lens reviewers use the same agent with the Hickey/Fairbanks template as the task) and the model from "Reviewer Thinking (pi)". Re-check `mergedAt` right before launching.
 5. **Wait for completions.** Don't poll; the harness notifies on each finish.
-6. **Launch the consolidator** (`reviewers/consolidator.md`; pi agent `pr-review.consolidator`) once every phase-1 report for that PR exists.
+6. **Launch the consolidator** (`reviewers/consolidator.md`; pi agent `pr-review.consolidator`, model per "Reviewer Thinking (pi)") once every phase-1 report for that PR exists.
 7. **Verify** — every inline anchor is inside a diff hunk on its side (`sed -n '<line>p'` against the worktree file); every blocking claim reproduced by you (and every inline claim under `--yolo`). Specialists hallucinate occasionally; you own the published review.
 8. **Re-fetch** — refresh the review ref and `gh pr view --json state,headRefOid`. If the head moved, read the new commits and rewrite.
 9. **Attended only: preview, then 1x1 sign-off.** Show the full body, every inline comment (path + line + body), and the verdict — never ask "post this?" without showing it. Then accept overrides per PR (e.g. REQUEST_CHANGES → APPROVE if the issue is pre-existing). User questions during sign-off are inputs: fold them in and re-preview. *(Skipped under `--yolo`.)*
 10. **Post** — `gh api -X POST /repos/<owner>/<repo>/pulls/<num>/reviews --input post.json` (see "Posting Mechanics").
 11. **Record the result** — write `result.json` (see "Output Layout") and report.
+
+## Reviewer Thinking (pi)
+
+pi-subagents does not hand the parent's thinking level to a child: without one, the child runs at its frontmatter `thinking` (`high` in `pi-agents/`) or its own settings default. So every pi `subagent` launch here passes the level as a model suffix, which overrides frontmatter `thinking`:
+
+1. `LEVEL` = the `--thinking` value if given, else `$PI_REASONING_LEVEL` (pi sets it in every bash command to the session's current level).
+2. `MODEL` = the `model:` line of the agent file pi loads: `sed -n 's/^model: //p' ~/.pi/agent/agents/pr-review-specialist.md` (or `pr-review-consolidator.md`).
+3. Launch with `model: "<MODEL>:<LEVEL>"`. The full id is required: a bare `:<LEVEL>` is not a model for pi children, and the tool's `thinking` field is ignored on dispatch. In a batched `tasks` launch, pass `model` once at the top level; task items accept only `agent` and `task`.
+
+If `MODEL` or `LEVEL` is empty, omit `model` and the frontmatter level applies. In Claude Code this section does not apply and `--thinking` is ignored.
 
 ## Review Worktrees
 

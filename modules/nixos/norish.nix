@@ -15,7 +15,9 @@
 # norish database; losing it makes encrypted data unreadable. Back up uploads/
 # too. Every start migrates the database forward. Before bumping the image
 # tag, dump the norish database and read the release's upgrade notes. A Nix
-# rollback doesn't roll back the schema; restore the dump instead.
+# rollback doesn't roll back the schema; restore the dump instead. Also check
+# that the tRPC procedures in bridgeProcedures still exist: tRPC is Norish's
+# internal, unversioned API.
 let
   host = "norish.garrisonsbygrace.com";
   port = 3010;
@@ -37,12 +39,24 @@ let
     deny all;
   '';
   # Executor runs on Docker's default bridge and reaches this vhost through
-  # the host, so its requests arrive from that subnet. Only /api/v1/ and
-  # /api/trpc/ are open to it: the REST API (key-authenticated except /health)
-  # and the tRPC API for household and admin settings, which accepts the same
-  # key as a session. It also admits every other default-bridge container.
-  # The other half is EXECUTOR_APPS_ALLOW_PRIVATE_FETCH in executor.nix.
+  # the host, so its requests arrive from that subnet. It may reach /api/v1/
+  # (the REST API, key-authenticated except /health) and the tRPC procedures
+  # in bridgeProcedures. admin.updateRegistration needs a server admin's key,
+  # so Executor holds one. The http-level map checks the raw URI against that
+  # list, which also rejects batch, %2F and backslash paths. Every other
+  # default-bridge container gets the same access. The other half is
+  # EXECUTOR_APPS_ALLOW_PRIVATE_FETCH in executor.nix.
   dockerBridge = "172.17.0.0/16";
+  bridgeProcedures = [
+    "households.get"
+    "households.regenerateCode"
+    "admin.updateRegistration"
+  ];
+  # nginx splits paths only on "/", Next.js also on "", so a backslash path
+  # under an allowed prefix reaches the rest of the app.
+  rejectBackslash = ''
+    if ($request_uri ~ "\\\\") { return 400; }
+  '';
 in
 {
   virtualisation.oci-containers.backend = "docker";
@@ -163,18 +177,31 @@ in
     };
     locations."/api/v1/" = {
       proxyPass = "http://127.0.0.1:${toString port}";
-      extraConfig = ''
+      extraConfig = rejectBackslash + ''
         allow ${dockerBridge};
       '' + tailnetOnly;
     };
     # The web app's tRPC calls also land here, so keep the 50m upload limit.
     locations."/api/trpc/" = {
       proxyPass = "http://127.0.0.1:${toString port}";
-      extraConfig = ''
+      extraConfig = rejectBackslash + ''
+        if ($norish_bridge_denied) { return 403; }
         allow ${dockerBridge};
       '' + tailnetOnly + ''
         client_max_body_size 50m;
       '';
     };
   };
+
+  services.nginx.appendHttpConfig = ''
+    geo $norish_bridge {
+      default 0;
+      ${dockerBridge} 1;
+    }
+    map $norish_bridge$request_uri $norish_bridge_denied {
+      default 0;
+      "~^1/api/trpc/(${lib.concatMapStringsSep "|" (lib.escapeRegex) bridgeProcedures})$" 0;
+      "~^1" 1;
+    }
+  '';
 }

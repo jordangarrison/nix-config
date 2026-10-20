@@ -38,7 +38,8 @@ in
       # Apps may fetch private addresses, so the Norish app can reach
       # norish.garrisonsbygrace.com on the tailnet IP. This applies to every
       # app: any of them can reach the LAN, tailnet peers and endeavour's
-      # 0.0.0.0 listeners. The other half is the /api/v1/ allow in norish.nix.
+      # 0.0.0.0 listeners. The other half is the /api/v1/ and /api/trpc/
+      # allows in norish.nix.
       EXECUTOR_APPS_ALLOW_PRIVATE_FETCH = "true";
     };
   };

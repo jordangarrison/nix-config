@@ -584,7 +584,7 @@ in
     with pkgs;
     [
       # nix utilities
-      master.devenv
+      devenv
       nh
       devbox
 
@@ -717,7 +717,9 @@ in
       ])
     ]
     ++ lib.optionals (userApps.azure-cli.enable or false) [
-      azure-cli
+      # Unstable azure-cli depends on python3.14-fabric, which is marked broken
+      # (2026-10-20). Switch back once unstable azure-cli evaluates again.
+      stable.azure-cli
     ]
     ++ lib.optionals (userApps.sidecar.enable or false) [
       sidecar

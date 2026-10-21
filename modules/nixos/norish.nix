@@ -86,7 +86,20 @@ in
   virtualisation.oci-containers.containers.norish-obscura = {
     # Keep in step with docker/obscura/pin.env for the Norish release above.
     image = "docker.io/norishapp/obscura:0.2.4-norish.1";
-    ports = [ "127.0.0.1:${toString obscuraPort}:9222" ];
+    # Obscura's DNS-rebinding guard checks the Host header's port against
+    # its listener. Docker port translation (3012 -> 9222) causes a 403 even
+    # with the correct token, so use the same port on both sides.
+    # The image embeds `serve` and its flags in ENTRYPOINT, not CMD.
+    extraOptions = [ "--entrypoint=/obscura" ];
+    cmd = [
+      "serve"
+      "--host"
+      "0.0.0.0"
+      "--port"
+      (toString obscuraPort)
+      "--stealth"
+    ];
+    ports = [ "127.0.0.1:${toString obscuraPort}:${toString obscuraPort}" ];
     environmentFiles = [ "${secretsDir}/obscura.env" ];
   };
 

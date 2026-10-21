@@ -13,7 +13,17 @@ let
   wallpapersPath = "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/wallpapers";
   scriptsPath = "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/hypr/scripts";
 
-  noctaliaPkg = inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default;
+  # noctalia-qs (v4's quickshell fork) predates upstream quickshell 5d5d498,
+  # which replaced opaque-pointer metatypes with MOC includes for Qt 6.12.
+  # The patch backports it. Drop it when Noctalia moves to v5 (#101).
+  noctaliaQs =
+    inputs.noctalia.inputs.noctalia-qs.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs
+      (old: {
+        patches = (old.patches or [ ]) ++ [ ./noctalia-qs-qt612.patch ];
+      });
+  noctaliaPkg = inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default.override {
+    quickshell = noctaliaQs;
+  };
   sweetNothingsPkg =
     inputs.sweet-nothings.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs
       (_: {

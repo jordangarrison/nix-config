@@ -37,9 +37,6 @@
       # rewrite (alpha) with an incompatible config schema and no migration
       # path from our v4 settings.json. Revisit once v5 stabilizes.
       url = "github:noctalia-dev/noctalia-shell/40dd5f54a0597b77ff78ac6a3a6d2ef42f04d544";
-      # Follows unstable so quickshell links the same mesa as
-      # /run/opengl-driver. modules/home/niri patches its quickshell fork
-      # (noctalia-qs) to build against Qt 6.12.
       inputs.nixpkgs.follows = "nixpkgs";
     };
     sweet-nothings = {

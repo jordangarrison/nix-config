@@ -2,7 +2,7 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, inputs, ... }:
+{ config, pkgs, ... }:
 
 {
   imports = [ # Include the results of the hardware scan.
@@ -14,13 +14,7 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   # Use latest kernel.
-  # framework-laptop-kmod (pulled in by nixos-hardware) installs without the
-  # .ko.cer that kernel module aggregation now requires. Build master's fixed
-  # package (NixOS/nixpkgs#575818) until it reaches nixos-unstable-small,
-  # then drop the extend.
-  boot.kernelPackages = pkgs.linuxPackages_latest.extend (self: _: {
-    framework-laptop-kmod = self.callPackage "${inputs.nixpkgs-master}/pkgs/os-specific/linux/framework-laptop-kmod" { };
-  });
+  boot.kernelPackages = pkgs.linuxPackages_latest;
 
   # Workaround for kernel 7.1.0 HID battery regression (fixed upstream in
   # 7.1.1, commit b15b03d6): if the PIXA3854 touchpad / ILIT2901 touchscreen

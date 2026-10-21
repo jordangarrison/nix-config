@@ -1282,7 +1282,7 @@
     "noctalia": {
       "inputs": {
         "nixpkgs": [
-          "nixpkgs-stable"
+          "nixpkgs"
         ],
         "noctalia-qs": "noctalia-qs"
       },

@@ -337,7 +337,7 @@ in
       # Third-party extensions at their latest release, installed unmodified
       # by pi itself into ~/.pi/agent/npm on first start. Move them forward
       # with `pi update --extensions`. Never patch their source: code we own
-      # lives in ~/dev/jordangarrison/pi-extensions.
+      # lives in modules/home/pi/extensions/.
       packages = [
         # Pinned to an upstream main commit that includes claude-opus-5-5 at
         # 1M (elidickinson/pi-claude-bridge#116, fixed after 0.8.0). When

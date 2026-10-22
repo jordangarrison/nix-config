@@ -65,6 +65,7 @@ in {
 
       # Access
       work.enable = lib.mkEnableOption "FloSports work integrations (the executor-flo MCP gateway)";
+      aikido.enable = lib.mkEnableOption "Aikido security-scan MCP server (local stdio)";
     };
   };
 

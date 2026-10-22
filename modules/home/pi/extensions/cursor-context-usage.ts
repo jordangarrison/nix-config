@@ -191,10 +191,15 @@ export default function cursorContextUsage(pi: ExtensionAPI) {
           contextUsage = undefined;
         }
         observe(message);
-        if (record?.type === "done" || record?.type === "error") {
-          const message = messageOf(event);
-          const finalUsage = message ? readUsage(message.usage) : undefined;
-          if (message && finalUsage) {
+        // Every provider's stream shares this prototype; only Cursor's usage is
+        // cumulative and needs fitting to the window.
+        if (
+          (record?.type === "done" || record?.type === "error") &&
+          message &&
+          isCursorAssistant(message)
+        ) {
+          const finalUsage = readUsage(message.usage);
+          if (finalUsage) {
             const chosen =
               contextUsage && isCumulativeReplacement(contextUsage, finalUsage, contextWindow)
                 ? { ...contextUsage, cost: finalUsage.cost ?? contextUsage.cost }

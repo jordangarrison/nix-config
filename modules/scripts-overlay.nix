@@ -48,6 +48,13 @@
         description = "Cloudflare CLI with automatic API token from ACME secrets";
       };
 
+      aikido-mcp = mkScript {
+        name = "aikido-mcp";
+        script = ../packages/aikido-mcp/aikido-mcp.sh;
+        deps = with final; [ coreutils nodejs ];
+        description = "Aikido MCP server with its API token read from ~/.config/aikido/api-key";
+      };
+
       herdr-handoff = mkScript {
         name = "herdr-handoff";
         script = ../packages/herdr-handoff/herdr-handoff.sh;

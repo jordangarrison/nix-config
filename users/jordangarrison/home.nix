@@ -29,6 +29,10 @@ let
   # Bridge needs one missing helper adapted locally. Keep that patch and the
   # complete dependency graph in a Nix package shared by every machine.
   ompPlugins = pkgs.callPackage ../../packages/omp-plugins { inherit piExtensions; };
+  # Shape one programs.mcp server for a client: `remote` for url servers,
+  # `local` for stdio (command) servers.
+  mcpEntry = remote: local: s: if s.command != null then local s else remote s;
+  mcpStdio = s: { inherit (s) command args; };
 in
 {
   imports = [
@@ -237,7 +241,7 @@ in
       # Same list as programs.mcp. A deep merge, so servers codex or the
       # ChatGPT app add themselves (node_repl) stay.
       mcp_servers = lib.mkIf config.programs.mcp.enable (
-        lib.mapAttrs (_: s: { inherit (s) url; }) config.programs.mcp.servers
+        lib.mapAttrs (_: mcpEntry (s: { inherit (s) url; }) mcpStdio) config.programs.mcp.servers
       );
       tui = {
         status_line = [
@@ -439,6 +443,11 @@ in
   # here. Both are OAuth with dynamic client registration; tokens land in
   # each client's keyring, not this file.
   #
+  # The one exception is Aikido: it ships only a local stdio server that
+  # scans code on this machine, and executor-flo cannot run stdio servers.
+  # Its token is read at startup from ~/.config/aikido/api-key (see
+  # packages/aikido-mcp), gated by userApps.aikido (endeavour, flomac).
+  #
   # On every host, so agents never fall back to direct servers. The work
   # gateway only goes to hosts allowed to reach work (userApps.work: endeavour,
   # opportunity, flomac). Fanned out to each agent's own format below: pi,
@@ -449,6 +458,9 @@ in
     servers.executor-flo = lib.mkIf (userApps.work.enable or false) {
       url = "https://executor.flostag-us-west-2.flokubernetes.com/mcp";
     };
+    servers.aikido = lib.mkIf (userApps.aikido.enable or false) {
+      command = lib.getExe pkgs.aikido-mcp;
+    };
   };
 
   # Native Pi reads only ~/.pi/agent/mcp.json, not the shared config path.
@@ -456,7 +468,7 @@ in
   # inventory.
   home.file.".pi/agent/mcp.json" = lib.mkIf config.programs.mcp.enable {
     text = builtins.toJSON {
-      mcpServers = lib.mapAttrs (name: server:
+      mcpServers = lib.mapAttrs (_: mcpEntry (server:
         { inherit (server) url; }
         // lib.optionalAttrs (server.headers != { }) { inherit (server) headers; }
         // lib.optionalAttrs (server ? oauth) {
@@ -465,7 +477,7 @@ in
               callbackUrl = server.oauth.redirectUri;
             };
         }
-      ) config.programs.mcp.servers;
+      ) mcpStdio) config.programs.mcp.servers;
     };
   };
 
@@ -480,11 +492,15 @@ in
     let
       servers = config.programs.mcp.servers;
       claude = pkgs.writeText "claude-mcp-servers.json" (builtins.toJSON (
-        lib.mapAttrs (_: s: { type = "http"; inherit (s) url; }) servers));
+        lib.mapAttrs (_: mcpEntry
+          (s: { type = "http"; inherit (s) url; })
+          (s: { type = "stdio"; } // mcpStdio s)) servers));
       cursor = pkgs.writeText "cursor-mcp-servers.json" (builtins.toJSON (
-        lib.mapAttrs (_: s: { inherit (s) url; }) servers));
+        lib.mapAttrs (_: mcpEntry (s: { inherit (s) url; }) mcpStdio) servers));
       opencode = pkgs.writeText "opencode-mcp-servers.json" (builtins.toJSON (
-        lib.mapAttrs (_: s: { type = "remote"; inherit (s) url; enabled = true; }) servers));
+        lib.mapAttrs (_: mcpEntry
+          (s: { type = "remote"; inherit (s) url; enabled = true; })
+          (s: { type = "local"; command = [ s.command ] ++ s.args; enabled = true; })) servers));
     in
     lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       mcpSet() {

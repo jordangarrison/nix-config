@@ -319,6 +319,7 @@
                   handy.enable = true;
                   herdr.enable = true;
                   work.enable = true;
+                  aikido.enable = true;
                   floai.enable = true;
                   grok-bot.enable = true;
                   bb-desktop.enable = true;
@@ -741,6 +742,7 @@
                     namespace.enable = true;
                     herdr.enable = true;
                     work.enable = true;
+                    aikido.enable = true;
                     floai.enable = true;
                   };
                 };

@@ -29,6 +29,15 @@
       extra-trusted-public-keys = [ "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g=" ];
     };
 
+    # Weekly store GC; without it old generations filled endeavour's disk.
+    programs.nh = {
+      enable = true;
+      clean = {
+        enable = true;
+        extraArgs = "--keep 5 --keep-since 7d";
+      };
+    };
+
     # Set your time zone.
     time.timeZone = "America/Chicago";
 

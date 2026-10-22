@@ -86,6 +86,10 @@
       url = "github:agavra/tuicr";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    onwatch = {
+      url = "github:onllm-dev/onwatch";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     try = {
       url = "github:tobi/try";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -247,6 +251,7 @@
             ./modules/nixos/greenlight.nix
             ./modules/nixos/panko.nix
             ./modules/nixos/agentsview.nix
+            ./modules/nixos/onwatch.nix
             ./modules/nixos/collie.nix
             ./modules/nixos/executor.nix
             ./modules/nixos/norish.nix

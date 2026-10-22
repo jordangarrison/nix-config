@@ -205,6 +205,9 @@
           printf '%s\n' "$results" > "$out"
         '';
 
+      checks.x86_64-linux.pi-extensions =
+        nixpkgs.legacyPackages.x86_64-linux.callPackage ./tests/pi-extensions { };
+
       nixosConfigurations = {
         "endeavour" = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs; };

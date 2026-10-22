@@ -130,10 +130,7 @@ each machine keeps the release it first installed until
 (`git:...@<sha>`) only to take an unreleased fix; its comment must name the
 fix and when to switch back to the npm release.
 
-Extensions Jordan owns belong in `~/dev/jordangarrison/pi-extensions`. Until
-that repo ships, three temporary exceptions stay here and are removed then:
-`packages/omp-plugins/` (patched bridge for omp), `packages/pi-extensions/`
-(its dependency graph), and `modules/home/pi/extensions/` (owned extensions).
+Extensions Jordan owns belong in `modules/home/pi/extensions/` in this repo.
 
 ### Update flake inputs
 

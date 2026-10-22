@@ -26,9 +26,10 @@ This session stays the **author**: it never reviews. The tab is the **reviewer**
 | PR URL | `gh pr view --json url` in the current checkout |
 | `--rounds <n>` | `1`. Each extra round re-reviews after the fixes are pushed. Max `3`. |
 | `--no-push` | Push the fixes. With this flag: commit locally, skip the push and the comment replies. |
-| `--yolo` | Skip the staffing confirmation. |
+| `--thinking <level>` | Automatic per-PR selection. Explicit override for the reviewer tab; in pi, also passed to the review's child agents. |
+| `--yolo` | Proceed without interactive gates; staffing is already automatic. |
 
-Invoking the skill is the consent to fix, commit, and push. The only interactive gate is the staffing line (step 3), which `--yolo` skips.
+Invoking the skill is the consent to staff the reviewer, fix, commit, and push. Report staffing for audit; approval is needed only if the user requested it.
 
 ## Steps
 
@@ -47,7 +48,13 @@ A `result.json` from an earlier run fires the watcher at once. If `$RESULT` exis
 
 ### 3. Staff the reviewer tab
 
-Reuse when `herdr agent get $NAME` shows a live agent that is `idle` or `done` (a previous round or run): skip to step 4 with it.
+Inspect the PR diff and choose thinking with [[multi-agent-pr-review]]'s **Reviewer Thinking (pi)** scope/risk table: use that same selection policy for the reviewer tab in every harness. Honor an explicit `--thinking` override; otherwise choose independently of the author's session. Let the review engine choose its own child-agent thinking from the full diff unless the user supplied an override.
+
+Keep the caller's agent kind (`herdr agent get "$HERDR_PANE_ID"` → `.result.agent.agent`). Choose the model for the actual work shape using [[herdr-dispatch]]'s staffing guidance, honoring any explicit model request; thinking comes from the review policy above rather than the generic review/audit row. Use that skill's per-kind flag syntax.
+
+Report `staffing: <kind> / <model> / <thinking> — <one-line scope/risk rationale>` and proceed without a confirmation prompt.
+
+Reuse when `herdr agent get $NAME` shows a live agent that is `idle` or `done` with matching staffing (a previous round or run): skip to step 4 with it. If staffing differs, reconfigure through the harness's supported controls and verify it, or replace the idle reviewer this skill created.
 
 Otherwise:
 
@@ -56,13 +63,13 @@ herdr tab create --workspace "$HERDR_WORKSPACE_ID" --cwd "$PWD" \
   --label "self-review $OWNER/$REPO#$NUM" --no-focus
 ```
 
-Read `.result.tab.tab_id` and `.result.root_pane.pane_id`. Start the agent with the caller's kind (`herdr agent get "$HERDR_PANE_ID"` → `.result.agent.agent`), staffed on the **review** row of [[herdr-dispatch]]'s staffing table, using that skill's per-kind flag syntax:
+Read `.result.tab.tab_id` and `.result.root_pane.pane_id`. Start the agent with the selected staffing:
 
 ```bash
 herdr agent start "$NAME" --kind <kind> --pane <root-pane-id> -- <model/thinking flags>
 ```
 
-State the staffing line (`staffing: pi / claude-opus-5-5 / high`). Attended: let the user correct it first. `--yolo`: proceed.
+Verify the start response's `argv` and the harness's active model/thinking display match the selected staffing before handing off.
 
 ### 4. Hand off the review
 
@@ -74,6 +81,8 @@ Review head <HEAD>. Write artifacts under /tmp/pr-review-<DATE>/<PR_KEY>/.
 This is a self-authored PR: post the review as COMMENT, as the skill describes.
 When result.json is written, stop.
 ```
+
+In pi, append `--thinking <level>` to the requested review invocation only when the user supplied that override; otherwise explicitly ask the reviewer to select child-agent thinking per PR using the review skill's policy. Carry the override, if any, into the watcher context for later rounds.
 
 ```bash
 herdr agent prompt "$NAME" "<prompt>"

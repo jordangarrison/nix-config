@@ -1,6 +1,6 @@
 # Self-Review: Fix Phase
 
-Runs in the author session when the watcher wakes it. Inputs from the wake: `URL`, `HEAD`, `RESULT`, `NAME`, tab id, rounds left, push mode.
+Runs in the author session when the watcher wakes it. Inputs from the wake: `URL`, `HEAD`, `RESULT`, `NAME`, tab id, rounds left, push mode, explicit thinking override (if any).
 
 ## 1. Read the outcome
 
@@ -26,7 +26,7 @@ If it stopped on a dirty checkout: report, keep the tab open, stop.
 
 ## 3. Next round
 
-Rounds left, and step 2 pushed fixes → set `HEAD` to the new head, decrement rounds, and run SKILL.md steps 2, 4, and 5 again against the same agent (`NAME`). Prompt it: "Follow-up self-review of `<URL>` at head `<HEAD>`, with --yolo. Same artifact directory. When result.json is written, stop."
+Rounds left, and step 2 pushed fixes → set `HEAD` to the new head, decrement rounds, and run SKILL.md steps 2, 4, and 5 again against the same agent (`NAME`). Prompt it: "Follow-up self-review of `<URL>` at head `<HEAD>`, with --yolo. Same artifact directory. When result.json is written, stop." In pi, include the user's explicit `--thinking <level>` override if supplied; otherwise let the review engine reassess child-agent thinking for the new diff.
 
 Otherwise finish (step 4).
 

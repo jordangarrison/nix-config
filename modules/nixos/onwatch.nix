@@ -26,7 +26,8 @@ in
       ONWATCH_PORT = toString port;
       ONWATCH_DB_PATH = "${dataDir}/data/onwatch.db";
       ONWATCH_SECURE_COOKIES = "true";
-      # No desktop session for a system service.
+      # No desktop session for a system service; the tray runs as the
+      # onwatch-menubar user service below.
       ONWATCH_DISABLE_TRAY = "1";
     };
 
@@ -38,6 +39,24 @@ in
       Restart = "always";
       RestartSec = "5s";
     };
+  };
+
+  # Tray companion in the desktop session. It reads the daemon's dashboard on
+  # localhost and its menubar settings from the same database, and exits ~30s
+  # after the daemon disappears, hence Restart=always.
+  home-manager.users.${user}.systemd.user.services.onwatch-menubar = {
+    Unit = {
+      Description = "onWatch tray companion";
+      After = [ "graphical-session.target" ];
+      PartOf = [ "graphical-session.target" ];
+    };
+    Service = {
+      Environment = [ "ONWATCH_DB_PATH=${dataDir}/data/onwatch.db" ];
+      ExecStart = "${onwatch}/bin/onwatch menubar --port ${toString port}";
+      Restart = "always";
+      RestartSec = "10s";
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
   };
 
   security.acme.certs.${host} = {

@@ -11,6 +11,9 @@ Model"; <https://www.georgefairbanks.com/software-architecture/model-code-gap/>.
 
 Writes: `/tmp/pr-review-{DATE}/{PR_KEY}/fairbanks.md`
 
+This is an internal research report, not a required paragraph in the posted
+review. The consolidator's Publishing Contract determines which findings go public.
+
 ## Template
 
 Use verbatim. Fill `{PR_SPECIFIC_LENS_*}` from the domain lenses below.
@@ -95,7 +98,7 @@ RULES:
   architecturally-evident, component/connector, erosion).
 - Be honest. Small good PRs deserve to be told they're good. Don't manufacture
   criticism.
-- Under 500 words (under 300 for tiny PRs).
+- Keep the internal report focused; around 500 words (300 for tiny PRs) is a useful target, not a limit. Retain every substantive finding and its evidence.
 ```
 
 ## Domain Lenses

@@ -6,6 +6,9 @@ A lens reviewer. Always on the team, for every domain. It asks one question:
 
 Writes: `/tmp/pr-review-{DATE}/{PR_KEY}/hickey.md`
 
+This is an internal research report, not a required paragraph in the posted
+review. The consolidator's Publishing Contract determines which findings go public.
+
 ## Template
 
 Use verbatim. Fill `{PR_SPECIFIC_LENS_*}` from the domain lenses below.
@@ -60,7 +63,7 @@ RULES:
 - Reference Hickey concepts by name (complect, place-oriented, easy/simple, information/data).
 - Be honest. Small good PRs deserve to be told they're good. Don't manufacture criticism.
 - Stay out of the Fairbanks lane: whether the code *reveals* its design is that agent's call. You judge whether the design is *simple*.
-- Under 500 words (under 300 for tiny PRs).
+- Keep the internal report focused; around 500 words (300 for tiny PRs) is a useful target, not a limit. Retain every substantive finding and its evidence.
 ```
 
 ## Domain Lenses

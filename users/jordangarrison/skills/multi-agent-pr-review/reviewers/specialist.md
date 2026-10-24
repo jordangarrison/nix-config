@@ -63,7 +63,7 @@ In this exact format:
 
 RULES:
 - Blocking ONLY for actual correctness/security regression / build break / contract violation.
-- Under 500 words total (under 400 for tiny PRs).
+- Keep the internal report focused; around 500 words is a useful target, not a limit. Retain every substantive finding and the evidence needed to verify it.
 - Stick to your role's lane. Don't comment on other agents' domains.
 ```
 

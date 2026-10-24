@@ -61,13 +61,13 @@ Autonomy is not silence. After posting, report per PR: verdict, inline count, he
 **The human gate is gone, so the machine gates get stricter.** All mandatory under `--yolo`:
 
 1. **Re-check `mergedAt` immediately before the fan-out**, not just at triage. PRs are routinely admin-merged within minutes of posting. If merged, skip the fan-out. See [[feedback_recheck_merged_before_fanout]].
-2. **Re-fetch the PR head immediately before posting.** If `headRefOid` moved during the fan-out, read the new commits and rewrite the review against the current head — do not post findings the author already fixed. Reference the addressing commits by short SHA.
-3. **Independently reproduce every finding you post inline.** Read the cited line, run the grep, check the CI run. Drop anything you cannot confirm; say in the body that you dropped it if it was load-bearing to a specialist's argument.
-4. **`REQUEST_CHANGES` needs two independent confirmations** that the *diff itself* introduces the defect, not that it surfaced something pre-existing. If the two disagree, downgrade to `COMMENT` and state both readings in the body.
+2. **Re-fetch the PR head immediately before posting.** If `headRefOid` moved during the fan-out, read the new commits and rewrite the review against the current head — do not post findings the author already fixed. Record the addressing commits locally; reference them publicly by short SHA when they resolve a finding from a previously published review (see the Publishing Contract's follow-up rule).
+3. **Independently reproduce every finding you post inline.** Read the cited line, run the grep, check the CI run. Drop anything you cannot confirm and record the reason in the local artifacts. Publish any remaining limitation that materially affects the verdict.
+4. **`REQUEST_CHANGES` needs two independent confirmations** that the *diff itself* introduces the defect, not that it surfaced something pre-existing. If the two disagree, downgrade to `COMMENT` and record both readings in the internal disagreements section; explain uncertainty publicly only where it affects the author's decision.
 5. **Never `--force`, never merge, never push, never edit the PR's code.** This mode posts GitHub reviews. Nothing else.
 
 **Cases that used to interrupt the user.** Under `--yolo` these never block the post. Post the conservative version, then put the item at the top of the report under "Needs your attention" (and in `result.json`, so a caller can surface it):
-- Specialists disagree on severity and the evidence does not settle it → post the lower severity with both readings in the body.
+- Specialists disagree on severity and the evidence does not settle it → post the lower severity, retaining material uncertainty in the finding and the debate in local notes.
 - A finding implies live production risk needing action now, not at merge (e.g. a workload left running on divergent code against a shared queue) → post the review, flag it.
 - A PR is outside what the fan-out could judge → post `COMMENT` saying what was and was not reviewed, flag it.
 
@@ -80,11 +80,11 @@ Autonomy is not silence. After posting, report per PR: verdict, inline count, he
 3. **Plan the team** — derive specialists from PR domain + size (see "Team Composition"); always add Hickey and Fairbanks. In pi, inspect the diff and choose the reviewer thinking level using "Reviewer Thinking (pi)"; record the level and a one-sentence rationale in `pr-body.md`.
 4. **Launch phase 1 in parallel, in the background.** One reviewer per role, each with a self-contained prompt from `reviewers/`. In Claude Code use the `Agent` tool with `run_in_background: true`; in pi use the `subagent` tool with the `pr-review.specialist` agent (lens reviewers use the same agent with the Hickey/Fairbanks template as the task) and the model from "Reviewer Thinking (pi)". Re-check `mergedAt` right before launching.
 5. **Wait for completions.** Don't poll; the harness notifies on each finish.
-6. **Launch the consolidator** (`reviewers/consolidator.md`; pi agent `pr-review.consolidator`, model per "Reviewer Thinking (pi)") once every phase-1 report for that PR exists.
+6. **Launch the consolidator** (`reviewers/consolidator.md`; pi agent `pr-review.consolidator`, model per "Reviewer Thinking (pi)") once every phase-1 report for that PR exists. Include its Publishing Contract in the handoff.
 7. **Verify** — every inline anchor is inside a diff hunk on its side (`sed -n '<line>p'` against the worktree file); every blocking claim reproduced by you (and every inline claim under `--yolo`). Specialists hallucinate occasionally; you own the published review.
 8. **Re-fetch** — refresh the review ref and `gh pr view --json state,headRefOid`. If the head moved, read the new commits and rewrite.
 9. **Attended only: preview, then 1x1 sign-off.** Show the full body, every inline comment (path + line + body), and the verdict — never ask "post this?" without showing it. Then accept overrides per PR (e.g. REQUEST_CHANGES → APPROVE if the issue is pre-existing). User questions during sign-off are inputs: fold them in and re-preview. *(Skipped under `--yolo`.)*
-10. **Post** — `gh api -X POST /repos/<owner>/<repo>/pulls/<num>/reviews --input post.json` (see "Posting Mechanics").
+10. **Post** — check the final payload against the Publishing Contract in `reviewers/consolidator.md`, including any parent rewrites. Every valuable issue must remain, each explained once; internal disagreements stay local. Then `gh api -X POST /repos/<owner>/<repo>/pulls/<num>/reviews --input post.json` (see "Posting Mechanics").
 11. **Record the result** — write `result.json` (see "Output Layout") and report.
 
 ## Reviewer Thinking (pi)
@@ -203,7 +203,7 @@ Pick specialist roles from the catalog in `reviewers/specialist.md`.
 | `COMMENT` | Substantive non-blocking concerns the author should consider but doesn't have to act on. Or for PRs you're not the canonical reviewer for. |
 | `REQUEST_CHANGES` | Actual regression: bug, security gap, broken bootstrap, contract break. Reserved — most PRs that surface "concerns" still don't warrant blocking. |
 
-If unsure between two: attended → ask the user; `--yolo` → pick the less severe one and say why in the body.
+If unsure between two: attended → ask the user; `--yolo` → pick the less severe one, record the reasoning internally, and publish any uncertainty that materially affects the verdict or requested action.
 
 ### Your Own PRs
 
@@ -244,7 +244,7 @@ When asked to re-review ("look at this one again", "check if it's addressed"), o
    ```
 2. Map each new commit against your prior asks. Call out addressing commits by short SHA.
 3. All prior asks addressed → post a fresh `APPROVE` referencing the addressing commits ("thanks for `<sha>` — the drift concern from my prior review is addressed").
-4. Prior asks still open, or new asks arose from the new commits → pick the verdict with "Verdict Selection" and say which asks are still open, which commits fixed the rest, and what is new. No need to re-fan-out unless changes are large.
+4. Prior asks still open, or new asks arose from the new commits → pick the verdict with "Verdict Selection" and follow the Publishing Contract's follow-up rule: briefly acknowledge fixes and focus on unresolved or new issues, linking existing threads rather than duplicating unchanged comments. No need to re-fan-out unless changes are large.
 5. **A `COMMENT` never lifts my earlier `REQUEST_CHANGES`**: GitHub keeps the PR blocked on my last `APPROVE`/`REQUEST_CHANGES`. Once no blocker remains, post `APPROVE`, with any non-blocking findings in the same review.
 6. **Recompute any quantitative claim** you made (memory headroom math, safety ratios) against the new state. If the math improved, say so — the author put work in.
 7. Finish with Run Flow steps 7-11: verify, re-fetch, sign-off (attended only), post, and write `result.json` for the reviewed head.
@@ -256,7 +256,7 @@ When asked to re-review ("look at this one again", "check if it's addressed"), o
 | Stacked PR (based on another PR's branch) | Diff base = the parent PR's head, not `main`. Tell every reviewer: this review covers only this PR's delta. |
 | Fork PR | Nothing special — `refs/pull/<num>/head` fetches fork heads too. |
 | Author asked to "ignore CI failures" | Say so in the body with the root cause: "Author requested CI failures be disregarded; root cause is {reason}. Approving despite red CI." |
-| PR updated mid-review, < 10 lines changed | Spot-read the new diff, post with a note. |
+| PR updated mid-review, < 10 lines changed | Spot-read the new diff and update the review for the current head; mention the update only if it changes the author's decision. |
 | PR updated mid-review, material change | Re-run the consolidator with the new state, or a mini-fan-out on just the changed files. |
 | PR depends on out-of-band manual ops (runbook, state push) | Say so in the body so reviewers don't think `terraform apply` alone is enough. |
 
@@ -273,7 +273,7 @@ When asked to re-review ("look at this one again", "check if it's addressed"), o
 | **Re-check `mergedAt` right before the fan-out** | Flo PRs get admin-merged within minutes of being posted — three floarena-api PRs merged between triage and fan-out on 2026-07-29. |
 | **Re-fetch before posting** | The author may have pushed during the fan-out. Three of four findings on `ibs#920` were fixed by commits that landed mid-review. |
 | **Own PRs post as `COMMENT`** | Author == current user → GitHub returns 422 on `APPROVE`/`REQUEST_CHANGES`. Review fully, post `COMMENT`, state the intended verdict at the top of the body. Never skip a PR for being yours. |
-| **Drop nits in the consolidator** | Style/preference/cosmetic = drop. Hickey and Fairbanks design notes go in the summary, not inline. |
+| **Apply the Publishing Contract** | `reviewers/consolidator.md` governs what goes public, including design findings and parent rewrites. Keep the investigation thorough and the published feedback direct. |
 | **Autonomy is not silence** | Under `--yolo`, report every posted review after the fact. |
 
 ## Common Mistakes
@@ -298,10 +298,8 @@ When asked to re-review ("look at this one again", "check if it's addressed"), o
 
 ## Output Quality Bar
 
-- Summary body: 2-4 paragraphs. Lead with the overall take. Surface the most important finding. End with a brief Hickey + Fairbanks lens paragraph.
-- Inline comments: ≤ 10 per PR. Specific + actionable + ≤ 200 words each.
-- No vague "consider X" without a concrete fix.
-- Cite file paths + line numbers in the body; the summary must stand alone — inline comments enhance it, not replace it.
+- Read and apply the **Publishing Contract** in [`reviewers/consolidator.md`](reviewers/consolidator.md) before drafting or posting, including follow-ups without a consolidator. It is the single source of truth for published review content.
+- Keep the research and verification gates intact; concise publication is not a shortcut through review.
 - Review bodies go out under Jordan's name: follow [[feedback_writing_as_jordan]] and [[reference_ai_smells_to_avoid]].
 
 ## Memory Touch-Points

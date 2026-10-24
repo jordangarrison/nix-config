@@ -325,6 +325,7 @@ in
   programs.pi = {
     enable = true;
     package = pkgs.llm-agents.pi;
+    cacheRetention = "long";
     settings = {
       defaultProvider = "openai-codex";
       defaultModel = "gpt-6.1-sol";

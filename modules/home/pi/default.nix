@@ -256,6 +256,22 @@ in
       description = "The pi package to install.";
     };
 
+    cacheRetention = mkOption {
+      type = types.enum [
+        "short"
+        "long"
+      ];
+      default = "short";
+      description = ''
+        Provider prompt-cache retention. `long` exports
+        `PI_CACHE_RETENTION=long`, which pi maps per provider where supported:
+        Anthropic `cache_control.ttl: "1h"`, OpenAI 24h (30m on GPT-5.6+).
+        Long cache writes cost more, so it pays off when sessions idle between
+        turns. pi reads only the environment for this; settings.json has no
+        equivalent key.
+      '';
+    };
+
     settings = mkOption {
       type = jsonFormat.type;
       default = { };
@@ -383,7 +399,10 @@ in
     # the standalone binary's assets. pi-subagents >= 0.70 detects the
     # standalone binary itself and passes this value on to background
     # children. Derived from the package so it survives pi upgrades.
-    home.sessionVariables.PI_PACKAGE_DIR = "${cfg.package}/libexec/pi";
+    home.sessionVariables = {
+      PI_PACKAGE_DIR = "${cfg.package}/libexec/pi";
+    }
+    // optionalAttrs (cfg.cacheRetention == "long") { PI_CACHE_RETENTION = "long"; };
 
     home.activation = {
       piSettingsSymlinkMigration = hm.dag.entryBetween [ "linkGeneration" ] [ "writeBoundary" ] (

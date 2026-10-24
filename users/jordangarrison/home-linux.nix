@@ -16,6 +16,8 @@
     pkgs.llm-agents.agent-browser # Headless browser automation CLI for AI agents (Linux only — dashboard pnpm build OOMs on aarch64-darwin)
     pkgs.llm-agents.chatgpt # ChatGPT desktop app (Electron)
     pkgs.llm-agents.claude-desktop # Claude desktop app (Electron)
+  ] ++ lib.optionals (userApps.hermes-desktop.enable or false) [
+    pkgs.llm-agents.hermes-desktop
   ] ++ lib.optionals (userApps.warp.enable or false) [
     inputs.warp-preview.packages.${pkgs.stdenv.hostPlatform.system}.default
   ] ++ lib.optionals (userApps.grok-bot.enable or false) [

@@ -31,6 +31,9 @@
   } # 48 GiB to match RAM
     ];
 
+  # Client only; connect to Endeavour's authenticated dashboard.
+  users.jordangarrison.apps.hermes-desktop.enable = true;
+
   networking.hostName = "opportunity"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 

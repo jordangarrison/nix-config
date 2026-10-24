@@ -209,6 +209,17 @@
           printf '%s\n' "$results" > "$out"
         '';
 
+      checks.x86_64-linux.hermes-module =
+        self.nixosConfigurations.endeavour.pkgs.runCommand "hermes-module-tests" {
+          results = builtins.toJSON (import ./tests/hermes-module.nix { flake = self; });
+        } ''
+          printf '%s\n' "$results" > "$out"
+        '';
+
+      checks.x86_64-linux.hermes-runtime = import ./tests/hermes-runtime.nix {
+        inherit (self.nixosConfigurations.endeavour) pkgs config;
+      };
+
       checks.x86_64-linux.pi-extensions =
         nixpkgs.legacyPackages.x86_64-linux.callPackage ./tests/pi-extensions { };
 
@@ -255,6 +266,7 @@
             ./modules/nixos/collie.nix
             ./modules/nixos/executor.nix
             ./modules/nixos/norish.nix
+            ./modules/nixos/hermes.nix
             ./modules/nixos/bb.nix
             ./modules/nixos/drawl.nix
             ./modules/nixos/tic-tac-toe-4-in-a-row.nix
@@ -746,6 +758,7 @@
                     pup.enable = true;
                     namespace.enable = true;
                     herdr.enable = true;
+                    hermes-desktop.enable = true;
                     work.enable = true;
                     aikido.enable = true;
                     floai.enable = true;

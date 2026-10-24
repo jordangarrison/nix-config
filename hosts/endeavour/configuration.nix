@@ -105,6 +105,64 @@
       # winboat # 2025-11-18 Currently broken
     ];
 
+  # Personal coding agent, running as Jordan. Enrollment + the root-owned enabled marker are
+  # required before it connects to Slack; see docs/runbooks/hermes.md.
+  services.hermes = {
+    enable = true;
+    user = "jordangarrison";
+    allowedUsers = [ "UQ69UGHKM" ]; # Jordan's work Slack member ID
+    instructions = builtins.readFile ../../users/jordangarrison/agents/AGENTS.md;
+    herdrIntegration.enable = true;
+    model = "gpt-6.1-sol";
+    plugins.conduit_push = pkgs.callPackage ../../packages/hermes-conduit-notifier { };
+    desktop = {
+      enable = true;
+      publicHost = "hermes.jordangarrison.dev";
+    };
+  };
+  users.jordangarrison.apps.hermes-desktop.enable = true;
+  # Interactive CLI chats use the dashboard profile's stored state/credentials.
+  # This does not promise simultaneous live-session ownership across clients.
+  # `command hermes` still reaches the separate ~/.hermes installation.
+  home-manager.users.jordangarrison.home.shellAliases.hermes = "hermes-service";
+
+  # DNS points at Endeavour's tailnet IP. The source ACL is still required:
+  # the host firewall is off, and a LAN client can spoof the HTTP Host header.
+  security.acme.certs."hermes.jordangarrison.dev" = {
+    group = "nginx";
+    dnsResolver = "1.1.1.1:53";
+  };
+  services.nginx.virtualHosts."hermes.jordangarrison.dev" = {
+    forceSSL = true;
+    useACMEHost = "hermes.jordangarrison.dev";
+    extraConfig = ''
+      # WS tickets and native sign-in codes must not end up in access logs.
+      access_log off;
+    '';
+    locations."/" = {
+      proxyPass = "http://127.0.0.1:${toString config.services.hermes.desktop.port}";
+      proxyWebsockets = true;
+      # Set an authoritative client IP, not a caller-supplied forwarding chain.
+      recommendedProxySettings = false;
+      extraConfig = ''
+        allow 127.0.0.1;
+        allow ::1;
+        allow 100.64.0.0/10;
+        allow fd7a:115c:a1e0::/48;
+        deny all;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_read_timeout 3600s;
+        proxy_send_timeout 3600s;
+        proxy_buffering off;
+        add_header X-Robots-Tag "noindex, nofollow" always;
+      '';
+    };
+  };
+
   # Private tailnet access to bb; the reusable service stays loopback-only.
   security.acme.certs."bb.jordangarrison.dev".group = "nginx";
   services.nginx.virtualHosts."bb.jordangarrison.dev" = {

@@ -17,8 +17,10 @@ in
 
     package = lib.mkOption {
       type = lib.types.package;
-      default = pkgs.day-dashboard;
-      defaultText = lib.literalExpression "pkgs.day-dashboard";
+      # Run the same pi as interactive sessions, so programs.pi options
+      # (e.g. cacheRetention) apply here too.
+      default = pkgs.day-dashboard.override { pi = config.programs.pi.finalPackage; };
+      defaultText = lib.literalExpression "pkgs.day-dashboard.override { pi = config.programs.pi.finalPackage; }";
       description = "The day-dashboard package to run.";
     };
 

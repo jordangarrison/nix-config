@@ -244,6 +244,25 @@ let
     }) files;
 
   activeThemeFile = if cfg.themes.active == null then null else "${cfg.themes.active}.json";
+
+  # Bake options pi reads only from the environment into the binary, so they
+  # hold for every launch (herdr panes, systemd units) rather than only shells
+  # that sourced hm-session-vars.sh. --set-default keeps a per-run override.
+  finalPackage =
+    if cfg.cacheRetention == "long" then
+      pkgs.symlinkJoin {
+        name = "pi-${cfg.package.version}";
+        paths = [ cfg.package ];
+        nativeBuildInputs = [ pkgs.makeWrapper ];
+        postBuild = ''
+          rm $out/bin/pi
+          makeWrapper ${getExe cfg.package} $out/bin/pi \
+            --set-default PI_CACHE_RETENTION long
+        '';
+        inherit (cfg.package) meta;
+      }
+    else
+      cfg.package;
 in
 {
   options.programs.pi = {
@@ -263,12 +282,24 @@ in
       ];
       default = "short";
       description = ''
-        Provider prompt-cache retention. `long` exports
+        Provider prompt-cache retention. `long` wraps the pi binary with
         `PI_CACHE_RETENTION=long`, which pi maps per provider where supported:
         Anthropic `cache_control.ttl: "1h"`, OpenAI 24h (30m on GPT-5.6+).
         Long cache writes cost more, so it pays off when sessions idle between
         turns. pi reads only the environment for this; settings.json has no
-        equivalent key.
+        equivalent key. Set `PI_CACHE_RETENTION=short` to override one run.
+      '';
+    };
+
+    finalPackage = mkOption {
+      type = types.package;
+      readOnly = true;
+      default = finalPackage;
+      defaultText = literalExpression "programs.pi.package wrapped per programs.pi options";
+      description = ''
+        The installed pi, with this module's environment options applied.
+        Reference this rather than {option}`programs.pi.package` when running
+        pi outside a shell, such as from a systemd unit.
       '';
     };
 
@@ -392,17 +423,14 @@ in
         }
       ];
 
-    home.packages = [ cfg.package ];
+    home.packages = [ cfg.finalPackage ];
 
     # The pi wrapper exports this for its own process. Keep the same value in
     # the ambient environment so tools that spawn pi outside the wrapper see
     # the standalone binary's assets. pi-subagents >= 0.70 detects the
     # standalone binary itself and passes this value on to background
     # children. Derived from the package so it survives pi upgrades.
-    home.sessionVariables = {
-      PI_PACKAGE_DIR = "${cfg.package}/libexec/pi";
-    }
-    // optionalAttrs (cfg.cacheRetention == "long") { PI_CACHE_RETENTION = "long"; };
+    home.sessionVariables.PI_PACKAGE_DIR = "${cfg.package}/libexec/pi";
 
     home.activation = {
       piSettingsSymlinkMigration = hm.dag.entryBetween [ "linkGeneration" ] [ "writeBoundary" ] (

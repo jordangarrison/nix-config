@@ -71,6 +71,9 @@ let
       webhook.enabled = false;
     };
     stt_enabled = false;
+    # Answer the usage-stats offer here; its UI can't write the store-backed
+    # config. offer_version must match upstream's OFFER_VERSION or it re-asks.
+    telemetry.shared_metrics = { enabled = false; send = false; offer_version = 2; };
   } // lib.optionalAttrs (cfg.desktop.publicHost != null) {
     # Enables upstream's real remote-auth gate even on a loopback listener.
     # Host/Origin checks also trust exactly this reverse-proxy hostname.
@@ -141,6 +144,12 @@ let
     SLACK_ALLOW_ALL_USERS = "false";
     GATEWAY_ALLOW_ALL_USERS = "false";
     PYTHONUNBUFFERED = "1";
+  } // lib.optionalAttrs cfg.herdrIntegration.enable {
+    # Let the agent drive the owner's Herdr server; the herdr skill gates on
+    # HERDR_ENV. No HERDR_PANE_ID, so the state plugin stays a no-op and
+    # commands must name their target workspace/tab/pane explicitly.
+    HERDR_ENV = "1";
+    HERDR_SOCKET_PATH = "${userHome}/.config/herdr/herdr.sock";
   };
 in
 {
@@ -155,7 +164,7 @@ in
       default = "";
       description = "Shared personal instructions appended by Hermes across CLI, Desktop, and messaging sessions.";
     };
-    herdrIntegration.enable = lib.mkEnableOption "the pinned Herdr session-reporting plugin in the service profile";
+    herdrIntegration.enable = lib.mkEnableOption "the pinned Herdr session-reporting plugin and Herdr control from the service profile";
     plugins = lib.mkOption {
       type = lib.types.attrsOf lib.types.package;
       default = { };

@@ -629,6 +629,7 @@ in
       # Apps
       arandr
       cliamp # Winamp-style terminal music player
+      signal-cli # Signal CLI; account linking is per host
       wezterm
       # doom-emacs
 

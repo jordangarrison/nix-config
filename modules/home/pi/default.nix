@@ -276,6 +276,16 @@ in
       description = "The pi package to install.";
     };
 
+    instructionsFile = mkOption {
+      type = types.nullOr types.str;
+      default = null;
+      description = ''
+        Absolute path (in the live checkout) to the global context file.
+        Symlinked out-of-store to {file}`~/.pi/agent/AGENTS.md`, which pi
+        loads in every session, so edits are live without a rebuild.
+      '';
+    };
+
     cacheRetention = mkOption {
       type = types.enum [
         "short"
@@ -434,6 +444,23 @@ in
     home.sessionVariables.PI_PACKAGE_DIR = "${cfg.package}/libexec/pi";
 
     home.activation = {
+      # Out-of-store symlinks have no build-time validation: a live path that
+      # does not exist yet (branch not merged into the canonical checkout)
+      # would silently become a dangling link. Fail before checkLinkTargets.
+      piLivePathCheck = mkIf (cfg.instructionsFile != null) (
+        hm.dag.entryBefore [ "checkLinkTargets" ] ''
+          if [[ ! -e ${escapeShellArg cfg.instructionsFile} ]]; then
+            if [[ -n "''${AGENTS_LIVE_ALLOW_DANGLING:-}" ]]; then
+              warnEcho "programs.pi: live path missing (allowed by AGENTS_LIVE_ALLOW_DANGLING): ${cfg.instructionsFile}"
+            else
+              errorEcho "programs.pi: live path does not exist: ${cfg.instructionsFile}"
+              errorEcho "Merge/pull this content into the canonical checkout first, or set AGENTS_LIVE_ALLOW_DANGLING=1 to proceed anyway."
+              exit 1
+            fi
+          fi
+        ''
+      );
+
       piSettingsSymlinkMigration = hm.dag.entryBetween [ "linkGeneration" ] [ "writeBoundary" ] (
         migrateManagedSettingsSymlink settingsPath
       );
@@ -449,6 +476,12 @@ in
 
     home.file = {
       ".pi/agent/keybindings.json".source = keybindingsFile;
+    }
+    // optionalAttrs (cfg.instructionsFile != null) {
+      ".pi/agent/AGENTS.md" = {
+        source = config.lib.file.mkOutOfStoreSymlink cfg.instructionsFile;
+        force = true; # adopt a pre-nix regular file
+      };
     }
     // optionalAttrs (cfg.models != { }) {
       ".pi/agent/models.json".source = modelsFile;

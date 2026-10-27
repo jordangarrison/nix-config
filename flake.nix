@@ -82,6 +82,13 @@
     floai = {
       url = "git+ssh://git@github.com/flocasts/floai";
     };
+    # Private repo, fetched over SSH like floai (same `nh flake update`
+    # caveat). No nixpkgs follows for the same reason: run jagpi on the
+    # nixpkgs (nodejs_24) its own lock was tested with. A new jagpi release
+    # is `nix flake update jagpi` plus a switch.
+    jagpi = {
+      url = "git+ssh://git@github.com/jordangarrison/jagpi";
+    };
     tuicr = {
       url = "github:agavra/tuicr";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -190,6 +197,7 @@
       lakeline-cg,
       grove,
       floai,
+      jagpi,
       tuicr,
       warp-preview,
       grok-bot,
@@ -414,6 +422,7 @@
                 ./modules/home/tea
                 ./modules/home/yazi
                 ./modules/home/day-dashboard
+                ./hosts/endeavour/jagpi.nix
               ];
 
               # The generator runs as a systemd --user service (needs the login

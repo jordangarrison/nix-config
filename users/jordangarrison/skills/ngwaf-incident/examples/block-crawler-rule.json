@@ -1,0 +1,59 @@
+{
+  "type": "request",
+  "enabled": true,
+  "groupOperator": "all",
+  "reason": "BLOCK: tv.varsity.com video-list crawler (2 Mac Chrome149/Edge148 UAs, empty Referer, hosting ASNs) that exhausted the origin ingress gateway during a 2026-10-27 incident. Fingerprint: exact UA + path + no Referer.",
+  "requestLogging": "sampled",
+  "expiration": "",
+  "conditions": [
+    {
+      "type": "single",
+      "field": "domain",
+      "operator": "equals",
+      "value": "tv.varsity.com"
+    },
+    {
+      "type": "single",
+      "field": "path",
+      "operator": "matches",
+      "value": "^/(collections/tag|teams)/[^/]+/videos?$"
+    },
+    {
+      "type": "group",
+      "groupOperator": "any",
+      "conditions": [
+        {
+          "type": "single",
+          "field": "useragent",
+          "operator": "equals",
+          "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
+        },
+        {
+          "type": "single",
+          "field": "useragent",
+          "operator": "equals",
+          "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0"
+        }
+      ]
+    },
+    {
+      "type": "multival",
+      "field": "requestHeader",
+      "operator": "doesNotExist",
+      "groupOperator": "all",
+      "conditions": [
+        {
+          "type": "single",
+          "field": "name",
+          "operator": "equals",
+          "value": "Referer"
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "type": "block"
+    }
+  ]
+}

@@ -5,6 +5,11 @@
 # `jagpi` on PATH (the TUI, and `jagpi notify` for workers). The instance's
 # state stays in ~/.local/state/jagpi/default. Options: jagpi's
 # nix/home-manager.nix.
+#
+# Lifetime: a user unit under default.target, so it starts at login, not at
+# boot (Linger=no), and stops with the last session. That matches herdr, whose
+# server the bot needs; boot-time availability would need linger plus a herdr
+# service of its own.
 { config, inputs, ... }:
 
 {

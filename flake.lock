@@ -848,11 +848,11 @@
         "nixpkgs": "nixpkgs_4"
       },
       "locked": {
-        "lastModified": 1793127386,
-        "narHash": "sha256-d0hkUcmjWda4bju9tlD18shhNjJ1XLy4aLl7r5+U+ZE=",
+        "lastModified": 1793128984,
+        "narHash": "sha256-TABU6DOS8GfKhAkG642qbyza2tsO2lre70viqQCUNyU=",
         "ref": "refs/heads/main",
-        "rev": "04a9badbd9f2dd4c4307c5d161315e340683bcb4",
-        "revCount": 77,
+        "rev": "5e490ea55a5a10b0454988f41028377c829f4d3d",
+        "revCount": 88,
         "type": "git",
         "url": "ssh://git@github.com/jordangarrison/jagpi"
       },

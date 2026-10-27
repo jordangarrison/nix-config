@@ -140,8 +140,8 @@ git diff -- flake.lock
 ```
 
 Validate the affected configuration using the commands above. Updating the
-private `floai` input requires GitHub SSH access; CI replaces it with
-`ci/stubs/floai`.
+private `floai` and `jagpi` inputs requires GitHub SSH access; CI replaces them
+with `ci/stubs/floai` and `ci/stubs/jagpi`.
 
 ### Cloudflare DNS
 

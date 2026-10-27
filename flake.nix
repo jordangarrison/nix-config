@@ -110,6 +110,12 @@
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Fork branch that adds nixosModules.default. Repoint at
+    # github:mago0/isp-snitch once that PR merges upstream.
+    isp-snitch = {
+      url = "github:jordangarrison/isp-snitch/feat-nix-modules";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # Agent skill sources (plain SKILL.md trees, consumed by
     # programs.agent-skills.external in users/jordangarrison/home.nix).
@@ -189,6 +195,7 @@
       grok-bot,
       sre-claude-auto-runner,
       disko,
+      isp-snitch,
       # Skill sources are only read through `inputs` (home.nix).
       ...
     }:
@@ -265,6 +272,7 @@
             ./modules/nixos/onwatch.nix
             ./modules/nixos/collie.nix
             ./modules/nixos/executor.nix
+            ./modules/nixos/isp-snitch.nix
             ./modules/nixos/norish.nix
             ./modules/nixos/hermes.nix
             ./modules/nixos/bb.nix
@@ -296,6 +304,7 @@
             drawl.nixosModules.default
             tic-tac-toe-4-in-a-row.nixosModules.default
             lakeline-cg.nixosModules.default
+            isp-snitch.nixosModules.default
             (
               let
                 # Single source of truth for the day-dashboard's shared knobs.

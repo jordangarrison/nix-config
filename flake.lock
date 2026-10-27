@@ -803,6 +803,27 @@
         "type": "github"
       }
     },
+    "isp-snitch": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793067143,
+        "narHash": "sha256-4x5cUmhtOQlzyM1PXfautdUu6Qoc25LiSYIFlzCbaQw=",
+        "owner": "jordangarrison",
+        "repo": "isp-snitch",
+        "rev": "94c63eb276aaedf302207006a9d5e63f471a4af6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "jordangarrison",
+        "ref": "feat-nix-modules",
+        "repo": "isp-snitch",
+        "type": "github"
+      }
+    },
     "lakeline-cg": {
       "inputs": {
         "flake-utils": "flake-utils_9",
@@ -1458,6 +1479,7 @@
         "grove": "grove",
         "home-manager": "home-manager",
         "hubctl": "hubctl",
+        "isp-snitch": "isp-snitch",
         "lakeline-cg": "lakeline-cg",
         "lavish-axi": "lavish-axi",
         "llm-agents": "llm-agents",

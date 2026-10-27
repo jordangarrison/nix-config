@@ -33,14 +33,13 @@ async def check(mode):
         env = os.environ | {
             "HOME": tmp,
             "HERMES_HOME": tmp,
-            "HERMES_MANAGED": "nixos",
             "HERMES_DASHBOARD_SESSION_TOKEN": token,
             "PYTHONUNBUFFERED": "1",
             "HERMES_DISABLE_LAZY_INSTALLS": "1",
             "HERMES_MANAGED_DIR": str(home / "empty-managed"),
         }
         (home / "empty-managed").mkdir()
-        for name in ("HERMES_DESKTOP", "HERMES_PARENT_PID", "SLACK_BOT_TOKEN", "SLACK_APP_TOKEN"):
+        for name in ("HERMES_DESKTOP", "HERMES_PARENT_PID", "HERMES_MANAGED", "SLACK_BOT_TOKEN", "SLACK_APP_TOKEN"):
             env.pop(name, None)
         if mode == "remote":
             env.update({

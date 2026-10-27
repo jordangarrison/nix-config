@@ -5,9 +5,9 @@ Hermes runs on `endeavour` with the stock web dashboard:
 - `hermes-serve`: runs `hermes dashboard --isolated --no-open --skip-build`
   on `127.0.0.1:9119`, supervised by systemd. Despite the retained unit name,
   this is the standard dashboard, **not** the headless `hermes serve` command.
-- `hermes-gateway`: an optional Slack gateway. It stays inactive until the
-  OAuth state, root-owned Slack credentials, and explicit enablement marker
-  all exist. The dashboard does not depend on this unit.
+- `hermes-gateway`: the optional Slack gateway for **JordanBot**
+  ([Slack](#slack-jordanbot)). It stays inactive until the OAuth state and the
+  root-owned `jordanbot-enabled` marker exist. The dashboard does not depend on it.
 
 Open **https://hermes.jordangarrison.dev/chat** in a browser on the tailnet.
 Sign in with the existing dashboard username/password (instructions below).
@@ -61,31 +61,67 @@ No new sudo privileges, scheduled jobs, or Grokbot cutover are configured.
 
 ## Ownership and paths
 
-- `modules/nixos/hermes.nix`: service identity, managed configuration, tool selection.
-- `hosts/endeavour/configuration.nix`: enablement, model, Slack member allowlist.
-- `/etc/hermes-service/config.yaml`: Nix-owned config; never edit in place.
-- `/home/jordangarrison/.local/share/hermes-service`: private mutable sessions, memory, and OAuth state.
-- `/home/jordangarrison/.local/share/hermes-service/auth.json`: writable Hermes-owned OAuth grant/pool.
-- `/var/lib/hermes-secrets/environment`: root-owned `0600` Slack tokens.
-- `/var/lib/hermes-secrets/enabled`: root-owned explicit Slack connection gate.
+Hermes owns its configuration; Nix owns the service around it.
+
+- `modules/nixos/hermes.nix`: service identity, units, the config seed and pins,
+  tool selection.
+- `hosts/endeavour/configuration.nix`: enablement, model, Slack member
+  allowlist, the Slack gate and the first config's Slack settings.
+- `/home/jordangarrison/.local/share/hermes-service/config.yaml`: **Hermes-owned**
+  live config. Edit it from the dashboard or Desktop (or `hermes-service config
+  set`). Nix seeds it once and keeps only the pinned settings below.
+- `/home/jordangarrison/.local/share/hermes-service/.env`: Hermes-owned `0600`
+  secrets, including JordanBot's `SLACK_BOT_TOKEN` and `SLACK_APP_TOKEN`.
+  Desktop's Slack page writes here. Values here override the unit's defaults
+  (such as `SLACK_ALLOWED_USERS`).
+- `/home/jordangarrison/.local/share/hermes-service/SOUL.md`: the bot's identity
+  and standing instructions, Hermes-owned and editable in Desktop.
+- `/etc/hermes-service/config.yaml`: the **seed**, for reference.
+  `/etc/hermes-service/pinned.json`: what Nix keeps in the live config.
+  `/etc/hermes-service/profiles.json`: both, as applied by `hermes-profiles`.
+- `/home/jordangarrison/.local/share/hermes-service`: private mutable sessions,
+  memory, and OAuth state; `auth.json` is the Hermes-owned OAuth grant/pool.
+- `/var/lib/hermes-secrets/jordanbot-enabled`: root-owned gate; the gateway
+  starts only while it exists.
+- `/var/lib/hermes-secrets/jordanbot-environment`: the root-only copy the
+  JordanBot tokens were first provisioned to. No longer loaded; kept as a backup
+  until you delete it. The retired Hermes Pilot app's `environment`/`enabled`
+  are gone from this host; revoke that app in Slack separately.
 - `/var/lib/hermes-secrets/desktop-environment`: root-owned `0600`
   dashboard username, random password, and persistent signing secret. Loaded
-  into the dashboard and, if enrolled, the Slack gateway. Separate from OpenAI OAuth.
+  into the dashboard and the gateway. Separate from OpenAI OAuth.
 - `/home/jordangarrison/.local/share/hermes-service/desktop-session-token`: legacy localhost-only credential;
   ignored and rejected when `desktop.publicHost` enables remote authentication.
 
-The gateway only runs after all Slack enrollment gates hold. Its privileged
-startup step selects the Slack-enabled config and loads Slack credentials.
-Without enrollment, the dashboard uses the Slack-disabled configuration and
-receives no Slack credentials. Gate changes take effect on a gateway restart.
+### Seed and pins
 
-The dashboard loads the remote-auth credentials and serves browser, Desktop,
-and Conduit connections. Model requests still require OpenAI enrollment.
+`hermes-profiles` (a oneshot unit, before the dashboard and gateway, at boot and
+on every activation that changes it):
+
+- **Seeds** `config.yaml` from `/etc/hermes-service/config.yaml` when the home
+  has none, or still links to an earlier Nix-generated file. A regular file is
+  never replaced: after the first run, the config is Hermes's.
+- **Pins** these leaves in the live config, restoring any that drift:
+  `mcp_servers.<name>` (from `programs.mcp`), `skills.external_dirs`,
+  `agent.system_prompt` (AGENTS.md), `dashboard.public_url` (the remote-auth
+  gate), `auth.adopt_external_logins`. Fields you add beside a pinned leaf
+  (e.g. a `tools` filter on an Executor server) stay. A rewrite first saves the
+  previous file to `backups/config/config.yaml.pre-nix.<time>`.
+- Records what it pinned in `.nix-hermes-profile.json`. Removing a pin from
+  Nix removes that leaf, unless it was edited since; then it is left.
+- Reports a symlinked or unparsable config as a failed unit and changes
+  nothing. The services start regardless.
+
+Change pins in Nix, everything else in Hermes. Pin changes restart the
+dashboard and gateway on activation; a seed change does nothing to an
+existing config. Running sessions see config changes at their next read.
+Slack adapter settings and tokens apply on a gateway restart.
 
 Nix owns the service: do not use `hermes gateway install`, `hermes gateway start`,
 or `hermes update`. Change the existing flake input and use the guarded NixOS
-build/test flow for upgrades. A Nix rollback does not roll back mutable Hermes
-state; back that up privately before upgrades.
+build/test flow for upgrades. The package still reports itself as an external
+(Nix) install, so Hermes's own updater stands down. A Nix rollback does not roll
+back Hermes-owned config or state; back them up privately before upgrades.
 
 ## Enrollment (human-operated)
 
@@ -132,70 +168,77 @@ Clients that explicitly send an interrupt/redirect RPC can still override that
 behavior; Stop remains available. Hermes may queue input during protected phases
 such as context compression.
 
-### 2. Create the dedicated Slack app
+### 2. Configure the JordanBot Slack app
 
-1. Open <https://api.slack.com/apps> → **Create New App** → **From an app manifest**.
-2. Select the work workspace. Paste `docs/runbooks/hermes-slack-manifest.json`
-   (also installed at `/etc/hermes-service/slack-manifest.json`).
-3. Review and create **Hermes Pilot**. Obtain workspace-admin approval if needed.
-4. Under **Basic Information → App-Level Tokens**, generate a token named
-   `hermes-socket` with `connections:write`. Keep the `xapp-` token private.
-5. Under **Install App**, install to the workspace. Keep the Bot User OAuth
-   Token (`xoxb-`) private.
+JordanBot already exists in the work workspace. In **api.slack.com/apps →
+JordanBot**, it needs the full Hermes scope and event set; the reference is
+`docs/runbooks/jordanbot-slack-manifest.json` (Hermes's own generated manifest,
+plus `reactions:write`, minus its 50 global slash commands; use `!help`, `!new`).
 
-The manifest uses Agent view and enables Messages. It deliberately subscribes
-only to DMs/app context, has no channel-history scopes, and registers no
-workspace-wide slash commands. It is narrower than the upstream full manifest.
-For session commands in the bot conversation, use Hermes's `!help`, `!new`, etc.
-Do not invite it into work channels yet. Reinstall after any scope/event changes.
+- **Bot token scopes:** `app_mentions:read`, `assistant:write`,
+  `channels:history`, `channels:read`, `chat:write`, `commands`,
+  `files:read`, `files:write`, `groups:history`, `groups:read`,
+  `im:history`, `im:read`, `im:write`, `mpim:history`, `mpim:read`,
+  `reactions:read`, `reactions:write`, `users:read`.
+- **Bot events:** `app_context_changed`, `app_home_opened`, `app_mention`,
+  `message.channels`, `message.groups`, `message.im`, `message.mpim`,
+  `reaction_added`. Leave `reaction_removed` off: removing a `:jordanbot:`
+  reaction would start a second turn.
+- **Socket Mode** on, with an app-level token (`xapp-`) scoped
+  `connections:write`. **Interactivity** on. **App Home → Messages tab** on.
+- **Agents → Agent experience** on, for the working-status line and streaming.
+  Leave **Slack MCP Server** off.
 
-The runtime allowlist admits only Jordan's work member ID. Non-allowlisted DMs
-are ignored rather than offered pairing. A nonempty channel-deny sentinel also
-blocks channels/group DMs; **an empty allowed_channels list means unrestricted**
-in Hermes and must not be used to express DM-only.
+Reinstall after any scope or event change. Invite JordanBot to each channel
+where you want it (`/invite @JordanBot`); it sees nothing elsewhere.
 
-### 3. Store Slack credentials locally
+### 3. Slack tokens
 
-In a human terminal, use hidden entry. Do not run under `set -x`, record the
-terminal, place tokens on command lines, or save them under the repository.
-The environment file should contain **only** the two Slack credentials; security
-policy belongs in Nix, not environment overrides.
+The tokens live in the Hermes-owned `.env`. Set them in **Desktop → Messaging
+→ Slack**, or in your own terminal with hidden entry (not under `set -x`):
 
 ```bash
 (
-  set +x
-  set -eu
-  umask 077
+  set +x; set -eu; umask 077
   read -rsp 'Slack bot token (xoxb-): ' bot; printf '\n'
   read -rsp 'Slack app token (xapp-): ' app; printf '\n'
   [[ "$bot" =~ ^xoxb-[A-Za-z0-9-]+$ && "$app" =~ ^xapp-[A-Za-z0-9-]+$ ]] || exit 1
-  sudo -v
-  printf 'SLACK_BOT_TOKEN=%s\nSLACK_APP_TOKEN=%s\n' "$bot" "$app" |
-    sudo install -o root -g root -m 0600 /dev/stdin \
-      /var/lib/hermes-secrets/environment
+  f=~/.local/share/hermes-service/.env; touch "$f"
+  { grep -v -E '^SLACK_(BOT|APP)_TOKEN=' "$f" || true
+    printf 'SLACK_BOT_TOKEN=%s\nSLACK_APP_TOKEN=%s\n' "$bot" "$app"; } > "$f.new"
+  mv "$f.new" "$f"
 )
 ```
 
-This does not start Hermes. OAuth tokens are refreshed in the separate writable
-auth store, never in the Nix store or this environment file.
-
-### 4. Enable the pilot explicitly
-
-Only after enrollment, access-policy review, and approval to connect:
+Never paste tokens into chat or screenshots. Test them without printing them
+(this does not open a Socket Mode connection):
 
 ```bash
-sudo touch /var/lib/hermes-secrets/enabled
-sudo systemctl restart hermes-gateway
-systemctl status hermes-gateway
+env_file=~/.local/share/hermes-service/.env
+sed -n 's/^SLACK_BOT_TOKEN="\{0,1\}\(xoxb-[A-Za-z0-9-]*\)"\{0,1\}$/Authorization: Bearer \1/p' "$env_file" |
+  curl -sS -H @- https://slack.com/api/auth.test | jq '{ok, error, team, user, user_id, bot_id}'
+sed -n 's/^SLACK_APP_TOKEN="\{0,1\}\(xapp-[A-Za-z0-9-]*\)"\{0,1\}$/Authorization: Bearer \1/p' "$env_file" |
+  curl -sS -X POST -H @- https://slack.com/api/apps.connections.open | jq '{ok, error}'
+# Expect ok: true twice. Print only these fields: the full reply holds a socket ticket.
+```
+
+After a token rotation (or a reinstall that changes the bot token), update
+`.env` and restart the gateway.
+
+### 4. Enable JordanBot
+
+```bash
+sudo touch /var/lib/hermes-secrets/jordanbot-enabled
+systemctl start hermes-gateway        # no sudo: polkit allows the owner
 journalctl -u hermes-gateway --since '5 minutes ago'
 ```
 
-Logs and session data may contain private conversations; do not publish them.
-To stop and prevent reconnection on restart/reboot:
+Expect `Authenticated as @jordanbot` and `Socket Mode connected`. To stop and
+prevent reconnection on restart or reboot:
 
 ```bash
-sudo rm /var/lib/hermes-secrets/enabled
-sudo systemctl restart hermes-gateway
+sudo rm /var/lib/hermes-secrets/jordanbot-enabled
+systemctl stop hermes-gateway
 ```
 
 Dashboard restarts briefly disconnect browser/Desktop/Conduit clients. Ask for
@@ -204,6 +247,45 @@ from a separate transient systemd job so stopping Hermes cannot kill the
 activation command before it restarts the service.
 
 Leave Grokbot's existing listeners alone until a later explicit cutover.
+
+## Slack: JordanBot
+
+JordanBot is one Slack app, one Socket Mode connection (held by
+`hermes-gateway`) and one Hermes profile (`default`): the same agent, memory,
+skills and tools as the dashboard and `hermes-service`. Seeded behaviour, all
+editable in Desktop:
+
+| Where | Who may trigger | How |
+| --- | --- | --- |
+| DM with JordanBot | Jordan (`UQ69UGHKM`) | any message |
+| Any channel it is in | Jordan | `@JordanBot` starts a thread; replies in that thread need no tag |
+| Any message where it is | Jordan | react `:jordanbot:` to have it handle that message in its thread |
+| Other people, other bots | nobody | ignored; no pairing offer |
+
+It puts :eyes: on a message while working, then a check mark (or a cross). Replies
+use Slack rich text. Cron results and notices go to the home channel, Jordan's
+DM with JordanBot. Background "memory/skill updated" notices stay out of Slack.
+
+**Editing it.** Change Slack behaviour, the allowlist or tokens in **Desktop**
+(or the dashboard), then apply with `systemctl restart hermes-gateway` (no sudo).
+Desktop's own gateway **Restart** button fails on this host (see below); a
+`SOUL.md` or prompt change needs no restart, only a new conversation (a fresh
+`@JordanBot` thread, or `!new`). Only one gateway may hold the Slack tokens:
+do not start another with `hermes gateway run|start|install`.
+
+**Known limitations (Hermes 0.22.5 as packaged by llm-agents):**
+
+- Desktop's gateway Restart spawns a bare Python without Hermes's
+  dependencies (`No module named 'ruamel'` in `logs/gateway-restart.log`).
+- `hermes-service gateway status` reports "not running": the CLI does not
+  recognise the Nix-wrapped gateway process. Use `systemctl status
+  hermes-gateway` and `gateway_state.json`.
+- Reaction triggers cannot be limited to additions; keep `reaction_removed`
+  unsubscribed in the app instead.
+- Lifecycle reaction emoji are fixed (:eyes:, :white_check_mark:, :x:).
+
+These are upstream packaging issues; report them to llm-agents/Hermes rather
+than patching the package here.
 
 ## Connect Hermes Desktop
 
@@ -246,7 +328,8 @@ If an older tab still shows a headless-backend page, reload it or open a fresh t
 Do not use the dashboard's Restart/Update buttons to manage the Nix service.
 
 Use the same work OAuth enrollment from above; no second subscription login is
-needed for this connection. Nix-owned settings remain read-only in Desktop.
+needed for this connection. Desktop can edit Hermes's config and `.env`;
+Nix restores only the pinned settings ([Seed and pins](#seed-and-pins)).
 The GUI is an admin interface (including file/terminal operations), and its
 chats now have coding tools with Jordan's user permissions. Treat dashboard
 access as workstation access. Do not share its dashboard login.
@@ -332,7 +415,7 @@ Hermes consumes the existing agent sources rather than maintaining copies:
   skills are immutable, but repository-backed links retain normal filesystem
   write permissions. Do not install duplicate copies into the Hermes profile.
 - **Terminal sessions:** run `hermes-service` from the desired repository. The
-  launcher sets `HERMES_HOME` and `HERMES_MANAGED`, passes arguments unchanged,
+  launcher sets `HERMES_HOME`, passes arguments unchanged,
   and does not change directory. It shares provider OAuth, skills, configuration,
   and session storage with the service, but runs as an interactive process. It
   does not load root-owned service secrets. Do
@@ -340,20 +423,32 @@ Hermes consumes the existing agent sources rather than maintaining copies:
 - **Herdr:** `services.hermes.herdrIntegration.enable` packages the unmodified
   `herdr-agent-state` plugin shipped by the pinned Herdr binary. Its installer
   runs only in an isolated build home; Nix installs/enables the result alongside
-  Conduit. Do not run `herdr integration install hermes` against the managed
-  service profile: the installer tries to rewrite `config.yaml`. Launch
+  Conduit. Do not run `herdr integration install hermes` against the
+  service profile: the installer rewrites `config.yaml` and plugin links. Launch
   `hermes-service` in a Herdr shell pane. The plugin reports session identity
   only when Herdr pane context is present. Other Hermes profiles are untouched.
 
-### Remaining parity gaps
+- **MCP:** Endeavour maps the host-gated `programs.mcp.servers` inventory
+  (`users/jordangarrison/home.nix`) into `services.hermes.mcpServers`, rendered
+  as the service profile's `mcp_servers`. Remote servers use `auth = "oauth"`.
+  Add or change servers there, not in Hermes. Enroll each OAuth server once,
+  in your own terminal: `hermes-service mcp login <name>`. Tokens stay in
+  `/home/jordangarrison/.local/share/hermes-service/mcp-tokens/`, never in Nix.
+  Do not copy other agents' tokens.
 
-**MCP is not connected yet.** The service still has an empty `mcp_servers` map.
-The intended source is the same host-gated `programs.mcp.servers` inventory in
-Home Manager, not a parallel list of endpoints or direct integrations bypassing
-Executor. Configuring that adapter requires an authorized management path for
-this Nix-managed deployment; the agent's available MCP management controls do
-not expose that declarative operation. Independent OAuth enrollment and real
-read-only MCP calls remain acceptance steps. Do not copy other agents' tokens.
+### Named profiles
+
+There is one bot today: the `default` profile. `services.hermes.profiles.<name>`
+can pin settings into a named profile created in Hermes later
+(`hermes-service profile create <name>`): `mcpServers` (names from
+`services.hermes.mcpServers`) and `shareMcpTokens` (link its `mcp-tokens` to the
+service profile's, reusing those OAuth grants). Removing a declaration undoes
+exactly what Nix pinned. Hermes 0.22 serves every named profile from the one
+gateway, including its cron jobs; route a channel to it with Hermes's
+`gateway.profile_routes`. The earlier `sre-review-bot` profile was deleted in
+Hermes (its tombstone keeps it from being revived).
+
+### Remaining parity gaps
 
 Interactive shell environment is not automatically inherited by the services.
 Keep wrappers for credentials, and add only explicitly required runtime/socket
@@ -472,7 +567,9 @@ delivery, or cross-device Desktop connectivity.
 
 After manual enrollment:
 
-1. DM Hermes from Jordan's account; confirm the reply is from **Hermes Pilot**.
+1. DM JordanBot from Jordan's account; confirm the reply is from **JordanBot**.
+   In a channel it is in, `@JordanBot` once, then reply in the thread without
+   a tag; react `:jordanbot:` to another message. See [Slack](#slack-jordanbot).
 2. In a disposable project directory, verify terminal execution, file read/write,
    and a harmless build/test command. Do not use real credentials as test data.
    No model-backed coding check is possible until OAuth enrollment succeeds.

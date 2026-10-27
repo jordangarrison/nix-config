@@ -19,7 +19,8 @@ from gateway.config import load_gateway_config, Platform
 from plugins.platforms.slack.adapter import SlackAdapter
 
 config = load_config()
-assert is_managed()
+# Hermes owns the seeded config: no package-manager lock refusing dashboard writes.
+assert not is_managed()
 assert config["model"]["provider"] == "openai-codex"
 assert config["auth"]["adopt_external_logins"] is False
 assert not config["fallback_providers"]
@@ -40,7 +41,7 @@ launcher_probe = subprocess.run([
     "launcher-test", os.environ["HERMES_TEST_LAUNCHER"], "chat", "argument with spaces",
 ], check=True, text=True, capture_output=True)
 launcher_lines = launcher_probe.stdout.splitlines()
-assert launcher_lines[:3] == [os.environ["HERMES_TEST_SERVICE_HOME"], "nixos", os.getcwd()]
+assert launcher_lines[:3] == [os.environ["HERMES_TEST_SERVICE_HOME"], "", os.getcwd()]
 assert launcher_lines[-2:] == ["chat", "argument with spaces"]
 for platform in ("slack", "cli", "cron"):
     selected = _get_platform_tools(config, platform)
@@ -51,14 +52,9 @@ assert gateway.get_unauthorized_dm_behavior(Platform.SLACK) == "ignore"
 assert not gateway.platforms[Platform.API_SERVER].enabled
 assert not gateway.platforms[Platform.WEBHOOK].enabled
 slack = gateway.platforms[Platform.SLACK]
-assert not slack.enabled  # Slack stays off until the root-owned activation gates.
-assert slack.extra["allowed_channels"] == ["DM_ONLY"]
-assert slack.extra["allow_bots"] == "none"
-assert slack.extra["reactions"] is False
-adapter = SlackAdapter(slack)
-assert not adapter._slash_channel_gated("D0123456789")
-assert adapter._slash_channel_gated("C0123456789")
-assert adapter._slash_channel_gated("G0123456789")
+# The seeded JordanBot settings; tests/hermes-slack-gateway.py exercises their gates.
+assert slack.enabled and slack.extra["allowed_channels"] == [] and slack.extra["allow_bots"] == "none"
+assert slack.home_channel is not None and slack.home_channel.chat_id.startswith("D")
 
 # Exercise the upstream allowlist algorithm without an initialized gateway,
 # adapters, or pairing grants. No OAuth or Slack credentials are needed.
@@ -96,14 +92,16 @@ from hermes_cli.auth_commands import auth_add_command
 from dataclasses import replace
 from hermes_cli.auth_commands import _OAUTH_ADD_SPECS
 
-original = Path(os.environ["HERMES_HOME"], "config.yaml").read_bytes()
 spec = replace(_OAUTH_ADD_SPECS["openai-codex"], login=lambda args: {
     "tokens": {"access_token": "offline-test-not-a-token", "refresh_token": "offline-test-not-a-refresh-token"}
 })
 with patch.dict(_OAUTH_ADD_SPECS, {"openai-codex": spec}):
     auth_add_command(Namespace(provider="openai-codex", auth_type="oauth", label="offline-test", priority=None))
 assert Path(os.environ["HERMES_HOME"], "auth.json").exists()
-assert Path(os.environ["HERMES_HOME"], "config.yaml").read_bytes() == original
+# Enrollment may touch the Hermes-owned config; it must keep the repository's pins.
+enrolled = load_config()
+assert enrolled["mcp_servers"] == config["mcp_servers"]
+assert resolve_ephemeral_system_prompt(enrolled) == instructions
 # Desktop must expose coding tools and retain authenticated transport. Test both
 # REST and WebSocket token gates without starting a server or calling a model.
 from tui_gateway.server import _load_enabled_toolsets, _load_busy_input_mode
@@ -177,4 +175,4 @@ with patch.object(skill_utils, "get_config_path", return_value=fixture_config):
     assert skill_utils.get_external_skills_dirs() == [shared_fixture.resolve()]
     assert (skill_utils.TIER_EXTERNAL, shared_fixture.resolve()) in skill_utils.get_skill_search_roots(include_project=False)
 skill_utils._external_dirs_cache_clear()
-print(json.dumps({"config": "passed", "tools": "coding-enabled", "slack_gates": "passed", "managed_oauth_enrollment": "passed", "desktop_auth": "passed", "shared_instructions": "passed", "shared_skills": "passed", "launcher": "passed", "herdr_hooks": "passed"}))
+print(json.dumps({"config": "passed", "tools": "coding-enabled", "slack_gates": "passed", "oauth_enrollment": "passed", "desktop_auth": "passed", "shared_instructions": "passed", "shared_skills": "passed", "launcher": "passed", "herdr_hooks": "passed"}))

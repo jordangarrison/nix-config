@@ -27,6 +27,9 @@ let
     services.hermes = { enable = true; allowedUsers = users; };
   };
   rejects = users: lib.any (a: !a.assertion && lib.hasPrefix "services.hermes." a.message) (invalid users).assertions;
+  rejectsProfiles = profiles: lib.any (a: !a.assertion && lib.hasPrefix "services.hermes.profiles" a.message) (mkConfig {
+    services.hermes = { enable = true; allowedUsers = [ "U0123456789" ]; mcpServers.known.url = "https://example.invalid/mcp"; inherit profiles; };
+  }).assertions;
   unit = enabled.systemd.services.hermes-gateway;
   serve = enabled.systemd.services.hermes-serve;
   noDesktop = mkConfig {
@@ -34,8 +37,19 @@ let
   };
   host = flake.nixosConfigurations.endeavour.config;
   remoteServe = host.systemd.services.hermes-serve;
-  remoteSettings = builtins.fromJSON host.environment.etc."hermes-service/config.yaml".source.text;
+  # Store paths (stdio MCP commands) carry context fromJSON rejects; the test only reads values.
+  remoteSettings = builtins.fromJSON (builtins.unsafeDiscardStringContext host.environment.etc."hermes-service/config.yaml".source.text);
   vhost = host.services.nginx.virtualHosts."hermes.jordangarrison.dev";
+  hostGateway = host.systemd.services.hermes-gateway;
+  rejectsMarker = marker: lib.any (a: !a.assertion && lib.hasPrefix "services.hermes.slack" a.message) (mkConfig {
+    services.hermes = { enable = true; allowedUsers = [ "U0123456789" ]; slack.enableMarker = marker; };
+  }).assertions;
+  specOf = cfg: builtins.fromJSON (builtins.unsafeDiscardStringContext cfg.environment.etc."hermes-service/profiles.json".source.text);
+  hostSpec = specOf host;
+  hostPinned = hostSpec.profiles.default.settings;
+  hostSlack = remoteSettings.platforms.slack;
+  profilesUnit = host.systemd.services.hermes-profiles;
+  hermesUnits = cfg: lib.filterAttrs (name: _: lib.hasPrefix "hermes-" name) cfg.systemd.services;
   settings = builtins.fromJSON enabled.environment.etc."hermes-service/config.yaml".source.text;
   manifest = builtins.fromJSON (builtins.readFile ../docs/runbooks/hermes-slack-manifest.json);
   unrestrictedUser = service: service.serviceConfig.User == "jordangarrison"
@@ -51,6 +65,63 @@ let
     disabledHasNoService = !(disabled.systemd.services ? hermes-gateway) && !(disabled.systemd.services ? hermes-serve);
     desktopOptIn = !(noDesktop.systemd.services ? hermes-serve);
     remoteAuthGate = remoteSettings.dashboard.public_url == "https://hermes.jordangarrison.dev";
+    sharedMcpServers = remoteSettings.mcp_servers.executor == { url = "https://executor.jordangarrison.dev/mcp"; auth = "oauth"; }
+      && remoteSettings.mcp_servers ? executor-flo;
+    # Hermes owns the live config; Nix seeds it once and pins a few leaves.
+    configHermesOwned = lib.all (unit: !(unit.environment ? HERMES_MANAGED)) (lib.attrValues (hermesUnits host))
+      && !lib.any (rule: lib.hasInfix "config.yaml" rule) host.systemd.tmpfiles.rules
+      && !lib.hasInfix "HERMES_MANAGED" (lib.findFirst (pkg: lib.getName pkg == "hermes-service")
+        (throw "launcher missing") host.environment.systemPackages).buildCommand;
+    seedIsReferenceConfig = hostSpec.profiles.default.seed == remoteSettings
+      && hostSpec.home == "/home/jordangarrison/.local/share/hermes-service";
+    pinsRepoOwnedSettings = hostPinned.mcp_servers == remoteSettings.mcp_servers
+      && hostPinned.skills.external_dirs == [ "/home/jordangarrison/.agents/skills" ]
+      && hostPinned.agent.system_prompt == builtins.readFile ../users/jordangarrison/agents/AGENTS.md
+      && hostPinned.dashboard.public_url == "https://hermes.jordangarrison.dev"
+      && !hostPinned.auth.adopt_external_logins
+      && lib.attrNames hostPinned == [ "agent" "auth" "dashboard" "mcp_servers" "skills" ];
+    # Pin changes restart the services; seed-only changes never touch the live config.
+    pinsRestartServices = lib.all (unit: lib.elem host.environment.etc."hermes-service/pinned.json".source unit.restartTriggers)
+      [ remoteServe hostGateway ]
+      && !(lib.elem host.environment.etc."hermes-service/config.yaml".source remoteServe.restartTriggers);
+    profilesBeforeServices = lib.all (u: lib.elem u profilesUnit.before) [ "hermes-serve.service" "hermes-gateway.service" ]
+      && profilesUnit.wantedBy == [ "multi-user.target" ];
+    profilesRunAsOwner = profilesUnit.serviceConfig.User == "jordangarrison" && profilesUnit.serviceConfig.Type == "oneshot"
+      && profilesUnit.serviceConfig.RemainAfterExit && profilesUnit.serviceConfig.UMask == "0077";
+    # A single default bot: no named profiles, so no routes or shared token links.
+    hostSingleProfile = lib.attrNames hostSpec.profiles == [ "default" ] && !(remoteSettings.gateway ? profile_routes)
+      && !(remoteSettings.gateway ? multiplex_profiles);
+    moduleSeedsNamedProfilesPinsOnly = let spec = specOf (mkConfig {
+      services.hermes = { enable = true; allowedUsers = [ "U0123456789" ]; mcpServers.known.url = "https://example.invalid/mcp";
+        profiles.bot = { mcpServers = [ "known" ]; shareMcpTokens = true; }; };
+    }); in spec.profiles.bot == { settings.mcp_servers.known.url = "https://example.invalid/mcp"; seed = null; shareMcpTokens = true; };
+    # JordanBot's first Slack settings: any channel it is in, Jordan only, follow mentioned threads.
+    hostSlackSeed = hostSlack.enabled && hostSlack.extra.allowed_channels == [ ]
+      && hostSlack.extra.require_mention && !hostSlack.extra.strict_mention && !hostSlack.extra.thread_require_mention
+      && hostSlack.extra.reaction_triggers == [ "jordanbot" ] && hostSlack.extra.reactions && hostSlack.extra.rich_blocks
+      && hostSlack.extra.allow_bots == "none" && hostSlack.extra.unauthorized_dm_behavior == "ignore"
+      && hostSlack.home_channel.chat_id == "D0CCDQ1JBNY"
+      && remoteSettings.display.platforms.slack.memory_notifications == "off" && !remoteSettings.gateway.allow_all_users;
+    hostSlackJordanOnly = hostGateway.environment.SLACK_ALLOWED_USERS == "UQ69UGHKM"
+      && hostGateway.environment.SLACK_ALLOW_ALL_USERS == "false" && hostGateway.environment.GATEWAY_ALLOW_ALL_USERS == "false";
+    hostJordanBotGate = hostGateway.unitConfig.ConditionPathExists == [
+      "/home/jordangarrison/.local/share/hermes-service/auth.json" "/var/lib/hermes-secrets/jordanbot-enabled"
+    ];
+    # Tokens live in the Hermes-owned .env: no unit loads a Slack credential file, and none is in Nix.
+    noSlackSecretsInNix = lib.all (unit: lib.all (file: !lib.hasInfix "slack" file && !lib.hasInfix "jordanbot" file)
+        (lib.toList (unit.serviceConfig.EnvironmentFile or [ ]))) (lib.attrValues (hermesUnits host))
+      && !lib.hasInfix "xoxb-" (builtins.toJSON remoteSettings) && !lib.hasInfix "xapp-" (builtins.toJSON remoteSettings);
+    ownerRestartsGatewayOnly = lib.hasInfix ''subject.user == "jordangarrison"'' host.security.polkit.extraConfig
+      && lib.hasInfix ''action.lookup("unit") == "hermes-gateway.service"'' host.security.polkit.extraConfig
+      && !lib.hasInfix "hermes-serve" host.security.polkit.extraConfig && host.security.polkit.enable;
+    defaultSlackDmOnly = settings.platforms.slack.extra.allowed_channels == [ "DM_ONLY" ] && !settings.platforms.slack.enabled;
+    rejectsMarkerOutsideSecretDir = rejectsMarker "/home/jordangarrison/enabled";
+    rejectsNestedMarker = rejectsMarker "/var/lib/hermes-secrets/../enabled";
+    acceptsMarkerInSecretDir = !(rejectsMarker "/var/lib/hermes-secrets/jordanbot-enabled");
+    rejectsUnknownProfileServer = rejectsProfiles { bot.mcpServers = [ "missing" ]; };
+    rejectsPathProfileName = rejectsProfiles { "../bot".mcpServers = [ "known" ]; };
+    rejectsDefaultProfileName = rejectsProfiles { default.shareMcpTokens = true; };
+    acceptsKnownProfileServer = !(rejectsProfiles { bot.mcpServers = [ "known" ]; });
     pluginsOptIn = settings.plugins.enabled == [ ];
     sharedAgentSkills = (settings.skills.external_dirs or [ ]) == [ "/home/jordangarrison/.agents/skills" ];
     sharedPersonalInstructions = (remoteSettings.agent.system_prompt or "") ==
@@ -92,17 +163,12 @@ let
     rejectsInjectedAllowlist = rejects [ "U123,*" ];
     bootService = unit.wantedBy == [ "multi-user.target" ];
     slackEnrollmentGated = unit.unitConfig.ConditionPathExists == [
-      "/home/jordangarrison/.local/share/hermes-service/auth.json"
-      "/var/lib/hermes-secrets/environment" "/var/lib/hermes-secrets/enabled"
+      "/home/jordangarrison/.local/share/hermes-service/auth.json" "/var/lib/hermes-secrets/enabled"
     ];
     standardDashboard = lib.hasInfix "dashboard --isolated --no-open --skip-build --host 127.0.0.1 --port 9119"
       (builtins.readFile serve.serviceConfig.ExecStart)
       && !(lib.elem "hermes-gateway.service" serve.wants);
-    slackOptIn = !settings.platforms.slack.enabled
-      && lib.hasInfix "/var/lib/hermes-secrets/enabled" unit.preStart;
-    gatewayCredentials = host.systemd.services.hermes-gateway.serviceConfig.EnvironmentFile == [
-      "-/run/hermes-service/slack-environment" "/var/lib/hermes-secrets/desktop-environment"
-    ];
+    gatewayCredentials = hostGateway.serviceConfig.EnvironmentFile == [ "/var/lib/hermes-secrets/desktop-environment" ];
     ownerIdentity = unit.serviceConfig.User == "jordangarrison" && unit.serviceConfig.Group == "users";
     ownerHomeAccessible = unrestrictedUser unit && unrestrictedUser host.systemd.services.hermes-gateway;
     separateServiceProfile = unit.environment.HOME == "/home/jordangarrison"
@@ -111,8 +177,7 @@ let
     sudoWrapperFirst = lib.all (service: lib.head (map toString service.path) == "/run/wrappers") [ unit serve ];
     privateFiles = unit.serviceConfig.UMask == "0077";
     rootOwnedGate = lib.elem "d /var/lib/hermes-secrets 0700 root root - -" enabled.systemd.tmpfiles.rules;
-    runtimeSecrets = unit.serviceConfig.EnvironmentFile == [ "-/run/hermes-service/slack-environment" ];
-    managedConfig = unit.environment.HERMES_MANAGED == "nixos";
+    runtimeSecrets = unit.serviceConfig.EnvironmentFile == [ ];
     restrictedUsers = unit.environment.SLACK_ALLOWED_USERS == "U0123456789"
       && unit.environment.SLACK_ALLOW_ALL_USERS == "false" && unit.environment.GATEWAY_ALLOW_ALL_USERS == "false";
     foregroundSupervised = lib.hasInfix "gateway run --external-supervisor" unit.serviceConfig.ExecStart

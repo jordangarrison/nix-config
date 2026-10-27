@@ -115,6 +115,33 @@
     herdrIntegration.enable = true;
     model = "gpt-6.1-sol";
     plugins.conduit_push = pkgs.callPackage ../../packages/hermes-conduit-notifier { };
+    # The shared agent MCP list (programs.mcp in users/jordangarrison/home.nix).
+    # The Executor gateways are OAuth with dynamic client registration.
+    mcpServers = pkgs.lib.mapAttrs (_: s:
+      if s.command != null
+      then { inherit (s) command args; }
+      else { inherit (s) url; auth = "oauth"; }
+    ) config.home-manager.users.jordangarrison.programs.mcp.servers;
+    # JordanBot: one Slack app and one default profile for every channel and
+    # DM. Hermes owns config.yaml, .env and SOUL.md (edit them in Desktop);
+    # these are only the first config's Slack settings. See docs/runbooks/hermes.md.
+    slack.enableMarker = "/var/lib/hermes-secrets/jordanbot-enabled";
+    seedSettings = {
+      platforms.slack = {
+        enabled = true;
+        home_channel = { platform = "slack"; chat_id = "D0CCDQ1JBNY"; name = "JordanBot DM"; };
+        extra = {
+          allowed_channels = [ ]; # any channel JordanBot is in
+          require_mention = true; # a new conversation needs @JordanBot...
+          strict_mention = false; # ...then it follows that thread
+          thread_require_mention = false;
+          reactions = true; # :eyes: while working, then a check or cross
+          reaction_triggers = [ "jordanbot" ];
+          rich_blocks = true;
+        };
+      };
+      display.platforms.slack.memory_notifications = "off";
+    };
     desktop = {
       enable = true;
       publicHost = "hermes.jordangarrison.dev";

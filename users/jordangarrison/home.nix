@@ -325,6 +325,7 @@ in
   programs.pi = {
     enable = true;
     package = pkgs.llm-agents.pi;
+    instructionsFile = "${agentsLive}/AGENTS.md";
     cacheRetention = "long";
     settings = {
       defaultProvider = "openai-codex";

@@ -40,7 +40,7 @@ Prefer `equals` on exact user-agent strings over a `matches` regex: an exact str
 | Action | Effect |
 |---|---|
 | `{ "type": "block" }` | Return the site's block code (406 unless the site sets another; `responseCode` overrides it) |
-| `{ "type": "addSignal", "signal": "site.<name>" }` | Tag only. Blocks nothing unless an enabled block rule matches the signal (check with `rules`). The signal must already exist on the site. |
+| `{ "type": "addSignal", "signal": "site.<name>" }` | Tag only. Blocks nothing unless an enabled block rule matches the signal or a blocking alert watches it (`rules` shows both). The signal must already exist on the site. |
 | `{ "type": "allow" }` | Let the request through other rules |
 | `{ "type": "browserChallenge" }` | Challenge instead of block |
 
@@ -48,4 +48,9 @@ A block rule can carry both `block` and `addSignal`, so its hits are countable w
 
 ## Rate-limit rules
 
-`type: rateLimit`, a top-level `signal: "site.<name>"` (create the signal first), actions `logRequest` (observe) or `blockSignal` (enforce), and `"rateLimit": { "threshold": N, "interval": 1 | 10, "duration": 300..86400, "clientIdentifiers": [ { "type": "ip" } ] }`. `interval` is minutes; `clientIdentifiers` is required. A sustained 429 or 503 to a verified search crawler drops pages from its index, so rate-limit real crawlers only with care.
+`type: rateLimit` needs four parts:
+
+- a top-level `signal: "site.<name>"`: the signal the rule attaches when a client crosses the threshold (create it first);
+- actions that each carry a `type` and a `signal`, the signal to act on once the limit trips: `{ "type": "logRequest", "signal": "site.<name>" }` to observe, `{ "type": "blockSignal", "signal": "site.<name>" }` to enforce, or `"signal": "ALL-REQUESTS"` to act on every request from that client;
+- `"rateLimit": { "threshold": N, "interval": 1 | 10, "duration": 300..86400, "clientIdentifiers": [ { "type": "ip" } ] }`, where `interval` is minutes and `clientIdentifiers` is required;
+- the common fields above. A sustained 429 or 503 to a verified search crawler drops pages from its index, so rate-limit real crawlers only with care.

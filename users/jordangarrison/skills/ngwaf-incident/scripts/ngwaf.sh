@@ -7,28 +7,32 @@
 #   - The token reaches curl only through a stdin config (`--config -`) fed by
 #     the printf builtin, so it never appears in argv, `ps`, shell history, a
 #     file, or this script's output.
-#   - get/corp-get refuse endpoints whose responses embed secrets.
+#   - get/corp-get refuse endpoints whose responses embed secrets, and curl
+#     runs with --globoff so the path checked is the path requested.
 #   - Writes are dry runs unless SIGSCI_ALLOW_WRITE equals the target site name.
 #
 # Run `ngwaf.sh help` for commands.
 set -euo pipefail
 
-CONFIG_FILE="${SIGSCI_CONFIG:-$HOME/.config/sigsci/config}"
+# Own cache file: using-sigsci-waf's ~/.config/sigsci/config cannot read the
+# file token source, so sharing it would break that skill.
+CONFIG_FILE="${NGWAF_CONFIG:-$HOME/.config/ngwaf-incident/config}"
+LEGACY_CONFIG="$HOME/.config/sigsci/config"
 API_HOST="https://dashboard.signalsciences.net"
-# Test seam: an API base override may only point at this machine, so no
+# Test seam: an API base override may only be a bare loopback authority, so no
 # environment change can send the token to another host.
 if [ -n "${SIGSCI_API_BASE:-}" ]; then
-  case "$SIGSCI_API_BASE" in
-    http://127.0.0.1:*|http://localhost:*) API_HOST="$SIGSCI_API_BASE" ;;
-    *) printf 'ngwaf: SIGSCI_API_BASE may only point at http://127.0.0.1:<port> or http://localhost:<port>\n' >&2; exit 1 ;;
-  esac
+  if [[ "$SIGSCI_API_BASE" =~ ^http://(127\.0\.0\.1|localhost):[0-9]{1,5}$ ]]; then API_HOST="$SIGSCI_API_BASE"
+  else printf 'ngwaf: SIGSCI_API_BASE must be exactly http://127.0.0.1:<port> or http://localhost:<port>\n' >&2; exit 1; fi
 fi
 API_BASE="$API_HOST/api/v0"
 
 # Exit codes the skill branches on.
 EXIT_SETUP=3   # setup cache missing or incomplete: run setup
-EXIT_AUTH=4    # token unreadable or rejected: run setup
+EXIT_AUTH=4    # token unreadable or rejected (HTTP 401/403): run setup
+EXIT_API=5     # API or network error that is not an auth failure: retry, report
 EXIT_PARTIAL=2 # feed stopped early: output is truncated
+HTTP_AUTH=41   # api(): the API rejected the credentials
 
 die() { printf 'ngwaf: %s\n' "$*" >&2; exit 1; }
 die_code() { local c=$1; shift; printf 'ngwaf: %s\n' "$*" >&2; exit "$c"; }
@@ -81,7 +85,10 @@ to_epoch() {
 # `other` even though the cache names a different site.
 load_config() {
   local _corp="${SIGSCI_CORP:-}" _site="${SIGSCI_SITE:-}" _user="${SIGSCI_API_USER:-}"
-  [ -f "$CONFIG_FILE" ] || die_code $EXIT_SETUP "no setup cache at $CONFIG_FILE; run setup"
+  if [ ! -f "$CONFIG_FILE" ]; then
+    [ -f "$LEGACY_CONFIG" ] && note "using-sigsci-waf's cache $LEGACY_CONFIG exists; its SIGSCI_OP_REF can be passed to: setup --op"
+    die_code $EXIT_SETUP "no setup cache at $CONFIG_FILE; run setup"
+  fi
   # shellcheck source=/dev/null
   . "$CONFIG_FILE"
   [ -n "$_corp" ] && SIGSCI_CORP="$_corp"
@@ -148,23 +155,48 @@ stamp_verified() {
 
 # api METHOD PATH_OR_URI [curl args...]
 # PATH is relative to /api/v0; a URI starting with /api/ (a feed next.uri) is
-# relative to the host. Prints the body; fails on HTTP >= 400 with the body.
+# relative to the host. Prints the body of the last attempt. Returns 0 on 2xx,
+# HTTP_AUTH on 401/403, EXIT_API on any other HTTP or network failure, or
+# get_token's code. GET and PUT retry 429, 5xx, and network errors; POST never
+# retries, since a retried create can land twice.
 api() {
   local method="$1" target="$2"; shift 2
   local url
   case "$target" in /api/*) url="$API_HOST$target" ;; *) url="$API_BASE$target" ;; esac
   local token; token=$(get_token) || return $?
-  printf 'header = "x-api-user: %s"\nheader = "x-api-token: %s"\nheader = "Content-Type: application/json"\n' \
-      "$SIGSCI_API_USER" "$token" \
-    | curl -sS --fail-with-body --retry 2 --max-time "${SIGSCI_MAX_TIME:-180}" -X "$method" "$@" --config - "$url"
+  local out; out=$(umask 077; mktemp)
+  local tries=3 n=0 code rc
+  [ "$method" = POST ] && tries=1
+  while :; do
+    n=$((n + 1)); rc=0
+    # -o rewrites the file on every attempt, so a failed attempt's body never
+    # precedes the good one.
+    code=$(printf 'header = "x-api-user: %s"\nheader = "x-api-token: %s"\nheader = "Content-Type: application/json"\n' \
+        "$SIGSCI_API_USER" "$token" \
+      | curl -sS --globoff --max-time "${SIGSCI_MAX_TIME:-180}" -X "$method" "$@" \
+          -o "$out" -w '%{http_code}' --config - "$url") || rc=$?
+    if [ $rc -eq 0 ]; then
+      case "$code" in 2??) cat "$out"; rm -f "$out"; return 0 ;; 429|5??) ;; *) break ;; esac
+    fi
+    [ $n -lt $tries ] || break
+    sleep $((n * 2))
+  done
+  cat "$out"; rm -f "$out"
+  if [ $rc -ne 0 ]; then note "network error (curl exit $rc) on $method ${target%%\?*}"; return $EXIT_API; fi
+  note "HTTP $code from $method ${target%%\?*}"
+  case "$code" in 401|403) return $HTTP_AUTH ;; *) return $EXIT_API ;; esac
 }
 
 site_path() { printf '/corps/%s/sites/%s%s' "$SIGSCI_CORP" "$SIGSCI_SITE" "$1"; }
 
-# Reject `.`/`..` segments: curl squashes them, which could escape a prefix.
+# Only plain paths: no `.`/`..` segments (curl squashes them, which could
+# escape a prefix), and no fragment, glob, or percent-encoding, which would make
+# the path requested differ from the path checked.
 assert_safe_path() {
   local p="${1%%\?*}"
   case "$p" in /*) ;; *) die "path must start with / (got '$1')" ;; esac
+  case "$p" in *[!A-Za-z0-9/._-]*) die "path may contain only letters, digits, and / . _ - (got '$1')" ;; esac
+  case "$1" in *'#'*) die "path must not contain '#' (got '$1')" ;; esac
   case "$p/" in */../*|*/./*) die "path must not contain '.' or '..' segments (got '$1')" ;; esac
 }
 
@@ -233,11 +265,13 @@ cmd_auth_test() {
   tmpdir
   local body rc=0
   body=$(api GET "$(site_path "")" 2>"$TMPD/err") || rc=$?
-  if [ $rc -ne 0 ]; then
-    # get_token failures already printed their reason and chose the exit code.
-    [ -n "$body" ] || { cat "$TMPD/err" >&2; exit $rc; }
-    die_code $EXIT_AUTH "auth failed for $SIGSCI_API_USER on $SIGSCI_CORP/$SIGSCI_SITE: $(printf '%s' "$body" | jq -r '.message? // .' 2>/dev/null | head -c 300)"
-  fi
+  local msg; msg=$(printf '%s' "$body" | jq -r '.message? // empty' 2>/dev/null | head -c 300 || true)
+  case $rc in
+    0) ;;
+    "$HTTP_AUTH") die_code $EXIT_AUTH "the API rejected $SIGSCI_API_USER on $SIGSCI_CORP/$SIGSCI_SITE: ${msg:-HTTP 401/403}" ;;
+    "$EXIT_SETUP"|"$EXIT_AUTH") cat "$TMPD/err" >&2; exit $rc ;;   # get_token's reason
+    *) cat "$TMPD/err" >&2; die_code $EXIT_API "API or network error, not an auth failure${msg:+: $msg}; retry" ;;
+  esac
   SIGSCI_VERIFIED_AT=$(iso "$(now)")
   stamp_verified
   printf '%s' "$body" | jq -r --arg u "$SIGSCI_API_USER" --arg c "$SIGSCI_CORP" --arg src "$SIGSCI_TOKEN_SOURCE" --arg at "$SIGSCI_VERIFIED_AT" '
@@ -246,24 +280,63 @@ cmd_auth_test() {
 }
 
 # Normalised rule list: site rules plus corp rules that apply to this site.
+# fetch_all PATH OUT: every page of a list endpoint into OUT as
+# {"data": [...], "totalCount": N}. Returns api's code on failure.
+fetch_all() {
+  local path="$1" out="$2" page=1 got=0 total=0 n rc
+  : > "$out.items"
+  while :; do
+    rc=0; api GET "$path?limit=100&page=$page" > "$out.page" 2>"$out.err" || rc=$?
+    [ $rc -eq 0 ] || { cat "$out.err" >&2; return $rc; }
+    jq -e 'type == "object" and (.data | type == "array")' "$out.page" >/dev/null || { note "unexpected response from $path"; return $EXIT_API; }
+    jq -c '.data[]' "$out.page" >> "$out.items"
+    n=$(jq '.data | length' "$out.page"); total=$(jq '.totalCount // 0' "$out.page"); got=$((got + n))
+    if [ "$n" -eq 0 ] || [ "$got" -ge "$total" ]; then break; fi
+    page=$((page + 1))
+  done
+  jq -s --argjson t "$total" '{data: ., totalCount: $t}' "$out.items" > "$out"
+}
+
+# Normalised view: site rules, corp rules that apply to this site, and site
+# alerts, plus what was and was not read. A read that fails is reported in
+# .coverage, never treated as an empty list.
 rules_json() {
   tmpdir
-  api GET "$(site_path /rules)" > "$TMPD/site-rules.json"
-  api GET "/corps/$SIGSCI_CORP/rules" > "$TMPD/corp-rules.json" 2>/dev/null || echo '{"data":[]}' > "$TMPD/corp-rules.json"
-  jq -n --slurpfile s "$TMPD/site-rules.json" --slurpfile c "$TMPD/corp-rules.json" --arg site "$SIGSCI_SITE" '
+  fetch_all "$(site_path /rules)" "$TMPD/site-rules.json"
+  local corp_err="" alerts_err="" rc
+  rc=0; fetch_all "/corps/$SIGSCI_CORP/rules" "$TMPD/corp-rules.json" 2>"$TMPD/corp.err" || rc=$?
+  if [ $rc -ne 0 ]; then corp_err=$(tr '\n' ' ' < "$TMPD/corp.err" | head -c 200); echo '{"data":[],"totalCount":0}' > "$TMPD/corp-rules.json"; fi
+  rc=0; api GET "$(site_path /alerts)" > "$TMPD/alerts.json" 2>"$TMPD/alerts.err" || rc=$?
+  if [ $rc -ne 0 ] || ! jq -e '.data | type == "array"' "$TMPD/alerts.json" >/dev/null 2>&1; then
+    alerts_err=$(tr '\n' ' ' < "$TMPD/alerts.err" | head -c 200); echo '{"data":[]}' > "$TMPD/alerts.json"
+  fi
+  jq -n --slurpfile s "$TMPD/site-rules.json" --slurpfile c "$TMPD/corp-rules.json" --slurpfile a "$TMPD/alerts.json" \
+        --arg site "$SIGSCI_SITE" --arg corp_err "$corp_err" --arg alerts_err "$alerts_err" '
     def signals_matched: [.. | objects | select(.field? == "signalType" or .field? == "signal") | .value? // empty] | unique;
-    ([$s[0].data[]? | . + {scope: "site"}]
-     + [$c[0].data[]? | select(.corpScope == "global" or ((.siteNames // []) | index($site))) | . + {scope: "corp"}])
-    | map({
-        id, scope, enabled, type,
-        actions: [.actions[]?.type],
-        blocks: ([.actions[]?.type] | any(. == "block" or . == "blockSignal")),
-        adds: ([.actions[]?.signal, .signal] | map(select(. != null and . != "")) | unique),
-        matches: signals_matched,
-        fields: ([.. | objects | .field? // empty] | unique - ["name", "signalType", "signal"]),
-        requestLogging, expiration,
-        reason: (.reason // "")
-      })'
+    {
+      coverage: {
+        site_rules: {read: ($s[0].data | length), total: $s[0].totalCount},
+        corp_rules: (if $corp_err == "" then {read: ($c[0].data | length), total: $c[0].totalCount} else {error: $corp_err} end),
+        alerts: (if $alerts_err == "" then {read: ($a[0].data | length)} else {error: $alerts_err} end)
+      },
+      rules: (([$s[0].data[] | . + {scope: "site"}]
+               + [$c[0].data[] | select(.corpScope == "global" or ((.siteNames // []) | index($site))) | . + {scope: "corp"}])
+        | map({
+            id, scope, enabled, type,
+            actions: [.actions[]?.type],
+            blocks: ([.actions[]?.type] | any(. == "block" or . == "blockSignal")),
+            adds: ([.actions[]?.signal, .signal] | map(select(. != null and . != "")) | unique),
+            matches: signals_matched,
+            fields: ([.. | objects | .field? // empty] | unique - ["name", "signalType", "signal"]),
+            requestLogging, expiration,
+            reason: (.reason // "")
+          })),
+      # flagged and blockImmediate alerts block traffic once the signal crosses the threshold.
+      alerts: [$a[0].data[] | {id, tagName, action, enabled, threshold, interval,
+                               blocks: (.action | test("flagged|block"; "i"))}]
+    }
+    | .complete = ((.coverage.site_rules.read >= .coverage.site_rules.total)
+                   and (.coverage.corp_rules.error == null) and (.coverage.alerts.error == null))'
 }
 
 cmd_rules() {
@@ -274,24 +347,39 @@ cmd_rules() {
   jq -r '
     def kind: if .blocks then "BLOCK" elif (.actions | index("allow")) then "ALLOW"
               elif .type == "rateLimit" then "RATELIMIT-LOG" else "OBSERVE" end;
-    . as $all
+    def cov(c): if c.error then "NOT READ (\(c.error))" else "\(c.read)" + (if c.total then "/\(c.total)" else "" end) end;
+    .rules as $all
     | ($all | map(select(.enabled and .blocks))) as $blockers
-    | "== rules (\(length)); fields = request fields the conditions test",
-    (.[] | "\(.id) \(if .enabled then "on " else "OFF" end) \(.scope) \(kind)" +
+    | (.alerts | map(select(.enabled and .blocks))) as $balerts
+    | .complete as $complete
+    | "== coverage: site rules \(cov(.coverage.site_rules)), corp rules \(cov(.coverage.corp_rules)), alerts \(cov(.coverage.alerts))",
+      (if $complete then empty else "   INCOMPLETE: a blocker may be missing from this view; check the control panel before concluding a signal is observe-only" end),
+    "",
+    "== rules (\($all | length)); fields = request fields the conditions test",
+    ($all[] | "\(.id) \(if .enabled then "on " else "OFF" end) \(.scope) \(kind)" +
            (if (.fields | length) > 0 then "  fields=\(.fields | join(","))" else "" end) +
            (if (.matches | length) > 0 then "  matches-signals=\(.matches | join(","))" else "" end) +
            (if (.adds | length) > 0 then "  adds=\(.adds | join(","))" else "" end) +
            "\n    \(.reason | gsub("\\s+"; " ") | .[0:140])"),
     "",
-    "== each signal a rule adds: who adds it, and which enabled block rules match on it",
+    "== each signal a rule adds: who adds it, and what can block on it",
     ( [$all[] | .adds[]] | unique | .[] as $sig
       | ($all | map(select(.adds | index($sig)) | "\(.id[0:8])(\(kind)\(if .enabled then "" else ",OFF" end))") | join(" ")) as $by
       | ($blockers | map(select(.matches | index($sig)) | .id[0:8])) as $bl
-      | "\($sig)\n    added by \($by)\n    matched by block rules: \(if ($bl | length) > 0 then $bl | join(" ") else "NONE" end)"),
+      | ($balerts | map(select(.tagName == $sig) | "\(.action)>\(.threshold)/\(.interval)m")) as $al
+      | "\($sig)\n    added by \($by)" +
+        "\n    matched by block rules: \(if ($bl | length) > 0 then $bl | join(" ") else "none" end)" +
+        "\n    blocking alerts: \(if ($al | length) > 0 then $al | join(" ") else "none" end)" +
+        (if ($bl | length) == 0 and ($al | length) == 0 then
+           (if $complete then "\n    => observe only" else "\n    => unknown (coverage incomplete)" end)
+         else "" end)),
     "",
     "== signals that enabled block rules match on",
     ( [$blockers[] | .matches[]] | unique | .[] as $sig
-      | "\($sig): \([$blockers[] | select(.matches | index($sig)) | .id[0:8]] | join(" "))" )
+      | "\($sig): \([$blockers[] | select(.matches | index($sig)) | .id[0:8]] | join(" "))" ),
+    "",
+    "== enabled blocking alerts",
+    ($balerts[] | "\(.tagName): \(.action) threshold=\(.threshold) interval=\(.interval)m")
   ' "$TMPD/rules.json"
   note "ids shortened to 8 chars in the summaries; a block rule that matches a signal may also test other fields before it blocks"
 }
@@ -318,7 +406,7 @@ feed_pages() {
   uri="$(site_path /feed/requests)?from=$FEED_FROM&until=$FEED_UNTIL"
   note "feed $(iso $FEED_FROM) to $(iso $FEED_UNTIL)"
   while [ -n "$uri" ]; do
-    if ! api GET "$uri" > "$TMPD/page.json" 2>"$TMPD/err" || ! jq -e '.data' "$TMPD/page.json" >/dev/null 2>&1; then
+    if ! api GET "$uri" > "$TMPD/page.json" 2>"$TMPD/err" || ! jq -e 'type == "object" and (.data | type == "array")' "$TMPD/page.json" >/dev/null 2>&1; then
       note "page $((page + 1)) failed after $total records: $(cat "$TMPD/page.json" "$TMPD/err" 2>/dev/null | head -c 300 | tr '\n' ' ')"
       note "TRUNCATED: output covers only the first $page pages"
       return $EXIT_PARTIAL
@@ -368,19 +456,28 @@ cmd_search() {
 # verify-rule ID FROM UNTIL [--host HOST] [--ua REGEX]
 cmd_verify_rule() {
   load_config
-  [ $# -ge 3 ] || die "verify-rule needs RULE_ID FROM UNTIL [--host HOST] [--ua REGEX]"
-  local id="$1" from="$2" until="$3" host="" ua=""; shift 3
+  [ $# -ge 3 ] || die "verify-rule needs RULE_ID FROM UNTIL [--host HOST] [--ua REGEX] [--path REGEX]"
+  local id="$1" from="$2" until="$3" host="" ua="" path=""; shift 3
   case "$id" in *[!a-zA-Z0-9]*) die "rule id must be alphanumeric (got '$id')" ;; esac
   while [ $# -gt 0 ]; do
-    case "$1" in --host) host="$2"; shift 2 ;; --ua) ua="$2"; shift 2 ;; *) die "verify-rule: unknown flag '$1'" ;; esac
+    case "$1" in
+      --host) host="$2"; shift 2 ;; --ua) ua="$2"; shift 2 ;; --path) path="$2"; shift 2 ;;
+      *) die "verify-rule: unknown flag '$1'" ;;
+    esac
   done
   local rule; rule=$(api GET "$(site_path "/rules/$id")") || die "rule $id not found on $SIGSCI_CORP/$SIGSCI_SITE"
   printf '%s' "$rule" | jq -r '"rule \(.id) enabled=\(.enabled) actions=\([.actions[].type] | join(",")) requestLogging=\(.requestLogging)\n  \(.reason | gsub("\\s+"; " ") | .[0:200])"'
   feed_window "$from" "$until"
+  # Hits can only exist after the rule's last change; earlier traffic would
+  # show as misses.
+  local changed; changed=$(printf '%s' "$rule" | jq -r '(.updated // .created // "") | sub("\\.[0-9]+"; "") | if . == "" then 0 else fromdateiso8601 end')
+  if [ "$FEED_FROM" -lt "$changed" ]; then
+    note "WARNING: the window starts before the rule's last change at $(iso "$changed"); for a post-change check use FROM >= $(iso $(( (changed + 59) / 60 * 60 )))"
+  fi
   tmpdir
   local rc=0
   feed_pages > "$TMPD/feed.ndjson" || rc=$?
-  jq -nr --arg id "$id" --arg host "$host" --arg ua "$ua" '
+  jq -nr --arg id "$id" --arg host "$host" --arg ua "$ua" --arg path "$path" '
     def bump(k): .[k] = ((.[k] // 0) + 1);
     def top(n): to_entries | sort_by(-.value) | .[0:n] | map("    \(.value)\t\(.key)") | .[];
     reduce inputs as $r ({n: 0, hit: {n: 0, code: {}, ua: {}, path: {}, host: {}}, other: {n: 0, by: {}}, fp: {n: 0, code: {}, path: {}}};
@@ -392,8 +489,9 @@ cmd_verify_rule() {
           | .hit.path |= bump($r.path // "") | .hit.host |= bump($r.serverName // "")
         elif $blk != null then .other.n += 1 | .other.by |= bump($blk)
         else . end
-      | if ($host != "" or $ua != "") and ($mine | not)
-           and ($host == "" or $r.serverName == $host) and ($ua == "" or (($r.userAgent // "") | test($ua))) then
+      | if ($host != "" or $ua != "" or $path != "") and ($mine | not)
+           and ($host == "" or $r.serverName == $host) and ($ua == "" or (($r.userAgent // "") | test($ua)))
+           and ($path == "" or (($r.path // "") | test($path))) then
           .fp.n += 1 | .fp.code |= bump("\($r.responseCode)" + (if $blk then " blocked by \($blk)" else "" end)) | .fp.path |= bump($r.path // "")
         else . end)
     | "flagged requests in window: \(.n)",
@@ -404,8 +502,9 @@ cmd_verify_rule() {
       "  hosts:", (.hit.host | top(5)),
       "blocked by OTHER rules (same block code, different detector): \(.other.n)",
       (.other.by | top(5)),
-      (if $host != "" or $ua != "" then
-         "fingerprint (host=\(if $host == "" then "*" else $host end) ua=~\(if $ua == "" then "*" else $ua end)) NOT attributed to this rule: \(.fp.n)",
+      (if $host != "" or $ua != "" or $path != "" then
+         "candidates (host=\(if $host == "" then "*" else $host end) ua=~\(if $ua == "" then "*" else $ua end) path=~\(if $path == "" then "*" else $path end)) NOT attributed to this rule: \(.fp.n)",
+         "  these match only the filters given, not every rule condition (headers are not checked): inspect them before calling any a miss",
          "  by response code:", (.fp.code | top(10)),
          "  top paths:", (.fp.path | top(10))
        else empty end)' < "$TMPD/feed.ndjson"
@@ -434,7 +533,12 @@ cmd_create() {
   if ! write_allowed; then
     printf 'DRY RUN: nothing sent. To apply, re-run with SIGSCI_ALLOW_WRITE=%s\n' "$SIGSCI_SITE"; return 0
   fi
-  local out; out=$(api POST "$(site_path /rules)" --data-binary @"$TMPD/body.json") || die "create failed: $out"
+  # Not retried: if the API committed the rule before failing, a retry would make a second one.
+  local out rc=0; out=$(api POST "$(site_path /rules)" --data-binary @"$TMPD/body.json") || rc=$?
+  if [ $rc -ne 0 ]; then
+    note "create failed (${out:0:300}); the rule may still have been created"
+    die "before retrying, run 'ngwaf.sh rules' and look for this rule's reason"
+  fi
   printf '%s' "$out" | jq -r '"created \(.id) enabled=\(.enabled) on \(.siteNames | join(","))\nrollback: ngwaf.sh disable \(.id)"'
 }
 
@@ -473,30 +577,33 @@ usage() {
   cat <<'USAGE'
 ngwaf.sh: Fastly Next-Gen WAF (Signal Sciences) incident client
 
-Setup cache: ~/.config/sigsci/config (override: SIGSCI_CONFIG). No token in it.
+Setup cache: ~/.config/ngwaf-incident/config (override: NGWAF_CONFIG). No token in it.
   setup (--op op://<vault>/<item>/<field> [--op-account ACCOUNT] | --file PATH [--var NAME])
         --corp CORP --site SITE --user API_USER_EMAIL
                          Record where the token is, then run auth-test. With --file,
                          an env-style file may supply SIGSCI_CORP/SIGSCI_SITE/SIGSCI_EMAIL.
   auth-test              Cheap check of the cached setup. Exit 3 = run setup (no cache),
-                         4 = run setup (token unreadable or rejected).
+                         4 = run setup (token unreadable, or API returned 401/403),
+                         5 = API or network error (retry).
 
 Read (TIME = unix seconds, -30m, -2h, -1d, or ISO-8601 UTC):
-  rules [--json]         Site + corp rules with their signals, and which block rules
-                         match on each signal.
+  rules [--json]         Site + corp rules (all pages) and site alerts: each signal, and
+                         the block rules and blocking alerts that act on it. Says when
+                         coverage is incomplete.
   feed FROM UNTIL        Flagged requests as NDJSON, all pages. UNTIL is moved back to
                          5 min ago if later. Window <= 24h, FROM <= 7 days ago. Exit 2 = truncated.
   timeseries TAG[,TAG] [FROM] [UNTIL] [ROLLUP] [--json]
                          Request counts per signal (e.g. BLOCKED). Default last 1h, 60s.
   search "QUERY" [LIMIT] Flagged-request search; on failure use feed.
-  verify-rule ID FROM UNTIL [--host HOST] [--ua REGEX]
+  verify-rule ID FROM UNTIL [--host HOST] [--ua REGEX] [--path REGEX]
                          Per-rule effect from the feed: requests the rule tagged, by code,
-                         UA, path; blocks by other rules; fingerprint requests it missed.
+                         UA, path; blocks by other rules; filter-matching candidates it
+                         did not tag. Warns if FROM is before the rule's last change.
   get PATH | corp-get PATH
                          Raw site- or corp-scoped GET. Secret-bearing endpoints refused.
 
 Write (dry run unless SIGSCI_ALLOW_WRITE=<site name>):
-  create FILE|-          POST a new site rule.
+  create FILE|-          POST a new site rule (never retried).
   disable ID             PUT the rule back with enabled=false (incident rollback).
 USAGE
 }

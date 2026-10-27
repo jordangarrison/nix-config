@@ -33,10 +33,10 @@ Done when the count of fingerprint matches outside the attack is zero, or each o
 ngwaf.sh rules
 ```
 
-Look for a rule that already targets this crawler (its reason, its fields), especially OBSERVE rules from an earlier wave. An OBSERVE rule only adds a signal; it blocks nothing unless an enabled block rule matches that signal, which the `matched by block rules` line shows. Check whether an old rule still matches the current variant:
+Look for a rule that already targets this crawler (its reason, its fields), especially OBSERVE rules from an earlier wave. An OBSERVE rule only adds a signal. It blocks nothing unless an enabled block rule matches that signal, or a blocking alert (`flagged`, `blockImmediate`) watches it: the `matched by block rules` and `blocking alerts` lines show both. Trust `=> observe only` only when the coverage line is complete. Check whether an old rule still matches the current variant:
 
 ```bash
-ngwaf.sh verify-rule <old-rule-id> <attack FROM> <attack UNTIL> --host HOST --ua 'REGEX'
+ngwaf.sh verify-rule <old-rule-id> <attack FROM> <attack UNTIL> --host HOST --ua 'REGEX' --path 'REGEX'
 ```
 
 In 2026-10-27, OBSERVE rules from July for an older variant added `site.bad-bot-traffic`, which no block rule matched, and they matched 0 of 6,229 crawler requests: the variant had changed.
@@ -56,19 +56,21 @@ Done when the rule ID and its rollback command (`ngwaf.sh disable <id>`) are pos
 
 ## 5. Verify
 
-Wait until 5 minutes after the rule went live (the feed lags), then:
+Check only traffic after go-live. Set FROM to the first minute boundary after the rule went live (`verify-rule` warns if FROM is earlier). The feed serves only windows that end 5 or more minutes ago, so run the check at least 10 minutes after go-live, giving a window of 5 minutes or more:
 
 ```bash
-ngwaf.sh verify-rule <id> -15m now --host HOST --ua 'REGEX'
+ngwaf.sh verify-rule <id> <first minute after go-live> now --host HOST --ua 'REGEX' --path 'REGEX'
 ```
 
 - **Attributed to this rule**: should be above zero, all with the block code.
-- **Fingerprint not attributed**: should be near zero. Requests here are a crawler variant the rule misses (compare their user agents and paths with the rule), or are blocked by another rule (the line names it).
+- **Candidates not attributed**: these match only the host, UA, and path filters, not the rule's header conditions. Inspect each group. A request the rule was meant to skip (one with a `Referer`, say) is correct. One blocked by another rule says so on its line. Only a request that meets every rule condition and was not blocked is a variant the rule misses.
 - **Blocked by other rules**: context only; those rules return the same status code, which is why a status-code count cannot prove this rule worked.
+
+The feed holds flagged, sampled requests, so it cannot show that unflagged traffic stopped; the symptom check below is what proves that.
 
 Then confirm the incident symptom is easing in the system that hurt: origin load, CDN cache misses, 5xx. A block shows up there as a drop; the blocked 406s may not reach logs that keep only 5xx.
 
-Done when the rule is attributed blocks, the leak count is near zero, and the symptom metric has moved. If the symptom has not moved, the crawler was not the cause, or a variant is leaking: report, and roll back if the rule is not helping.
+Done when the rule has attributed blocks, no inspected candidate is a real miss, and the symptom metric has moved. If the symptom has not moved, the crawler was not the cause, or a variant is leaking: report, and roll back if the rule is not helping.
 
 ## 6. Codify
 

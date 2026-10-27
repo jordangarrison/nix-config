@@ -15,8 +15,8 @@ Run `ngwaf.sh auth-test`. It reads the setup cache, makes one cheap call to the 
 |---|---|---|
 | 0 | Cache and key work. The cache's verified-at time is updated. | Continue. If `agentLevel` is not `block`, tell the user: no rule on this site blocks anything. |
 | 3 | No cache, or it lacks a field. | Run setup. |
-| 4 | Key unreadable (op signed out, file missing or not mode 600) or rejected. | Fix the stated cause, or run setup. |
-| other | Network or API error. | Retry once, then report the error. |
+| 4 | Key unreadable (op signed out, file missing or not mode 600), or the API returned 401/403. | Fix the stated cause, or run setup. |
+| 5 | API or network error; the key was not judged. | Retry once, then report the error. |
 
 **Setup.** Ask the user for the key source and the target, then run one of:
 
@@ -27,7 +27,7 @@ ngwaf.sh setup --file <path-to-600-file> [--var <NAME>] [--corp <corp> --site <s
 
 A `--file` may hold the bare key, or `NAME=value` lines; the variable defaults to `SIGSCI_TOKEN`, and `SIGSCI_CORP`, `SIGSCI_SITE`, and `SIGSCI_EMAIL` in the same file fill the other flags. Setup writes the cache, keeps any previous one as `config.prev`, and runs auth-test. The step is done when auth-test exits 0.
 
-The cache is `~/.config/sigsci/config` (override with `SIGSCI_CONFIG`). It holds only where the key is, the corp, site, API user, and verified-at time. using-sigsci-waf uses the same file, and its 1Password caches load here unchanged. `SIGSCI_SITE=<site> ngwaf.sh ...` targets another site for one call without touching the cache.
+The cache is `~/.config/ngwaf-incident/config` (override with `NGWAF_CONFIG`). It holds only where the key is, the corp, site, API user, and verified-at time. It is separate from using-sigsci-waf's `~/.config/sigsci/config`, which cannot read a file source; when that file exists, its `SIGSCI_OP_REF` can be passed to `setup --op`. `SIGSCI_SITE=<site> ngwaf.sh ...` targets another site for one call without touching the cache.
 
 ## 2. Reach for the command that fits
 
@@ -35,11 +35,11 @@ Times are unix seconds, `-30m`, `-2h`, `-1d`, or ISO-8601 UTC (`2026-10-27T00:40
 
 | Need | Command |
 |---|---|
-| Every rule, its signals, and whether any enabled block rule matches each signal | `rules` (`--json` for the normalised list) |
+| Every rule and alert, and for each signal whether an enabled block rule or blocking alert acts on it | `rules` (`--json` for the normalised view) |
 | All flagged requests in a window, as NDJSON | `feed FROM UNTIL > file.ndjson` |
 | Counts per signal over time (`BLOCKED`, `site.<name>`, system signals) | `timeseries TAG[,TAG] [FROM] [UNTIL] [ROLLUP]` |
 | Quick search in NGWAF query syntax | `search "from:-30min httpcode:406" [LIMIT]` |
-| What one rule did, and what its fingerprint missed | `verify-rule ID FROM UNTIL [--host HOST] [--ua REGEX]` |
+| What one rule did, and requests like its fingerprint that it did not tag | `verify-rule ID FROM UNTIL [--host HOST] [--ua REGEX] [--path REGEX]` |
 | Create a rule / turn one off (guarded, section 3) | `create FILE` / `disable ID` |
 | Any other read | `get /site-path` or `corp-get /corp-path` |
 
@@ -47,7 +47,9 @@ Feed facts the API enforces: `until` must be 5 or more minutes ago (the helper m
 
 `search` has returned HTTP 500 for whole incidents while `feed` kept working. When search fails, use feed.
 
-`verify-rule` attributes requests to the rule by `tags[].detector`, not by status code: every block rule on a site returns the same code (406 by default), so a 406 alone proves nothing. Counts are lower bounds, because the feed holds flagged requests only and `requestLogging: sampled` logs a sample.
+`rules` reads every page of site and corp rules plus the site's alerts, and its first line reports coverage. When a read fails it prints `INCOMPLETE`, and a signal with no known blocker reads `unknown`, not `observe only`.
+
+`verify-rule` attributes requests to the rule by `tags[].detector`, not by status code: every block rule on a site returns the same code (406 by default), so a 406 alone proves nothing. Its candidates match only the filters you pass, not every rule condition. It warns when the window starts before the rule's last change, since earlier traffic cannot carry the rule's tag. Counts are lower bounds, because the feed holds flagged requests only and `requestLogging: sampled` logs a sample.
 
 Feed records hold client IPs and request headers: keep raw feed files out of repositories and shared channels, and share counts.
 
@@ -57,7 +59,7 @@ Feed records hold client IPs and request headers: keep raw feed files out of rep
 
 Before setting `SIGSCI_ALLOW_WRITE`, show the user the dry-run output and the evidence for the change (for a block, the collateral count from the playbook), then get their go-ahead. With `--yolo`, skip the go-ahead; the dry run and the collateral check still run and appear in your report, and a nonzero collateral count still stops the write.
 
-- **Create**: write the body from [rule-schema.md](rule-schema.md), then `ngwaf.sh create rule.json`. Report the new ID and the rollback command it prints.
+- **Create**: write the body from [rule-schema.md](rule-schema.md), then `ngwaf.sh create rule.json`. Report the new ID and the rollback command it prints. Create is never retried. If it fails, the rule may still exist: run `rules` and look for its reason before trying again.
 - **Rollback**: `ngwaf.sh disable ID` sends the rule back with `enabled: false` and everything else unchanged, then reads it back to confirm. Prefer it to deleting: the rule and its history stay for the write-up, and re-enabling is one control-panel toggle.
 
 Any other change (editing conditions, deleting, corp rules, site settings) goes through the control panel or Terraform.

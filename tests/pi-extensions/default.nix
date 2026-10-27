@@ -34,6 +34,8 @@ runCommand "pi-extension-tests"
     mkdir -p work/extensions work/tests work/node_modules/@earendil-works
     cp ${../../modules/home/pi/extensions/compact-until.ts} work/extensions/compact-until.ts
     cp ${./compact-until.test.ts} work/tests/compact-until.test.ts
+    cp ${../../modules/home/pi/extensions/expandable-bash-command.ts} work/extensions/expandable-bash-command.ts
+    cp ${./expandable-bash-command.test.ts} work/tests/expandable-bash-command.test.ts
     cp -r ${nodeModules}/node_modules/. work/node_modules/
     chmod -R u+w work/node_modules
     cp -r ${./stubs/pi-coding-agent} work/node_modules/@earendil-works/pi-coding-agent

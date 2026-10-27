@@ -198,6 +198,7 @@ let
     "compact-until.ts".source = ./extensions/compact-until.ts;
     "codex-subscription-usage.ts".source = ./extensions/codex-subscription-usage.ts;
     "cursor-context-usage.ts".source = ./extensions/cursor-context-usage.ts;
+    "expandable-bash-command.ts".source = ./extensions/expandable-bash-command.ts;
     "protected-paths.ts".source = ./extensions/protected-paths.ts;
     "status-line.ts".source = ./extensions/status-line.ts;
   };

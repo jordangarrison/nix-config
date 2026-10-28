@@ -79,10 +79,9 @@
           # Like upstream, a provider without `module` must name one in
           # passthru.jagpiProvider; reading it here fails CI when it does not.
           config = lib.mkIf cfg.enable {
-            home.packages = [
-              self.packages.${pkgs.stdenv.hostPlatform.system}.default
-            ]
-            ++ lib.concatMap (plugin: plugin.runtimePackages) cfg.providers;
+            # runtimePackages are only type-checked: upstream puts them on
+            # the daemon's PATH, not in the user profile.
+            home.packages = [ self.packages.${pkgs.stdenv.hostPlatform.system}.default ];
             xdg.configFile."jagpi/${cfg.instance}/config.json".text = builtins.toJSON {
               providers = map (plugin: {
                 module = "${plugin.package}/${

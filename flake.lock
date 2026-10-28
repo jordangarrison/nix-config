@@ -1496,6 +1496,26 @@
         "type": "github"
       }
     },
+    "pi-extensions": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793176372,
+        "narHash": "sha256-8sz+JIH4hf8zXm3GTiPzg+GpREhROjYdIP8ZeloA2Z4=",
+        "ref": "refs/heads/main",
+        "rev": "05d2c42fbab8f6be8c9c18b3258e60ba39cf8eea",
+        "revCount": 15,
+        "type": "git",
+        "url": "ssh://git@github.com/jordangarrison/pi-extensions"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@github.com/jordangarrison/pi-extensions"
+      }
+    },
     "readwise-skills": {
       "flake": false,
       "locked": {
@@ -1550,6 +1570,7 @@
         "obsidian-skills": "obsidian-skills",
         "onwatch": "onwatch",
         "panko": "panko",
+        "pi-extensions": "pi-extensions",
         "readwise-skills": "readwise-skills",
         "sre-claude-auto-runner": "sre-claude-auto-runner",
         "sweet-nothings": "sweet-nothings",

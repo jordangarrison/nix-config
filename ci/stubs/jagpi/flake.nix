@@ -4,7 +4,8 @@
   # It mirrors only the interface this repo consumes (see
   # hosts/endeavour/jagpi.nix): packages.<system>.{default,jagpi}, and
   # homeManagerModules.default with the services.jagpi options the host
-  # sets, typed like upstream, that installs the package. If that surface
+  # sets, typed like upstream, that installs the package and writes the
+  # providers part of config.json. If that surface
   # grows, grow this stub to match.
   description = "CI stub for the private jordangarrison/jagpi flake";
 
@@ -29,7 +30,12 @@
       packages.aarch64-darwin = stubFor "aarch64-darwin";
 
       homeManagerModules.default =
-        { config, lib, pkgs, ... }:
+        {
+          config,
+          lib,
+          pkgs,
+          ...
+        }:
         let
           cfg = config.services.jagpi;
         in
@@ -47,9 +53,44 @@
               default = null;
             };
             herdr.package = lib.mkPackageOption pkgs "herdr" { };
+            providers = lib.mkOption {
+              type = lib.types.listOf (
+                lib.types.submodule {
+                  options = {
+                    package = lib.mkOption { type = lib.types.package; };
+                    module = lib.mkOption {
+                      type = lib.types.nullOr lib.types.str;
+                      default = null;
+                    };
+                    options = lib.mkOption {
+                      type = (pkgs.formats.json { }).type;
+                      default = { };
+                    };
+                    runtimePackages = lib.mkOption {
+                      type = lib.types.listOf lib.types.package;
+                      default = [ ];
+                    };
+                  };
+                }
+              );
+              default = [ ];
+            };
           };
+          # Like upstream, a provider without `module` must name one in
+          # passthru.jagpiProvider; reading it here fails CI when it does not.
           config = lib.mkIf cfg.enable {
-            home.packages = [ self.packages.${pkgs.stdenv.hostPlatform.system}.default ];
+            home.packages = [
+              self.packages.${pkgs.stdenv.hostPlatform.system}.default
+            ]
+            ++ lib.concatMap (plugin: plugin.runtimePackages) cfg.providers;
+            xdg.configFile."jagpi/${cfg.instance}/config.json".text = builtins.toJSON {
+              providers = map (plugin: {
+                module = "${plugin.package}/${
+                  if plugin.module != null then plugin.module else plugin.package.jagpiProvider
+                }";
+                inherit (plugin) options;
+              }) cfg.providers;
+            };
           };
         };
     };

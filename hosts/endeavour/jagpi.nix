@@ -10,7 +10,12 @@
 # boot (Linger=no), and stops with the last session. That matches herdr, whose
 # server the bot needs; boot-time availability would need linger plus a herdr
 # service of its own.
-{ config, inputs, ... }:
+{
+  config,
+  inputs,
+  pkgs,
+  ...
+}:
 
 {
   imports = [ inputs.jagpi.homeManagerModules.default ];
@@ -24,6 +29,17 @@
 
     # No extraPackages: git, gh, jq, herdr, nix, and nh are already on the
     # unit's PATH through the user profile and the system profile.
+
+    # Claude (subscription) models through the claude-bridge's jagpi entry
+    # (jagpi docs/providers.md). It runs the same Nix-managed claude that
+    # home.nix gives pi's bridge, so no claude goes on the unit's PATH. No
+    # model or tiers here: which bot uses Claude is set apart from this.
+    providers = [
+      {
+        package = inputs.pi-extensions.packages.${pkgs.stdenv.hostPlatform.system}.claude-bridge;
+        options.pathToClaudeCodeExecutable = "${pkgs.llm-agents.claude-code}/bin/claude";
+      }
+    ];
 
     # Slack: no app or tokens yet. Follow jagpi's docs/slack-app.md, then set
     # the file with SLACK_BOT_TOKEN and SLACK_APP_TOKEN (and owners.slack in

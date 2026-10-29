@@ -720,16 +720,19 @@ in
       # Code review TUI
       inputs.tuicr.packages.${pkgs.stdenv.hostPlatform.system}.default
 
-      # AI quota tracker (endeavour also runs it as a service, see
-      # modules/nixos/onwatch.nix)
-      inputs.onwatch.packages.${pkgs.stdenv.hostPlatform.system}.default
-
       # AWS Tools from flake inputs
       inputs.aws-tools.packages.${pkgs.stdenv.hostPlatform.system}.default
       inputs.aws-use-sso.packages.${pkgs.stdenv.hostPlatform.system}.default
 
       # Google Workspace CLI
       gws
+    ]
+    # AI quota tracker (endeavour also runs it as a service, see
+    # modules/nixos/onwatch.nix). Linux only: on Darwin its Go tests call
+    # `ps`, which the Nix build environment does not provide, so the build
+    # fails.
+    ++ lib.optionals pkgs.stdenv.isLinux [
+      inputs.onwatch.packages.${pkgs.stdenv.hostPlatform.system}.default
     ]
     ++ lib.optionals (userApps.grove.enable or false) [
       inputs.grove.packages.${pkgs.stdenv.hostPlatform.system}.default

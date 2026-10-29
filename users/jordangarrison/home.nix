@@ -630,7 +630,6 @@ in
       # Apps
       arandr
       cliamp # Winamp-style terminal music player
-      signal-cli # Signal CLI; account linking is per host
       wezterm
       # doom-emacs
 
@@ -791,6 +790,7 @@ in
           pavucontrol
           pinentry-gnome3
           remmina
+          signal-cli # Signal CLI; Linux only, account linking is per host
           vial
           wally-cli
           xcb-util-cursor

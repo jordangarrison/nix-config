@@ -2,15 +2,22 @@
 
 Shared by [[slack-pr-review]], [[infra-reviews]], and [[sre-review-thread]].
 
-Slack goes through the `executor-flo` MCP server, not a direct Slack server. Run every Slack call as JavaScript inside its `execute` tool. The account segment of the tool path differs per user, so resolve it once per session:
+Slack goes through the `executor-flo` MCP server, not a direct Slack server. Pi's built-in MCP exposes that server as `mcp__executor_flo__execute`. Call it from `codemode`. The JavaScript argument runs inside Executor, not in Pi.
+
+The account segment of the tool path differs per user, so resolve it once per session, inside that program:
 
 ```js
-const { items } = await tools.search({ query: "slack_read_thread", limit: 10 });
-const path = items.map(i => i.path).find(p => /^slack_mcp\.user\.[^.]+\.slack_read_thread$/.test(p));
-return path.split(".")[2]; // <account>
+const account = await tools.mcp__executor_flo__execute({
+  code: `
+    const { items } = await tools.search({ query: "slack_read_thread", limit: 10 });
+    const path = items.map(i => i.path).find(p => /^slack_mcp\\.user\\.[^.]+\\.slack_read_thread$/.test(p));
+    if (!path) return null;
+    return path.split(".")[2];
+  `,
+});
 ```
 
-Then call `tools.slack_mcp.user[<account>].<tool>({ ... })`; one `execute` program can make several calls. A call returns `{ ok, data }` instead of throwing. On `ok: false`, `error.code` and `error.message` say why (`oauth_reauth_required` means Slack needs reconnecting in the FloSports Executor dashboard). On success, `data.content[0].text` holds Slack's response text. If the search finds no `slack_mcp` path, Slack isn't connected in Executor: stop and say so.
+Then call Slack tools inside the same Executor program: `tools.slack_mcp.user[<account>].<tool>({ ... })`. One program can make several calls. An inner call returns `{ ok, data }` instead of throwing. On `ok: false`, `error.code` and `error.message` say why (`oauth_reauth_required` means Slack needs reconnecting in the FloSports Executor dashboard). On success, `data.content[0].text` holds Slack's response text. If the search finds no `slack_mcp` path, Slack isn't connected in Executor: stop and say so.
 
 ## Tools used
 

@@ -2,7 +2,7 @@
 name: slack-watcher
 package: pr-review
 description: Runs unattended slack-pr-review passes over a Slack review channel or thread, including the multi-agent review fan-out, verification, GitHub posting, and the location's Slack reactions and replies.
-tools: read, grep, find, ls, bash, edit, write, mcp, mcpScript, web_search, source_check, fetch_content, get_search_content, subagent, bg_wait, until, contact_supervisor
+tools: read, grep, find, ls, bash, edit, write, codemode, web_search, source_check, fetch_content, get_search_content, subagent, bg_wait, until, contact_supervisor
 model: claude-bridge/claude-opus-5-5
 thinking: high
 systemPromptMode: replace
@@ -14,7 +14,6 @@ acceptance: {"level":"none","reason":"Long-running review-only orchestration wit
 acceptanceRole: read-only
 skills: slack-pr-review, multi-agent-pr-review, infra-reviews, sre-review-thread
 skillPath: @HOME@/.agents/skills, @HOME@/.pi/agent/npm/node_modules/pi-subagents/skills
-subagentOnlyExtensions: @HOME@/.pi/agent/npm/node_modules/pi-mcp-adapter/index.ts
 maxSubagentDepth: 2
 ---
 

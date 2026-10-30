@@ -40,7 +40,7 @@ Wallpaper is managed separately via **swaybg**.
 | `Mod+N` | Obsidian |
 | `Mod+F` | Yazi file manager (in Ghostty) |
 | `Mod+Shift+F` | Nautilus file manager |
-| `Mod+Shift+D` | Handy voice dictation with post-processing |
+| `Mod+Shift+D` | Hex voice dictation toggle (press to record, press to transcribe and paste) |
 | `Mod+Space` | Noctalia launcher |
 | `Mod+;` | Emoji picker (noctalia) |
 
@@ -92,6 +92,13 @@ Screenshots are accessed via the which-key menu (`Mod+D → s`). Niri built-in s
 |------------|--------|
 | `Print` | Screenshot (niri built-in) |
 | `Shift+Print` | Screenshot window (niri built-in) |
+| `F9` | Start Hex screen annotation |
+| `Shift+F9` | Stop and finish Hex annotation |
+| `Ctrl+F9` | Toggle Hex annotation pen (starts a recording if idle) |
+
+Hex uses compositor commands because GNOME's GlobalShortcuts portal requires
+GNOME Shell and is disabled for Niri. The F9 tap/hold instructions in Hex's UI
+do not apply here; use the separate start, stop, and pen bindings above.
 
 ### Which-Key Menu (Mod+D)
 

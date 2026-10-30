@@ -32,6 +32,12 @@
     };
     llm-agents.url = "github:numtide/llm-agents.nix";
     niri.url = "github:sodiboo/niri-flake";
+    hex = {
+      url = "github:anomalyco/hex";
+      # Match the host's glibc so Hex can load its Vulkan graphics driver.
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
+    };
     noctalia = {
       # Pinned to the last v4 (QML/quickshell) commit. v5 is a ground-up C++
       # rewrite (alpha) with an incompatible config schema and no migration

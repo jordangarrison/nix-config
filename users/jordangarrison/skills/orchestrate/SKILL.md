@@ -1,148 +1,86 @@
 ---
 name: orchestrate
-description: Declare the current session an orchestrator. From this point on the agent does not do task work itself - it decomposes the request, dispatches each piece to another agent (a herdr worktree pane via herdr-dispatch when inside herdr, an async subagent otherwise), tracks the workers in a small on-disk ledger, and owns integration. Same harness as the caller by default, explicit model per worker, orchestrator keeps whatever model it was launched with. Triggered by `/orchestrate`, "you are the orchestrator", "declare this session an orchestrator", "hand this off, don't do it yourself". Pass `--yolo` to dispatch on proposed staffing without confirming. Works nested - a dispatched worker can itself be told to load this skill.
+description: Declare this session a coordinator-only orchestrator. Decompose work, dispatch through work-dispatch in the starting orchestration surface, track workers, and own integration decisions without implementing. Triggered by /orchestrate, "you are the orchestrator", or "hand this off, don't do it yourself". Supports --yolo for routine staffing gates, not cross-runtime handoffs.
 ---
 
 # Orchestrate
 
-A mode switch, not an orchestration system. Loading this skill turns the current session into a coordinator for the rest of the conversation. The coordinator's only outputs are briefs, dispatches, a ledger, and integration decisions.
+An explicit role for this conversation, not the default consequence of
+launching a worker. The orchestrator produces briefs, dispatches, a ledger,
+and integration decisions. It does not implement, run workers' assigned tests,
+or fix small findings itself. Read-only inspection and ledger writes are fine.
 
-## The one rule
+## 1. Intake and placement
 
-**The orchestrator never does the task.** It does not edit repo files, run the tests it asked a worker to run, or "just fix this small thing." Every unit of work goes to another agent. A task marked complete with zero dispatch records in the ledger is a failure, not a shortcut.
+Read [[work-dispatch]] and establish the owning surface. Fetch a named ticket
+with available tracker tools, or ask for its text if unavailable. Break work
+into independently owned tasks, sequencing overlapping writes. Keep the
+concurrent set small enough to supervise; choose helpers versus dedicated
+workstreams using work-dispatch, not an environment-variable gate.
 
-The orchestrator *may* read anything, run read-only commands, and write under its ledger directory (see Step 2). It never writes inside a repo checkout.
+Use supported staffing and honor explicit model/settings requests. Report the
+choice. `--yolo` permits routine staffing choices without confirmation; a
+cross-runtime handoff still needs explicit approval or a preauthorized fallback.
+If dispatch is unavailable, surface the blocker rather than implementing here.
 
-## Step 0 - know where you are
+## 2. Ledger and briefs
 
-```bash
-test "${HERDR_ENV:-}" = 1 && herdr agent get "$HERDR_PANE_ID"   # .result.agent.agent = own harness kind
-```
+Keep a run-specific ledger outside repositories under
+`~/.local/state/orchestrate/<repo>/<ticket-or-slug>-<unique-run-id>/` (respect
+`XDG_STATE_HOME`). Report the path. Resume only an identified existing run;
+inspect its records before dispatching to avoid duplicate workers.
 
-| Situation | Dispatch backend |
-|---|---|
-| `HERDR_ENV=1` | **herdr**: one workspace + worktree per writing task via [[herdr-dispatch]] `--yolo`. Read-only helpers (scouting, review) may still use in-process subagents. |
-| Not in herdr, harness has async subagents (pi: `subagent` workflowScript with `worktree: true`; claude: Agent tool; codex: subagents) | **in-process**: writers get `worktree: true` or disjoint file ownership; readers run plain. |
-| Neither | Say so and stop. Do not fall back to doing the work. |
+Record in `ledger.md`: objective, owner, parent reference, task scopes,
+dependencies, status, user decisions, and integration results. Status values:
+`pending | dispatched | blocked | done | done-with-concerns | failed`.
+Record dispatch references, links, checkout/base, staffing, and completion
+mechanism in `dispatch.jsonl`. These records point to runtime state; they do
+not replace native lifecycle tools.
 
-Model for the orchestrator: whatever this session was launched with - do not switch. Model for each worker: pick explicitly from the staffing table in [[herdr-dispatch]] (mechanical → sonnet/low, ordinary → opus/medium, debugging → opus/high, review → opus/xhigh). Never let a worker inherit silently.
+Write a self-contained `task-N-brief.md` with:
 
-Harness for each worker: the same kind as this session, unless the task names a different one.
+- Objective, repo/ticket, scope and non-goals.
+- Acceptance criteria and checks.
+- Owned files or coordination boundaries.
+- Decisions already made and their reasons.
+- Orchestration owner and parent reference.
+- Report contract: status, changes/commits, tests, decisions changed by user
+  steering, concerns, and any outstanding descendants.
 
-Model ids must be exact `provider/model` pairs the harness has enabled. In pi, read `enabledModels` from `~/.pi/agent/settings.json` (today: `claude-bridge/claude-opus-5`, `claude-bridge/claude-sonnet-5`, `openai-codex/gpt-5.6-sol`); a guessed prefix such as `openai/...` fails the child with "No API key found".
+Use accessible absolute paths or send the brief content through the runtime.
+Workers may delegate further under work-dispatch and their harness rules.
+Only label a worker coordinator-only if that role is appropriate; otherwise it
+may implement as well as delegate.
 
-## Step 1 - intake
+## 3. Dispatch and supervise
 
-Input is free-form: a sentence, a pasted spec, or a ticket id. If it is a ticket id and a tool for that tracker is available (Linear MCP, `jira` CLI, `tea`), fetch it and use it as source material - but the skill is not coupled to any tracker. No tool? Ask for the text.
+Use [[work-dispatch]], which selects the runtime-specific mechanics. Confirm
+launch and record returned references. Give the user links or workspace details
+for dedicated workstreams. Keep coordinating unless explicitly handing off.
 
-Decompose into tasks that can each be owned by one worker with disjoint files. If two tasks must touch the same files, make them one task or sequence them. Keep the count small; three to five concurrent workers is the practical ceiling.
+Use native completion events where provided. For Herdr file reports, require
+fresh positive evidence from this run before waking; a worker's idle status
+alone is not a completion signal. A shell-condition watch uses the harness's
+watch facility rather than a blocking sleep loop. Persist consumed result IDs
+before rearming. Do not add watches for T3 delegates that already notify.
 
-## Step 2 - ledger
+Read current worker outcomes before acting, including user steering and live
+descendants. Resolve routine choices within scope and log the ruling; bring
+scope changes, missing permissions, and cross-runtime proposals to the user.
+Use supported continuation controls or launch a new bounded assignment when
+required by the runtime. Stop repeated failed attempts and report the blocker.
 
-The ledger lives **outside every repo** so it can never be committed:
+## 4. Integrate
 
-```bash
-BASE="${XDG_STATE_HOME:-$HOME/.local/state}/orchestrate/<repo>"
-LEDGER="$(ls -d "$BASE/<slug>-"* 2>/dev/null | sort | tail -1)"   # resume the newest run of this slug
-LEDGER="${LEDGER:-$BASE/<slug>-$(date +%Y%m%d)}"                # otherwise start today's
-mkdir -p "$LEDGER"
-```
+Implementation can run in parallel; integration of overlapping changes is
+serial. Inspect each report and diff, request review where useful, and dispatch
+any fixes or integration edits. The coordinator does not edit repo files.
 
-`<repo>` is the basename of the primary repo, or `misc` when there is none.
+Push, PR, and merge only within the user's authorization and repository rules.
+Record validation evidence and remaining concerns. Preserve independently
+steerable work until cleanup is appropriate; use the owning runtime to clean
+up only this run's resources, with clean/pushed work and required approval.
 
-`<slug>` is determined in this order:
-
-1. `--slug <name>` on the invocation.
-2. The ticket id if the request names one, lowercased (`sre-452`, `proj-123`).
-3. Otherwise derive 2-4 words from the request: kebab-case, `[a-z0-9-]` only, max 40 chars ("add dark mode and fix the flaky login test" → `dark-mode-login-test`). Match what [[herdr-dispatch]] would use for the branch so ledger and branches line up.
-
-The date suffix is today's date on creation and is what lets the same slug be run again later. The snippet above resumes the newest existing run of the slug; pass `--fresh` to force a new dated directory instead. Print the resolved path once at the start so the user can find it. All paths in briefs and prompts are absolute.
-
-```
-$LEDGER/
-  ledger.md            # first line: "# orchestrate: <slug>" then one line per task with status
-  task-N-brief.md      # what the worker reads
-  task-N-report.md     # what the worker writes back
-  dispatch.jsonl       # one record per dispatch: task, agent name, workspace id, checkout, branch, model, thinking, ts
-```
-
-The ledger is the source of truth. After any context compaction, or on resume, re-read `ledger.md` and `dispatch.jsonl` and `git log` before doing anything. Never re-dispatch a task the ledger says is done.
-
-Status values: `pending | dispatched | blocked | done | done-with-concerns | failed`.
-
-## Step 3 - brief
-
-`task-N-brief.md` is self-contained. A worker with no access to this conversation must be able to act on it.
-
-```
-# Task N: <title>
-Repo / checkout: <path>           Branch: <name>       Base: origin/<default>
-## Objective
-## Acceptance criteria         (how the worker knows it is done; tests to run)
-## Files you own               (and files you must not touch)
-## Decisions already made      (and why - this is what workers most often miss)
-## Non-goals
-## Report
-Write <absolute $LEDGER path>/task-N-report.md, then reply in under 15 lines:
-Status: DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT
-Commits: <shas>
-Tests: <one line>
-Concerns: <one line or "none">
-Do not spawn reviewers or other agents unless this brief says you are an orchestrator.
-```
-
-If the task is itself big enough to need a coordinator, add one line at the top of the brief: *"Load the `orchestrate` skill before starting; you are an orchestrator for this task."* Write it as plain text - slash commands sent through `herdr agent prompt` are often not interpreted as commands.
-
-## Step 4 - dispatch
-
-**herdr:** run [[herdr-dispatch]] `--yolo` per task. Its handoff prompt is five lines: the brief path, "read CLAUDE.md first", the ticket id if any, the report path, and the reply contract. Nothing else - do not paste history. Append the returned workspace id, checkout, branch, agent name, model, and thinking to `dispatch.jsonl`. Verify the prompt actually submitted (herdr-dispatch step 8).
-
-**in-process:** launch one async child per task with the brief as the task text and the same report contract. Writers get `worktree: true`. Record the run id in `dispatch.jsonl`.
-
-Under `--yolo`, dispatch on the proposed staffing line without waiting. Without it, state the staffing line per task once and proceed unless corrected.
-
-## Step 5 - supervise
-
-Do not sit in a silent open-ended wait. Do not poll every few seconds.
-
-- **In-process children** deliver their own completion; continue local work and act when the result arrives.
-- **herdr workers, pi orchestrator:** arm one `until` watch per worker with `intervalSeconds: 5` (never the 30s default) and a `timeoutSeconds` matching the task's expected length. Wake when the report file exists **or** the agent is no longer `working`:
-  ```bash
-  test -f <ledger>/task-N-report.md || herdr agent get <name> | jq -e '.result.agent.agent_status != "working"' >/dev/null
-  ```
-  Never watch for `done` specifically: herdr reports `idle` or `done` for the same finished state depending on whether a client has already marked it seen, so a `done`-only watch can spin forever on a worker that finished long ago. Arm the watch only after the dispatch prompt was confirmed `working` (herdr-dispatch step 8), otherwise the pre-prompt `idle` fires immediately.
-
-  On wake: report file present → read it and proceed. `blocked` → handle below. Settled with no report → send one closed-ended status prompt and re-arm.
-
-  Yield to the user between wakes; re-arm after handling any wake that does not finish the task.
-- **herdr workers, other harnesses:** `herdr agent wait <name> --timeout 600000` in bounded stretches, one status line to the user between stretches.
-
-On `blocked`: `herdr agent read <name> --source visible --lines 30`, decide if it is a routine choice (answer it, log the ruling in `ledger.md` as `Ruling: <decision> - <why>`) or a real decision for the user (ask, once, with the exact question).
-
-Status checks are closed-ended: *"Reply with 1) acceptance criteria met? YES/NO 2) current blocker in one line 3) files changed."* Not "how's it going?".
-
-Fix loop per task: retries 1-3 re-prompt the same worker with the specific failure; retry 4 relaunch one model tier up with the same brief; retry 5 stop and surface to the user.
-
-## Step 6 - integrate
-
-Implementation in parallel, integration serial. For each `done` task:
-
-1. Read `task-N-report.md` and the diff (`git -C <checkout> diff origin/<default>...HEAD`).
-2. Optional review pass by an in-process reviewer on a different model family.
-3. Open the PR (or hand the branch to the user - the request says which). The orchestrator owns push/PR/merge; workers do not.
-4. Update `ledger.md`.
-5. Clean up only when the branch is pushed and the checkout is clean: `herdr worktree remove --workspace <id>`, then `git branch -d`. Never `--force` unasked. Never remove a dirty or unpushed checkout.
-
-Report to the user with the ledger summary: tasks, status, PR links, open concerns.
-
-## Guardrails
-
-- Orchestrator writes: only under `$LEDGER`. If you catch yourself opening an editor on a repo file, stop and dispatch instead.
-- Workers are leaves (`max depth 1`) unless their brief explicitly makes them orchestrators.
-- Keep steering text and lifecycle actions separate: steer with `herdr agent prompt`; interrupt with `herdr agent send-keys <name> ctrl+c`, never by sending "/quit" as text.
-- Trust the report file for completion, not the pane's `done` heuristic.
-- Only remove workspaces this session created.
-
-## Not in scope
-
-No watcher daemon, no ticket adapters, no budgets beyond the fix-loop cap. Add them as separate skills or extensions if the loop proves out.
+Finish with tasks, results, links, and open concerns. A task is not complete
+while its required child work remains outstanding. On resume or compaction,
+read the ledger and current runtime state before issuing further work.

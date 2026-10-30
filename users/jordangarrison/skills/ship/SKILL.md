@@ -62,7 +62,7 @@ Done when the ticket exists, is in progress, and its id and branch name are in t
 
 ## 2. Change
 
-1. **Worktree** off the freshly fetched default branch, per the workspace's worktree convention (in herdr: `herdr worktree create`, copy env files, `direnv allow`). The work happens in this session, not in a dispatched agent.
+1. **Worktree** off the freshly fetched default branch, using the owning runtime's supported checkout mechanism and the workspace conventions. Keep an existing ticket checkout when appropriate. Work normally happens in this session; if independent workstreams are needed, use [[work-dispatch]] and retain coordination.
 2. **Layers.** Two concerns where one depends on the other go in a stack with [[gh-stack]], one concern per layer. A follow-up to a PR that is approved and waiting goes in a new layer above it, so the approval stands.
 3. **Make the change** and run the repo's checks. Where a behaviour can be shown rather than argued, show it: run the cheap live or empirical test, and record the run ids. Evidence the PR body cites stays alive: delete scratch branches, never the runs they produced.
 4. **Draft PR** with the [[pr]] template plus a `## Not in this PR` section for adjacent issues found on the way. Link the ticket.

@@ -8,6 +8,7 @@ Every skill that has interactive gates (previews-for-approval, y/n confirmations
 
 - **Authoring:** if the skill you're writing or editing has any interactive gate, document `--yolo` in its SKILL.md. If it already has a skill-specific skip flag (e.g. multi-agent-pr-review's old `--skip-user-confirmation`), make `--yolo` an alias for it rather than a second mechanism.
 - **Invocation:** treat `--yolo` as valid on any skill here even if its SKILL.md predates this rule and doesn't mention it.
+- **Orchestration boundary:** `--yolo` does not authorize a cross-runtime handoff. Follow [[work-dispatch]]: ask unless the user explicitly preauthorized that fallback for the run.
 - **What `--yolo` does NOT waive:** still show/report what was done so the user can audit it (autonomy is not silence); still stop on genuine blockers (missing inputs, ambiguous state), destructive actions outside the skill's documented scope, and never-rules like force-push.
 
 ## Other conventions

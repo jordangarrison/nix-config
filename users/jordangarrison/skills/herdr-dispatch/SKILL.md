@@ -1,21 +1,24 @@
 ---
 name: herdr-dispatch
-description: Dispatch a task into an isolated herdr workspace - for repo work, cut a worktree workspace off the fresh default branch; for investigation-shaped work with no owning repo, create a plain workspace in the workspace's investigations home instead. Proposes a harness, model, and thinking level for the new agent, then starts it in the pane and hands off minimal context. The dispatching session stays a coordinator; execution happens in the new pane and the user manages it there. Triggered by `/herdr-dispatch`, "dispatch this to a worktree", "spin up a worktree for X", or when a workspace AGENTS.md routes parallel/isolated work to herdr. Pass `--yolo` to let the dispatcher pick the harness/model/thinking without confirming. Requires HERDR_ENV=1 (fall back to the workspace's manual .worktrees/ convention otherwise).
+description: Herdr-specific placement for dedicated workstreams selected by work-dispatch, or explicit /herdr-dispatch requests. Creates a workspace and optional worktree, staffs an agent, and returns steering references. Requires an available Herdr session; --yolo skips staffing confirmation, not cross-runtime approval.
 ---
 
 # Herdr Dispatch
 
 Send a unit of work to its own herdr worktree + workspace, staffed with an agent, without pulling the current session (or the user's focus) away from what it's doing.
 
-**The dispatcher does not implement the task.** It creates the isolated environment, passes context, and reports back. All edits happen in the worktree's pane, managed by the user from there.
+**The dispatcher does not implement the task.** It creates the isolated environment, passes context, and reports back. Edits for this assignment happen in the worker pane. The parent retains coordination unless the user explicitly requests a handoff. This does not make the parent coordinator-only for unrelated work.
 
 ## When to use
+
+Read [[work-dispatch]] first. Use this adapter only when Herdr is the selected
+owner or an approved handoff target. `HERDR_ENV=1` alone is not selection.
 
 - A task needs an isolated branch/checkout (feature work, a review, a risky experiment) and the session is running inside herdr.
 - A multi-repo change needs one worktree per repo, each with its own agent and its slice of the context.
 - An investigation-shaped task (diagnose / quantify / "why is X broken") has no obvious owning repo - use **Investigation mode** below instead of a worktree.
 
-**Do NOT use** for quick edits in the current checkout, or outside herdr (`HERDR_ENV` unset) - use the workspace's manual `.worktrees/` fallback instead.
+For quick edits, work in the current checkout. If Herdr is unavailable, return the capability gap to work-dispatch; do not silently fall back to manual worktrees.
 
 ## Inputs
 
@@ -31,7 +34,7 @@ Send a unit of work to its own herdr worktree + workspace, staffed with an agent
 Load the [[herdr]] skill first for CLI mechanics - discover syntax from the installed binary, parse all IDs from JSON responses, never predict them. Use `--no-focus` on every create.
 
 1. **Route + read**: identify the target repo; read its `CLAUDE.md` enough to know the default branch and any env-file quirks.
-2. **Freshness**: `git -C <repo> fetch --all --prune`. The worktree must branch from the just-fetched remote head.
+2. **Freshness**: `git -C <repo> fetch --all --prune`. New independent work branches from the just-fetched remote default head. For dependent work, select the explicit parent branch and use it as `--base` in step 4. Keep the main clone on its existing branch.
 3. **Repo workspace (reuse-or-create)**: find an existing workspace via `herdr workspace list` (match `worktree.repo_root` to the repo's absolute path); only if missing, `herdr workspace create --cwd <repo> --label <repo> --no-focus`.
 4. **Create the worktree**:
    ```bash
@@ -48,9 +51,32 @@ Load the [[herdr]] skill first for CLI mechanics - discover syntax from the inst
    Everything after `--` is passed straight through to the harness binary, so that is where the model and thinking flags go. Name the agent after the task (`[a-z][a-z0-9_-]{0,31}`, unique among live agents, e.g. `playbooks-rp`). The response echoes the full `argv` - read it back to confirm the flags landed.
 7. **Hand off context** with `herdr agent prompt <name> "..."`. Keep it minimal: the task, the ticket, "read CLAUDE.md first", and any state the agent can't cheaply rediscover (decisions already made, files already touched, known gotchas). For a multi-repo change, pass only that repo's slice. Do not restate worktree mechanics, commit chains, or the full deliverable list.
 8. **Verify the prompt actually submitted**: multi-line prompts can land as an unsubmitted paste (`[Pasted text #1 ...]` sitting at the input). Check `herdr agent get <name>` - if status is still `idle`, `herdr agent read <name> --source visible --lines 10` to confirm, then `herdr agent send-keys <name> enter` and re-check for `working`.
-9. **Report back**: workspace id + label, agent name, checkout path, and the staffing line actually used. Then stand down - coordinate, don't edit the checkout. The user manages the work in the new pane.
+9. **Report back**: workspace id + label, agent name, checkout path, and the staffing line actually used. Record the completion/report mechanism and retain coordination. The user can steer the new pane directly; incorporate those decisions before integration. Stand down only for an explicit handoff.
 
 For multi-repo dispatch, repeat 1-9 per repo, partitioning the context in step 7. Staffing can differ per repo - a mechanical change in one repo and a hairy one in another do not deserve the same model.
+
+## Resume an existing checkout
+
+Existing `.worktrees/<repo>/<slug>` checkouts remain valid; adopting one does
+not require moving it or creating a replacement branch.
+
+1. Fetch with `git -C <repo> fetch --all --prune`, then inspect the checkout's
+   dirty state, branch, upstream, and any existing Herdr workspace/agent.
+2. Preserve local changes. For a clean checkout with an upstream, use
+   `git -C <checkout> pull --ff-only`. If it diverges or has no upstream,
+   establish the intended base and ask before rebasing existing work. Dependent
+   branches retain their parent; do not automatically rebase them onto default.
+3. Reuse its workspace if already open. Otherwise use `herdr worktree open`
+   with the existing checkout, conventional label, and `--no-focus`; discover
+   the installed command's arguments through [[herdr]]. Parse the returned
+   workspace and pane IDs rather than predicting them.
+4. Verify required env files without overwriting checkout-specific values.
+   Run `direnv allow <checkout>` if a trusted `.envrc` was copied. Resume an
+   existing agent through supported controls or staff a new one using steps
+   6–9. Read its current decisions before sending new instructions.
+
+Opening a pre-existing checkout does not grant permission to delete it. Record
+which resources this run created separately from resources it merely adopted.
 
 ## Staffing the agent
 
@@ -94,6 +120,6 @@ If the investigation graduates into code changes, run a normal repo dispatch the
 
 ## Cleanup (later, on request)
 
-- `herdr worktree remove --workspace <id>` removes checkout and workspace together (`--force` only for dirty checkouts, after confirming). Herdr does **not** delete the local branch - follow with `git -C <repo> branch -d <branch>`.
+- For merged or explicitly abandoned work, first verify the checkout is clean and its work is pushed or otherwise preserved. `herdr worktree remove --workspace <id>` removes checkout and workspace together (`--force` only for dirty checkouts, after confirming). Herdr does **not** delete the local branch - follow with `git -C <repo> branch -d <branch>`.
 - Close a plain repo workspace with `herdr workspace close <id>` when it's no longer a useful anchor.
 - Only remove what this session created unless the user asks for a broader sweep. For "clean up my workspaces": list, cross-check branches against merged PRs, propose, act on confirmation.

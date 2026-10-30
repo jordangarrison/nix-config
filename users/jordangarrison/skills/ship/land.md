@@ -46,7 +46,7 @@ Done when nothing the ledger listed is still live.
 
 Only what this run created:
 
-- **Worktree and its workspace:** `herdr worktree remove`, or `git worktree remove` outside herdr. Generated untracked files (a lockfile) can go; anything else, ask first.
+- **Worktree and its workspace:** use the owning runtime's cleanup operation; raw `git worktree remove` only for manually managed checkouts. Generated untracked files (a lockfile) can go; anything else, ask first.
 - **Local branches:** `git branch -D`, after `git diff origin/<default> <branch>` shows its content is on the default branch. Squash merges make branches look unmerged to git.
 - **The rest:** stack metadata, [[pr-watch]] state files, reviewer tabs, every watcher in the ledger, and scratch branches. Keep runs that evidence cites.
 

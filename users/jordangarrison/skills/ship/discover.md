@@ -11,7 +11,7 @@ From the workspace's `AGENTS.md` and its local additions file (`ADDITIONS.md` or
 | Tracker, team, ticket template | The additions file's project-management section; the tracker's templates |
 | State map | The tracker's workflow states for the team, mapped to ship's milestones: in progress, in review, staging, production, done. Record which ones the tracker lacks |
 | Branch naming | The additions file; the tracker's suggested branch for the ticket |
-| Worktree convention | The router's worktree section (herdr, or the manual fallback) |
+| Worktree convention | The router's repository conventions and [[work-dispatch]]'s selected runtime |
 | Review channel skill | The additions file names it (e.g. a `/<channel> post` skill). None named → no announcement |
 
 ## Repo

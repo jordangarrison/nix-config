@@ -162,6 +162,9 @@ in
           fromDir "${inputs.floai}/catalog/skills" [
             "flo-brand-naming"
             "git-update-pr-description"
+            "setup-pitch-ci"
+            "using-flo-cli"
+            "using-flo-pitch"
           ]
         ))
       ];

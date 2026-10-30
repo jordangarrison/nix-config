@@ -117,7 +117,7 @@ Before adding a package:
 
 ### Agent tooling
 
-Take agent CLIs (claude-code, codex, pi, omp, herdr) from `llm-agents` as
+Take agent CLIs (claude-code, codex, pi, herdr) from `llm-agents` as
 published. Do not add inputs or overlay overrides to get ahead of it; wait for
 the next `llm-agents` update. Do not patch third-party agent code (`patches`,
 `substituteInPlace`, source swaps).

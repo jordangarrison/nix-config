@@ -22,13 +22,6 @@ let
   emacsPackage = if pkgs.stdenv.hostPlatform.isLinux then pkgs.emacs-pgtk else pkgs.emacs;
   # Live-checkout path for hand-authored agent content (see ./agents)
   agentsLive = "${config.home.homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/agents";
-  # OMP loads pi-claude-bridge from this bundle (see packages/omp-plugins).
-  # pi itself installs its extensions from programs.pi.settings.packages.
-  piExtensions = pkgs.callPackage ../../packages/pi-extensions { };
-  # OMP can load Pi extensions through its compatibility layer, but Claude
-  # Bridge needs one missing helper adapted locally. Keep that patch and the
-  # complete dependency graph in a Nix package shared by every machine.
-  ompPlugins = pkgs.callPackage ../../packages/omp-plugins { inherit piExtensions; };
   # Shape one programs.mcp server for a client: `remote` for url servers,
   # `local` for stdio (command) servers.
   mcpEntry = remote: local: s: if s.command != null then local s else remote s;
@@ -50,7 +43,6 @@ in
     ../../modules/home/claude-code
     ../../modules/home/codex
     ../../modules/home/cursor-agent
-    ../../modules/home/omp
   ];
 
   programs.bb-desktop = {
@@ -175,7 +167,7 @@ in
       ];
   };
 
-  # Agent CLI configs (claude/codex/omp) + workspace routers. Hand-authored
+  # Agent CLI configs (claude/codex) + workspace routers. Hand-authored
   # content lives in ./agents and is symlinked out-of-store from the live
   # checkout; settings/config files that the tools mutate at runtime are
   # merged on activation, never made read-only. See docs/plans/
@@ -338,7 +330,6 @@ in
         "openai-codex/gpt-6-astra"
         "claude-bridge/claude-opus-5-5"
         "claude-bridge/claude-fable-5-1"
-        "cursor/grok-4.7@256k"
       ];
       # Third-party extensions at their latest release, installed unmodified
       # by pi itself into ~/.pi/agent/npm on first start. Move them forward
@@ -353,7 +344,6 @@ in
         "npm:pi-subagents"
         "npm:pi-web-access"
         "npm:pi-foldable-tools"
-        "npm:@pixu1980/pi-cursor"
         "git:github.com/joelhooks/pi-until"
       ];
       # Install with the Nix npm, so package installs do not depend on PATH.
@@ -453,7 +443,7 @@ in
   # On every host, so agents never fall back to direct servers. The work
   # gateway only goes to hosts allowed to reach work (userApps.work: endeavour,
   # opportunity, flomac). Fanned out to each agent's own format below: pi,
-  # omp, Claude Code, Codex, Cursor and OpenCode.
+  # Claude Code, Codex, Cursor and OpenCode.
   programs.mcp = {
     enable = true;
     servers.executor.url = "https://executor.jordangarrison.dev/mcp";
@@ -531,46 +521,12 @@ in
     ''
   );
 
-  # OMP (oh-my-pi). Same ownership split as claude-code/codex above:
-  # AGENTS.md is the live out-of-store symlink, config.yml is merged on
-  # activation because omp writes it at runtime.
-  #
-  # Two omp-specific defaults are load-bearing here:
-  #  - `enabledProviders` defaults to empty, so foreign *user* roots
-  #    (~/.claude/CLAUDE.md, ~/.claude.json, ~/.codex/config.toml) never
-  #    load. The native AGENTS.md and mcp.json below are what omp actually
-  #    reads; without them a session has no user context and no MCP servers.
-  #    Skills are the exception — `skills.enableAgentsUser` defaults true, so
-  #    the ~/.agents/skills fan-out from programs.agent-skills is picked up
-  #    with no extra wiring.
-  #  - `tools.approvalMode` already defaults to `yolo`, so nothing needs
-  #    declaring to match claude's bypassPermissions and codex's
-  #    danger-full-access.
-  programs.omp = {
-    enable = true;
-    instructionsFile = "${agentsLive}/AGENTS.md";
-    # Same server inventory as native Pi, with OMP's own config format.
-    # Read-only, so add servers in programs.mcp, not `/mcp add`.
-    mcpConfigSource = lib.mkIf config.programs.mcp.enable config.xdg.configFile."mcp/mcp.json".source;
-    extensionPaths = [
-      "${ompPlugins}/lib/node_modules/jordangarrison-omp-plugins"
-    ];
-    settings.theme = {
-      dark = "dark-rose-pine";
-      light = "dark-rose-pine";
-    };
-    settings.composer.shape = "band";
-    settings.symbolPreset = "nerd";
-    settings.modelRoles.default = "cursor/grok-4.7-high";
-  };
-
   programs.herdr = {
     enable = userApps.herdr.enable or false;
     integrations = [
       "claude"
       "codex"
       "pi"
-      "omp"
       "opencode"
     ];
     settings = {
@@ -1302,18 +1258,6 @@ in
     # Claude Bridge provides Claude Code-backed models to Pi. Point it at the
     # Nix-managed CLI because the Agent SDK's bundled binary may not run on NixOS.
     ".pi/agent/claude-bridge.json".text = builtins.toJSON {
-      askClaude.enabled = false;
-      provider = {
-        plan = "pro";
-        longContextExtraUsage = false;
-        strictMcpConfig = true;
-        pathToClaudeCodeExecutable = "${pkgs.llm-agents.claude-code}/bin/claude";
-      };
-    };
-
-    # OMP's Claude Bridge uses OMP's active agent directory through the Pi
-    # compatibility shim, so it needs a separate global config from Pi.
-    ".omp/agent/claude-bridge.json".text = builtins.toJSON {
       askClaude.enabled = false;
       provider = {
         plan = "pro";

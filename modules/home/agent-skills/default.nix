@@ -1,7 +1,7 @@
 # Cross-agent skills fan-out.
 #
 # Every skill is linked into both:
-#   ~/.agents/skills/<name>  — read natively by codex, pi, omp, and opencode
+#   ~/.agents/skills/<name>  — read natively by codex, pi, and opencode
 #   ~/.claude/skills/<name>  — Claude Code only reads its own directory
 #
 # Two kinds of skill, kept apart because they change differently:

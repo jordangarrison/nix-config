@@ -71,7 +71,7 @@ in
     restartTriggers = [ configFile ];
 
     # git: the Changes view. herdr: the multiplexer CLI. The per-user profile
-    # holds the agent CLIs (pi, claude, codex, omp): Collie runs
+    # holds the agent CLIs (pi, claude, codex): Collie runs
     # `<agent> --version` to trust an agent's input profile, and without it
     # sends into a running agent are held instead of queued.
     path = [

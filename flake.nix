@@ -785,7 +785,8 @@
                   username = "jordan.garrison";
                   homeDirectory = "/Users/jordan.garrison";
                   userApps = {
-                    t3code.enable = true;
+                    # Desktop and t3 CLI: Homebrew cask t3-code in hosts/flomac.
+                    # Do not also install llm-agents.t3code here.
                     azure-cli.enable = true;
                     plannotator.enable = true;
                     pup.enable = true;

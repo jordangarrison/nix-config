@@ -74,6 +74,10 @@ in
       "rectangle"
       "slack"
       "superwhisper"
+      # Notarized app with auto-updates. The app installs its own t3 link.
+      # Do not also enable userApps.t3code; that Nix package cannot self-update
+      # and would put a second t3 on PATH. The endeavour server stays on Nix.
+      "t3-code"
       "todoist-app"
       "visual-studio-code"
       "warp"

@@ -534,6 +534,7 @@
                   todoist.enable = true;
                   nextcloud.enable = true;
                   codex.enable = true;
+                  t3code.enable = true;
                   codiff.enable = true;
                   plannotator.enable = true;
                   google-cloud-sdk.enable = true;
@@ -784,6 +785,7 @@
                   username = "jordan.garrison";
                   homeDirectory = "/Users/jordan.garrison";
                   userApps = {
+                    t3code.enable = true;
                     azure-cli.enable = true;
                     plannotator.enable = true;
                     pup.enable = true;

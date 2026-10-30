@@ -609,6 +609,7 @@ in
       # LLM Agents (available via overlay as pkgs.llm-agents.*)
       llm-agents.claude-code
       llm-agents.cursor-agent
+      llm-agents.grok # Grok Build, xAI's coding agent (`grok`)
       sox # Audio playback/recording, used by Claude Code
       otel-tui # Terminal OpenTelemetry viewer
       stack-cli # Squash-safe stacked PR/MR repair CLI (kitlangton/stack), installs `stack`

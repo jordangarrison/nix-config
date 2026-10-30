@@ -731,7 +731,7 @@ in
     # modules/nixos/onwatch.nix). Linux only: on Darwin its Go tests call
     # `ps`, which the Nix build environment does not provide, so the build
     # fails.
-    ++ lib.optionals pkgs.stdenv.isLinux [
+    ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
       inputs.onwatch.packages.${pkgs.stdenv.hostPlatform.system}.default
     ]
     ++ lib.optionals (userApps.grove.enable or false) [

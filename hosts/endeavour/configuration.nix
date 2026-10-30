@@ -8,6 +8,7 @@
   imports = [
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
+    ../../modules/nixos/t3code.nix
   ];
 
   # Bootloader.
@@ -105,91 +106,6 @@
       # winboat # 2025-11-18 Currently broken
     ];
 
-  # Personal coding agent, running as Jordan. Enrollment + the root-owned enabled marker are
-  # required before it connects to Slack; see docs/runbooks/hermes.md.
-  services.hermes = {
-    enable = true;
-    user = "jordangarrison";
-    allowedUsers = [ "UQ69UGHKM" ]; # Jordan's work Slack member ID
-    instructions = builtins.readFile ../../users/jordangarrison/agents/AGENTS.md;
-    herdrIntegration.enable = true;
-    model = "gpt-6.1-sol";
-    plugins.conduit_push = pkgs.callPackage ../../packages/hermes-conduit-notifier { };
-    # The shared agent MCP list (programs.mcp in users/jordangarrison/home.nix).
-    # The Executor gateways are OAuth with dynamic client registration.
-    mcpServers = pkgs.lib.mapAttrs (_: s:
-      if s.command != null
-      then { inherit (s) command args; }
-      else { inherit (s) url; auth = "oauth"; }
-    ) config.home-manager.users.jordangarrison.programs.mcp.servers;
-    # JordanBot: one Slack app and one default profile for every channel and
-    # DM. Hermes owns config.yaml, .env and SOUL.md (edit them in Desktop);
-    # these are only the first config's Slack settings. See docs/runbooks/hermes.md.
-    slack.enableMarker = "/var/lib/hermes-secrets/jordanbot-enabled";
-    seedSettings = {
-      platforms.slack = {
-        enabled = true;
-        home_channel = { platform = "slack"; chat_id = "D0CCDQ1JBNY"; name = "JordanBot DM"; };
-        extra = {
-          allowed_channels = [ ]; # any channel JordanBot is in
-          require_mention = true; # a new conversation needs @JordanBot...
-          strict_mention = false; # ...then it follows that thread
-          thread_require_mention = false;
-          reactions = true; # :eyes: while working, then a check or cross
-          reaction_triggers = [ "jordanbot" ];
-          rich_blocks = true;
-        };
-      };
-      display.platforms.slack.memory_notifications = "off";
-    };
-    desktop = {
-      enable = true;
-      publicHost = "hermes.jordangarrison.dev";
-    };
-  };
-  users.jordangarrison.apps.hermes-desktop.enable = true;
-  # Interactive CLI chats use the dashboard profile's stored state/credentials.
-  # This does not promise simultaneous live-session ownership across clients.
-  # `command hermes` still reaches the separate ~/.hermes installation.
-  home-manager.users.jordangarrison.home.shellAliases.hermes = "hermes-service";
-
-  # DNS points at Endeavour's tailnet IP. The source ACL is still required:
-  # the host firewall is off, and a LAN client can spoof the HTTP Host header.
-  security.acme.certs."hermes.jordangarrison.dev" = {
-    group = "nginx";
-    dnsResolver = "1.1.1.1:53";
-  };
-  services.nginx.virtualHosts."hermes.jordangarrison.dev" = {
-    forceSSL = true;
-    useACMEHost = "hermes.jordangarrison.dev";
-    extraConfig = ''
-      # WS tickets and native sign-in codes must not end up in access logs.
-      access_log off;
-    '';
-    locations."/" = {
-      proxyPass = "http://127.0.0.1:${toString config.services.hermes.desktop.port}";
-      proxyWebsockets = true;
-      # Set an authoritative client IP, not a caller-supplied forwarding chain.
-      recommendedProxySettings = false;
-      extraConfig = ''
-        allow 127.0.0.1;
-        allow ::1;
-        allow 100.64.0.0/10;
-        allow fd7a:115c:a1e0::/48;
-        deny all;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $remote_addr;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_set_header X-Forwarded-Host $host;
-        proxy_read_timeout 3600s;
-        proxy_send_timeout 3600s;
-        proxy_buffering off;
-        add_header X-Robots-Tag "noindex, nofollow" always;
-      '';
-    };
-  };
-
   # Private tailnet access to bb; the reusable service stays loopback-only.
   security.acme.certs."bb.jordangarrison.dev".group = "nginx";
   services.nginx.virtualHosts."bb.jordangarrison.dev" = {
@@ -205,6 +121,32 @@
         allow fd7a:115c:a1e0::/48;
         deny all;
         proxy_read_timeout 3600s;
+        proxy_buffering off;
+      '';
+    };
+  };
+
+  services.t3code = {
+    enable = true;
+    user = "jordangarrison";
+  };
+
+  # Full access to the user's coding environment: tailnet + T3 pairing only.
+  security.acme.certs."t3code.jordangarrison.dev".group = "nginx";
+  services.nginx.virtualHosts."t3code.jordangarrison.dev" = {
+    forceSSL = true;
+    useACMEHost = "t3code.jordangarrison.dev";
+    locations."/" = {
+      proxyPass = "http://127.0.0.1:${toString config.services.t3code.port}";
+      proxyWebsockets = true;
+      extraConfig = ''
+        allow 127.0.0.1;
+        allow ::1;
+        allow 100.64.0.0/10;
+        allow fd7a:115c:a1e0::/48;
+        deny all;
+        proxy_read_timeout 3600s;
+        proxy_send_timeout 3600s;
         proxy_buffering off;
       '';
     };

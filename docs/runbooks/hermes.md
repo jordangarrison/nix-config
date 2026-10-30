@@ -1,6 +1,10 @@
 # Hermes personal coding agent
 
-Hermes runs on `endeavour` with the stock web dashboard:
+Not deployed. No host enables `services.hermes` or `hermes-desktop`.
+The module, tests, and this runbook remain so the service can be turned
+back on. Do not treat the steps below as the live setup.
+
+When it was deployed, Hermes ran on `endeavour` with the stock web dashboard:
 
 - `hermes-serve`: runs `hermes dashboard --isolated --no-open --skip-build`
   on `127.0.0.1:9119`, supervised by systemd. Despite the retained unit name,

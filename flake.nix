@@ -231,6 +231,13 @@
           printf '%s\n' "$results" > "$out"
         '';
 
+      checks.x86_64-linux.t3code-module =
+        self.nixosConfigurations.endeavour.pkgs.runCommand "t3code-module-tests" {
+          results = builtins.toJSON (import ./tests/t3code-module.nix { flake = self; });
+        } ''
+          printf '%s\n' "$results" > "$out"
+        '';
+
       checks.x86_64-linux.hermes-module =
         self.nixosConfigurations.endeavour.pkgs.runCommand "hermes-module-tests" {
           results = builtins.toJSON (import ./tests/hermes-module.nix { flake = self; });
@@ -350,6 +357,7 @@
                   nextcloud.enable = true;
                   deskflow.enable = true;
                   codex.enable = true;
+                  t3code.enable = true;
                   codiff.enable = true;
                   plannotator.enable = true;
                   google-cloud-sdk.enable = true;
@@ -363,7 +371,6 @@
                   aikido.enable = true;
                   floai.enable = true;
                   grok-bot.enable = true;
-                  bb-desktop.enable = true;
                 };
               };
 
@@ -536,7 +543,6 @@
                   herdr.enable = true;
                   work.enable = true;
                   grok-bot.enable = true;
-                  bb-desktop.enable = true;
                 };
               };
 
@@ -783,7 +789,6 @@
                     pup.enable = true;
                     namespace.enable = true;
                     herdr.enable = true;
-                    hermes-desktop.enable = true;
                     work.enable = true;
                     aikido.enable = true;
                     floai.enable = true;

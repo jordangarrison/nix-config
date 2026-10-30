@@ -53,6 +53,7 @@ in {
       freelens.enable = lib.mkEnableOption "Freelens Kubernetes IDE";
       sidecar.enable = lib.mkEnableOption "Sidecar TUI for coding agents";
       codex.enable = lib.mkEnableOption "Codex and OpenCode LLM agents";
+      t3code.enable = lib.mkEnableOption "T3 Code desktop and CLI";
       grove.enable = lib.mkEnableOption "Grove workspace manager";
       google-cloud-sdk.enable = lib.mkEnableOption "Google Cloud SDK";
       azure-cli.enable = lib.mkEnableOption "Azure CLI";

@@ -723,6 +723,11 @@ in
       llm-agents.codex
       llm-agents.opencode
     ]
+    ++ lib.optionals (userApps.t3code.enable or false) [
+      # Keep the CLI and desktop on the same release; update through Nix.
+      llm-agents.t3code
+      llm-agents.t3code-desktop
+    ]
     ++ lib.optionals (userApps.handy.enable or false) (
       [ llm-agents.handy ]
       # Handy needs a native Wayland typing tool; its Enigo/X11 fallback

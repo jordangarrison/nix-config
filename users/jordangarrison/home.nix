@@ -724,8 +724,8 @@ in
       llm-agents.opencode
     ]
     ++ lib.optionals (userApps.t3code.enable or false) [
-      # NixOS only. The Flo Mac uses the Homebrew cask in hosts/flomac so the
-      # app can self-update. Do not enable this on Darwin: two t3 binaries.
+      # Keep the CLI and desktop on the same release as the other hosts.
+      # Update through Nix. Do not also install the Homebrew cask.
       llm-agents.t3code
       llm-agents.t3code-desktop
     ]

@@ -7,8 +7,8 @@
 - NixOS unit: `t3code.service`, starts at boot as `jordangarrison`.
 - Backend: `127.0.0.1:3773`; nginx provides TLS, WebSockets and a tailnet allowlist.
 - State: `/home/jordangarrison/.local/share/t3code-server/userdata`.
-- Package: `llm-agents.t3code`, the same release as the NixOS desktop and CLI.
-- Flo Mac client: Homebrew cask `t3-code`, not this package. It may run ahead of the server. Its app installs the Mac `t3` link. Do not also install the Nix package or the curl installer there.
+- Package: `llm-agents.t3code`, the same release as the desktop and CLI on every host, including the Flo Mac.
+- Do not install the Homebrew cask `t3-code` or `t3-code@nightly` on the Flo Mac. That updater drifts ahead of this server, and a newer client is then blocked.
 
 This is a personal coding server. Authorized clients can run code with Jordan's
 file and provider-account access. It is not a sandbox or a public shared service.

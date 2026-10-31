@@ -58,16 +58,16 @@ Browser automation/streamed browser tabs are separate from the web console. Thei
 automatic Chrome download is not validated on NixOS by this configuration. Do not
 run the upstream apt-based browser setup or disable the browser sandbox as a workaround.
 
-## jagpi ACP provider (pending upstream release)
+## jagpi ACP provider
 
 The host opts in with `services.jagpi.acp.enable = true` in
-`hosts/endeavour/jagpi.nix`. **This preparation is not deployable with the current
-lock:** jagpi is pinned to `ebc5da30b262958cd74c7db91a8b638f7531f0e6`, which lacks
-ACP. Merge [jagpi PR #80](https://github.com/jordangarrison/jagpi/pull/80), which adds
-the Home Manager option and `jagpi-acp` launcher, before updating the production pin. The launcher must use the same `services.jagpi.package`
-and `instance`, set the user runtime directory and user bus environment, and
-connect to the existing `jagpi-default.service` user unit through its managed
-config. No second daemon, config, or nix-config wrapper is needed.
+`hosts/endeavour/jagpi.nix`. The jagpi input includes
+[jagpi PR #80](https://github.com/jordangarrison/jagpi/pull/80), which adds the
+Home Manager option and `jagpi-acp` launcher. The launcher uses the same
+`services.jagpi.package` and `instance`, sets the user runtime directory and
+user bus environment, and connects to the existing `jagpi-default.service`
+user unit through its managed config. No second daemon, config, or nix-config
+wrapper is needed.
 
 T3 is a system service running as Jordan; jagpi is a systemd **user** service.
 T3's environment does not supply `XDG_RUNTIME_DIR` or
@@ -78,18 +78,14 @@ shared T3 system module. Do not change linger or service lifetime: jagpi still
 starts at login and stops with the last session. T3 starting at boot does not
 ensure the user runtime, user bus, or Herdr is available.
 
-### Publish, validate, then register
+### Validate, activate, then register
 
-1. Merge jagpi PR #80 with ACP and the launcher contract above, then run
-   `nix flake update jagpi` and inspect `flake.lock`. Do not pin a local checkout
+1. For subsequent upgrades, run `nix flake update jagpi` and inspect `flake.lock`. Do not pin a local checkout
    or an unpublished revision. jagpi upgrades are Nix-managed, not npm installs
    or edits to profile symlinks.
 2. Build the focused check (`nix build .#checks.x86_64-linux.t3code-module`) and
    the host (`nh os build . --no-nom`). The focused check verifies host opt-in
    and instance selection only; CI's stub does not prove launcher behavior.
-   Before publication, a build may use
-   `--override-input jagpi path:/home/jordangarrison/dev/jordangarrison/jagpi --no-write-lock-file`
-   only once that checkout implements the contract.
 3. With separate activation approval, follow build → test → switch, using
    `nh os test . --no-nom` then `nh os switch . --no-nom`. Neither activation nor
    restarting the existing daemon is authorized by this preparation. Coordinate

@@ -44,6 +44,8 @@
           # CI. environmentFile is here so the Slack follow-up stays one line.
           options.services.jagpi = {
             enable = lib.mkEnableOption "the jagpi daemon (CI stub)";
+            # Contract-only: CI does not build or exercise the upstream launcher.
+            acp.enable = lib.mkEnableOption "the jagpi ACP launcher (CI stub)";
             instance = lib.mkOption {
               type = lib.types.strMatching "[a-z][a-z0-9-]{0,31}";
               default = "default";

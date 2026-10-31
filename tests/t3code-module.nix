@@ -25,8 +25,12 @@ let
   }).config;
   service = enabled.systemd.services.t3code;
   host = flake.nixosConfigurations.endeavour.config;
+  jagpi = host.home-manager.users.jordangarrison.services.jagpi;
   proxy = host.services.nginx.virtualHosts."t3code.jordangarrison.dev";
   results = {
+    # Host wiring only: the CI jagpi stub does not implement the launcher.
+    jagpiAcpEnabled = jagpi.enable && jagpi.acp.enable;
+    jagpiUsesExistingInstance = jagpi.instance == "default";
     disabledHasNoService = !(disabled.systemd.services ? t3code);
     runsAtBoot = builtins.elem "multi-user.target" service.wantedBy;
     nonRoot = service.serviceConfig.User == "developer";

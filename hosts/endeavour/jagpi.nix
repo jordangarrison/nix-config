@@ -24,6 +24,10 @@
     enable = true;
     instance = "default";
 
+    # T3 launches the upstream wrapper against this same user daemon.
+    # Requires a jagpi input with services.jagpi.acp.enable; see the T3 runbook.
+    acp.enable = true;
+
     # The herdr the TUI uses, so the daemon's workers talk to the same server.
     herdr.package = config.programs.herdr.package;
 

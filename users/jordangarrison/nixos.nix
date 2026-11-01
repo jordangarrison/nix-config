@@ -46,6 +46,7 @@ in {
       warp.enable = lib.mkEnableOption "Warp terminal (preview)";
       grok-bot.enable = lib.mkEnableOption "Grok Bot desktop agent";
       bb-desktop.enable = lib.mkEnableOption "BB desktop app";
+      herdr-app.enable = lib.mkEnableOption "Herdr desktop app";
       hermes-desktop.enable = lib.mkEnableOption "Hermes desktop client";
 
       # Dev tools (heavy, built from source)

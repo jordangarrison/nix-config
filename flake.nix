@@ -31,6 +31,10 @@
       # inputs.nixpkgs.follows = "nixpkgs";
     };
     llm-agents.url = "github:numtide/llm-agents.nix";
+    # Temporary exception for the desktop app only (upstream PR #11664).
+    # Remove once the regular llm-agents input ships herdr-app.
+    # Keep the PR's own dependency pins; do not replace the llm-agents overlay.
+    herdr-app.url = "github:arthurk/llm-agents.nix/0da37226a5efee8d264a75f6f32a8fa6cbe7937f";
     niri.url = "github:sodiboo/niri-flake";
     noctalia = {
       # Pinned to the last v4 (QML/quickshell) commit. v5 is a ground-up C++
@@ -367,6 +371,7 @@
                   namespace.enable = true;
                   handy.enable = true;
                   herdr.enable = true;
+                  herdr-app.enable = true;
                   work.enable = true;
                   aikido.enable = true;
                   floai.enable = true;

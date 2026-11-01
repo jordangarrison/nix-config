@@ -14,6 +14,21 @@ than editing the symlink or changing settings in the Herdr UI.
 unmanaged and lives in `~/.config/herdr/session.json` and
 `~/.config/herdr/session-history.json`.
 
+## Desktop app (temporary input)
+
+Endeavour also enables `users.jordangarrison.apps.herdr-app`. Only
+`herdr-app` comes from the separate, pinned `inputs.herdr-app`, which tracks
+[llm-agents.nix PR #11664](https://github.com/numtide/llm-agents.nix/pull/11664).
+The regular `llm-agents` input, Herdr TUI, hooks, and session state are unchanged.
+Once the regular input ships the desktop package, use it in `home.nix` and
+remove the temporary input.
+
+Launch `herdr-app` or select Herdr in the desktop launcher after activation.
+The desktop app needs the separate `herdr-core` (`hc`); this PR packages only
+the GUI. The app offers to install a missing core into `~/.local/bin`, outside
+Nix management. Adding the GUI does not install that core or migrate existing
+TUI sessions. Do not replace or restart the existing TUI server for this app.
+
 ## Agent integrations
 
 Session restoration requires current per-agent Herdr hooks. These hooks live in

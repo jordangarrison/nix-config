@@ -547,6 +547,7 @@
                   pup.enable = true;
                   handy.enable = true;
                   herdr.enable = true;
+                  herdr-app.enable = true;
                   work.enable = true;
                   grok-bot.enable = true;
                 };
@@ -798,6 +799,7 @@
                     pup.enable = true;
                     namespace.enable = true;
                     herdr.enable = true;
+                    herdr-app.enable = true;
                     work.enable = true;
                     aikido.enable = true;
                     floai.enable = true;

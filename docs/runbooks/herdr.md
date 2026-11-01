@@ -16,7 +16,8 @@ unmanaged and lives in `~/.config/herdr/session.json` and
 
 ## Desktop app (temporary input)
 
-Endeavour also enables `users.jordangarrison.apps.herdr-app`. Only
+Endeavour and Opportunity enable `users.jordangarrison.apps.herdr-app`;
+flomac enables `userApps.herdr-app` in its Home Manager arguments. Only
 `herdr-app` comes from the separate, pinned `inputs.herdr-app`, which tracks
 [llm-agents.nix PR #11664](https://github.com/numtide/llm-agents.nix/pull/11664).
 The regular `llm-agents` input, Herdr TUI, hooks, and session state are unchanged.

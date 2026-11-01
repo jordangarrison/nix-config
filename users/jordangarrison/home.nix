@@ -35,6 +35,7 @@ in
     ../../modules/home/languages
     ../../modules/home/pi
     ../../modules/home/herdr
+    ../../modules/home/herdr-app
     ../../modules/home/tuicr
     ../../modules/home/bb
     ../../modules/home/bb-desktop
@@ -692,11 +693,6 @@ in
     # fails.
     ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [
       inputs.onwatch.packages.${pkgs.stdenv.hostPlatform.system}.default
-    ]
-    # Only the desktop app comes from the temporary PR input. The Herdr TUI
-    # and all other agent packages stay on the regular llm-agents input.
-    ++ lib.optionals (userApps.herdr-app.enable or false) [
-      inputs.herdr-app.packages.${pkgs.stdenv.hostPlatform.system}.herdr-app
     ]
     ++ lib.optionals (userApps.grove.enable or false) [
       inputs.grove.packages.${pkgs.stdenv.hostPlatform.system}.default

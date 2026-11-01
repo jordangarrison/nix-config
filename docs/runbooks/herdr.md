@@ -21,8 +21,38 @@ flomac enables `userApps.herdr-app` in its Home Manager arguments. Only
 `herdr-app` comes from the separate, pinned `inputs.herdr-app`, which tracks
 [llm-agents.nix PR #11664](https://github.com/numtide/llm-agents.nix/pull/11664).
 The regular `llm-agents` input, Herdr TUI, hooks, and session state are unchanged.
-Once the regular input ships the desktop package, use it in `home.nix` and
-remove the temporary input.
+Once the regular input ships the desktop package, use it in
+`modules/home/herdr-app/default.nix` and remove the temporary input.
+
+The desktop package and personal configuration are managed together in
+`modules/home/herdr-app/`, gated by `userApps.herdr-app.enable`. Nix owns:
+
+- `~/.config/herdr-app/keys.json`: default app shortcuts plus the TUI's
+  Alt+H/J/K/L pane focus, Alt+Shift+J/K space navigation (replacing pane
+  swap on those two keys), and Alt+brace tab navigation.
+- `~/.config/herdr-app/settings.json`: sounds disabled, Rosé Pine selected,
+  and Source Code Pro as the terminal font.
+- `~/.config/herdr-app/themes/rose-pine.json`: the local Rosé Pine palette.
+
+These are read-only symlinks, like the TUI config. Change their source files
+and rebuild; do not edit them through the app. Existing per-layout theme picks
+override the settings theme. To select Rosé Pine for the shown layout, run
+`herdr-app do app.theme --name rose-pine`.
+
+Agent priority sorting is already the shipped agents mod's default. The TUI's
+`onboarding`, `experimental.pane_history`, and `session.resume_agents_on_restore`
+have no documented desktop settings equivalents and remain TUI-only.
+
+Leave app runtime state (`shared.json`, `view.json`, `layouts/.state/`, core
+session data) and app-generated files (the guide, types, shipped layouts and
+mods) unmanaged. Do not copy the TUI's state into the desktop app.
+
+Home Manager uses `backupFileExtension = "backup"` on these hosts. On first
+activation it backs up existing regular files at the managed paths to
+`<path>.backup`; an existing conflicting backup blocks activation. Check the
+live files for newer preferences before applying, and move any conflicting
+backups into a dated backup folder. Do not use `force = true`. The manual
+migration backup is under `~/.config/herdr-app/backups/` on Opportunity.
 
 Launch `herdr-app` or select Herdr in the desktop launcher after activation.
 The desktop app needs the separate `herdr-core` (`hc`); this PR packages only

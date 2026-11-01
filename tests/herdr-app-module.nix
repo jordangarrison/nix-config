@@ -24,10 +24,19 @@ let
   keys = builtins.fromJSON (builtins.readFile files."herdr-app/keys.json".source);
   settings = builtins.fromJSON (builtins.readFile files."herdr-app/settings.json".source);
   theme = builtins.fromJSON (builtins.readFile files."herdr-app/themes/rose-pine.json".source);
+  workLayout = builtins.fromJSON (builtins.readFile files."herdr-app/layouts/work-items.json".source);
+  workMod = builtins.fromJSON (builtins.readFile files."herdr-app/mods/work-items/mod.json".source);
+  managed = [
+    "herdr-app/keys.json"
+    "herdr-app/settings.json"
+    "herdr-app/themes/rose-pine.json"
+    "herdr-app/layouts/work-items.json"
+    "herdr-app/layouts/work-items.svg"
+    "herdr-app/mods/work-items/mod.json"
+    "herdr-app/mods/work-items/main.js"
+  ];
   results = {
-    disabledHasNoConfig = !(disabled.xdg.configFile ? "herdr-app/keys.json")
-      && !(disabled.xdg.configFile ? "herdr-app/settings.json")
-      && !(disabled.xdg.configFile ? "herdr-app/themes/rose-pine.json");
+    disabledHasNoConfig = builtins.all (name: !(disabled.xdg.configFile ? name)) managed;
     disabledHasNoPackage = !(builtins.elem pkgs.hello disabled.home.packages);
     enabledHasPackage = builtins.elem pkgs.hello enabled.home.packages;
     focusKeys = keys.global.alt-h == "pane.go:left"
@@ -46,14 +55,13 @@ let
     terminalFont = settings.font == "Source Code Pro";
     rosePine = settings.theme == "rose-pine" && theme.background == "#191724"
       && theme.foreground == "#e0def4" && builtins.length theme.ansi == 16;
-    noForcedOverwrite = !(files."herdr-app/keys.json".force)
-      && !(files."herdr-app/settings.json".force)
-      && !(files."herdr-app/themes/rose-pine.json".force);
-    noRuntimeFiles = builtins.all (name: !(lib.hasPrefix "herdr-app/" name) || builtins.elem name [
-      "herdr-app/keys.json"
-      "herdr-app/settings.json"
-      "herdr-app/themes/rose-pine.json"
-    ]) (builtins.attrNames files);
+    noForcedOverwrite = builtins.all (name: !(files.${name}.force)) managed;
+    noRuntimeFiles = builtins.all (name: !(lib.hasPrefix "herdr-app/" name) || builtins.elem name managed) (builtins.attrNames files);
+    workItemsLayout = workLayout.id == "root"
+      && workLayout.preview == "layouts/work-items.svg"
+      && lib.hasInfix ''"mod": "work-items"'' (builtins.readFile files."herdr-app/layouts/work-items.json".source);
+    workItemsMod = workMod.place == "none"
+      && lib.hasInfix "work.items" (builtins.readFile files."herdr-app/mods/work-items/main.js".source);
   };
 in
 assert lib.assertMsg (lib.all (x: x) (builtins.attrValues results)) "Herdr app module checks failed";

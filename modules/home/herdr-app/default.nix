@@ -15,12 +15,18 @@
     ];
 
     # Keep personal configuration declarative, as with herdr/config.toml.
-    # Do not manage layouts/.state, shared.json, or the app-generated guide,
-    # types, shipped layouts and mods: Herdr owns and writes those files.
+    # The work-items layout and mod are ours. Do not manage layouts/.state,
+    # shared.json, or the app-generated guide, types, shipped layouts and
+    # mods: Herdr owns and writes those files. Link only our files so the
+    # app can still write jsconfig.json and .d.ts beside the mod.
     xdg.configFile = {
       "herdr-app/keys.json".source = ./keys.json;
       "herdr-app/settings.json".source = ./settings.json;
       "herdr-app/themes/rose-pine.json".source = ./rose-pine.json;
+      "herdr-app/layouts/work-items.json".source = ./layouts/work-items.json;
+      "herdr-app/layouts/work-items.svg".source = ./layouts/work-items.svg;
+      "herdr-app/mods/work-items/mod.json".source = ./mods/work-items/mod.json;
+      "herdr-app/mods/work-items/main.js".source = ./mods/work-items/main.js;
     };
   };
 }

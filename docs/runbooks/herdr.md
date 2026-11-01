@@ -33,11 +33,18 @@ The desktop package and personal configuration are managed together in
 - `~/.config/herdr-app/settings.json`: sounds disabled, Rosé Pine selected,
   and Source Code Pro as the terminal font.
 - `~/.config/herdr-app/themes/rose-pine.json`: the local Rosé Pine palette.
+- `~/.config/herdr-app/layouts/work-items.json` and its preview SVG: the
+  personal work-item layout. A work item groups spaces from any machine;
+  the sidebar still labels which machine each space is on.
+- `~/.config/herdr-app/mods/work-items/`: the sidebar mod for that layout.
+  Only `mod.json` and `main.js` are managed, so the app can still write
+  `jsconfig.json` and `.d.ts` beside them.
 
 These are read-only symlinks, like the TUI config. Change their source files
 and rebuild; do not edit them through the app. Existing per-layout theme picks
 override the settings theme. To select Rosé Pine for the shown layout, run
-`herdr-app do app.theme --name rose-pine`.
+`herdr-app do app.theme --name rose-pine`. Switch to the work-item layout with
+`herdr-app do layout.switch --name work-items`, or `ctrl-shift-l`.
 
 Agent priority sorting is already the shipped agents mod's default. The TUI's
 `onboarding`, `experimental.pane_history`, and `session.resume_agents_on_restore`
@@ -45,7 +52,9 @@ have no documented desktop settings equivalents and remain TUI-only.
 
 Leave app runtime state (`shared.json`, `view.json`, `layouts/.state/`, core
 session data) and app-generated files (the guide, types, shipped layouts and
-mods) unmanaged. Do not copy the TUI's state into the desktop app.
+mods) unmanaged. The work-items grouping itself lives in `shared.json` under
+`work.items`; do not copy that state into Nix. Do not copy the TUI's state
+into the desktop app.
 
 Home Manager uses `backupFileExtension = "backup"` on these hosts. On first
 activation it backs up existing regular files at the managed paths to

@@ -39,6 +39,10 @@ The desktop package and personal configuration are managed together in
 - `~/.config/herdr-app/mods/work-items/`: the sidebar mod for that layout.
   Only `mod.json` and `main.js` are managed, so the app can still write
   `jsconfig.json` and `.d.ts` beside them.
+- `~/.config/herdr-app/mods/work-agents/`: the agents list under the work
+  items. Ready stays open. Working is a collapsed count row. Settled is a
+  collapsed count row for agents untouched for three days, or settled by
+  right-click when the work is done.
 
 These are read-only symlinks, like the TUI config. Change their source files
 and rebuild; do not edit them through the app. Existing per-layout theme picks

@@ -34,6 +34,8 @@ let
     "herdr-app/layouts/work-items.svg"
     "herdr-app/mods/work-items/mod.json"
     "herdr-app/mods/work-items/main.js"
+    "herdr-app/mods/work-agents/mod.json"
+    "herdr-app/mods/work-agents/main.js"
   ];
   results = {
     disabledHasNoConfig = builtins.all (name: !(disabled.xdg.configFile ? name)) managed;
@@ -59,7 +61,8 @@ let
     noRuntimeFiles = builtins.all (name: !(lib.hasPrefix "herdr-app/" name) || builtins.elem name managed) (builtins.attrNames files);
     workItemsLayout = workLayout.id == "root"
       && workLayout.preview == "layouts/work-items.svg"
-      && lib.hasInfix ''"mod": "work-items"'' (builtins.readFile files."herdr-app/layouts/work-items.json".source);
+      && lib.hasInfix ''"mod": "work-items"'' (builtins.readFile files."herdr-app/layouts/work-items.json".source)
+      && lib.hasInfix ''"mod": "work-agents"'' (builtins.readFile files."herdr-app/layouts/work-items.json".source);
     workItemsMod = workMod.place == "none"
       && lib.hasInfix "work.items" (builtins.readFile files."herdr-app/mods/work-items/main.js".source);
   };

@@ -22,3 +22,7 @@ users/jordangarrison/tools/doom.d/config.el
 
 # lavish review artifacts
 .lavish/
+
+# herdr-app writes editor typings beside each mod during `herdr-app check`
+modules/home/herdr-app/mods/*/jsconfig.json
+modules/home/herdr-app/mods/*/gpui-kit.d.ts

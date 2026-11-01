@@ -34,7 +34,16 @@
             {
               "id": "work-items",
               "type": "block",
+              "size": { "weight": 3 },
+              "min": 120,
               "content": { "mod": "work-items" }
+            },
+            {
+              "id": "work-agents",
+              "type": "block",
+              "size": { "weight": 2 },
+              "min": 140,
+              "content": { "mod": "work-agents" }
             }
           ]
         },

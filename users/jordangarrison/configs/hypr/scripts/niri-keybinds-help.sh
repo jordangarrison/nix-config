@@ -14,8 +14,11 @@ Super + F                 → File manager (Yazi)
 Super + Shift + F         → File manager (Nautilus)
 Super + Space             → App launcher (Noctalia)
 Super + Semicolon         → Emoji picker (rofimoji)
-Super + Shift + D         → Voice dictation with post-processing (Handy)
+Super + Shift + D         → Voice dictation toggle (Hex)
 Super + Ctrl + Alt + Shift + 5 → Voice dictation toggle (Handy)
+F9                        → Start screen annotation (Hex)
+Shift + F9                → Stop and finish annotation (Hex)
+Ctrl + F9                 → Toggle annotation pen; starts recording if idle (Hex)
 
 [WINDOW CONTROLS]
 Super + Q                 → Close window

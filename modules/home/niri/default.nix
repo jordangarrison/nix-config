@@ -72,6 +72,7 @@ in
     # `noctalia-shell ipc call ...` invocations fail.
     inputs.noctalia.homeModules.default
     inputs.sweet-nothings.homeManagerModules.default
+    inputs.hex.homeManagerModules.default
   ];
 
   programs.noctalia-shell = {
@@ -79,6 +80,14 @@ in
     systemd.enable = true;
     package = noctaliaPkg;
   };
+
+  programs.hex = {
+    enable = true;
+    autostart = true;
+  };
+
+  # Keep annotations local and pasteable; do not discover or send to OpenCode sessions.
+  systemd.user.services.hex.Service.Environment = [ "SCRAWL_NO_OPENCODE=1" ];
 
   programs.sweet-nothings = {
     enable = true;
@@ -471,12 +480,30 @@ in
         "--toggle-post-process"
       ];
 
-      # Handy - Voice dictation with post-processing (D for dictation)
-      "Mod+Shift+D".action.spawn = [
-        "handy"
-        "--toggle-transcription"
-        "--toggle-post-process"
-      ];
+      # Hex - press once to record, again to transcribe and paste.
+      "Mod+Shift+D" = {
+        repeat = false;
+        action.spawn = [
+          "${config.programs.hex.package}/bin/hex"
+          "dictation"
+          "toggle"
+        ];
+      };
+
+      # Hex annotation uses explicit commands without a shortcuts portal.
+      # The native tap/hold shortcut shown in Hex settings is not registered.
+      "F9" = {
+        repeat = false;
+        action.spawn = [ "${config.programs.hex.package}/bin/hex" "annotate" "start" ];
+      };
+      "Shift+F9" = {
+        repeat = false;
+        action.spawn = [ "${config.programs.hex.package}/bin/hex" "annotate" "stop" ];
+      };
+      "Ctrl+F9" = {
+        repeat = false;
+        action.spawn = [ "${config.programs.hex.package}/bin/hex" "annotate" "draw" ];
+      };
 
       # Which-key menu (D for discover)
       "Mod+D".action.spawn = "wlr-which-key-menu";

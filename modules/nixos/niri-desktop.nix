@@ -41,6 +41,8 @@
       niri = {
         default = [ "gnome" "gtk" ];
         "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
+        # GNOME global shortcuts require GNOME Shell, which Niri does not run.
+        "org.freedesktop.impl.portal.GlobalShortcuts" = [ "none" ];
       };
     };
   };

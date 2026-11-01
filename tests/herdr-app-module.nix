@@ -36,6 +36,8 @@ let
     "herdr-app/mods/work-items/main.js"
     "herdr-app/mods/work-agents/mod.json"
     "herdr-app/mods/work-agents/main.js"
+    "herdr-app/mods/subscription-usage/mod.json"
+    "herdr-app/mods/subscription-usage/main.js"
   ];
   results = {
     disabledHasNoConfig = builtins.all (name: !(disabled.xdg.configFile ? name)) managed;
@@ -62,9 +64,12 @@ let
     workItemsLayout = workLayout.id == "root"
       && workLayout.preview == "layouts/work-items.svg"
       && lib.hasInfix ''"mod": "work-items"'' (builtins.readFile files."herdr-app/layouts/work-items.json".source)
-      && lib.hasInfix ''"mod": "work-agents"'' (builtins.readFile files."herdr-app/layouts/work-items.json".source);
+      && lib.hasInfix ''"mod": "work-agents"'' (builtins.readFile files."herdr-app/layouts/work-items.json".source)
+      && lib.hasInfix ''"mod": "subscription-usage"'' (builtins.readFile files."herdr-app/layouts/work-items.json".source);
     workItemsMod = workMod.place == "none"
       && lib.hasInfix "work.items" (builtins.readFile files."herdr-app/mods/work-items/main.js".source);
+    xaiUsage = lib.hasInfix "cli-chat-proxy.grok.com/v1/billing?format=credits" (builtins.readFile files."herdr-app/mods/subscription-usage/main.js".source)
+      && lib.hasInfix "creditUsagePercent" (builtins.readFile files."herdr-app/mods/subscription-usage/main.js".source);
   };
 in
 assert lib.assertMsg (lib.all (x: x) (builtins.attrValues results)) "Herdr app module checks failed";

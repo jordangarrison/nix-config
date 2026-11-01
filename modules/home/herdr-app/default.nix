@@ -29,6 +29,8 @@
       "herdr-app/mods/work-items/main.js".source = ./mods/work-items/main.js;
       "herdr-app/mods/work-agents/mod.json".source = ./mods/work-agents/mod.json;
       "herdr-app/mods/work-agents/main.js".source = ./mods/work-agents/main.js;
+      "herdr-app/mods/subscription-usage/mod.json".source = ./mods/subscription-usage/mod.json;
+      "herdr-app/mods/subscription-usage/main.js".source = ./mods/subscription-usage/main.js;
     };
   };
 }

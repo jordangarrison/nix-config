@@ -130,7 +130,7 @@
           "id": "status",
           "type": "block",
           "size": { "px": 28 },
-          "content": { "mod": "workspace-status" }
+          "content": { "mod": "subscription-usage" }
         }
       ]
     }

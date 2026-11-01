@@ -43,6 +43,11 @@ The desktop package and personal configuration are managed together in
   items. Ready stays open. Working is a collapsed count row. Settled is a
   collapsed count row for agents untouched for three days, or settled by
   right-click when the work is done.
+- `~/.config/herdr-app/mods/subscription-usage/`: the work-items status bar.
+  Subscription usage sits to the right of the agent count. It reads the local
+  Claude, Codex, and xAI logins and requests their usage endpoints. xAI is the
+  weekly credit percent from the Grok billing endpoint. It stores percents and
+  reset times only, never tokens.
 
 These are read-only symlinks, like the TUI config. Change their source files
 and rebuild; do not edit them through the app. Existing per-layout theme picks

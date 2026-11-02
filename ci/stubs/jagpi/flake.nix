@@ -2,7 +2,8 @@
   # CI stub for the private jordangarrison/jagpi flake, which is fetched
   # over SSH and unreachable from credential-less GitHub-hosted runners.
   # It mirrors only the interface this repo consumes (see
-  # hosts/endeavour/jagpi.nix): packages.<system>.{default,jagpi}, and
+  # hosts/endeavour/jagpi.nix): packages.<system>.{default,jagpi}, the
+  # claude-bridge provider package with its passthru.jagpiProvider path, and
   # homeManagerModules.default with the services.jagpi options the host
   # sets, typed like upstream, that installs the package and writes the
   # providers part of config.json. If that surface
@@ -23,6 +24,19 @@
           ];
         };
         default = jagpi;
+        claude-bridge =
+          derivation {
+            name = "jagpi-claude-bridge-stub";
+            inherit system;
+            builder = "/bin/sh";
+            args = [
+              "-c"
+              "echo ci-stub > $out"
+            ];
+          }
+          // {
+            jagpiProvider = "lib/claude-bridge/src/hosts/jagpi.ts";
+          };
       };
     in
     {

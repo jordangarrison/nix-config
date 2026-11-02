@@ -55,9 +55,10 @@ when required by the tool. Record the worker reference, link, and completion
 mechanism. A separate review helper need not become a top-level thread.
 
 Use a fresh reviewer for follow-ups when the runtime requires it; reuse only
-through supported continuation controls. In Herdr, a reviewer can use a new
-unfocused tab in the current workspace (load [[herdr]] for CLI mechanics),
-without creating an implementation worktree. The review skill owns its review
+through supported continuation controls. In the Herdr app, a reviewer can run as an
+`hc` child, shown in a new unfocused tab in the current space (load
+[[herdr-core]] and [[herdr-app]]), without creating an implementation
+worktree. The review skill owns its review
 checkout. Preserve the author/reviewer separation in every runtime.
 
 ### 4. Hand off the review

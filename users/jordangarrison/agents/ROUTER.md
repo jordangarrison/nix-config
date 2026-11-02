@@ -43,8 +43,8 @@ separate workstreams.
 For dedicated tickets, threads, workspaces, or multi-repo workstreams, load
 [[work-dispatch]] (`work-dispatch/SKILL.md` under the configured skills
 home). It owns orchestration-surface selection and runtime guidance. The
-starting surface owns dedicated workers; `HERDR_ENV=1` alone does not select
-Herdr. Native harness helpers remain available for bounded assistance.
+starting surface owns dedicated workers; `HC_TERMINAL_ID` or `HERDR_ENV=1`
+alone does not select Herdr. Native harness helpers remain available for bounded assistance.
 
 ### Repository conventions
 

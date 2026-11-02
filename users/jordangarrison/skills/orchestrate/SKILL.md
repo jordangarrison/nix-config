@@ -58,8 +58,9 @@ Use [[work-dispatch]], which selects the runtime-specific mechanics. Confirm
 launch and record returned references. Give the user links or workspace details
 for dedicated workstreams. Keep coordinating unless explicitly handing off.
 
-Use native completion events where provided. For Herdr file reports, require
-fresh positive evidence from this run before waking; a worker's idle status
+Use native completion events where provided: in the Herdr app, workers
+report with `hc send` and `hc wait --children` wakes the parent. For file
+reports, require fresh positive evidence from this run before waking; a worker's idle status
 alone is not a completion signal. A shell-condition watch uses the harness's
 watch facility rather than a blocking sleep loop. Persist consumed result IDs
 before rearming. Do not add watches for T3 delegates that already notify.

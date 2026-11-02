@@ -70,6 +70,19 @@ in
           export HOME=$TMPDIR
           pup skills install codex --type=skill --dir $out --no-agent
         '';
+        # herdr-app prints its skill with --skill, without frontmatter.
+        # herdr-core (hc) is not in Nix; see skills/herdr-core.
+        herdrAppPkg = inputs.herdr-app.packages.${pkgs.stdenv.hostPlatform.system}.herdr-app;
+        herdrAppSkill = pkgs.runCommand "herdr-app-skill-${herdrAppPkg.version}" { } ''
+          export HOME=$TMPDIR
+          mkdir -p $out/herdr-app
+          {
+            printf '%s\n' '---' 'name: herdr-app' \
+              'description: "Drive the Herdr desktop app window (spaces, tabs, panes, layouts, mods) with herdr-app. Use when HC_TERMINAL_ID is set and the user asks to show, arrange, or open something in the Herdr window. For starting, messaging, or waiting on agents and programs, use herdr-core (hc). Not the older herdr TUI."' \
+              '---' ""
+            ${lib.getExe herdrAppPkg} --skill
+          } > $out/herdr-app/SKILL.md
+        '';
       in
       lib.mkMerge [
         (fromDir "${pkgs.gws.src}/skills" [
@@ -143,6 +156,9 @@ in
         ])
         (lib.mkIf (userApps.herdr.enable or false) (
           fromDir "${config.programs.herdr.package.src}/skills" [ "herdr" ]
+        ))
+        (lib.mkIf (userApps.herdr-app.enable or false) (
+          fromDir herdrAppSkill [ "herdr-app" ]
         ))
         (lib.mkIf (userApps.pup.enable or false) (
           fromDir pupSkills [
@@ -878,22 +894,6 @@ in
   programs.atuin = {
     enable = true;
     enableZshIntegration = true;
-    settings = {
-      sync_frequency = "10m";
-      inline_height = 20;
-    };
-  };
-
-  programs.gh = {
-    enable = true;
-    settings = {
-      git_protocol = "ssh";
-    };
-    extensions = with pkgs; [
-      gh-dash
-      master.gh-stack
-    ];
-  };
     # The Herdr app's atuin-threads mod needs `atuin threads` (18.24.3+).
     # nixpkgs has 18.23.0. Remove this override when nixpkgs ships 18.24.3+.
     package = pkgs.master.atuin.overrideAttrs (
@@ -921,10 +921,26 @@ in
     # Threads capture needs the daemon. This is what
     # `atuin config enable threads` writes, done declaratively.
     daemon.enable = true;
+    settings = {
+      sync_frequency = "10m";
+      inline_height = 20;
+      threads.capture = true;
+    };
+  };
+
+  programs.gh = {
+    enable = true;
+    settings = {
+      git_protocol = "ssh";
+    };
+    extensions = with pkgs; [
+      gh-dash
+      master.gh-stack
+    ];
+  };
 
   programs.git = {
     enable = true;
-      threads.capture = true;
     lfs.enable = true;
     signing.format = "openpgp";
     settings = {

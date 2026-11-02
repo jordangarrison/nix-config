@@ -48,9 +48,16 @@ fallback. Missing required capabilities remain blockers.
 
 - **T3 Code:** read [t3.md](t3.md). Follow the provided T3 tool rules for
   delegation versus new top-level threads and managed isolation.
-- **Herdr:** load [[herdr-dispatch]] for dedicated workspaces and [[herdr]]
-  for CLI mechanics. Herdr must be the selected owner, not just the terminal
-  enclosing another orchestration surface.
+- **Herdr app (herdr-core):** `HC_TERMINAL_ID` is set. Load [[herdr-core]]
+  to start, message, wait on, and read workers with `hc`. When the user
+  should see or steer a dedicated workstream, load [[herdr-app]] to give it
+  a named space or tab. hc has no managed checkouts: use the manual
+  `.worktrees/<repo>/<slug>` convention and pass that path as the worker's
+  `--cwd` or the space's `--folder`. The Herdr app must be the selected
+  owner, not just the terminal enclosing another orchestration surface.
+- **Herdr TUI (legacy, being retired):** `HERDR_ENV=1` is set. Load [[herdr-dispatch]] for
+  dedicated workspaces and [[herdr]] for CLI mechanics. The same owner rule
+  applies.
 - **Standalone harness:** use its supported delegation and isolation tools.
   A helper is not necessarily an independently steerable thread. If dedicated
   placement is unsupported, offer to work here or ask about another surface.

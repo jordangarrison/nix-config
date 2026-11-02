@@ -110,7 +110,7 @@ Run the gate again; the wake may be stale. First match wins:
    - `skipped` (merged or closed meanwhile) → stop (step 5).
    - none → the review failed. Set `seen_head` to `<new>` so the failure isn't retried every tick, report it, and keep watching; the next push tries again.
 
-**Record a round:** append `{head, verdict, review_url, at}` to `rounds`; set `reviewed_head` and `seen_head` to its head and `review_url` to its URL. The core reviews the head current at posting, which can be newer than `<new>`. Run `on_round`, if set, with the round's verdict and review URL. Verdict `APPROVE` → stop (step 5). Otherwise report one line and end the turn:
+**Record a round:** append `{head, verdict, review_url, at}` to `rounds`; set `reviewed_head` and `seen_head` to its head and `review_url` to its URL. The core reviews the head current at posting, which can be newer than `<new>`. Run `on_round`, if set, with the round's verdict and review URL. Verdict `APPROVE`, or `intended_verdict` `APPROVE` when `result.json` has one → stop (step 5). Otherwise report one line and end the turn:
 
 ```
 <owner>/<repo>#<num> → <verdict> <review_url> (<reviewed7>..<head7>) · attention: <needs_attention or none>

@@ -159,6 +159,7 @@ All artifacts go under `/tmp/pr-review-YYYY-MM-DD/<pr-key>/`. `<pr-key>` = `<rep
   "status": "posted | skipped",
   "skip_reason": null,
   "verdict": "APPROVE | COMMENT | REQUEST_CHANGES",
+  "intended_verdict": "<the verdict the review reached; present only when it differs from verdict>",
   "review_url": "https://github.com/.../pull/12#pullrequestreview-...",
   "head_sha": "<sha the review was posted against>",
   "inline_count": 3,
@@ -205,6 +206,8 @@ Pick specialist roles from the catalog in `reviewers/specialist.md`.
 
 If unsure between two: attended → ask the user; `--yolo` → pick the less severe one, record the reasoning internally, and publish any uncertainty that materially affects the verdict or requested action.
 
+**The findings own the verdict.** Post the verdict this table picks. "Your Own PRs" below is the one case where the posted event differs. A caller's brief picks the PRs, the scope, and the models; the verdict comes from the findings. Under `--yolo`, Jordan's standing authorization is the human sign-off, so `APPROVE` covers production, cost, and access changes too. If a caller asks for a different event ("post COMMENT so a human signs off"), post the reached verdict and record the request under `needs_attention`. Watchers stop only on `APPROVE`, so a capped verdict loops the follow-ups ([[review-watch]], `ibs#1168`).
+
 ### Your Own PRs
 
 GitHub rejects `APPROVE` and `REQUEST_CHANGES` on a PR you authored (422), but accepts `COMMENT`. So a self-authored PR gets the full review, posted as `COMMENT`:
@@ -243,7 +246,7 @@ When asked to re-review ("look at this one again", "check if it's addressed"), o
    git -C <wt> checkout --detach origin/pr/<num>
    ```
 2. Map each new commit against your prior asks. Call out addressing commits by short SHA.
-3. All prior asks addressed → post a fresh `APPROVE` referencing the addressing commits ("thanks for `<sha>` — the drift concern from my prior review is addressed").
+3. Every prior ask settled and nothing new → post a fresh `APPROVE` referencing the addressing commits ("thanks for `<sha>` — the drift concern from my prior review is addressed"). An ask is settled when a commit fixes it or the author accepts it as intended or moves it to a follow-up ticket. A follow-up that has nothing new to say is an `APPROVE`.
 4. Prior asks still open, or new asks arose from the new commits → pick the verdict with "Verdict Selection" and follow the Publishing Contract's follow-up rule: briefly acknowledge fixes and focus on unresolved or new issues, linking existing threads rather than duplicating unchanged comments. No need to re-fan-out unless changes are large.
 5. **A `COMMENT` never lifts my earlier `REQUEST_CHANGES`**: GitHub keeps the PR blocked on my last `APPROVE`/`REQUEST_CHANGES`. Once no blocker remains, post `APPROVE`, with any non-blocking findings in the same review.
 6. **Recompute any quantitative claim** you made (memory headroom math, safety ratios) against the new state. If the math improved, say so — the author put work in.
@@ -289,6 +292,7 @@ When asked to re-review ("look at this one again", "check if it's addressed"), o
 | Fairbanks agent turns into a naming-nit reviewer | A name matters only when it hides an architectural role or domain concept. Drop the rest in consolidation. |
 | Skipped PR left no trace | Write `result.json` with `status: skipped` and the reason, so the caller can tell the poster. |
 | Reached into Slack from here | This skill never touches Slack. Return results; the caller signals. |
+| Posted `COMMENT` with "would approve; a human must sign off" | Jordan's `--yolo` authorization is the sign-off. Post `APPROVE` (see "The findings own the verdict"). |
 
 ## Red Flags — STOP (attended) / record in "Needs your attention" (`--yolo`)
 

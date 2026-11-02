@@ -34,11 +34,13 @@ The desktop package and personal configuration are managed together in
   and Source Code Pro as the terminal font.
 - `~/.config/herdr-app/themes/rose-pine.json`: the local Rosé Pine palette.
 - `~/.config/herdr-app/layouts/work-items.json` and its preview SVG: the
-  personal work-item layout. A work item groups spaces from any machine;
-  the sidebar still labels which machine each space is on.
+  personal work-item layout.
 - `~/.config/herdr-app/mods/work-items/`: the sidebar mod for that layout.
   Only `mod.json` and `main.js` are managed, so the app can still write
-  `jsconfig.json` and `.d.ts` beside them.
+  `jsconfig.json` and `.d.ts` beside them. Keep the mod one file: each
+  managed file links to its own store path, so a relative import resolves
+  outside the app folder and the app refuses the mod. The pure rules are the
+  marked MODEL section at the top of `main.js`. See "Work items" below.
 - `~/.config/herdr-app/mods/work-agents/`: the agents list under the work
   items. Ready stays open. Working is a collapsed count row. Settled is a
   collapsed count row for agents untouched for three days, or settled by
@@ -61,9 +63,33 @@ have no documented desktop settings equivalents and remain TUI-only.
 
 Leave app runtime state (`shared.json`, `view.json`, `layouts/.state/`, core
 session data) and app-generated files (the guide, types, shipped layouts and
-mods) unmanaged. The work-items grouping itself lives in `shared.json` under
-`work.items`; do not copy that state into Nix. Do not copy the TUI's state
-into the desktop app.
+mods) unmanaged. Do not copy the TUI's state into the desktop app.
+
+### Work items
+
+Work items are a facet of each machine: machine -> items -> spaces. All of
+the data lives on the machine it describes, so every device connected to that
+machine shows the same items. The app keeps only view state (folded rows).
+
+- **Item list:** `~/.config/herdr-app/work-items.json` on each machine,
+  `{ "items": [{ "id", "name", "order" }] }`. The mod re-reads it before each
+  change and replaces it atomically. It is runtime data: keep it out of Nix.
+  If it does not parse, the mod leaves it alone and shows an error.
+- **Membership:** the label `work.item=<item id>` on every terminal of a space,
+  in the core of the machine that hosts the space. The mod copies it onto new
+  tabs and splits. Inspect it with `hc get <terminal>`.
+- **Sidebar:** items with the same name (ignoring case) on different machines
+  show as one row, with each machine listed under it. Rename and delete act on
+  every connected machine. Adding a space on a machine that lacks the item
+  creates it there with the same name.
+- **Other devices:** every connected list is re-read every 60 seconds. A
+  label that names an item its machine's list lacks re-reads that list at
+  once, so new items from another device appear quickly.
+- **Offline machine:** its items and spaces are absent until it reconnects.
+  Nothing is removed.
+- **Migration:** the first run moves the old `shared.json` `work.items` into
+  the per-machine lists and labels, then clears that key. It waits until every
+  machine those spaces live on is connected.
 
 Home Manager uses `backupFileExtension = "backup"` on these hosts. On first
 activation it backs up existing regular files at the managed paths to

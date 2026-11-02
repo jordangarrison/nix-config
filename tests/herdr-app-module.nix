@@ -26,6 +26,7 @@ let
   theme = builtins.fromJSON (builtins.readFile files."herdr-app/themes/rose-pine.json".source);
   workLayout = builtins.fromJSON (builtins.readFile files."herdr-app/layouts/work-items.json".source);
   workMod = builtins.fromJSON (builtins.readFile files."herdr-app/mods/work-items/mod.json".source);
+  workItemsJs = builtins.readFile files."herdr-app/mods/work-items/main.js".source;
   managed = [
     "herdr-app/keys.json"
     "herdr-app/settings.json"
@@ -67,7 +68,12 @@ let
       && lib.hasInfix ''"mod": "work-agents"'' (builtins.readFile files."herdr-app/layouts/work-items.json".source)
       && lib.hasInfix ''"mod": "subscription-usage"'' (builtins.readFile files."herdr-app/layouts/work-items.json".source);
     workItemsMod = workMod.place == "none"
-      && lib.hasInfix "work.items" (builtins.readFile files."herdr-app/mods/work-items/main.js".source);
+      # Each managed file links to its own store path, so a relative import
+      # resolves outside the app folder and the app refuses the mod.
+      && !(lib.hasInfix ''from "./'' workItemsJs)
+      && lib.hasInfix "// ==== MODEL BEGIN ====" workItemsJs
+      && lib.hasInfix ''LABEL = "work.item"'' workItemsJs
+      && lib.hasInfix ''LIST_FILE = ".config/herdr-app/work-items.json"'' workItemsJs;
     xaiUsage = lib.hasInfix "cli-chat-proxy.grok.com/v1/billing?format=credits" (builtins.readFile files."herdr-app/mods/subscription-usage/main.js".source)
       && lib.hasInfix "creditUsagePercent" (builtins.readFile files."herdr-app/mods/subscription-usage/main.js".source);
   };

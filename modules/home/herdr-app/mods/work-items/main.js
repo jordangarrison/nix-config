@@ -55,11 +55,18 @@ function save(model) {
   return next;
 }
 
+// A remote space id is "<machine>/<id>"; no prefix means this computer.
+const hostOf = (spaceId) => (spaceId.includes("/") ? spaceId.split("/")[0] : null);
+
+// Drop only spaces that are known to be gone. A machine that is not ready
+// (offline or still loading) does not list its spaces, so keep them.
 function prune(model, live) {
   let changed = false;
   const ids = new Set(live.map((space) => space.id));
+  const ready = new Set(machines().filter((m) => m.layout === "ready").map((m) => m.name));
+  const known = (id) => hostOf(id) === null || ready.has(hostOf(id));
   for (const item of model.items) {
-    const kept = item.spaces.filter((id) => ids.has(id));
+    const kept = item.spaces.filter((id) => ids.has(id) || !known(id));
     if (kept.length !== item.spaces.length) {
       item.spaces = kept;
       changed = true;

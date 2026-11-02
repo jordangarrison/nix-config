@@ -845,6 +845,22 @@
         "type": "github"
       }
     },
+    "herdr-t3": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1793614284,
+        "narHash": "sha256-/Lq3BFCwKIlqm6S0qAOdnwYovqDR0pyKodHw15pzEY8=",
+        "owner": "JinJieBeWater",
+        "repo": "herdr-t3",
+        "rev": "bf05b354f5fc1ed80106a0d3fc7e02f0801d90b6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "JinJieBeWater",
+        "repo": "herdr-t3",
+        "type": "github"
+      }
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -1645,6 +1661,7 @@
         "grok-bot": "grok-bot",
         "grove": "grove",
         "herdr-app": "herdr-app",
+        "herdr-t3": "herdr-t3",
         "home-manager": "home-manager",
         "hubctl": "hubctl",
         "isp-snitch": "isp-snitch",

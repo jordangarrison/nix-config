@@ -7,6 +7,7 @@ let
     inherit pkgs;
     extraSpecialArgs = {
       inputs.herdr-app.packages.x86_64-linux.herdr-app = pkgs.hello;
+      inputs.herdr-t3 = flake.inputs.herdr-t3;
       userApps.herdr-app.enable = enabled;
     };
     modules = [
@@ -39,6 +40,9 @@ let
     "herdr-app/mods/work-agents/main.js"
     "herdr-app/mods/subscription-usage/mod.json"
     "herdr-app/mods/subscription-usage/main.js"
+    "herdr-app/mods/atuin-threads/mod.json"
+    "herdr-app/mods/atuin-threads/main.js"
+    "herdr-app/mods/atuin-threads/threads.svg"
   ];
   results = {
     disabledHasNoConfig = builtins.all (name: !(disabled.xdg.configFile ? name)) managed;
@@ -56,6 +60,11 @@ let
       && keys.global."alt-shift-]" == "tab.next";
     preservedDefaults = keys.terminal.ctrl-shift-c == "terminal.copy"
       && keys.global.ctrl-shift-p == "app.palette";
+    herdrT3Keys = keys."layout:herdr-t3".ctrl-shift-a == "t3-tabs.view"
+      && keys."layout:herdr-t3".cmd-shift-b == "t3-chrome.sidebar";
+    herdrT3Installed = enabled.home.activation ? herdrT3
+      && lib.hasInfix "install-herdr-t3" enabled.home.activation.herdrT3.data
+      && !(disabled.home.activation ? herdrT3);
     soundsDisabled = !settings.sounds.enabled;
     terminalFont = settings.font == "Source Code Pro";
     rosePine = settings.theme == "rose-pine" && theme.background == "#191724"

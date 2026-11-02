@@ -894,9 +894,37 @@ in
       master.gh-stack
     ];
   };
+    # The Herdr app's atuin-threads mod needs `atuin threads` (18.24.3+).
+    # nixpkgs has 18.23.0. Remove this override when nixpkgs ships 18.24.3+.
+    package = pkgs.master.atuin.overrideAttrs (
+      finalAttrs: _: {
+        version = "18.24.4";
+        src = pkgs.fetchFromGitHub {
+          owner = "atuinsh";
+          repo = "atuin";
+          tag = "v${finalAttrs.version}";
+          hash = "sha256-IyAR7TZqMrCuflkfs9Rgnfm5PrUDYVi0O8//WU8/KAI=";
+        };
+        cargoDeps = pkgs.rustPlatform.fetchCargoVendor {
+          inherit (finalAttrs) src;
+          hash = "sha256-rwB3hdVygTRAxaSCIioFAjMWw9V5bkRUBXHyFrQ4MtI=";
+        };
+        # 18.24's atuin-server tests need Postgres and a live server, absent
+        # in the sandbox. This package does not build the server.
+        cargoTestFlags = [
+          "--workspace"
+          "--exclude"
+          "atuin-server"
+        ];
+      }
+    );
+    # Threads capture needs the daemon. This is what
+    # `atuin config enable threads` writes, done declaratively.
+    daemon.enable = true;
 
   programs.git = {
     enable = true;
+      threads.capture = true;
     lfs.enable = true;
     signing.format = "openpgp";
     settings = {

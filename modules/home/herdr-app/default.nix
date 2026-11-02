@@ -1,4 +1,5 @@
 {
+  config,
   lib,
   pkgs,
   inputs,
@@ -6,6 +7,18 @@
   ...
 }:
 
+let
+  installHerdrT3 = pkgs.writeShellApplication {
+    name = "install-herdr-t3";
+    runtimeInputs = with pkgs; [
+      coreutils
+      diffutils
+      jq
+      rsync
+    ];
+    text = builtins.readFile ./install-herdr-t3.sh;
+  };
+in
 {
   config = lib.mkIf (userApps.herdr-app.enable or false) {
     # Only the desktop app comes from the temporary PR input. The Herdr TUI
@@ -31,6 +44,18 @@
       "herdr-app/mods/work-agents/main.js".source = ./mods/work-agents/main.js;
       "herdr-app/mods/subscription-usage/mod.json".source = ./mods/subscription-usage/mod.json;
       "herdr-app/mods/subscription-usage/main.js".source = ./mods/subscription-usage/main.js;
+      # From github:atuinsh/herdr-atuin-threads@6e2786d. Needs atuin threads;
+      # see programs.atuin in users/jordangarrison/home.nix.
+      "herdr-app/mods/atuin-threads/mod.json".source = ./mods/atuin-threads/mod.json;
+      "herdr-app/mods/atuin-threads/main.js".source = ./mods/atuin-threads/main.js;
+      "herdr-app/mods/atuin-threads/threads.svg".source = ./mods/atuin-threads/threads.svg;
     };
+
+    # Herdr T3 layout (inputs.herdr-t3; `nix flake update herdr-t3` to update).
+    # Copied, not linked: see install-herdr-t3.sh. This step owns the t3-*
+    # mods and layouts/herdr-t3.*; local edits to them are replaced.
+    home.activation.herdrT3 = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      run ${lib.getExe installHerdrT3} ${inputs.herdr-t3} "${config.xdg.configHome}/herdr-app"
+    '';
   };
 }

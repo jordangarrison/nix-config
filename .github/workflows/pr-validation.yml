@@ -23,7 +23,7 @@ concurrency:
 
 env:
   # The lakeline-cg and sre-claude-auto-runner inputs live on the
-  # Tailscale-only Forgejo, and floai, jagpi, and pi-extensions are private
+  # Tailscale-only Forgejo, and floai and jagpi are private
   # GitHub repos fetched over SSH — all unreachable from credential-less
   # GitHub-hosted runners. CI swaps them for local stubs that mirror the interface
   # this repo uses.
@@ -32,7 +32,6 @@ env:
     --override-input sre-claude-auto-runner path:./ci/stubs/sre-claude-auto-runner
     --override-input floai path:./ci/stubs/floai
     --override-input jagpi path:./ci/stubs/jagpi
-    --override-input pi-extensions path:./ci/stubs/pi-extensions
     --no-write-lock-file
 
 jobs:

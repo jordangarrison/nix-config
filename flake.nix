@@ -99,13 +99,6 @@
     jagpi = {
       url = "git+ssh://git@github.com/jordangarrison/jagpi";
     };
-    # Private repo, fetched over SSH like jagpi (same `nh flake update`
-    # caveat). Only its claude-bridge package is used: jagpi's provider
-    # plugin (hosts/endeavour/jagpi.nix). Pi's own bridge comes from npm.
-    pi-extensions = {
-      url = "git+ssh://git@github.com/jordangarrison/pi-extensions";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     tuicr = {
       url = "github:agavra/tuicr";
       inputs.nixpkgs.follows = "nixpkgs";

@@ -52,6 +52,7 @@ let
       && keys.global.alt-j == "pane.go:down"
       && keys.global.alt-k == "pane.go:up"
       && keys.global.alt-l == "pane.go:right";
+    atuinThreadsKey = keys.global.ctrl-shift-r == "mod.open:atuin-threads";
     spaceKeys = keys.global.alt-shift-j == "space.next"
       && keys.global.alt-shift-k == "space.prev";
     tabKeys = keys.global."alt-{" == "tab.prev"

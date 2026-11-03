@@ -49,6 +49,12 @@
       url = "github:jankeesvw/herdr-issues";
       flake = false;
     };
+    # Herdr app vitals window, by mrolafsson. Source only; the herdr-app
+    # module copies app/mods/vitals. The mod downloads its own binary.
+    herdr-vitals = {
+      url = "github:mrolafsson/herdr-vitals";
+      flake = false;
+    };
     niri.url = "github:sodiboo/niri-flake";
     noctalia = {
       # Pinned to the last v4 (QML/quickshell) commit. v5 is a ground-up C++

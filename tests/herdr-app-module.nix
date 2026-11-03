@@ -12,6 +12,7 @@ let
       inputs.herdr-t3 = flake.inputs.herdr-t3;
       inputs.herdr-space-folders = flake.inputs.herdr-space-folders;
       inputs.herdr-issues = flake.inputs.herdr-issues;
+      inputs.herdr-vitals = flake.inputs.herdr-vitals;
       userApps.herdr-app.enable = enabled;
     };
     modules = [
@@ -61,6 +62,8 @@ let
       && keys.global.alt-k == "pane.go:up"
       && keys.global.alt-l == "pane.go:right";
     atuinThreadsKey = keys.global.ctrl-shift-r == "mod.open:atuin-threads";
+    vitalsKey = keys.global."cmd-alt-v" == "mod.open:vitals"
+      && keys."mod:vitals".escape == "vitals.close";
     spaceKeys = keys.global.alt-shift-j == "space.next"
       && keys.global.alt-shift-k == "space.prev";
     tabKeys = keys.global."alt-{" == "tab.prev"
@@ -82,7 +85,9 @@ let
     herdrModsInstalled = enabled.home.activation ? herdrMods
       && lib.hasInfix "install-herdr-mods" enabled.home.activation.herdrMods.data
       && lib.hasInfix "issues=" enabled.home.activation.herdrMods.data
+      && lib.hasInfix "vitals=" enabled.home.activation.herdrMods.data
       && !(files ? "herdr-app/mods/issues/main.js")
+      && !(files ? "herdr-app/mods/vitals/main.js")
       && !(disabled.home.activation ? herdrMods);
     soundsDisabled = !settings.sounds.enabled;
     terminalFont = settings.font == "Source Code Pro";

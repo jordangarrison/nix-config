@@ -31,10 +31,6 @@
       # inputs.nixpkgs.follows = "nixpkgs";
     };
     llm-agents.url = "github:numtide/llm-agents.nix";
-    # Temporary exception for the desktop app only (upstream PR #11664).
-    # Remove once the regular llm-agents input ships herdr-app.
-    # Keep the PR's own dependency pins; do not replace the llm-agents overlay.
-    herdr-app.url = "github:arthurk/llm-agents.nix/0da37226a5efee8d264a75f6f32a8fa6cbe7937f";
     # Herdr app layout by JinJieBeWater. Source only; the herdr-app module
     # copies its mods and layout into ~/.config/herdr-app.
     herdr-t3 = {

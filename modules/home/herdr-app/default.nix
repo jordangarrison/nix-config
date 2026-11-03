@@ -21,11 +21,7 @@ let
 in
 {
   config = lib.mkIf (userApps.herdr-app.enable or false) {
-    # Only the desktop app comes from the temporary PR input. The Herdr TUI
-    # and all other agent packages stay on the regular llm-agents input.
-    home.packages = [
-      inputs.herdr-app.packages.${pkgs.stdenv.hostPlatform.system}.herdr-app
-    ];
+    home.packages = [ pkgs.llm-agents.herdr-app ];
 
     # Keep personal configuration declarative, as with herdr/config.toml.
     # The work-items layout and mod are ours. Do not manage layouts/.state,

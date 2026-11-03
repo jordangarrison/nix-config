@@ -2,11 +2,13 @@
 { flake }:
 let
   inherit (flake.inputs.nixpkgs) lib;
-  pkgs = import flake.inputs.nixpkgs { system = "x86_64-linux"; };
+  pkgs = import flake.inputs.nixpkgs {
+    system = "x86_64-linux";
+    overlays = [ (final: prev: { llm-agents.herdr-app = prev.hello; }) ];
+  };
   mkHome = enabled: (flake.inputs.home-manager.lib.homeManagerConfiguration {
     inherit pkgs;
     extraSpecialArgs = {
-      inputs.herdr-app.packages.x86_64-linux.herdr-app = pkgs.hello;
       inputs.herdr-t3 = flake.inputs.herdr-t3;
       inputs.herdr-space-folders = flake.inputs.herdr-space-folders;
       userApps.herdr-app.enable = enabled;

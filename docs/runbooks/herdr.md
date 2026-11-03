@@ -14,15 +14,11 @@ than editing the symlink or changing settings in the Herdr UI.
 unmanaged and lives in `~/.config/herdr/session.json` and
 `~/.config/herdr/session-history.json`.
 
-## Desktop app (temporary input)
+## Desktop app
 
 Endeavour and Opportunity enable `users.jordangarrison.apps.herdr-app`;
-flomac enables `userApps.herdr-app` in its Home Manager arguments. Only
-`herdr-app` comes from the separate, pinned `inputs.herdr-app`, which tracks
-[llm-agents.nix PR #11664](https://github.com/numtide/llm-agents.nix/pull/11664).
-The regular `llm-agents` input, Herdr TUI, hooks, and session state are unchanged.
-Once the regular input ships the desktop package, use it in
-`modules/home/herdr-app/default.nix` and remove the temporary input.
+flomac enables `userApps.herdr-app` in its Home Manager arguments. The app is
+`pkgs.llm-agents.herdr-app` from the regular `llm-agents` input, like the TUI.
 
 The desktop package and personal configuration are managed together in
 `modules/home/herdr-app/`, gated by `userApps.herdr-app.enable`. Nix owns:
@@ -99,10 +95,14 @@ backups into a dated backup folder. Do not use `force = true`. The manual
 migration backup is under `~/.config/herdr-app/backups/` on Opportunity.
 
 Launch `herdr-app` or select Herdr in the desktop launcher after activation.
-The desktop app needs the separate `herdr-core` (`hc`); this PR packages only
-the GUI. The app offers to install a missing core into `~/.local/bin`, outside
-Nix management. Adding the GUI does not install that core or migrate existing
-TUI sessions. Do not replace or restart the existing TUI server for this app.
+The desktop app needs `herdr-core` (`hc`). By exception, `herdr-core` is not
+Nix-managed (see `docs/adr/007-herdr-core-outside-nix.md`). The app installs
+it into `~/.local/bin`; update it with `hc update` and `hc machine update`.
+Do not put a Nix `herdr-core` on PATH. The copy at the end of the `herdr-app`
+wrapper's PATH is only a fallback. After an `llm-agents` update, compare
+`hc --version` with the core that `herdr-app` pairs with, and update if it is
+behind. Adding the GUI does not migrate existing TUI sessions. Do not replace
+or restart the existing TUI server for this app.
 
 ## Agent integrations
 

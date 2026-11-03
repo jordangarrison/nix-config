@@ -71,8 +71,9 @@ in
           pup skills install codex --type=skill --dir $out --no-agent
         '';
         # herdr-app prints its skill with --skill, without frontmatter.
-        # herdr-core (hc) is not in Nix; see skills/herdr-core.
-        herdrAppPkg = inputs.herdr-app.packages.${pkgs.stdenv.hostPlatform.system}.herdr-app;
+        # herdr-core (hc) stays outside Nix by exception (ADR 007);
+        # see skills/herdr-core.
+        herdrAppPkg = pkgs.llm-agents.herdr-app;
         herdrAppSkill = pkgs.runCommand "herdr-app-skill-${herdrAppPkg.version}" { } ''
           export HOME=$TMPDIR
           mkdir -p $out/herdr-app

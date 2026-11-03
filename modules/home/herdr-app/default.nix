@@ -49,6 +49,17 @@ in
       "herdr-app/mods/atuin-threads/mod.json".source = ./mods/atuin-threads/mod.json;
       "herdr-app/mods/atuin-threads/main.js".source = ./mods/atuin-threads/main.js;
       "herdr-app/mods/atuin-threads/threads.svg".source = ./mods/atuin-threads/threads.svg;
+      # Space folders (inputs.herdr-space-folders; `nix flake update
+      # herdr-space-folders` to update). Herdr's main layout with a spaces
+      # list that has folders. The mod keeps its folders in
+      # ~/.config/herdr-space-folders.json; we do not manage that file. Its
+      # next/prev space keys are the layout:main-folders section of keys.json.
+      "herdr-app/layouts/main-folders.json".source =
+        "${inputs.herdr-space-folders}/layouts/main-folders.json";
+      "herdr-app/mods/space-folders/mod.json".source =
+        "${inputs.herdr-space-folders}/mods/space-folders/mod.json";
+      "herdr-app/mods/space-folders/main.js".source =
+        "${inputs.herdr-space-folders}/mods/space-folders/main.js";
     };
 
     # Herdr T3 layout (inputs.herdr-t3; `nix flake update herdr-t3` to update).

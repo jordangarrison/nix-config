@@ -41,6 +41,12 @@
       url = "github:JinJieBeWater/herdr-t3";
       flake = false;
     };
+    # Herdr app spaces list with folders, by jankeesvw. Source only; the
+    # herdr-app module links its mod and layout into ~/.config/herdr-app.
+    herdr-space-folders = {
+      url = "github:jankeesvw/herdr-space-folders";
+      flake = false;
+    };
     niri.url = "github:sodiboo/niri-flake";
     noctalia = {
       # Pinned to the last v4 (QML/quickshell) commit. v5 is a ground-up C++

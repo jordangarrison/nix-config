@@ -64,6 +64,14 @@
     "alt-shift-]": "tab.next",
     "alt-shift-[": "tab.prev"
   },
+  "layout:main-folders": {
+    "alt-shift-j": "space-folders.next",
+    "alt-shift-k": "space-folders.prev",
+    "ctrl-shift-pagedown": "space-folders.next",
+    "ctrl-shift-pageup": "space-folders.prev",
+    "ctrl-space shift-n": "space-folders.next",
+    "ctrl-space shift-p": "space-folders.prev"
+  },
   "layout:herdr-t3": {
     "cmd-shift-b": "t3-chrome.sidebar",
     "cmd-shift-a": "t3-tabs.view",

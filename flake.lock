@@ -845,6 +845,22 @@
         "type": "github"
       }
     },
+    "herdr-space-folders": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1793698083,
+        "narHash": "sha256-yeCMgWuE8waP2FTjxOfgQkr2Pcl1RMooe9nqvlvDGOI=",
+        "owner": "jankeesvw",
+        "repo": "herdr-space-folders",
+        "rev": "0f1bae881bd5053e607585d94e8cab2b94a8b0de",
+        "type": "github"
+      },
+      "original": {
+        "owner": "jankeesvw",
+        "repo": "herdr-space-folders",
+        "type": "github"
+      }
+    },
     "herdr-t3": {
       "flake": false,
       "locked": {
@@ -1641,6 +1657,7 @@
         "grok-bot": "grok-bot",
         "grove": "grove",
         "herdr-app": "herdr-app",
+        "herdr-space-folders": "herdr-space-folders",
         "herdr-t3": "herdr-t3",
         "home-manager": "home-manager",
         "hubctl": "hubctl",

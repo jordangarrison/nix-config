@@ -8,6 +8,7 @@ let
     extraSpecialArgs = {
       inputs.herdr-app.packages.x86_64-linux.herdr-app = pkgs.hello;
       inputs.herdr-t3 = flake.inputs.herdr-t3;
+      inputs.herdr-space-folders = flake.inputs.herdr-space-folders;
       userApps.herdr-app.enable = enabled;
     };
     modules = [
@@ -43,6 +44,9 @@ let
     "herdr-app/mods/atuin-threads/mod.json"
     "herdr-app/mods/atuin-threads/main.js"
     "herdr-app/mods/atuin-threads/threads.svg"
+    "herdr-app/layouts/main-folders.json"
+    "herdr-app/mods/space-folders/mod.json"
+    "herdr-app/mods/space-folders/main.js"
   ];
   results = {
     disabledHasNoConfig = builtins.all (name: !(disabled.xdg.configFile ? name)) managed;
@@ -63,6 +67,10 @@ let
       && keys.global.ctrl-shift-p == "app.palette";
     herdrT3Keys = keys."layout:herdr-t3".ctrl-shift-a == "t3-tabs.view"
       && keys."layout:herdr-t3".cmd-shift-b == "t3-chrome.sidebar";
+    spaceFolders = lib.hasInfix ''"mod": "space-folders"'' (builtins.readFile files."herdr-app/layouts/main-folders.json".source)
+      && keys."layout:main-folders".alt-shift-j == "space-folders.next"
+      && keys."layout:main-folders".alt-shift-k == "space-folders.prev"
+      && !(keys."layout:main-folders" ? alt-down);
     herdrT3Installed = enabled.home.activation ? herdrT3
       && lib.hasInfix "install-herdr-t3" enabled.home.activation.herdrT3.data
       && !(disabled.home.activation ? herdrT3);

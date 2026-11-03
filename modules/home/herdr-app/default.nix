@@ -37,6 +37,11 @@ let
     # Changes. Runs gh, curl and `hc read`; caches issues, avatars and images
     # in ~/.config/herdr-app/data/issues/, which we do not manage.
     issues = "${inputs.herdr-issues}/mods/issues";
+    # Vitals window (inputs.herdr-vitals; `nix flake update herdr-vitals`
+    # to update). CPU, memory, and disks for this machine or a connected
+    # one. First read downloads herdr-vitals onto that machine and runs it.
+    # Not the TUI plugin.
+    vitals = "${inputs.herdr-vitals}/app/mods/vitals";
   };
 in
 {

@@ -815,6 +815,22 @@
         "type": "github"
       }
     },
+    "herdr-vitals": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1793558688,
+        "narHash": "sha256-jwZQuoDvKdNj7/28MWhWmGtMHfG+s21m3TAIcb/WFr8=",
+        "owner": "mrolafsson",
+        "repo": "herdr-vitals",
+        "rev": "2b10b7217207b7d4e05e2ec1a40295073b7aed99",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mrolafsson",
+        "repo": "herdr-vitals",
+        "type": "github"
+      }
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -1582,6 +1598,7 @@
         "herdr-issues": "herdr-issues",
         "herdr-space-folders": "herdr-space-folders",
         "herdr-t3": "herdr-t3",
+        "herdr-vitals": "herdr-vitals",
         "home-manager": "home-manager",
         "hubctl": "hubctl",
         "isp-snitch": "isp-snitch",

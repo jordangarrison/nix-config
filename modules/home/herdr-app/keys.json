@@ -49,6 +49,7 @@
     "ctrl-shift-t": "tab.new",
     "ctrl-shift-k": "mod.open:picker",
     "ctrl-shift-r": "mod.open:atuin-threads",
+    "cmd-alt-v": "mod.open:vitals",
     "ctrl-shift-p": "app.palette",
     "ctrl-,": "app.settings",
     "ctrl-shift-o": "pane.split:right",
@@ -79,6 +80,9 @@
     "ctrl-shift-f": "t3-chrome.sidebar",
     "ctrl-shift-a": "t3-tabs.view",
     "ctrl-shift-s": "t3-focus.settle"
+  },
+  "mod:vitals": {
+    "escape": "vitals.close"
   },
   "terminal": {
     "ctrl-backspace": "send:\u0017",

@@ -955,14 +955,15 @@
     "jagpi": {
       "inputs": {
         "flake-utils": "flake-utils_9",
-        "nixpkgs": "nixpkgs_5"
+        "nixpkgs": "nixpkgs_5",
+        "slack-cli": "slack-cli"
       },
       "locked": {
-        "lastModified": 1793685800,
-        "narHash": "sha256-z5OdAVaPgBG5MENZLvmYEiFM8B7nMs8y8W8y4Lt1VfA=",
+        "lastModified": 1793724109,
+        "narHash": "sha256-Ed+W1zeCuCPSefSMwoFv7Vn+KHGzLGXGq2ADt9ublI8=",
         "ref": "refs/heads/main",
-        "rev": "f95b10e06dea7216d658ef22aa612068d25a2e3f",
-        "revCount": 288,
+        "rev": "d6d94877f72ad1d80ab3b30de8ab8fd1ba808933",
+        "revCount": 294,
         "type": "git",
         "url": "ssh://git@github.com/jordangarrison/jagpi"
       },
@@ -1786,6 +1787,27 @@
       "original": {
         "owner": "oxalica",
         "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "slack-cli": {
+      "inputs": {
+        "nixpkgs": [
+          "jagpi",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793661593,
+        "narHash": "sha256-C7P/J2J1y2rXBs+RwAigx8cyGddS0PHfNDX14pJvyEY=",
+        "owner": "jordangarrison",
+        "repo": "slack-cli-flake",
+        "rev": "69a0839bc994239343a43ca70f133cc52db79d98",
+        "type": "github"
+      },
+      "original": {
+        "owner": "jordangarrison",
+        "repo": "slack-cli-flake",
         "type": "github"
       }
     },

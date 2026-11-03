@@ -18,6 +18,26 @@ let
     ];
     text = builtins.readFile ./install-herdr-t3.sh;
   };
+
+  installHerdrMods = pkgs.writeShellApplication {
+    name = "install-herdr-mods";
+    runtimeInputs = with pkgs; [
+      coreutils
+      findutils
+      rsync
+    ];
+    text = builtins.readFile ./install-herdr-mods.sh;
+  };
+
+  # Third-party mods with more than one file: copied, not linked (see
+  # install-herdr-mods.sh). Name in mods/ -> its folder in a flake input.
+  copiedMods = {
+    # Issues panel (inputs.herdr-issues; `nix flake update herdr-issues` to
+    # update). GitHub issues of the focused terminal's repo, beside Files and
+    # Changes. Runs gh, curl and `hc read`; caches issues, avatars and images
+    # in ~/.config/herdr-app/data/issues/, which we do not manage.
+    issues = "${inputs.herdr-issues}/mods/issues";
+  };
 in
 {
   config = lib.mkIf (userApps.herdr-app.enable or false) {
@@ -56,17 +76,9 @@ in
         "${inputs.herdr-space-folders}/mods/space-folders/mod.json";
       "herdr-app/mods/space-folders/main.js".source =
         "${inputs.herdr-space-folders}/mods/space-folders/main.js";
-      # Issues panel (inputs.herdr-issues; `nix flake update herdr-issues` to
-      # update). GitHub issues of the focused terminal's repo, beside Files and
-      # Changes. Runs gh, curl and `hc read`; caches issues, avatars and
-      # images in ~/.config/herdr-app/data/issues/, which we do not manage.
-      # main-issues is Herdr's main layout with the panel and its button.
+      # main-issues: Herdr's main layout with the issues panel (copiedMods)
+      # and its button.
       "herdr-app/layouts/main-issues.json".source = "${inputs.herdr-issues}/layouts/main-issues.json";
-      "herdr-app/mods/issues/mod.json".source = "${inputs.herdr-issues}/mods/issues/mod.json";
-      "herdr-app/mods/issues/main.js".source = "${inputs.herdr-issues}/mods/issues/main.js";
-      "herdr-app/mods/issues/viewer.js".source = "${inputs.herdr-issues}/mods/issues/viewer.js";
-      "herdr-app/mods/issues/icons.js".source = "${inputs.herdr-issues}/mods/issues/icons.js";
-      "herdr-app/mods/issues/pictures.js".source = "${inputs.herdr-issues}/mods/issues/pictures.js";
     };
 
     # Herdr T3 layout (inputs.herdr-t3; `nix flake update herdr-t3` to update).
@@ -74,6 +86,13 @@ in
     # mods and layouts/herdr-t3.*; local edits to them are replaced.
     home.activation.herdrT3 = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       run ${lib.getExe installHerdrT3} ${inputs.herdr-t3} "${config.xdg.configHome}/herdr-app"
+    '';
+
+    # After linkGeneration, so the old generation's links are gone first.
+    home.activation.herdrMods = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+      run ${lib.getExe installHerdrMods} "${config.xdg.configHome}/herdr-app" ${
+        lib.escapeShellArgs (lib.mapAttrsToList (name: src: "${name}=${src}") copiedMods)
+      }
     '';
   };
 }

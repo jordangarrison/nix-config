@@ -11,6 +11,7 @@ let
     extraSpecialArgs = {
       inputs.herdr-t3 = flake.inputs.herdr-t3;
       inputs.herdr-space-folders = flake.inputs.herdr-space-folders;
+      inputs.herdr-issues = flake.inputs.herdr-issues;
       userApps.herdr-app.enable = enabled;
     };
     modules = [
@@ -49,6 +50,7 @@ let
     "herdr-app/layouts/main-folders.json"
     "herdr-app/mods/space-folders/mod.json"
     "herdr-app/mods/space-folders/main.js"
+    "herdr-app/layouts/main-issues.json"
   ];
   results = {
     disabledHasNoConfig = builtins.all (name: !(disabled.xdg.configFile ? name)) managed;
@@ -76,6 +78,12 @@ let
     herdrT3Installed = enabled.home.activation ? herdrT3
       && lib.hasInfix "install-herdr-t3" enabled.home.activation.herdrT3.data
       && !(disabled.home.activation ? herdrT3);
+    # Multi-file mods are copied, never linked: linked relative imports fail.
+    herdrModsInstalled = enabled.home.activation ? herdrMods
+      && lib.hasInfix "install-herdr-mods" enabled.home.activation.herdrMods.data
+      && lib.hasInfix "issues=" enabled.home.activation.herdrMods.data
+      && !(files ? "herdr-app/mods/issues/main.js")
+      && !(disabled.home.activation ? herdrMods);
     soundsDisabled = !settings.sounds.enabled;
     terminalFont = settings.font == "Source Code Pro";
     rosePine = settings.theme == "rose-pine" && theme.background == "#191724"

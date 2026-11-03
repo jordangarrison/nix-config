@@ -46,9 +46,12 @@
       }
     ];
 
-    # Slack: no app or tokens yet. Follow jagpi's docs/slack-app.md, then set
-    # the file with SLACK_BOT_TOKEN and SLACK_APP_TOKEN (and owners.slack in
-    # settings):
-    # environmentFile = "/home/jordangarrison/.config/jagpi/slack.env";
+    # Slack: the jagpi app (A0CEC4LHTNV) in the FloSports workspace, created
+    # from jagpi's packages/slack/manifest.json with the Slack CLI (jagpi
+    # docs/slack-app.md, ADR 0026). Not JordanBot: Hermes keeps that app.
+    # The file is mode 600 and outside the store, with SLACK_BOT_TOKEN and
+    # SLACK_APP_TOKEN. systemd does not start the unit while it is missing.
+    environmentFile = "/home/jordangarrison/.config/jagpi/slack.env";
+    settings.owners.slack = [ "UQ69UGHKM" ];
   };
 }

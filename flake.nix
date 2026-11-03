@@ -43,6 +43,12 @@
       url = "github:jankeesvw/herdr-space-folders";
       flake = false;
     };
+    # Herdr app GitHub issues panel, by jankeesvw. Source only; the
+    # herdr-app module links its mod and layout into ~/.config/herdr-app.
+    herdr-issues = {
+      url = "github:jankeesvw/herdr-issues";
+      flake = false;
+    };
     niri.url = "github:sodiboo/niri-flake";
     noctalia = {
       # Pinned to the last v4 (QML/quickshell) commit. v5 is a ground-up C++

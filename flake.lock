@@ -767,6 +767,22 @@
         "type": "github"
       }
     },
+    "herdr-issues": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1793698060,
+        "narHash": "sha256-C230Src4O4OkjxjpMGqJatgJHv7Rz38WRJA37//8QQs=",
+        "owner": "jankeesvw",
+        "repo": "herdr-issues",
+        "rev": "dd1d0f4aaed35ce2b75bf30dd925941d46ff3d0a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "jankeesvw",
+        "repo": "herdr-issues",
+        "type": "github"
+      }
+    },
     "herdr-space-folders": {
       "flake": false,
       "locked": {
@@ -1563,6 +1579,7 @@
         "greenlight": "greenlight",
         "grok-bot": "grok-bot",
         "grove": "grove",
+        "herdr-issues": "herdr-issues",
         "herdr-space-folders": "herdr-space-folders",
         "herdr-t3": "herdr-t3",
         "home-manager": "home-manager",

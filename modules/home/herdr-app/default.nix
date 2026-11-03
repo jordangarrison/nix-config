@@ -56,6 +56,17 @@ in
         "${inputs.herdr-space-folders}/mods/space-folders/mod.json";
       "herdr-app/mods/space-folders/main.js".source =
         "${inputs.herdr-space-folders}/mods/space-folders/main.js";
+      # Issues panel (inputs.herdr-issues; `nix flake update herdr-issues` to
+      # update). GitHub issues of the focused terminal's repo, beside Files and
+      # Changes. Runs gh, curl and `hc read`; caches issues, avatars and
+      # images in ~/.config/herdr-app/data/issues/, which we do not manage.
+      # main-issues is Herdr's main layout with the panel and its button.
+      "herdr-app/layouts/main-issues.json".source = "${inputs.herdr-issues}/layouts/main-issues.json";
+      "herdr-app/mods/issues/mod.json".source = "${inputs.herdr-issues}/mods/issues/mod.json";
+      "herdr-app/mods/issues/main.js".source = "${inputs.herdr-issues}/mods/issues/main.js";
+      "herdr-app/mods/issues/viewer.js".source = "${inputs.herdr-issues}/mods/issues/viewer.js";
+      "herdr-app/mods/issues/icons.js".source = "${inputs.herdr-issues}/mods/issues/icons.js";
+      "herdr-app/mods/issues/pictures.js".source = "${inputs.herdr-issues}/mods/issues/pictures.js";
     };
 
     # Herdr T3 layout (inputs.herdr-t3; `nix flake update herdr-t3` to update).

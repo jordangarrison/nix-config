@@ -122,6 +122,9 @@ published. Do not add inputs or overlay overrides to get ahead of it; wait for
 the next `llm-agents` update. Do not patch third-party agent code (`patches`,
 `substituteInPlace`, source swaps).
 
+Exception: `herdr-core` (`hc`) stays self-managed in `~/.local/bin`. Do not
+put it on PATH through Nix; see `docs/adr/007-herdr-core-outside-nix.md`.
+
 pi installs its third-party extensions itself from
 `programs.pi.settings.packages`, unversioned. This is a deliberate trade:
 each machine keeps the release it first installed until

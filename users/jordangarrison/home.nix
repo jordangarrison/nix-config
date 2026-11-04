@@ -908,7 +908,7 @@ in
     # The Herdr app's atuin-threads mod needs `atuin threads` (18.24.3+).
     # nixpkgs has 18.23.0. Remove this override when nixpkgs ships 18.24.3+.
     package = pkgs.master.atuin.overrideAttrs (
-      finalAttrs: _: {
+      finalAttrs: old: {
         version = "18.24.4";
         src = pkgs.fetchFromGitHub {
           owner = "atuinsh";
@@ -927,6 +927,20 @@ in
           "--exclude"
           "atuin-server"
         ];
+        # Tests that depend on the macOS build machine, not on atuin:
+        # - The resume tests look for a running pi in the process list. The
+        #   macOS sandbox shows every process on the machine, so a pi
+        #   session open during the build fails them.
+        # - The reload test needs the reload to be slow enough to time;
+        #   on Apple silicon it is not ("reload too fast to measure").
+        checkFlags =
+          (old.checkFlags or [ ])
+          ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
+            "--skip=a_copy_behind_another_machine_catches_up_as_it_resumes"
+            "--skip=a_diverged_copy_resumes_only_as_chosen"
+            "--skip=a_session_gone_on_with_elsewhere_catches_up_where_it_came_from"
+            "--skip=end_history_is_not_starved_by_an_index_reload"
+          ];
       }
     );
     # Threads capture needs the daemon. This is what

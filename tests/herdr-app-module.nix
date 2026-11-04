@@ -13,6 +13,7 @@ let
       inputs.herdr-space-folders = flake.inputs.herdr-space-folders;
       inputs.herdr-issues = flake.inputs.herdr-issues;
       inputs.herdr-vitals = flake.inputs.herdr-vitals;
+      inputs.herdr-linear = flake.inputs.herdr-linear;
       userApps.herdr-app.enable = enabled;
     };
     modules = [
@@ -86,6 +87,8 @@ let
       && lib.hasInfix "install-herdr-mods" enabled.home.activation.herdrMods.data
       && lib.hasInfix "issues=" enabled.home.activation.herdrMods.data
       && lib.hasInfix "vitals=" enabled.home.activation.herdrMods.data
+      && lib.hasInfix "linear=" enabled.home.activation.herdrMods.data
+      && !(files ? "herdr-app/mods/linear/main.js")
       && !(files ? "herdr-app/mods/issues/main.js")
       && !(files ? "herdr-app/mods/vitals/main.js")
       && !(disabled.home.activation ? herdrMods);

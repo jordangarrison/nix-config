@@ -783,6 +783,22 @@
         "type": "github"
       }
     },
+    "herdr-linear": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1793559196,
+        "narHash": "sha256-j5lIthUPRza+1q3eTDsznh5rOZjrV9O5Gcl2O6zxV4o=",
+        "owner": "mrolafsson",
+        "repo": "herdr-linear",
+        "rev": "0b031488214e37c0ee06ec7b08455173d64dac52",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mrolafsson",
+        "repo": "herdr-linear",
+        "type": "github"
+      }
+    },
     "herdr-space-folders": {
       "flake": false,
       "locked": {
@@ -1596,6 +1612,7 @@
         "grok-bot": "grok-bot",
         "grove": "grove",
         "herdr-issues": "herdr-issues",
+        "herdr-linear": "herdr-linear",
         "herdr-space-folders": "herdr-space-folders",
         "herdr-t3": "herdr-t3",
         "herdr-vitals": "herdr-vitals",

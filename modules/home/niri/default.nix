@@ -415,6 +415,19 @@ in
         matches = [ { app-id = "^nm-connection-editor$"; } ];
         open-floating = true;
       }
+      # Float pi show_html pages: `brave --app` windows for files under
+      # ~/.cache/pi-html/ (modules/home/pi/extensions/html-popup.ts).
+      {
+        matches = [ { app-id = "^brave-.*_pi-html_.*$"; } ];
+        open-floating = true;
+        open-focused = true;
+        default-column-width = {
+          proportion = 0.6;
+        };
+        default-window-height = {
+          proportion = 0.75;
+        };
+      }
       # Float Sweet Nothings dictation window
       {
         matches = [ { app-id = "^com\\.sweet-nothings$"; } ];

@@ -131,6 +131,7 @@ gaps = 8  # Gap between windows
 ## Window Rules
 
 - **Floating by default**: file dialogs, pop-ups, Nautilus, nm-applet, blueman
+- **pi `show_html` pages**: `brave --app` windows for `~/.cache/pi-html/` files float, centered, 60% × 75%
 - **Workspace assignments**: Brave -> 1, Obsidian -> 4, Steam -> 10
 
 ## Adding New Keybindings

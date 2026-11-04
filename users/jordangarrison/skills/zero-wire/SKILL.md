@@ -74,23 +74,25 @@ assessment is available, make a fresh assessment and apply the normal post rule.
 
 For **not exposed**, write one line to jagpi's `memory` tool with the GUID,
 verdict, and evidence, or say so when run by hand. Keep this out of the Slack
-notice. Retain each final assessment (GUID, verdict, evidence, unknowns, next
-step) in jagpi memory so the next update can be compared.
+notice. A posted assessment needs no memory entry: it is the run's answer, and
+`search_history` finds it when the briefing changes. Memory is size-capped.
 
 ## 5. Prepare the answer and acknowledge
 
-Build one message for the run, with no preamble. Use Slack markdown and at most
-about eight lines per briefing that needs a post:
+Build one message for the run, with no preamble. jagpi posts the answer as
+standard Markdown (`chat.postMessage` `markdown_text`), not Slack mrkdwn: links
+are `[Title](url)` and bold is `**bold**`. Use at most about eight lines per
+briefing that needs a post:
 
-```text
-*<briefing-url|Title>* — CVE-YYYY-NNNN (or no CVE assigned)
-*Verdict:* Affected / Cannot rule out
-*Evidence:* repo, file, version or image; where it runs
-*Unknowns:* missing facts, or none
-*Next step:* specific action; likely owner team if clear
+```markdown
+**[Title](briefing-url)**: CVE-YYYY-NNNN (or no CVE assigned)
+**Verdict:** Affected / Cannot rule out
+**Evidence:** repo, file, version or image; where it runs
+**Unknowns:** missing facts, or none
+**Next step:** specific action; likely owner team if clear
 ```
 
-After each decision is final and its assessment is retained, run
+After each decision is final (and a not-exposed one is in memory), run
 `zero-wire-poll ack <guid>` in the same run. Use the exact GUID printed by the
 poller as a quoted argument. Ack only the items you finished, not `--all`:
 unacknowledged items return next hour. If ack fails, report the blocker; do not

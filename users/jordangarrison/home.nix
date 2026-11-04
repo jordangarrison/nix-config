@@ -366,6 +366,9 @@ in
         "npm:pi-web-access"
         "npm:pi-foldable-tools"
         "git:github.com/joelhooks/pi-until"
+        # Registers ask_user: structured questions instead of guessing.
+        # Peers @earendil-works/pi-coding-agent >=0.74.0; current pi is 1.5.0.
+        "npm:pi-ask-user"
       ];
       # Install with the Nix npm, so package installs do not depend on PATH.
       npmCommand = [ "${pkgs.nodejs}/bin/npm" ];

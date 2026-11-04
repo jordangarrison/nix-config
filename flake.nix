@@ -55,6 +55,12 @@
       url = "github:mrolafsson/herdr-vitals";
       flake = false;
     };
+    # Herdr app Linear popup, by mrolafsson. Source only. The herdr-app
+    # module copies app/mods/linear and builds the Go binary from this input.
+    herdr-linear = {
+      url = "github:mrolafsson/herdr-linear";
+      flake = false;
+    };
     niri.url = "github:sodiboo/niri-flake";
     noctalia = {
       # Pinned to the last v4 (QML/quickshell) commit. v5 is a ground-up C++

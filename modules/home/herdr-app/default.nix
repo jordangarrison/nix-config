@@ -42,11 +42,43 @@ let
     # one. First read downloads herdr-vitals onto that machine and runs it.
     # Not the TUI plugin.
     vitals = "${inputs.herdr-vitals}/app/mods/vitals";
+    # Linear popup (inputs.herdr-linear; `nix flake update herdr-linear` to
+    # update). Copied, not linked: it imports ./look.js and its own SVGs.
+    # The Go binary from that same input is pre-placed below, where the mod's
+    # [ -x ] check looks, so the mod does not download a release.
+    linear = "${inputs.herdr-linear}/app/mods/linear";
+  };
+
+  # The mod pins this string and looks up ~/.local/share/herdr-linear/app/<it>/.
+  linearVersion =
+    let
+      line = lib.findFirst (l: lib.hasPrefix "export const LINEAR_VERSION = " l) "" (
+        lib.splitString "\n" (builtins.readFile "${inputs.herdr-linear}/app/mods/linear/main.js")
+      );
+      matched = builtins.match "export const LINEAR_VERSION = \"([^\"]+)\";" line;
+    in
+    if matched == null then
+      throw "herdr-linear: LINEAR_VERSION not found in app/mods/linear/main.js"
+    else
+      builtins.head matched;
+
+  herdrLinear = pkgs.callPackage ../../../packages/herdr-linear {
+    src = inputs.herdr-linear;
+    version = linearVersion;
   };
 in
 {
   config = lib.mkIf (userApps.herdr-app.enable or false) {
-    home.packages = [ pkgs.llm-agents.herdr-app ];
+    home.packages = [
+      pkgs.llm-agents.herdr-app
+      herdrLinear
+    ];
+
+    # The mod never searches PATH. An executable at this exact path makes its
+    # provision script print the path and exit, before curl. The script uses
+    # $HOME/.local/share, not XDG_DATA_HOME.
+    home.file.".local/share/herdr-linear/app/${linearVersion}/herdr-linear".source =
+      lib.getExe herdrLinear;
 
     # Keep personal configuration declarative, as with herdr/config.toml.
     # The work-items layout and mod are ours. Do not manage layouts/.state,

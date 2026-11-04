@@ -598,6 +598,7 @@ in
       ralph
 
       # Script packages (wrapped with dependencies)
+      cloudflare-zero-wire-changes # New or changed Cloudflare Radar Zero Wire briefings
       myip # Public IP with geolocation
       gi # gitignore template fetcher
       tmux-cht # Cheat sheet lookup in tmux

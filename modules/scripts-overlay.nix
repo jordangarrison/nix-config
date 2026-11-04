@@ -6,6 +6,12 @@
     (final: prev: let
       mkScript = final.callPackage ../lib/mkScript.nix { };
     in {
+      cloudflare-zero-wire-changes = final.writers.writePython3Bin "cloudflare-zero-wire-changes" {
+        # Keep the reviewed script unchanged: long help text (E501) and the
+        # original shebang, after the writer's own shebang (E265).
+        flakeIgnore = [ "E501" "E265" ];
+      } (builtins.readFile ../packages/cloudflare-zero-wire-changes/cloudflare-zero-wire-changes.py);
+
       myip = mkScript {
         name = "myip";
         script = ../packages/myip/myip.sh;

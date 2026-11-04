@@ -595,6 +595,7 @@ in
       ralph
 
       # Script packages (wrapped with dependencies)
+      zero-wire-poll # Cloudflare Radar vulnerability briefing feed
       myip # Public IP with geolocation
       gi # gitignore template fetcher
       tmux-cht # Cheat sheet lookup in tmux

@@ -6,6 +6,12 @@
     (final: prev: let
       mkScript = final.callPackage ../lib/mkScript.nix { };
     in {
+      zero-wire-poll = final.writers.writePython3Bin "zero-wire-poll" {
+        # Keep the reviewed poller unchanged: long help text (E501) and the
+        # original shebang, after the writer's own shebang (E265).
+        flakeIgnore = [ "E501" "E265" ];
+      } (builtins.readFile ../packages/zero-wire-poll/zero-wire-poll.py);
+
       myip = mkScript {
         name = "myip";
         script = ../packages/myip/myip.sh;

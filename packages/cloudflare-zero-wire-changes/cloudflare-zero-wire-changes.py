@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""zero-wire-poll: report Cloudflare Radar Zero Wire briefings that are new or changed.
+"""cloudflare-zero-wire-changes: report Cloudflare Radar Zero Wire briefings that are new or changed.
 
-  zero-wire-poll check   print briefings not yet acknowledged (new slug, new GUID, or new category); nothing if none
-  zero-wire-poll ack ID  mark briefings handled, by GUID (as `check` prints them) or `--all` for everything in the feed
-  zero-wire-poll list    print every briefing in the feed with its state, one per line
+  cloudflare-zero-wire-changes check   print briefings not yet acknowledged (new slug, new GUID, or new category); nothing if none
+  cloudflare-zero-wire-changes ack ID  mark briefings handled, by GUID (as `check` prints them) or `--all` for everything in the feed
+  cloudflare-zero-wire-changes list    print every briefing in the feed with its state, one per line
 
 The feed's GUID is `<slug>@<date of the latest chronology update>`, so a material update gets a new GUID and a
 "last checked" bump does not. `check` never writes what was seen: a run that fails before `ack` sees the same briefings again. It does count
 failed fetches in a row (reset by a good one), so a feed that stays down is noticed, not silent.
 
-State: ${XDG_STATE_HOME:-~/.local/state}/zero-wire/seen.json, or --state. Feed: --feed, default the full Zero Wire feed.
+State: ${XDG_STATE_HOME:-~/.local/state}/cloudflare-zero-wire/seen.json, or --state. Feed: --feed, default the full Zero Wire feed.
 Exit codes: 0 ok; 2 the feed could not be fetched or parsed (the message is on stderr); 3 that has now happened
 --alert-after times in a row (default 6) or more: say so to a person.
 """
@@ -25,12 +25,12 @@ from pathlib import Path
 
 FEED = "https://radar.cloudflare.com/security/zero-wire/rss"
 NS = {"content": "http://purl.org/rss/1.0/modules/content/", "dc": "http://purl.org/dc/elements/1.1/"}
-USER_AGENT = "zero-wire-poll/1"
+USER_AGENT = "cloudflare-zero-wire-changes/1"
 
 
 def default_state() -> Path:
     base = os.environ.get("XDG_STATE_HOME") or str(Path.home() / ".local" / "state")
-    return Path(base) / "zero-wire" / "seen.json"
+    return Path(base) / "cloudflare-zero-wire" / "seen.json"
 
 
 class TextOf(HTMLParser):
@@ -173,7 +173,7 @@ def main() -> int:
     except Exception as error:  # noqa: BLE001: any fetch or parse failure is the same answer
         state["failures"] = state.get("failures", 0) + 1
         save(args.state, state)
-        print(f"zero-wire-poll: could not read {args.feed} ({state['failures']} in a row): {error}", file=sys.stderr)
+        print(f"cloudflare-zero-wire-changes: could not read {args.feed} ({state['failures']} in a row): {error}", file=sys.stderr)
         return 3 if state["failures"] >= args.alert_after else 2
     if state.get("failures"):
         state["failures"] = 0
@@ -195,7 +195,7 @@ def main() -> int:
     wanted = {b["guid"] for b in briefings} if args.all else set(args.guids)
     unknown = wanted - {b["guid"] for b in briefings}
     if unknown:
-        print(f"zero-wire-poll: not in the feed: {', '.join(sorted(unknown))}", file=sys.stderr)
+        print(f"cloudflare-zero-wire-changes: not in the feed: {', '.join(sorted(unknown))}", file=sys.stderr)
         return 2
     for briefing in briefings:
         if briefing["guid"] in wanted:

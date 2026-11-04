@@ -74,7 +74,7 @@ in
         # herdr-app prints its skill with --skill, without frontmatter.
         # herdr-core (hc) stays outside Nix by exception (ADR 007);
         # see skills/herdr-core.
-        herdrAppPkg = pkgs.llm-agents.herdr-app;
+        herdrAppPkg = import ../../modules/home/herdr-app/package.nix { inherit pkgs; };
         herdrAppSkill = pkgs.runCommand "herdr-app-skill-${herdrAppPkg.version}" { } ''
           export HOME=$TMPDIR
           mkdir -p $out/herdr-app

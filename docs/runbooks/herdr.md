@@ -17,8 +17,15 @@ unmanaged and lives in `~/.config/herdr/session.json` and
 ## Desktop app
 
 Endeavour and Opportunity enable `users.jordangarrison.apps.herdr-app`;
-flomac enables `userApps.herdr-app` in its Home Manager arguments. The app is
-`pkgs.llm-agents.herdr-app` from the regular `llm-agents` input, like the TUI.
+flomac enables `userApps.herdr-app` in its Home Manager arguments. On Linux
+the app is `pkgs.llm-agents.herdr-app` from the regular `llm-agents` input,
+like the TUI. On macOS that build has no `Herdr.app` bundle, so
+`packages/herdr-app-bin` installs the signed release bundle, starting at the
+`llm-agents` version. The bundle then updates itself between switches; app
+versions on different machines need not match. When an `llm-agents` update
+changes the version, the flomac build fails until you add the new release
+hash to that package. Home Manager copies macOS apps instead of linking them
+(`users/jordangarrison/home-darwin.nix`), so Spotlight finds them.
 
 The desktop package and personal configuration are managed together in
 `modules/home/herdr-app/`, gated by `userApps.herdr-app.enable`. Nix owns:

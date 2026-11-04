@@ -70,7 +70,7 @@ in
 {
   config = lib.mkIf (userApps.herdr-app.enable or false) {
     home.packages = [
-      pkgs.llm-agents.herdr-app
+      (import ./package.nix { inherit pkgs; })
       herdrLinear
     ];
 

@@ -53,7 +53,15 @@
     # SLACK_APP_TOKEN. systemd does not start the unit while it is missing.
     environmentFile = "/home/jordangarrison/.config/jagpi/slack.env";
     settings.owners.slack = [ "UQ69UGHKM" ];
-    # Repos where members may ask a worker to review a PR (jagpi ADR 0029).
-    settings.reviews.repos = [ "flocasts/FloSports30" ];
+    # Repos where members may ask a worker to review a PR (jagpi ADR 0029):
+    # every repo of each FloSports enterprise org.
+    settings.reviews.repos = [
+      "flocasts/*"
+      "milesplit/*"
+      "HockeyTech/*"
+      "DirectAthletics/*"
+      "flo-eng-leaders/*"
+      "KartingCoach/*"
+    ];
   };
 }

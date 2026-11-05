@@ -24,7 +24,7 @@ People gate every run: a reviewer approves before the merge, and Jordan says go 
 |---|---|
 | Target | A ticket id, a PR (URL or number), or a description of the change. A PR starts at **review**; a ticket or description starts at **ticket**. |
 | `--to <stage>` | `land`: merged, deployed to staging, verified there, ticket in its staging state; then ask Jordan about the production release. `review` stops once the PR is ready and announced. `close` (or Jordan's go on the release question) runs through production to done. |
-| `--yolo` | Previews off: messages to other people post without showing Jordan first. Every "ask every time" gate below still asks. |
+| `--preview` | Off: messages to other people post, then get reported. On: show Jordan each one first and post on his OK. The "ask every time" gates below ask either way. |
 
 ## Ledger
 
@@ -37,11 +37,11 @@ The default is to proceed. Engage only on the rows that say so, and come with a 
 | Situation | Do |
 |---|---|
 | **Shape**: the request is broader or narrower than the work needs; one PR or two; designs with different blast radius | Ask, with a recommendation |
-| Words to other people in Jordan's name: ticket comments that ask or tell people things, replies to other people's review comments | Preview, post on his OK (`--yolo`: post) |
+| Words to other people in Jordan's name: ticket comments that ask or tell people things, replies to other people's review comments | Post, then report the text and link (`--preview`: show first, post on his OK). A message Jordan asked for posts as he asked; if you reworded his point, say how in the report |
 | A push that dismisses an approval; `--admin`; changes outside the repo (identity-provider groups, tokens, cloud consoles); queries or writes against prod data; deleting anything this run didn't create | Ask every time |
 | Credentials that need his browser or a new token | Say the exact command or console path, then wait |
 | A failure whose fix is outside the change's scope | Report with a diagnosis, then ask |
-| **Production release**: any step that puts the change in production (promoting a build, merging a release PR, pushing a tag, a manual prod deploy, a prod sync) | Ask, with what's in it and how it checked out on staging. Only `--to close` at invocation answers it in advance; `--yolo` doesn't |
+| **Production release**: any step that puts the change in production (promoting a build, merging a release PR, pushing a tag, a manual prod deploy, a prod sync) | Ask, with what's in it and how it checked out on staging. Only `--to close` at invocation answers it in advance |
 | Fixes inside scope; replies to, and resolving, threads this run's own self-review opened; marking ready and announcing once clean; merging when the land preconditions hold; deploying to non-production environments; re-running a cancelled deploy; cleaning up what this run created | Do it |
 | Milestones: PR open, ready and announced, approved, merged, on staging, released, closed | Tell him, two lines at most |
 | A watcher wakes with nothing new | Say nothing |
@@ -73,7 +73,7 @@ Done when the draft PR is open, the branch is pushed, and the repo's checks pass
 
 1. **Self-review** with [[self-review]] after every push, until a round has nothing to fix. Reply on each of its threads with the commit or the reason, then resolve them: merge rules often require resolved threads.
 2. **Ready and announce** once a round is clean and CI is green: `gh pr ready`, then the workspace's review-channel skill (its `post` mode, with its no-watch flag if it has one: step 3 starts [[pr-watch]]), once per PR. No channel: skip the announcement.
-3. **Others' feedback** through [[pr-watch]], sharing [[self-review]]'s state file. Before a push to an approved PR, ask: the push dismisses the approval.
+3. **Others' feedback** through [[pr-watch]], sharing [[self-review]]'s state file, with `--yolo` unless this run has `--preview`. Before a push to an approved PR, ask: the push dismisses the approval.
 4. **Nudges** follow the review-channel skill's rules, or a deadline Jordan sets.
 
 Done when the merge preconditions in [`land.md`](land.md) hold. `--to review` stops after step 2.

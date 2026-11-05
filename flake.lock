@@ -929,11 +929,11 @@
         "slack-cli": "slack-cli"
       },
       "locked": {
-        "lastModified": 1793724109,
-        "narHash": "sha256-Ed+W1zeCuCPSefSMwoFv7Vn+KHGzLGXGq2ADt9ublI8=",
+        "lastModified": 1793826341,
+        "narHash": "sha256-WQ4eclFxpbEbttEpx5QjrU4bgBQtksSz9BXYyRgJr4E=",
         "ref": "refs/heads/main",
-        "rev": "d6d94877f72ad1d80ab3b30de8ab8fd1ba808933",
-        "revCount": 294,
+        "rev": "9e35afd556f1e5b7a366e3e5f22189e1008ceb11",
+        "revCount": 298,
         "type": "git",
         "url": "ssh://git@github.com/jordangarrison/jagpi"
       },
@@ -948,11 +948,11 @@
         "nixpkgs": "nixpkgs_5"
       },
       "locked": {
-        "lastModified": 1792031843,
-        "narHash": "sha256-cHZhBXS8v+8km2U9e9QuhQ8tyu/OooMeCinjB/hfmX0=",
+        "lastModified": 1793853221,
+        "narHash": "sha256-vfKC4mOuoQiY78BN5l4RyJv4OHuKBQzdfsEYfSRc86M=",
         "ref": "refs/heads/main",
-        "rev": "a243c38aae85a7445c6cdc124b7d461f1f8b1776",
-        "revCount": 50,
+        "rev": "42006ef3e52aed4e7657b0b11fdc852fed33038a",
+        "revCount": 51,
         "type": "git",
         "url": "ssh://forgejo@forgejo.jordangarrison.dev/jordangarrison/cg.git"
       },

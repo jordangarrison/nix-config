@@ -155,6 +155,13 @@
   # Or disable the firewall altogether.
   networking.firewall.enable = false;
 
+  # Tailscale exit node. "server" turns on IP forwarding; the set flag
+  # advertises the node. Approve it once in the Tailscale admin console.
+  services.tailscale = {
+    useRoutingFeatures = "server";
+    extraSetFlags = [ "--advertise-exit-node" ];
+  };
+
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
   # on your system were taken. It's perfectly fine and recommended to leave

@@ -36,6 +36,7 @@ in
     ../../modules/home/pi
     ../../modules/home/herdr
     ../../modules/home/herdr-app
+    ../../modules/home/ovis
     ../../modules/home/tuicr
     ../../modules/home/bb
     ../../modules/home/bb-desktop

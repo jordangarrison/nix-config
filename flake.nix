@@ -272,6 +272,24 @@
         inherit (self.nixosConfigurations.endeavour) pkgs config;
       };
 
+      checks.x86_64-linux.ovis-module =
+        self.nixosConfigurations.endeavour.pkgs.runCommand "ovis-module-tests" {
+          results = builtins.toJSON (import ./tests/ovis-module.nix { flake = self; });
+        } ''
+          printf '%s\n' "$results" > "$out"
+        '';
+
+      checks.x86_64-linux.ovis-pi-integration =
+        let
+          inherit (self.nixosConfigurations.endeavour) pkgs config;
+          integration = config.home-manager.users.jordangarrison.programs.pi.extensions.files."herdr-web-ui.js".source;
+        in
+        pkgs.runCommand "ovis-pi-integration-tests" { nativeBuildInputs = [ pkgs.nodejs ]; } ''
+          cp ${integration} integration.mjs
+          node ${./tests/ovis-pi-integration.mjs} "$PWD/integration.mjs"
+          touch "$out"
+        '';
+
       checks.x86_64-linux.pi-extensions =
         nixpkgs.legacyPackages.x86_64-linux.callPackage ./tests/pi-extensions { };
 
@@ -391,6 +409,7 @@
                   handy.enable = true;
                   herdr.enable = true;
                   herdr-app.enable = true;
+                  ovis.enable = true;
                   work.enable = true;
                   aikido.enable = true;
                   floai.enable = true;

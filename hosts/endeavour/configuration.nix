@@ -106,6 +106,41 @@
       # winboat # 2025-11-18 Currently broken
     ];
 
+  # Terminal access from the Ovis mobile app: tailnet + Ovis authentication.
+  # The user service stays on loopback and reads its token outside the store.
+  security.acme.certs."ovis.jordangarrison.dev" = {
+    group = "nginx";
+    dnsResolver = "1.1.1.1:53";
+  };
+  services.nginx.virtualHosts."ovis.jordangarrison.dev" = {
+    forceSSL = true;
+    useACMEHost = "ovis.jordangarrison.dev";
+    locations."/" = {
+      proxyPass = "http://127.0.0.1:7317";
+      proxyWebsockets = true;
+      # Set these headers once, below, rather than duplicating the defaults.
+      recommendedProxySettings = false;
+      extraConfig = ''
+        allow 127.0.0.1;
+        allow ::1;
+        allow 100.64.0.0/10;
+        allow fd7a:115c:a1e0::/48;
+        deny all;
+        # Keep the browser origin and mark proxy requests as external.
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        # Only tailscale serve may assert a Tailscale login, never a visitor.
+        proxy_set_header Tailscale-User-Login "";
+        proxy_read_timeout 3600s;
+        proxy_send_timeout 3600s;
+        proxy_buffering off;
+        client_max_body_size 100m;
+        add_header X-Robots-Tag "noindex, nofollow" always;
+      '';
+    };
+  };
+
   # Private tailnet access to bb; the reusable service stays loopback-only.
   security.acme.certs."bb.jordangarrison.dev".group = "nginx";
   services.nginx.virtualHosts."bb.jordangarrison.dev" = {

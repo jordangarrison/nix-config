@@ -474,6 +474,11 @@ in
     servers.executor-flo = lib.mkIf (userApps.work.enable or false) {
       url = "https://executor.flostag-us-west-2.flokubernetes.com/mcp";
     };
+    # Executor v2 for FloSports. Runs next to v1 (executor-flo) while
+    # integrations move over; skills and day-dashboard still use v1.
+    servers.executor-flo-v2 = lib.mkIf (userApps.work.enable or false) {
+      url = "https://executor.flosports.tv/mcp";
+    };
     servers.aikido = lib.mkIf (userApps.aikido.enable or false) {
       command = lib.getExe pkgs.aikido-mcp;
     };

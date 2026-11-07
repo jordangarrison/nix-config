@@ -415,8 +415,8 @@ in
         matches = [ { app-id = "^nm-connection-editor$"; } ];
         open-floating = true;
       }
-      # Float pi show_html pages: `brave --app` windows for files under
-      # ~/.cache/pi-html/ (modules/home/pi/extensions/html-popup.ts).
+      # Float pi show_html pages: `brave --app` windows for
+      # http://127.0.0.1:<port>/pi-html/* (modules/home/pi/extensions/html-popup.ts).
       {
         matches = [ { app-id = "^brave-.*_pi-html_.*$"; } ];
         open-floating = true;

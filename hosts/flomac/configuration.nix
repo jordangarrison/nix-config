@@ -12,6 +12,22 @@ let
 in
 {
 
+  # Determinate Nix owns /etc/nix/nix.conf (nix.enable = false), so nix.settings
+  # does nothing here. Its nix.conf includes nix.custom.conf, which we own.
+  # The numtide cache has prebuilt llm-agents packages; without it this Mac
+  # compiles codex and friends from source on every llm-agents update. Same
+  # cache and key as modules/nixos/common.nix.
+  environment.etc."nix/nix.custom.conf" = {
+    text = ''
+      extra-substituters = https://cache.numtide.com
+      extra-trusted-public-keys = niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g=
+    '';
+    # The stub the Determinate installer writes, so activation may replace it.
+    knownSha256Hashes = [
+      "3bd68ef979a42070a44f8d82c205cfd8e8cca425d91253ec2c10a88179bb34aa"
+    ];
+  };
+
   environment.systemPackages = [ pkgs.vim pkgs.git ];
   programs.zsh.enable = true;
   system.primaryUser = "jordan.garrison";

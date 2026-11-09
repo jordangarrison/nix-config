@@ -231,6 +231,7 @@ in
         KeyRepeat = 1;
       };
       trackpad = { Clicking = true; };
+      # Stage Manager. Turn it off when enabling OmniWM; the two conflict.
       WindowManager = { GloballyEnabled = true; };
     };
     keyboard = {

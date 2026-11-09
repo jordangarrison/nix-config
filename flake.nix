@@ -841,6 +841,9 @@
                     work.enable = true;
                     aikido.enable = true;
                     floai.enable = true;
+                    # Off for now: back on Stage Manager + Rectangle. Set to
+                    # true to try OmniWM; see modules/home/omniwm/README.md.
+                    omniwm.enable = false;
                   };
                 };
               };

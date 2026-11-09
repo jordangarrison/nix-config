@@ -3,6 +3,7 @@
   imports = [
     ./home.nix
     ../../modules/home/ghostty
+    ../../modules/home/omniwm
   ];
 
   home.packages = lib.optionals (userApps.hermes-desktop.enable or false) [

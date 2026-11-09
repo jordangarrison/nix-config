@@ -170,6 +170,7 @@ Read the focused guidance before changing the corresponding subsystem:
 | --- | --- |
 | Voyager power, lid, or `/data` behavior | `hosts/voyager/configuration.nix` |
 | Niri | `modules/home/niri/CLAUDE.md` |
+| OmniWM (macOS tiling) | `modules/home/omniwm/README.md` |
 | Tablet mode, gestures, rotation, or OSK | `modules/home/tablet-mode/README.md` |
 | Hyprland or monitor configuration | `users/jordangarrison/configs/hypr/CLAUDE.md` |
 | Noctalia | `users/jordangarrison/configs/noctalia/README.md` |

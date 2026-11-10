@@ -93,6 +93,8 @@ in {
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIESG8ITo2U4sVsFhXySY0WQcKpTAf5mBFUGC2hvU/Ob7 garrisonsbygrace@voyager"
         # heeler
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINZCTiF6GwFi57cDum1txkC4s3vi7CncdF+Oa9S97Lvh heeler"
+        # Herdr mobile
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIfi/aW06ioEYz0mU1SrrhZHVIOOztFrKlZFANhZ5p1m herdr-mobile"
         # Nodeterm on iOS
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFvbLhccCptdg0LDslDaU1s9Vp3M6XFCYsg2VKfXkqh9 nodeterm-ios"
         # Older key from a `jordan` account

@@ -73,8 +73,10 @@ let
       && keys.global."alt-shift-]" == "tab.next";
     preservedDefaults = keys.terminal.ctrl-shift-c == "terminal.copy"
       && keys.global.ctrl-shift-p == "app.palette";
-    herdrT3Keys = keys."layout:herdr-t3".ctrl-shift-a == "t3-tabs.view"
-      && keys."layout:herdr-t3".cmd-shift-b == "t3-chrome.sidebar";
+    herdrT3Keys = keys."layout:herdr-t3".cmd-shift-b == "t3-tabs.sidebar"
+      && keys."layout:herdr-t3".ctrl-shift-f == "t3-tabs.sidebar"
+      && keys."layout:herdr-t3".ctrl-shift-s == "t3-tabs.settle"
+      && keys."mod:t3-picker".ctrl-alt-x == "overlay.close";
     spaceFolders = lib.hasInfix ''"mod": "space-folders"'' (builtins.readFile files."herdr-app/layouts/main-folders.json".source)
       && keys."layout:main-folders".alt-shift-j == "space-folders.next"
       && keys."layout:main-folders".alt-shift-k == "space-folders.prev"

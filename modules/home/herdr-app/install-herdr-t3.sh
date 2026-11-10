@@ -13,12 +13,19 @@ app=$2
 mkdir -p "$app/mods" "$app/layouts"
 
 # One mod at a time; other mods are left alone. Excluded files are written
-# by the app and are protected from --delete.
+# by the app and are protected from --delete. check*.cjs are upstream's dev
+# checks, not shipped (as upstream scripts/update.sh); -s lets --delete
+# remove copies an older install left.
 for d in "$src"/mods/t3-*/; do
   rsync -a --delete --chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r \
     --exclude gpui-kit.d.ts --exclude herdr.d.ts --exclude jsconfig.json \
+    --filter='-s_check*.cjs' \
     "$d" "$app/mods/$(basename "$d")/"
 done
+
+# Mods upstream removed; an older install of this step put them here.
+# t3-focus: its settle command moved to t3-tabs (upstream 2026-11).
+rm -rf "${app:?}/mods/t3-focus"
 
 install -m 644 "$src/layouts/herdr-t3.svg" "$app/layouts/herdr-t3.svg"
 

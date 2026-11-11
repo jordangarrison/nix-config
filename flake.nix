@@ -61,6 +61,15 @@
       url = "github:mrolafsson/herdr-linear";
       flake = false;
     };
+    # Herdr app Revive, by dmazlum. Source only. Resumes the agent a herdr-core
+    # terminal lost to a reboot; the herdr-app module copies mods/revive and
+    # wires its pi extension, zsh block and Claude Code hooks. Pinned to a
+    # release tag because it runs in every shell start and agent session:
+    # read the release notes, then change the tag to update.
+    herdr-revive = {
+      url = "github:dmazlum/herdr-revive/v0.5.1";
+      flake = false;
+    };
     niri.url = "github:sodiboo/niri-flake";
     noctalia = {
       # Pinned to the last v4 (QML/quickshell) commit. v5 is a ground-up C++

@@ -47,7 +47,28 @@ let
     # The Go binary from that same input is pre-placed below, where the mod's
     # [ -x ] check looks, so the mod does not download a release.
     linear = "${inputs.herdr-linear}/app/mods/linear";
+    # Revive (inputs.herdr-revive, pinned to a release tag). Resumes the
+    # agent a herdr-core terminal lost to a reboot. Its record lives in
+    # `revive.*` terminal labels; it writes no files at runtime. Its pi
+    # extension, zsh block and Claude Code hooks are wired below.
+    revive = "${inputs.herdr-revive}/mods/revive";
   };
+
+  # Revive runs from the copy in mods/, not the store: its Claude Code hooks
+  # name this path, so it stays the same across updates.
+  reviveDir = "${config.xdg.configHome}/herdr-app/mods/revive";
+
+  # Revive's own zsh block, generated from the pinned source rather than
+  # copied, so an update cannot leave a stale copy. `revive.mjs install`
+  # would append it to ~/.zshrc, which is a read-only Nix symlink here.
+  # The engine path comes first: revive.mjs runs its CLI when argv[1] is itself.
+  reviveZshBlock = pkgs.runCommand "herdr-revive-zsh-block" { nativeBuildInputs = [ pkgs.nodejs ]; } ''
+    node --input-type=module -e '
+      const { shellBlock } = await import(process.argv[2]);
+      process.stdout.write(shellBlock(process.argv[1]) + "\n");
+    ' ${lib.escapeShellArg "${reviveDir}/revive.mjs"} ${inputs.herdr-revive}/mods/revive/revive.mjs > $out
+    grep -q '# >>> herdr-revive >>>' $out
+  '';
 
   # The mod pins this string and looks up ~/.local/share/herdr-linear/app/<it>/.
   linearVersion =
@@ -131,5 +152,36 @@ in
         lib.escapeShellArgs (lib.mapAttrsToList (name: src: "${name}=${src}") copiedMods)
       }
     '';
+
+    # Revive, part 1: pi records its session through this extension. A link
+    # to the copied mod, as `revive.mjs install` would make: the extension
+    # finds the engine beside its real path.
+    home.file.".pi/agent/extensions/herdr-revive.ts" = lib.mkIf (config.programs.pi.enable or false) {
+      source = config.lib.file.mkOutOfStoreSymlink "${reviveDir}/pi/revive.ts";
+    };
+
+    # Revive, part 2: a recovered shell resumes the session at its first
+    # prompt. Last in .zshrc, where `revive.mjs install` would put it.
+    programs.zsh.initContent = lib.mkIf config.programs.zsh.enable (
+      lib.mkOrder 2000 ''
+        # herdr-revive: resume the agent this herdr terminal lost to a reboot.
+        source ${reviveZshBlock}
+      ''
+    );
+
+    # Revive, part 3: Claude Code records its session through SessionStart and
+    # SessionEnd hooks. Not declared in programs.claude-code.settings: that
+    # merge replaces arrays, which would drop the other tools' hooks. Revive's
+    # installer adds only its own entries and leaves the rest. It changes
+    # nothing when they are there, and backs up settings.json once to
+    # settings.json.revive-backup. The shell block, pi and the agents we do
+    # not want recorded are skipped here.
+    home.activation.herdrReviveClaudeHooks = lib.mkIf (config.programs.claude-code.enable or false) (
+      lib.hm.dag.entryAfter [ "herdrMods" "claudeCodeSettingsMerge" ] ''
+        run ${lib.getExe pkgs.nodejs} ${lib.escapeShellArg "${reviveDir}/revive.mjs"} install \
+          --no-shell --no-pi --no-omp --no-codex --no-droid --no-cursor \
+          || warnEcho "herdr-revive: could not add its Claude Code hooks; run the install above by hand"
+      ''
+    );
   };
 }

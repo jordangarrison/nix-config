@@ -177,7 +177,7 @@ Read the focused guidance before changing the corresponding subsystem:
 | Doom Emacs | `users/jordangarrison/tools/doom.d/AGENTS.md` |
 | nvf/Neovim | `users/jordangarrison/tools/nvim/README.md` |
 | Super Productivity server, app, or sync | `modules/super-productivity/README.md` |
-| Herdr persistence, updates, or recovery | `docs/runbooks/herdr.md` and `modules/home/herdr/` |
+| Herdr persistence, updates, recovery, or agent resume | `docs/runbooks/herdr.md`, `modules/home/herdr/` and `modules/home/herdr-app/` |
 | Agent configuration and routing | `users/jordangarrison/agents/AGENTS.md` |
 | Skills | `users/jordangarrison/skills/CLAUDE.md` |
 

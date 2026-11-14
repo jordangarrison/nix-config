@@ -48,8 +48,11 @@ A `result.json` from an earlier run fires the watcher at once. If `$RESULT` exis
 
 Inspect the PR diff and choose thinking with [[multi-agent-pr-review]]'s **Reviewer Thinking (pi)** scope/risk table: use that same selection policy for the reviewer in every harness. Honor an explicit `--thinking` override; otherwise choose independently of the author's session. Let the review engine choose its own child-agent thinking from the full diff unless the user supplied an override.
 
-Use the selected runtime's supported staffing, honoring explicit model requests;
-thinking comes from the review policy above. Report the staffing and scope/risk
+Use the selected runtime's supported staffing, honoring explicit model requests.
+In Pi, select the model from [[multi-agent-pr-review]]'s **Reviewer Thinking (pi)**
+policy and pass it explicitly to the reviewer (`model: "<MODEL>:<LEVEL>"` for a
+native subagent, or `--model <MODEL> --thinking <LEVEL>` for a Pi CLI worker).
+Thinking comes from the review policy above. Report the staffing and scope/risk
 rationale. Dispatch with [[work-dispatch]], passing the step 4 brief at launch
 when required by the tool. Record the worker reference, link, and completion
 mechanism. A separate review helper need not become a top-level thread.
@@ -72,7 +75,12 @@ This is a self-authored PR: post the review as COMMENT, as the skill describes.
 When result.json is written, stop.
 ```
 
-In pi, append `--thinking <level>` to the requested review invocation only when the user supplied that override; otherwise explicitly ask the reviewer to select child-agent thinking per PR using the review skill's policy. Carry the override, if any, into the watcher context for later rounds.
+In Pi, add the selected full provider/model id to the brief and require it on
+every review helper launch, including specialists, lens reviewers, and the
+consolidator. Append `--thinking <level>` to the requested review invocation only
+when the user supplied that override; otherwise ask the reviewer to select
+child-agent thinking per PR using the review skill's policy. Carry the selected
+model and thinking override, if any, into the run context for later rounds.
 
 Submit using the selected runtime and confirm launch. If the worker cannot
 access the author's local artifact directory, arrange supported artifact return
@@ -94,9 +102,9 @@ the worker and report the blocker rather than treating it as a review result.
 Other harnesses use their supported background notification mechanism; if none
 exists, disclose that limitation rather than blocking in a polling loop.
 
-Record URL, HEAD, RESULT, worker reference, rounds left, push mode, and thinking
-override in the run context. Report the worker link/reference and any watcher
-id, then return control to the user. Persist consumed results before another
+Record URL, HEAD, RESULT, worker reference, rounds left, push mode, selected
+model, and thinking override in the run context. Report the worker link/reference
+and any watcher id, then return control to the user. Persist consumed results before another
 round; never rearm for an already handled result.
 
 ### 6. On wake

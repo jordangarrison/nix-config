@@ -89,11 +89,21 @@ Autonomy is not silence. After posting, report per PR: verdict, inline count, he
 
 ## Reviewer Thinking (pi)
 
-pi-subagents does not hand the parent's thinking level to a child: without one, the child runs at its frontmatter `thinking` (`high` in `pi-agents/`) or its own settings default. So every pi `subagent` launch here passes the level as a model suffix, which overrides frontmatter `thinking`:
+The current review model default is `openai/gpt-6.1-sol` until changed here and
+in this skill's `pi-agents/` role files. Use it for the self-review dispatcher,
+specialists, lens reviewers, consolidator, and any extra Pi review helpers.
+Honor an explicit user model request instead and pass the selected full
+provider/model id in every launch and reviewer brief, including follow-ups.
+Check the runtime registry before launch; if the selected model is unavailable,
+report the blocker rather than substituting another model. Registry presence
+alone does not prove account access.
+
+Choose thinking separately from the model. Every Pi `subagent` launch here
+passes the level as a model suffix, which overrides frontmatter `thinking`:
 
 1. `LEVEL` = the `--thinking` value if given; otherwise choose per PR using the table below (independent of `$PI_REASONING_LEVEL`).
-2. `MODEL` = the `model:` line of the agent file pi loads: `sed -n 's/^model: //p' ~/.pi/agent/agents/pr-review-specialist.md` (or `pr-review-consolidator.md`).
-3. Launch with `model: "<MODEL>:<LEVEL>"`. The full id is required: a bare `:<LEVEL>` is not a model for pi children, and the tool's `thinking` field is ignored on dispatch. In a batched `tasks` launch, pass `model` once at the top level; task items accept only `agent` and `task`.
+2. `MODEL` = the explicit user model request, or the review default above. Use the full provider/model id; agent frontmatter and the author's session do not replace this policy.
+3. Launch with `model: "<MODEL>:<LEVEL>"`. A bare `:<LEVEL>` is not a model for Pi children. With `workflow: "parallel"`, set `model` on **each** item in `args.tasks`, as in the installed [[pi-subagents]] skill.
 
 Use the selected level for specialists, lens reviewers, and the consolidator. Automatic selection uses only `low`, `medium`, or `high`:
 
@@ -105,7 +115,7 @@ Use the selected level for specialists, lens reviewers, and the consolidator. Au
 
 Judge semantic scope, not line count alone: a one-line auth, permissions, secret-handling, destructive-data, or production-routing change can warrant `high`. Choose the higher level when uncertain. If later findings reveal greater complexity or risk, raise the level for remaining launches and re-review affected conclusions at that level. An explicit `--thinking` override takes precedence throughout.
 
-If `MODEL` is empty, omit `model` and the frontmatter level applies. In Claude Code this section does not apply and `--thinking` is ignored.
+In Claude Code this section does not apply and `--thinking` is ignored.
 
 ## Review Worktrees
 

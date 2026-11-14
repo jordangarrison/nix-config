@@ -24,7 +24,7 @@ This session stays the **author**: it never reviews. The worker is the **reviewe
 | PR URL | `gh pr view --json url` in the current checkout |
 | `--rounds <n>` | `1`. Each extra round re-reviews after the fixes are pushed. Max `3`. |
 | `--no-push` | Push the fixes. With this flag: commit locally, skip the push and the comment replies. |
-| `--thinking <level>` | Automatic per-PR selection. Explicit override for the reviewer; in pi, also passed to the review's child agents. |
+| Pi staffing | Pinned to `openai/gpt-6.1-sol:high` for the reviewer and every review helper, including later rounds. |
 | `--yolo` | Proceed without interactive gates; staffing is already automatic. |
 
 Invoking the skill is the consent to staff the reviewer, fix, commit, and push. Report staffing for audit; cross-runtime handoffs still require approval unless explicitly preauthorized.
@@ -46,13 +46,17 @@ A `result.json` from an earlier run fires the watcher at once. If `$RESULT` exis
 
 ### 3. Staff the reviewer
 
-Inspect the PR diff and choose thinking with [[multi-agent-pr-review]]'s **Reviewer Thinking (pi)** scope/risk table: use that same selection policy for the reviewer in every harness. Honor an explicit `--thinking` override; otherwise choose independently of the author's session. Let the review engine choose its own child-agent thinking from the full diff unless the user supplied an override.
+In Pi, pin the reviewer to `model: "openai/gpt-6.1-sol:high"` for a native
+subagent, or `--model openai/gpt-6.1-sol --thinking high` for a Pi CLI worker.
+Use the same pinned staffing for every child review helper and later round,
+per [[multi-agent-pr-review]]'s **Reviewer Thinking (pi)** policy. This is the
+current staffing until changed; do not select thinking from PR scope or inherit
+it from the author. Other harnesses use their supported staffing.
 
-Use the selected runtime's supported staffing, honoring explicit model requests;
-thinking comes from the review policy above. Report the staffing and scope/risk
-rationale. Dispatch with [[work-dispatch]], passing the step 4 brief at launch
-when required by the tool. Record the worker reference, link, and completion
-mechanism. A separate review helper need not become a top-level thread.
+Report the actual staffing. Dispatch with [[work-dispatch]], passing the step 4
+brief at launch when required by the tool. Record the worker reference, link,
+and completion mechanism. A separate review helper need not become a top-level
+thread.
 
 Use a fresh reviewer for follow-ups when the runtime requires it; reuse only
 through supported continuation controls. In the Herdr app, a reviewer can run as an
@@ -72,7 +76,11 @@ This is a self-authored PR: post the review as COMMENT, as the skill describes.
 When result.json is written, stop.
 ```
 
-In pi, append `--thinking <level>` to the requested review invocation only when the user supplied that override; otherwise explicitly ask the reviewer to select child-agent thinking per PR using the review skill's policy. Carry the override, if any, into the watcher context for later rounds.
+In Pi, add this instruction to the brief: "Use `model: openai/gpt-6.1-sol:high`
+for every review helper, including specialists, lens reviewers, and the
+consolidator; keep high thinking for all later rounds." Carry the pinned
+staffing into the run context. Do not ask the reviewer to select another
+thinking level from PR scope.
 
 Submit using the selected runtime and confirm launch. If the worker cannot
 access the author's local artifact directory, arrange supported artifact return
@@ -94,9 +102,9 @@ the worker and report the blocker rather than treating it as a review result.
 Other harnesses use their supported background notification mechanism; if none
 exists, disclose that limitation rather than blocking in a polling loop.
 
-Record URL, HEAD, RESULT, worker reference, rounds left, push mode, and thinking
-override in the run context. Report the worker link/reference and any watcher
-id, then return control to the user. Persist consumed results before another
+Record URL, HEAD, RESULT, worker reference, rounds left, push mode, and pinned
+Pi staffing `openai/gpt-6.1-sol:high` in the run context. Report the worker link/reference
+and any watcher id, then return control to the user. Persist consumed results before another
 round; never rearm for an already handled result.
 
 ### 6. On wake

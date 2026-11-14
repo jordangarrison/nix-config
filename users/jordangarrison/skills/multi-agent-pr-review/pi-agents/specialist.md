@@ -3,7 +3,7 @@ name: specialist
 package: pr-review
 description: Evidence-first reviewer for one PR in the multi-agent-pr-review fan-out. Runs any phase-1 role (domain specialist, Hickey lens, Fairbanks lens) from the template in its task.
 tools: read, grep, find, ls, bash, write, web_search, source_check, fetch_content, get_search_content, contact_supervisor
-model: claude-bridge/claude-opus-5-5
+model: openai/gpt-6.1-sol:high
 thinking: high
 systemPromptMode: replace
 inheritProjectContext: true

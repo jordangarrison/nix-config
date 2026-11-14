@@ -1,6 +1,6 @@
 # Self-Review: Fix Phase
 
-Runs in the author session when the watcher wakes it. Inputs from the wake: `URL`, `HEAD`, `RESULT`, worker reference/link, rounds left, push mode, explicit thinking override (if any).
+Runs in the author session when the watcher wakes it. Inputs from the wake: `URL`, `HEAD`, `RESULT`, worker reference/link, rounds left, push mode, pinned Pi staffing `openai/gpt-6.1-sol:high`.
 
 ## 1. Read the outcome
 
@@ -26,7 +26,7 @@ If it stopped on a dirty checkout: report, preserve the worker, stop.
 
 ## 3. Next round
 
-Rounds left, and step 2 pushed fixes → set `HEAD` to the new head, decrement rounds, and run SKILL.md steps 2–5 again. Use a new reviewer or supported continuation as the runtime requires. Prompt it: "Follow-up self-review of `<URL>` at head `<HEAD>`, with --yolo. Same artifact directory. When result.json is written, stop." In pi, include the user's explicit `--thinking <level>` override if supplied; otherwise let the review engine reassess child-agent thinking for the new diff.
+Rounds left, and step 2 pushed fixes → set `HEAD` to the new head, decrement rounds, and run SKILL.md steps 2–5 again. Use a new reviewer or supported continuation as the runtime requires. Prompt it: "Follow-up self-review of `<URL>` at head `<HEAD>`, with --yolo. Same artifact directory. When result.json is written, stop." In Pi, explicitly pass `model: "openai/gpt-6.1-sol:high"` at every native reviewer/helper launch (or `--model openai/gpt-6.1-sol --thinking high` for a Pi CLI worker). Repeat this pinned staffing in the brief for every review helper and later round; do not reassess thinking from the new diff.
 
 Otherwise finish (step 4).
 

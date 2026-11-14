@@ -44,7 +44,7 @@ This skill is the **review mechanism** only. It does not read Slack, add reactio
 - Optional per-PR author note (e.g. the Slack message that posted it). Passed to every reviewer as `{AUTHOR_NOTE_OR_NONE}`.
 - Optional team overrides ("skip Hickey on this one", "skip Fairbanks", "add an auth-security specialist").
 - Optional `--yolo` (see below). `--skip-user-confirmation` is an accepted alias.
-- Optional `--thinking <level>` (pi only): reviewer thinking level for this run, one of pi's `off`, `minimal`, `low`, `medium`, `high`, `xhigh`, `max`. Default: choose `low`, `medium`, or `high` per PR based on size, complexity, and risk, independent of the parent session's thinking level. See "Reviewer Thinking (pi)".
+- Pi staffing is pinned to `openai/gpt-6.1-sol:high` for every review launch. See "Reviewer Thinking (pi)".
 
 ## `--yolo` — don't ask me, just post the review
 
@@ -77,7 +77,7 @@ Autonomy is not silence. After posting, report per PR: verdict, inline count, he
 
 1. **Triage** — `gh pr view <url> --json state,isDraft,mergedAt,author,headRefOid,baseRefName,title,body`. Skip merged, closed, and drafts (unless asked). Record the skip reason. **Your own PRs are reviewed like any other** — compare `author.login` to `gh api user -q .login` and, if it matches, mark the PR *self-authored*: its posted event is always `COMMENT` (see "Your Own PRs").
 2. **Review worktree** — see "Review Worktrees". Cache the PR body at `/tmp/pr-review-<date>/<pr-key>/pr-body.md`.
-3. **Plan the team** — derive specialists from PR domain + size (see "Team Composition"); always add Hickey and Fairbanks. In pi, inspect the diff and choose the reviewer thinking level using "Reviewer Thinking (pi)"; record the level and a one-sentence rationale in `pr-body.md`.
+3. **Plan the team** — derive specialists from PR domain + size (see "Team Composition"); always add Hickey and Fairbanks. In Pi, record the pinned staffing `openai/gpt-6.1-sol:high` in `pr-body.md`.
 4. **Launch phase 1 in parallel, in the background.** One reviewer per role, each with a self-contained prompt from `reviewers/`. In Claude Code use the `Agent` tool with `run_in_background: true`; in pi use the `subagent` tool with the `pr-review.specialist` agent (lens reviewers use the same agent with the Hickey/Fairbanks template as the task) and the model from "Reviewer Thinking (pi)". Re-check `mergedAt` right before launching.
 5. **Wait for completions.** Don't poll; the harness notifies on each finish.
 6. **Launch the consolidator** (`reviewers/consolidator.md`; pi agent `pr-review.consolidator`, model per "Reviewer Thinking (pi)") once every phase-1 report for that PR exists. Include its Publishing Contract in the handoff.
@@ -89,31 +89,20 @@ Autonomy is not silence. After posting, report per PR: verdict, inline count, he
 
 ## Reviewer Thinking (pi)
 
-The current review model default is `openai/gpt-6.1-sol` until changed here and
-in this skill's `pi-agents/` role files. Use it for the self-review dispatcher,
-specialists, lens reviewers, consolidator, and any extra Pi review helpers.
-Honor an explicit user model request instead and pass the selected full
-provider/model id in every launch and reviewer brief, including follow-ups.
-Check the runtime registry before launch; if the selected model is unavailable,
-report the blocker rather than substituting another model. Registry presence
-alone does not prove account access.
+The current Pi review staffing is pinned to `openai/gpt-6.1-sol:high` until
+changed here and in this skill's `pi-agents/` role files. Every reviewer
+dispatch, specialist, lens reviewer, consolidator, extra review helper, and
+follow-up round uses this exact model with high thinking. PR size, risk, agent
+frontmatter, and the author's session do not change this selection.
 
-Choose thinking separately from the model. Every Pi `subagent` launch here
-passes the level as a model suffix, which overrides frontmatter `thinking`:
-
-1. `LEVEL` = the `--thinking` value if given; otherwise choose per PR using the table below (independent of `$PI_REASONING_LEVEL`).
-2. `MODEL` = the explicit user model request, or the review default above. Use the full provider/model id; agent frontmatter and the author's session do not replace this policy.
-3. Launch with `model: "<MODEL>:<LEVEL>"`. A bare `:<LEVEL>` is not a model for Pi children. With `workflow: "parallel"`, set `model` on **each** item in `args.tasks`, as in the installed [[pi-subagents]] skill.
-
-Use the selected level for specialists, lens reviewers, and the consolidator. Automatic selection uses only `low`, `medium`, or `high`:
-
-| Level | Review scope |
-|---|---|
-| `low` | Trivial, low-risk change: a one-liner or similarly small mechanical/docs edit with obvious, local effects. |
-| `medium` | Mid-sized, bounded change in a familiar domain, with moderate reasoning or cross-file context needed. |
-| `high` | Any large review (e.g. 50+ files, broad feature/refactor, multi-domain change), or complex/high-risk behavior regardless of diff size. |
-
-Judge semantic scope, not line count alone: a one-line auth, permissions, secret-handling, destructive-data, or production-routing change can warrant `high`. Choose the higher level when uncertain. If later findings reveal greater complexity or risk, raise the level for remaining launches and re-review affected conclusions at that level. An explicit `--thinking` override takes precedence throughout.
+- Native Pi subagent: pass `model: "openai/gpt-6.1-sol:high"` explicitly.
+- With `workflow: "parallel"`, set that exact `model` on **each** item in
+  `args.tasks`, as in the installed [[pi-subagents]] skill.
+- Pi CLI worker: pass `--model openai/gpt-6.1-sol --thinking high`.
+- Include the pinned model and thinking in every reviewer brief and later round.
+- Check the runtime registry before launch. If this model is unavailable or
+  account access fails, report the blocker rather than substituting another
+  model or thinking level. Registry presence alone does not prove account access.
 
 In Claude Code this section does not apply and `--thinking` is ignored.
 

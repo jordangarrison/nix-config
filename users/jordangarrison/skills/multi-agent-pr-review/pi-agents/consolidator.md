@@ -3,7 +3,7 @@ name: consolidator
 package: pr-review
 description: Consolidates multi-agent-pr-review reports for one PR into the strict _final.md review artifact.
 tools: read, grep, find, ls, bash, write, contact_supervisor
-model: openai/gpt-6.1-sol
+model: openai/gpt-6.1-sol:high
 thinking: high
 systemPromptMode: replace
 inheritProjectContext: true

@@ -367,9 +367,10 @@ in
         "npm:pi-web-access"
         "npm:pi-foldable-tools"
         "git:github.com/joelhooks/pi-until"
-        # Registers ask_user: structured questions instead of guessing.
-        # Peers @earendil-works/pi-coding-agent >=0.74.0; current pi is 1.5.0.
-        "npm:pi-ask-user"
+        # Native blocked status for Herdr Core/App (edlsh/pi-ask-user#100).
+        # Overlays need Pi >=1.5.2. Return to "npm:pi-ask-user" when an
+        # upstream release includes this fix, then run pi update --extensions.
+        "git:github.com/jordangarrison/pi-ask-user@7ad9e0e38d62a3b8f1541a2490cbd1d92831da04"
       ];
       # Install with the Nix npm, so package installs do not depend on PATH.
       npmCommand = [ "${pkgs.nodejs}/bin/npm" ];

@@ -9,16 +9,6 @@
 let
   stateDir = "${config.xdg.configHome}/ovis";
   tokenFile = "${stateDir}/token.env";
-  # Bundle the unmodified upstream extension from the same source as the server.
-  # The published package does not install integrations/. This is the installer's
-  # node/ESM build, kept in the store rather than written into Pi at runtime.
-  piIntegration = pkgs.runCommand "ovis-pi-integration-${pkgs.llm-agents.ovis.version}" {
-    nativeBuildInputs = [ pkgs.bun ];
-  } ''
-    mkdir -p "$out"
-    bun build ${pkgs.llm-agents.ovis.src}/integrations/pi-ask.ts \
-      --target=node --format=esm --outfile="$out/herdr-web-ui.js"
-  '';
   # A missing or empty token must never expose the terminals through nginx.
   checkToken = pkgs.writeShellScript "ovis-check-token" ''
     if [ -z "''${OVIS_TOKEN:-}" ]; then
@@ -32,7 +22,7 @@ in
     home.packages = [ pkgs.llm-agents.ovis ];
 
     programs.pi.extensions.files."herdr-web-ui.js" = lib.mkIf config.programs.pi.enable {
-      source = "${piIntegration}/herdr-web-ui.js";
+      source = pkgs.llm-agents.ovis.integrations.pi;
     };
 
     systemd.user.services.ovis = {

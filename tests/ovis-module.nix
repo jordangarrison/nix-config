@@ -31,6 +31,9 @@ let
     installsPublishedPackage = lib.elem pkgs.llm-agents.ovis enabled.home.packages;
     piIntegrationNeedsOvis = !(disabled.programs.pi.extensions.files ? "herdr-web-ui.js");
     piIntegrationNeedsPi = !(withoutPi.programs.pi.extensions.files ? "herdr-web-ui.js");
+    piIntegrationPublished =
+      enabled.programs.pi.extensions.files."herdr-web-ui.js".source
+      == pkgs.llm-agents.ovis.integrations.pi;
     piIntegrationManaged =
       enabled.home.file.".pi/agent/extensions/herdr-web-ui.js".source
       == enabled.programs.pi.extensions.files."herdr-web-ui.js".source;

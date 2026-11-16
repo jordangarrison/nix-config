@@ -51,7 +51,7 @@
     # docs/slack-app.md, ADR 0026). Not JordanBot: Hermes keeps that app.
     # The file is mode 600 and outside the store, with SLACK_BOT_TOKEN and
     # SLACK_APP_TOKEN. systemd does not start the unit while it is missing.
-    environmentFile = "/home/jordangarrison/.config/jagpi/slack.env";
+    environmentFile = "/home/jordangarrison/.config/flo-secrets/jagpi-slack.env";
     settings.owners.slack = [ "UQ69UGHKM" ];
     # Repos where members may ask a worker to review a PR (jagpi ADR 0029):
     # every repo of each FloSports enterprise org.

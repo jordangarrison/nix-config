@@ -24,6 +24,7 @@
 let
   hashes = {
     "0.1.11" = "sha256-fE5zGMVLvL8XX/1tG09hi1kTc4MzCv+OtbwQ3D/u7Lk=";
+    "0.1.16" = "sha256-mQAIderZMzoz9ctgJ0zNnPnT5HNg8DYTpGcpUQXHHAQ=";
   };
 in
 stdenvNoCC.mkDerivation {

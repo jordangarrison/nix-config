@@ -6,10 +6,9 @@
 # state stays in ~/.local/state/jagpi/default. Options: jagpi's
 # nix/home-manager.nix.
 #
-# Lifetime: a user unit under default.target, so it starts at login, not at
-# boot (Linger=no), and stops with the last session. That matches herdr, whose
-# server the bot needs; boot-time availability would need linger plus a herdr
-# service of its own.
+# Lifetime: endeavour declares linger for jordangarrison, so default.target
+# starts at boot and stays up after logout. Start the self-managed hc core
+# before jagpi; hc itself owns its transient core and terminal-holder units.
 {
   config,
   inputs,
@@ -19,6 +18,28 @@
 
 {
   imports = [ inputs.jagpi.homeManagerModules.default ];
+
+  systemd.user.services.hc-core = {
+    Unit = {
+      Description = "Start the self-managed Herdr core";
+      # Fresh machines can install hc later through the desktop app (ADR 007).
+      ConditionPathExists = "%h/.local/bin/hc";
+    };
+    Service = {
+      Type = "oneshot";
+      ExecStart = "%h/.local/bin/hc server start";
+      RemainAfterExit = true;
+      # No ExecStop: stopping this bootstrap must not stop the shared core or
+      # its holders. hc starts those in separate transient user units, and
+      # server start is a no-op when the core is already running.
+    };
+    Install.WantedBy = [ "default.target" ];
+  };
+
+  systemd.user.services.jagpi-default.Unit = {
+    Wants = [ "hc-core.service" ];
+    After = [ "hc-core.service" ];
+  };
 
   services.jagpi = {
     enable = true;

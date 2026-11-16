@@ -111,6 +111,31 @@ wrapper's PATH is only a fallback. After an `llm-agents` update, compare
 behind. Adding the GUI does not migrate existing TUI sessions. Do not replace
 or restart the existing TUI server for this app.
 
+## Core startup and reboot recovery (endeavour)
+
+Endeavour declares linger for `jordangarrison`, so user services start at boot
+without a login and remain available after logout. `hc-core.service` is a
+oneshot bootstrap under `default.target`, ordered before `jagpi-default.service`.
+It calls the self-managed `~/.local/bin/hc server start`; Nix does not own the
+binary. A missing binary skips the bootstrap without failing boot. After
+installing hc, run `systemctl --user start hc-core.service` to retry.
+
+`server start` returns success without replacing an already-running core.
+The bootstrap has no stop command: switching configurations or stopping this
+unit does not stop or restart the core or its holders. hc owns their separate
+transient `hc-serve-*` and `hc-hold-*` user units. Home Manager can restart
+`jagpi-default.service` when its unit changes; that is not a core restart.
+
+After a reboot, the bootstrap starts the core again. Terminals created with
+`hc run --keep` recover as shells in their saved working directories, **not**
+as automatically restarted agents or tasks. Ordinary exits and explicit kills
+stay final. jagpi's hc worker dispatches now use `hc run --keep`; this does not
+change older terminals. For an older terminal, opt in with `hc keep <terminal>`.
+To resume a Pi worker, attach to its recovered shell and run `pi -c` in the
+worker's original working directory (select the correct session if needed).
+Core startup does not resume Pi by itself. This is hc recovery, separate from
+the older Herdr TUI's hook-based restoration below.
+
 ## Agent integrations
 
 Session restoration requires current per-agent Herdr hooks. These hooks live in

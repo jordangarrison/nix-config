@@ -94,6 +94,9 @@
   hardware.logitech.wireless.enable = true;
   programs.solaar.enable = true;
 
+  # Start Jordan's always-on user services at boot, without a login session.
+  users.users.jordangarrison.linger = true;
+
   # User configuration now handled by user modules in flake.nix
 
   # Endeavour-specific system packages

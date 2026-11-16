@@ -3,7 +3,7 @@
 let
   user = "jordangarrison";
   home = "/home/${user}";
-  dataDir = "${home}/.agentsview";
+  dataDir = "/mnt/hubble/agentsview";
   port = 8080;
   host = "agentsview.jordangarrison.dev";
 in
@@ -11,7 +11,15 @@ in
   systemd.services.agentsview = {
     description = "agentsview - local viewer and analytics for AI agent sessions";
     wantedBy = [ "multi-user.target" ];
-    after = [ "network.target" ];
+    # Keep the archive on Hubble. Never create an empty local replacement when
+    # the drive is absent, and stop the writer if its mount goes away.
+    after = [ "network.target" "mnt-hubble.mount" ];
+    bindsTo = [ "mnt-hubble.mount" ];
+    unitConfig = {
+      RequiresMountsFor = dataDir;
+      ConditionPathIsMountPoint = "/mnt/hubble";
+      ConditionPathExists = "${dataDir}/sessions.db";
+    };
 
     environment = {
       AGENTSVIEW_DATA_DIR = dataDir;

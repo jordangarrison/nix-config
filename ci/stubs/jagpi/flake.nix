@@ -68,6 +68,11 @@
               type = lib.types.nullOr lib.types.str;
               default = null;
             };
+            # Mirror upstream's free-form JSON contract; no runtime settings are changed (#156).
+            settings = lib.mkOption {
+              type = (pkgs.formats.json { }).type;
+              default = { };
+            };
             herdr.package = lib.mkPackageOption pkgs "herdr" { };
             providers = lib.mkOption {
               type = lib.types.listOf (

@@ -26,6 +26,73 @@ let
   # `local` for stdio (command) servers.
   mcpEntry = remote: local: s: if s.command != null then local s else remote s;
   mcpStdio = s: { inherit (s) command args; };
+
+  # Temporary catalog additions; remove once the packaged Pi includes GPT-6.2.
+  # Follow-up: https://github.com/jordangarrison/nix-config/issues/163
+  # Specs: earendil-works/pi@cead615b48b80d1c61eecab2f0b576d16eeaf4c5,
+  # packages/ai/catalog/{providers/openai-codex.ts,families/openai.ts}.
+  piGpt62Models = map
+    (model: model // {
+      api = "openai-codex-responses";
+      baseUrl = "https://chatgpt.com/backend-api";
+      reasoning = true;
+      input = [ "text" "image" ];
+      maxTokens = 128000;
+      # Both reject off and minimal; expose only their actual effort levels.
+      thinkingLevelMap = {
+        off = null;
+        minimal = null;
+        low = "low";
+        medium = "medium";
+        high = "high";
+        xhigh = "xhigh";
+        max = "max";
+      };
+      compat = {
+        supportsOpenAIGrammarTools = true;
+        supportsAdditionalTools = true;
+        supportsToolSearch = true;
+        supportsMidConvoSystemMessages = true;
+      };
+    })
+    [
+      {
+        id = "gpt-6.2-astra";
+        name = "GPT-6.2 Astra";
+        contextWindow = 272000;
+        cost = {
+          input = 8;
+          output = 40;
+          cacheRead = 0.4;
+          cacheWrite = 10;
+          tiers = [ {
+            inputTokensAbove = 272000;
+            input = 16;
+            output = 60;
+            cacheRead = 0.8;
+            cacheWrite = 20;
+          } ];
+        };
+      }
+      {
+        id = "gpt-6.2-sol";
+        name = "GPT-6.2 Sol";
+        contextWindow = 500000;
+        cost = {
+          input = 2;
+          output = 10;
+          cacheRead = 0.1;
+          cacheWrite = 2.5;
+          tiers = [ {
+            inputTokensAbove = 272000;
+            input = 4;
+            output = 15;
+            cacheRead = 0.2;
+            cacheWrite = 5;
+          } ];
+        };
+      }
+    ];
 in
 {
   imports = [
@@ -449,6 +516,28 @@ in
       # on the next activation — so a rebuild re-collapses the blocks.
       hideThinkingBlock = true;
     };
+
+    # Adding IDs to built-in providers preserves their other models and auth.
+    # No provider-level api/baseUrl override: existing models stay unchanged.
+    models.providers.openai-codex.models = piGpt62Models;
+    # Workers also use openai with its own ChatGPT OAuth sign-in (not Codex).
+    # Match upstream's direct-API context cap and compatibility flags.
+    models.providers.openai.models = map
+      (model: model // {
+        api = "openai-responses";
+        baseUrl = "https://api.openai.com/v1";
+        contextWindow = 272000;
+        compat = model.compat // {
+          supportsStrictMode = true;
+          supportsExplicitPromptCacheMode = true;
+          supportsMidConvoEffort = true;
+        };
+        inputLimits = {
+          maxRequestBytes = 536870912;
+          images.maxPerRequest = 1500;
+        };
+      })
+      piGpt62Models;
 
     # Local models served by ollama on flomac (the work MacBook), reached over
     # the tailnet rather than the LAN so this works from anywhere. flomac's

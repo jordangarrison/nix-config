@@ -10,3 +10,10 @@
   - Rich Hickey's "Simple Made Easy" is the design philosophy for what we're doing
   - Write in George Fairbanks' "architecturally evident coding style" from Just Enough Software Architecture
 - Try to use ASD-STE100 unless more complex language is required and pretend I have ADHD
+
+## pstack-models
+
+For pstack roles (poteto-mode, arena, swarm, interrogate), read
+`~/.claude/rules/pstack-models.md` instead of the skills' Cursor rule path.
+Use its provider/model IDs and thinking levels with the current harness's
+subagent tool. These choices do not change jagpi worker tiers.

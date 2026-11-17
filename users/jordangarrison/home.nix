@@ -38,10 +38,11 @@ let
       reasoning = true;
       input = [ "text" "image" ];
       maxTokens = 128000;
-      # Both reject off and minimal; expose only their actual effort levels.
+      # Both reject off and the minimal effort value; map minimal to low,
+      # as upstream's Codex catalog does, rather than sending minimal.
       thinkingLevelMap = {
         off = null;
-        minimal = null;
+        minimal = "low";
         low = "low";
         medium = "medium";
         high = "high";

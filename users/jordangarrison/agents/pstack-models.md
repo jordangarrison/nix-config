@@ -1,3 +1,7 @@
+---
+description: pstack per-role model choices (overrides skill defaults)
+alwaysApply: true
+---
 # pstack model configuration. One line per role. Delete a line to fall back to the skill default.
 # Managed by nix-config; do not run /setup-pstack to replace it. Edit the source and rebuild.
 # `inherit-parent` or `auto` as a value: the role runs on the parent chat model. Alias entries in a panel list still count toward its fan-out.

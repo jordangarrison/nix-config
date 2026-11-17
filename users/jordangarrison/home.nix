@@ -1397,8 +1397,8 @@ in
   };
 
   home.file = {
-    # Store-backed so a worktree build/test can validate the sheet before merge.
-    ".claude/rules/pstack-models.md".source = ./agents/pstack-models.md;
+    # Use pstack's own lookup path; keep the sheet out of global agent context.
+    ".cursor/rules/pstack-models.mdc".source = ./agents/pstack-models.md;
 
     # Pin ~/.local/bin/claude to the Nix-managed version to prevent auto-updater overwrites
     ".local/bin/claude".source = "${pkgs.llm-agents.claude-code}/bin/claude";

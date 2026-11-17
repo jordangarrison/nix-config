@@ -22,10 +22,10 @@ Run `ngwaf.sh auth-test`. It reads the setup cache, makes one cheap call to the 
 
 ```bash
 ngwaf.sh setup --op 'op://<vault>/<item>/<field>' [--op-account <account>] --corp <corp> --site <site> --user <api-user-email>
-ngwaf.sh setup --file <path-to-600-file> [--var <NAME>] [--corp <corp> --site <site> --user <email>]
+ngwaf.sh setup --file ~/.config/flo-secrets/ngwaf.env [--var <NAME>] [--corp <corp> --site <site> --user <email>]
 ```
 
-A `--file` may hold the bare key, or `NAME=value` lines; the variable defaults to `SIGSCI_TOKEN`, and `SIGSCI_CORP`, `SIGSCI_SITE`, and `SIGSCI_EMAIL` in the same file fill the other flags. Setup writes the cache, keeps any previous one as `config.prev`, and runs auth-test. The step is done when auth-test exits 0.
+The standard local file is `~/.config/flo-secrets/ngwaf.env`; pass another path when needed. A `--file` may hold the bare key, or `NAME=value` lines; the variable defaults to `SIGSCI_TOKEN`, and `SIGSCI_CORP`, `SIGSCI_SITE`, and `SIGSCI_EMAIL` in the same file fill the other flags. Setup writes the cache, keeps any previous one as `config.prev`, and runs auth-test. The step is done when auth-test exits 0.
 
 The cache is `~/.config/ngwaf-incident/config` (override with `NGWAF_CONFIG`). It holds only where the key is, the corp, site, API user, and verified-at time. It is separate from using-sigsci-waf's `~/.config/sigsci/config`, which cannot read a file source; when that file exists, its `SIGSCI_OP_REF` can be passed to `setup --op`. `SIGSCI_SITE=<site> ngwaf.sh ...` targets another site for one call without touching the cache.
 

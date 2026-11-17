@@ -463,7 +463,7 @@ in
   #
   # The one exception is Aikido: it ships only a local stdio server that
   # scans code on this machine, and executor-flo cannot run stdio servers.
-  # Its token is read at startup from ~/.config/aikido/api-key (see
+  # Its token is read at startup from ~/.config/flo-secrets/aikido-api-key (see
   # packages/aikido-mcp), gated by userApps.aikido (endeavour, flomac).
   #
   # On every host, so agents never fall back to direct servers. The work

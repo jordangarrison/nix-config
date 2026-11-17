@@ -58,7 +58,7 @@
         name = "aikido-mcp";
         script = ../packages/aikido-mcp/aikido-mcp.sh;
         deps = with final; [ coreutils nodejs ];
-        description = "Aikido MCP server with its API token read from ~/.config/aikido/api-key";
+        description = "Aikido MCP server with its API token read from ~/.config/flo-secrets/aikido-api-key";
       };
 
       herdr-handoff = mkScript {

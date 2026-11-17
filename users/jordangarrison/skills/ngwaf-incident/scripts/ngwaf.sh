@@ -48,7 +48,7 @@ now() { date -u +%s; }
 iso() { jq -nr --argjson t "$1" '$t | todate'; }
 
 # Octal permission bits of a file, GNU or BSD stat.
-file_mode() { stat -c %a "$1" 2>/dev/null || stat -f %Lp "$1"; }
+file_mode() { stat -L -c %a "$1" 2>/dev/null || stat -L -f %Lp "$1"; }
 
 # A token file must be readable by its owner only.
 assert_private() {

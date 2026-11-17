@@ -199,6 +199,22 @@
         "type": "github"
       }
     },
+    "cursor-plugins": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794896313,
+        "narHash": "sha256-VFEMIRgUEY3/HRlKIqkJdidxoXzgHX7jIL/dhYRr0sU=",
+        "owner": "cursor",
+        "repo": "plugins",
+        "rev": "e1cc03121a0e71129a4fb730d7c5528a0a3e43c8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "cursor",
+        "repo": "plugins",
+        "type": "github"
+      }
+    },
     "diagram-design": {
       "flake": false,
       "locked": {
@@ -1602,6 +1618,7 @@
         "aws-use-sso": "aws-use-sso",
         "boristane-agent-skills": "boristane-agent-skills",
         "caveman": "caveman",
+        "cursor-plugins": "cursor-plugins",
         "diagram-design": "diagram-design",
         "disko": "disko",
         "drawl": "drawl",

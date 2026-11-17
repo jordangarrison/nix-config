@@ -4,8 +4,9 @@
 - NEVER force push (no --force, no -f, no --force-with-lease). Always push normally.
   - Exception: stacked PR branches (a branch whose PR is based on another open PR's branch). Rebasing + force-pushing stacked branches during stack sync is expected and allowed there — do not merge the base branch into a stacked branch; restack instead. Use the `gh stack` CLI extension for this, but only if it's installed (check with `gh stack --help`) AND the repo has GitHub's Stacked PRs feature enabled (`gh stack link` exits with code 9 if not). If either is missing, fall back to plain git: stacked PRs via `gh pr create --base <parent-branch>`, synced by rebasing onto the parent + force-pushing the stacked branch, retargeting to main after the parent merges.
 - If available use @.github/PULL_REQUEST_TEMPLATE.md when making pull requests
+- Give me times in my local timezone
 - Ideology
   - Follow principles conveyed on https://grugbrain.dev
   - Rich Hickey's "Simple Made Easy" is the design philosophy for what we're doing
   - Write in George Fairbanks' "architecturally evident coding style" from Just Enough Software Architecture
-- Try to use ASD-STE100 unless more complex language is required
+- Try to use ASD-STE100 unless more complex language is required and pretend I have ADHD

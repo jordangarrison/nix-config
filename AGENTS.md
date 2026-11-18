@@ -20,10 +20,8 @@ them here.
   and failed workarounds are documented in `hosts/voyager/configuration.nix`.
 - Do not edit generated or Nix-managed symlinks in place. Change their Nix source
   and rebuild.
-- Keep public files, fixtures, commits, PRs, and comments generic. Use synthetic
-  data. Keep incident or ticket IDs, internal hosts and URLs, Slack IDs and
-  permalinks, people’s names, customer data, and live system details private.
-  Run the [privacy check](ci/privacy/README.md) before publishing.
+- Follow the [public repository rule](users/jordangarrison/agents/AGENTS.md#public-repositories)
+  and run the [privacy check](ci/privacy/README.md) before publishing.
 - Do not expose, copy into the repository, or manually print secrets. Use the
   repository's wrapped tools and declared secret paths.
 - Do not commit or push unless the user asks.

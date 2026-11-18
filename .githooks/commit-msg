@@ -1,3 +1,3 @@
 #!/bin/sh
-# Git runs this hook from the root of the working tree.
+# Scan staged text and the proposed message for credentials.
 exec python3 ci/privacy/check.py staged --hook-message "$1"

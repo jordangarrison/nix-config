@@ -127,3 +127,29 @@ jobs:
           nix build --no-link --print-build-logs
           ".#nixosConfigurations.endeavour.config.home-manager.users.jordangarrison.programs.agent-skills.bundle"
           $STUB_OVERRIDES
+
+  check-deploy:
+    name: check deploy guards
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25 # v22
+      - name: Test fleet policy and operator gates (mocked transport)
+        run: >-
+          nix build --no-link --print-build-logs
+          .#checks.x86_64-linux.deploy-policy
+          .#checks.x86_64-linux.deploy-wrapper
+          $STUB_OVERRIDES
+      # The upstream deploy checks reference full system closures. Evaluate
+      # their derivations here; build them locally before an actual deploy.
+      - name: Evaluate upstream deploy checks and node profiles
+        run: |
+          for check in deploy-schema deploy-activate; do
+            nix eval --raw ".#checks.x86_64-linux.$check.drvPath" $STUB_OVERRIDES
+          done
+          for node in discovery endeavour; do
+            nix eval --raw ".#deploy.nodes.$node.profiles.system.path.drvPath" $STUB_OVERRIDES
+          done

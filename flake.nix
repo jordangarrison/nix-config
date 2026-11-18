@@ -6,6 +6,10 @@
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-26.05";
     nixpkgs-master.url = "github:nixos/nixpkgs/master";
     nixos-hardware.url = "github:nixos/nixos-hardware";
+    deploy-rs = {
+      url = "github:serokell/deploy-rs";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nix-darwin = {
       url = "github:LnL7/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -222,6 +226,7 @@
       nixpkgs-stable,
       nixpkgs-master,
       nixos-hardware,
+      deploy-rs,
       nix-darwin,
       home-manager,
       nvf,
@@ -255,6 +260,71 @@
     {
       nixosModules.bb = ./modules/nixos/bb.nix;
       homeManagerModules.bb-desktop = ./modules/home/bb-desktop;
+
+      # Intentionally a small fleet, not every nixosConfiguration. Voyager
+      # currently runs Omarchy; opportunity is a laptop. See docs/runbooks/deploy.md.
+      deploy = {
+        sshUser = "jordangarrison";
+        user = "root";
+        sudo = "sudo -n -u";
+        interactiveSudo = false;
+        sshOpts = [
+          "-o" "BatchMode=yes"
+          "-o" "StrictHostKeyChecking=yes"
+          "-o" "ConnectTimeout=10"
+          "-o" "ServerAliveInterval=15"
+          "-o" "ServerAliveCountMax=3"
+        ];
+        remoteBuild = false;
+        autoRollback = true;
+        magicRollback = true;
+        activationTimeout = 600;
+        confirmTimeout = 60;
+        nodes = builtins.mapAttrs (name: hostname: {
+          inherit hostname;
+          profiles.system.path =
+            deploy-rs.lib.x86_64-linux.activate.nixos self.nixosConfigurations.${name};
+        }) {
+          # The guarded command runs on endeavour. Avoid its stale SSH alias.
+          endeavour = "localhost";
+          discovery = "discovery";
+        };
+      };
+
+      packages.x86_64-linux.deploy-rs = deploy-rs.packages.x86_64-linux.default;
+      packages.x86_64-linux.deploy-always-on =
+        let
+          pkgs = nixpkgs.legacyPackages.x86_64-linux;
+          mkScript = pkgs.callPackage ./lib/mkScript.nix { };
+        in mkScript {
+          name = "deploy-always-on";
+          script = ./packages/deploy-always-on/deploy-always-on.sh;
+          deps = [ self.packages.x86_64-linux.deploy-rs ]
+            ++ (with pkgs; [ bash coreutils jq nix openssh util-linux ]);
+          description = "Build, test, and confirm deployment of the always-on NixOS fleet";
+        };
+
+      # Add deployChecks alongside (not instead of) the existing module checks.
+      checks.x86_64-linux.deploy-schema =
+        (deploy-rs.lib.x86_64-linux.deployChecks self.deploy).deploy-schema;
+      checks.x86_64-linux.deploy-activate =
+        (deploy-rs.lib.x86_64-linux.deployChecks self.deploy).deploy-activate;
+      checks.x86_64-linux.deploy-wrapper =
+        let pkgs = nixpkgs.legacyPackages.x86_64-linux;
+        in pkgs.runCommand "deploy-wrapper-tests" {
+          nativeBuildInputs = [ pkgs.python3 pkgs.bash pkgs.shellcheck pkgs.jq pkgs.util-linux ];
+        } ''
+          shellcheck ${./packages/deploy-always-on/deploy-always-on.sh}
+          python3 ${./tests/deploy-wrapper.py} ${./packages/deploy-always-on/deploy-always-on.sh}
+          touch "$out"
+        '';
+      checks.x86_64-linux.deploy-policy =
+        let pkgs = nixpkgs.legacyPackages.x86_64-linux;
+        in pkgs.runCommand "deploy-policy-tests" {
+          results = builtins.toJSON (import ./tests/deploy-policy.nix { flake = self; });
+        } ''
+          printf '%s\n' "$results" > "$out"
+        '';
 
       packages.x86_64-linux.bb-desktop =
         let
@@ -373,6 +443,7 @@
             ./users/jane/nixos.nix
             ./users/isla/nixos.nix
             ./hosts/endeavour/configuration.nix
+            ./modules/nixos/deploy-target.nix
             nixos-hardware.nixosModules.msi-b550-a-pro
             nixos-hardware.nixosModules.common-gpu-amd
             home-manager.nixosModules.home-manager
@@ -775,6 +846,7 @@
             ./users/jane/nixos.nix
             ./users/isla/nixos.nix
             ./hosts/discovery/configuration.nix
+            ./modules/nixos/deploy-target.nix
             ./modules/super-productivity/app.nix
             nixos-hardware.nixosModules.common-cpu-amd
             nixos-hardware.nixosModules.common-pc-ssd

@@ -477,6 +477,12 @@ in
         "emoji"
       ];
 
+      # Hex - compositor-owned fallback: our portal may lack GlobalShortcuts.
+      "Ctrl+Alt+Space" = lib.mkIf (config.programs.hex.enable or false) {
+        action.spawn = [ (lib.getExe config.programs.hex.package) "dictation" "toggle" ];
+        hotkey-overlay.title = "Hex voice dictation";
+      };
+
       # Handy - Voice dictation. Toggles the running instance.
       "Mod+Ctrl+Alt+Shift+5".action.spawn = [
         "handy"

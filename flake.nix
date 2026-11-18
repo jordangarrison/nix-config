@@ -31,6 +31,12 @@
       # inputs.nixpkgs.follows = "nixpkgs";
     };
     llm-agents.url = "github:numtide/llm-agents.nix";
+    # Linux dictation: keep the release tag explicit; update it and the lock together.
+    hex = {
+      url = "github:anomalyco/hex/v3.4.0";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
+    };
     # Herdr app layout by JinJieBeWater. Source only; the herdr-app module
     # copies its mods and layout into ~/.config/herdr-app.
     herdr-t3 = {
@@ -422,6 +428,7 @@
                   pup.enable = true;
                   namespace.enable = true;
                   handy.enable = true;
+                  hex.enable = true;
                   herdr.enable = true;
                   herdr-app.enable = true;
                   ovis.enable = true;
@@ -599,6 +606,7 @@
                   okta.enable = true;
                   pup.enable = true;
                   handy.enable = true;
+                  hex.enable = true;
                   herdr.enable = true;
                   herdr-app.enable = true;
                   work.enable = true;
@@ -783,11 +791,12 @@
             {
               programs.super-productivity.enable = true;
 
-              # Configure users for discovery
+              # Configure users for discovery (GNOME desktop with PipeWire).
               users.jordangarrison = {
                 enable = true;
                 username = "jordangarrison";
                 homeDirectory = "/home/jordangarrison";
+                apps.hex.enable = true;
               };
 
               users.mikayla = {

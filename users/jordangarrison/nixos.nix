@@ -65,6 +65,7 @@ in {
       namespace.enable = lib.mkEnableOption "Namespace (namespace.so) nsc CLI";
       floai.enable = lib.mkEnableOption "FloSports flo CLI";
       handy.enable = lib.mkEnableOption "Handy push-to-talk speech-to-text";
+      hex.enable = lib.mkEnableOption "Hex local voice dictation";
       herdr.enable = lib.mkEnableOption "Herdr terminal workspace manager for AI coding agents";
 
       # Access

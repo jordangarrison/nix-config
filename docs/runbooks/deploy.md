@@ -1,4 +1,4 @@
-# Deploy the always-on NixOS machines
+# Deploy the fleet from endeavour
 
 Run from the repository root **on endeavour**, in an interactive terminal:
 
@@ -7,9 +7,9 @@ nix run .#deploy-always-on
 ```
 
 This is an operator command, not an unattended agent or CI deploy. Starting it
-consents to **live testing** (including service restarts). It asks once more
-before the persistent switch. Agents must still obtain Jordan's permission
-before entering any activation phase.
+consents to **Linux live testing** (including service restarts) and a remote Mac
+build. It asks once before switching Linux and then the Mac. Agents must still
+obtain Jordan's permission before entering any activation phase.
 
 For validation without contacting any target:
 
@@ -17,15 +17,25 @@ For validation without contacting any target:
 nix run .#deploy-always-on -- --build-only
 ```
 
+For Linux only (for example, while the Mac is offline):
+
+```bash
+nix run .#deploy-always-on -- --no-mac
+```
+
+Options precede the optional flake argument. `--build-only` always stays local,
+regardless of whether `--no-mac` is supplied.
+
 ## Fleet and transport
 
 | Node | SSH destination | Why included |
 | --- | --- | --- |
 | discovery | `jordangarrison@discovery` | Jordan confirmed this is an always-on machine. Tailscale MagicDNS name. |
 | endeavour | `jordangarrison@localhost` | Always-on workstation and home-services host; also the build/deploy machine. |
+| H952L3DPHH / flomac | `jordan.garrison@h952l3dphh` | Work Mac; attended `nh darwin` over TTY-backed SSH, **not deploy-rs**. Optional with `--no-mac`. |
 
-The wrapper deploys discovery first and endeavour last. Both use the same
-SSH/sudo/rollback path; there is no hidden local `nh os switch`. Endeavour's
+The wrapper switches discovery, endeavour, then the Mac. The Linux hosts use the
+same SSH/sudo/rollback path; there is no hidden local `nh os switch`. Endeavour's
 existing SSH alias points to an old Tailscale address, so this draft avoids it
 without changing the user's SSH config. Do not run this wrapper from another
 machine: `localhost` must be endeavour. A future multi-controller setup should
@@ -36,8 +46,6 @@ Excluded deliberately:
 - **voyager** currently runs Omarchy, per Jordan. Its NixOS configuration,
   including its no-suspend and `machine.type = "desktop"` invariants, is untouched.
 - **opportunity** is a laptop, not part of this always-on fleet.
-- **H952L3DPHH** is nix-darwin: upstream has `activate.darwin`, but it needs
-  separate macOS SSH/sudo validation and is outside this NixOS fleet.
 - **jordangarrison@normandy** is standalone Home Manager on WSL/Ubuntu.
   `activate.home-manager` could deploy a user profile, not a NixOS system;
   WSL availability and SSH bootstrap are separate concerns.
@@ -47,37 +55,99 @@ Excluded deliberately:
 
 1. Refuse another controller, non-interactive execution, or a concurrent fleet
    command. Resolve the selected flake to an immutable Nix-store snapshot.
+   With the Mac enabled, require a clean Git revision and fetch that SHA from
+   the canonical GitHub remote. Verify the revision **and source NAR hash** match
+   the Linux snapshot. Dirty/uncommitted, unpublished, unverifiable, or mismatched
+   sources stop the command before contacting any fleet target. `--no-mac` and
+   `--build-only` retain local-snapshot support for Linux development.
 2. **Build locally**: build `deploy-schema`, `deploy-activate`, `deploy-policy`,
-   and `deploy-wrapper`. The activation check depends on **both full system
-   closures**. Nix distributed builders are disabled for this command. No SSH,
-   copying, test, or switch occurs during this build phase.
-3. Read each target's hostname and `/run/current-system` over SSH. A wrong
-   hostname or failed connection stops the command. Print and save the previous
-   paths plus manual recovery commands under
+   and `deploy-wrapper`. The activation check depends on **both full Linux system
+   closures**, not Darwin. Nix distributed builders are disabled for this phase.
+   No fleet target is contacted during this local build.
+3. Read each enabled target's hostname and `/run/current-system` over SSH. A wrong
+   hostname or failed connection stops the command before Linux live tests.
+   Print and save previous paths plus manual recovery commands under
    `${XDG_STATE_HOME:-~/.local/state}/nix-config/deploy/before-*.txt`.
-4. Run upstream `deploy --test` against discovery, then endeavour, using the
-   built snapshot. Closures are copied over SSH and each host runs
+4. If enabled, use `ssh -t` to run **`nh darwin build --no-nom` on the Mac** for
+   that exact published revision and `-H H952L3DPHH`, refusing lock updates.
+   This builds without activating; failure stops before Linux live tests. The
+   Mac cannot be checked by building its aarch64-darwin closure on Linux.
+5. Run upstream `deploy --test` against discovery, then endeavour, using the
+   built snapshot. Closures are copied over SSH and each Linux host runs
    `switch-to-configuration test`. **This changes running services now.**
-5. After both tests succeed, stop at **`[y/N]`**. Check services on both hosts.
-   Only an affirmative answer runs `deploy` against those same snapshot/profile
-   paths, which calls `switch-to-configuration switch` and updates boot loaders.
-   There is no `--yes` flag.
+   Darwin has no equivalent `--test` and is never in this loop.
+6. After the Linux tests succeed, stop at the single **`[y/N]`** gate. Inspect
+   services before answering. Only Yes runs the Linux `deploy` switches for the
+   tested snapshot, updating boot loaders, followed by the Mac's **TTY-backed
+   `nh darwin switch --no-nom`**, for the same published revision. Enter the Mac's
+   password when sudo/Homebrew asks; no password is stored or forwarded by the
+   wrapper. There is no `--yes` mode.
+
+The Mac switch runs only after **both** Linux switches succeed. If it fails or
+loses SSH after that point, the command exits nonzero and explicitly reports that
+Linux switches remain applied. It does **not** attempt a cross-platform rollback.
+An unreachable/unready Mac stops early with an explicit `--no-mac` suggestion;
+there is no silent skip.
 
 The wrapper uses `--skip-checks` on the two upstream invocations only because
 it already built the four deploy-specific checks. It does not replace the
 repository's other `nix flake check` checks. All phases refuse lock-file updates;
 checkout edits made while checking services cannot change the tested generation.
 
-Builds use endeavour's caches and credentials. The targets do not need access
-to the private flake sources for normal deploys. `remoteBuild = false` avoids
+Linux builds use endeavour's caches and credentials. The Linux targets do not
+need access to the private flake sources for normal deploys. `remoteBuild = false` avoids
 asking weaker machines to compile the full desktop closure. With
 `fastConnection` left at its upstream default, targets can substitute cached
 paths before copying the remaining closure.
 
-## SSH, sudo, and one-time bootstrap
+## Mac transport, source pinning, and recovery
+
+Jordan chose to keep the managed work Mac out of deploy-rs. It is **not** in
+`deploy.nodes`, the Linux activation checks, or their `--test` loop. The controller
+runs two ordinary SSH commands: a remote build before the approval gate, then a
+remote switch after Yes and the Linux switches. Both use `ssh -t`; the existing
+password-required sudo policy stays unchanged. There is no NOPASSWD grant, root
+SSH, agent forwarding, sudo-password pipe, or extra Nix trust grant for the Mac.
+
+The Mac's config uses Determinate Nix (`nix.enable = false`). Its Homebrew
+activation enables auto-update/upgrade and has many casks; nested installers may
+ask for sudo or GUI interaction. A real TTY allows attended password prompts,
+but does not promise that every MDM/GUI installer can finish over SSH. Homebrew
+changes are mutable and are **not** undone by a Nix generation rollback. Nothing
+in this change disables Homebrew or changes Mosyle/PAM policy.
+
+The immutable ref is:
+
+```text
+git+ssh://git@github.com/jordangarrison/nix-config?allRefs=1&rev=<40-character-SHA>
+```
+
+Both remote `nh darwin` calls explicitly select `-H H952L3DPHH`, pass `--no-nom`,
+and refuse lock updates. The controller verifies the revision is fetchable from
+the canonical remote and matches its clean snapshot before any target preflight.
+The Mac has its own GitHub SSH access to the private inputs. Neither its checkout
+(`~/dev/jordangarrison/nix-config`) nor its branch is changed, pulled, or reset.
+Commit and **push** before a full fleet deployment; use `--no-mac` for dirty or
+local-only Linux work. Cached copies of a previously published immutable ref are
+valid; the controller requests refreshed metadata rather than trusting a local
+branch/upstream label alone.
+
+The Mac preflight records its resolved `/run/current-system` and a manual
+`sudo env HOME=/var/root /nix/store/<previous-darwin-system>/activate` recovery command. No automatic
+Mac rollback is promised by this SSH/nh path. If recovery is required, obtain
+approval, reactivate the recorded old closure in a local or TTY-backed terminal,
+and separately restore `/nix/var/nix/profiles/system` with `sudo nix-env --profile
+/nix/var/nix/profiles/system --set <previous-darwin-system>` if necessary. Neither
+step reverses Homebrew updates or service-data changes. Preserve recovery access.
+
+Only read-only Mac SSH checks were performed while implementing this draft. The
+remote build and switch path is covered with mocks, **not validated on the Mac**;
+the first real remote build/activation remains a separately approved operator task.
+
+## Linux SSH, sudo, and one-time bootstrap
 
 No new root SSH login, public key, firewall rule, or secret is introduced.
-The existing Jordan user has `NOPASSWD` sudo. The draft sets:
+The existing Linux Jordan user has `NOPASSWD` sudo. The draft sets:
 
 - `sshUser = "jordangarrison"`, profile `user = "root"`;
 - `sudo = "sudo -n -u"`, `interactiveSudo = false`;

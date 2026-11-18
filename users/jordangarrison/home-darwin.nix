@@ -6,7 +6,11 @@
     ../../modules/home/omniwm
   ];
 
-  home.packages = lib.optionals (userApps.hermes-desktop.enable or false) [
+  home.packages = [
+    # Keep the upstream signature for Microphone and Accessibility grants.
+    # copyApps below installs the bundle; see packages/hex-bin/README.md.
+    (pkgs.callPackage ../../packages/hex-bin { })
+  ] ++ lib.optionals (userApps.hermes-desktop.enable or false) [
     pkgs.llm-agents.hermes-desktop
   ];
 

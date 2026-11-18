@@ -106,11 +106,18 @@ Interactive hierarchical command menu powered by `wlr-which-key`. Press `Mod+D` 
 | Media | m | Headphone/Speaker switching, Mic mute |
 | Session | x | Reload config, Quit niri, Hotkey overlay |
 | Display | d | Monitor focus/move |
-| Jagpi | j | Open the Jagpi layout in Herdr (when the desktop app is enabled) |
+| Jagpi | j | Open or focus the Jagpi TUI in Ghostty |
 
-`Mod+D → j` uses `herdr-jagpi`: reuse and raise the Herdr window, or start it
-and wait for readiness before selecting the Nix-managed `jagpi` layout. See
-`docs/runbooks/herdr.md` for how the board selects its daemon host.
+`Mod+D → j` uses `jagpi-ghostty`: run the local daemon's CLI when
+`services.jagpi.enable` is set, or `ssh -t endeavour jagpi` on opportunity.
+Other hosts without a local daemon omit the entry. No Herdr desktop app is
+required; its Jagpi layout and board remain available separately.
+
+The launcher finds `dev.jordangarrison.jagpi` in `niri msg --json windows`
+and focuses that window by ID. A launch lock covers startup, so rapid presses
+reuse the same window. Ghostty's `--class` sets both the Wayland app-id and
+D-Bus identity; `--gtk-single-instance=false` avoids handoff to a wedged
+instance. Startup failures are logged to `$XDG_RUNTIME_DIR/jagpi-ghostty.log`.
 
 **Configuration:** `modules/home/wlr-which-key/default.nix`
 
@@ -172,13 +179,13 @@ Keep both files in sync to ensure users can discover all available keybindings.
 
 ```bash
 # Build without switching (validates config)
-nh os build .
+nh os build . --no-nom
 
 # Test configuration (switch temporarily)
-nh os test .
+nh os test . --no-nom
 
-# Apply permanently
-nh os switch .
+# Apply permanently (only after build/test pass and user approval)
+nh os switch . --no-nom
 ```
 
 ## Troubleshooting

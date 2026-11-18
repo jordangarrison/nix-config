@@ -71,7 +71,7 @@ Super + D                 → Open which-key menu
   m                       → Media (headphones/speakers/mic mute)
   x                       → Session (reload config, quit, hotkey overlay)
   d                       → Display (monitor focus/move)
-  j                       → Jagpi layout in Herdr (when Herdr desktop is enabled)
+  j                       → Jagpi TUI in Ghostty (local or SSH to endeavour; reuses window)
 
 [SCREENSHOTS (via Super + D → s)]
 s then r                  → Region select + Satty annotation

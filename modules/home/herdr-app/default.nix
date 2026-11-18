@@ -29,6 +29,41 @@ let
     text = builtins.readFile ./install-herdr-mods.sh;
   };
 
+  # jagpi board (inputs.jagpi; `nix flake update jagpi` to update): jagpi's
+  # own Herdr mod and layout (jagpi integrations/herdr-app), on every host.
+  # A host that runs the jagpi daemon (services.jagpi, hosts/endeavour/
+  # jagpi.nix) reads it here. Any other host runs jagpi on the daemon's
+  # herdr-core machine (jagpi ADR 0070), so it needs no jagpi package.
+  jagpiDaemonMachine = "endeavour"; # as `hc machine ls` names it
+  jagpiBoardMachine = if config.services.jagpi.enable or false then null else jagpiDaemonMachine;
+  jagpiBoardSrc = "${inputs.jagpi}/integrations/herdr-app";
+
+  # Every jagpi-board content, wherever the layout puts it (blocks, a
+  # stack's header), gets `machine`, so no copy that starts before the
+  # board runs jagpi here.
+  withMachine =
+    value:
+    if builtins.isList value then
+      map withMachine value
+    else if builtins.isAttrs value then
+      let
+        walked = lib.mapAttrs (_: withMachine) value;
+      in
+      if (value.mod or null) == "jagpi-board" then
+        lib.recursiveUpdate walked { props.machine = jagpiBoardMachine; }
+      else
+        walked
+    else
+      value;
+
+  jagpiLayout =
+    if jagpiBoardMachine == null then
+      "${jagpiBoardSrc}/layouts/jagpi.json"
+    else
+      builtins.toFile "jagpi.json" (
+        builtins.toJSON (withMachine (lib.importJSON "${jagpiBoardSrc}/layouts/jagpi.json"))
+      );
+
   # Third-party mods with more than one file: copied, not linked (see
   # install-herdr-mods.sh). Name in mods/ -> its folder in a flake input.
   copiedMods = {
@@ -47,6 +82,9 @@ let
     # The Go binary from that same input is pre-placed below, where the mod's
     # [ -x ] check looks, so the mod does not download a release.
     linear = "${inputs.herdr-linear}/app/mods/linear";
+    # jagpi board (see jagpiBoardSrc). Copied: it imports ./model.js and
+    # its siblings.
+    jagpi-board = "${jagpiBoardSrc}/mods/jagpi-board";
   };
 
   # The mod pins this string and looks up ~/.local/share/herdr-linear/app/<it>/.
@@ -116,6 +154,10 @@ in
       # main-issues: Herdr's main layout with the issues panel (copiedMods)
       # and its button.
       "herdr-app/layouts/main-issues.json".source = "${inputs.herdr-issues}/layouts/main-issues.json";
+      # The jagpi layout, with `machine` on every jagpi-board block when the
+      # daemon runs elsewhere (see jagpiLayout).
+      "herdr-app/layouts/jagpi.json".source = jagpiLayout;
+      "herdr-app/layouts/jagpi.svg".source = "${jagpiBoardSrc}/layouts/jagpi.svg";
     };
 
     # Herdr T3 layout (inputs.herdr-t3; `nix flake update herdr-t3` to update).

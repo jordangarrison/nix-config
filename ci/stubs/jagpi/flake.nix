@@ -6,8 +6,9 @@
   # claude-bridge provider package with its passthru.jagpiProvider path, and
   # homeManagerModules.default with the services.jagpi options the host
   # sets, typed like upstream, that installs the package and writes the
-  # providers part of config.json. If that surface
-  # grows, grow this stub to match.
+  # providers part of config.json. integrations/herdr-app/ holds the board
+  # mod and layout that modules/home/herdr-app reads (the layout at
+  # evaluation time). If that surface grows, grow this stub to match.
   description = "CI stub for the private jordangarrison/jagpi flake";
 
   outputs =

@@ -59,6 +59,12 @@
           # CI. environmentFile is here so the Slack follow-up stays one line.
           options.services.jagpi = {
             enable = lib.mkEnableOption "the jagpi daemon (CI stub)";
+            package = lib.mkOption {
+              type = lib.types.package;
+              default = self.packages.${pkgs.stdenv.hostPlatform.system}.default;
+              defaultText = lib.literalExpression "jagpi.packages.\${system}.default";
+              description = "The jagpi package. It is also installed, so `jagpi` opens the TUI on this instance.";
+            };
             # Contract-only: CI does not build or exercise the upstream launcher.
             acp.enable = lib.mkEnableOption "the jagpi ACP launcher (CI stub)";
             instance = lib.mkOption {
@@ -103,7 +109,7 @@
           config = lib.mkIf cfg.enable {
             # runtimePackages are only type-checked: upstream puts them on
             # the daemon's PATH, not in the user profile.
-            home.packages = [ self.packages.${pkgs.stdenv.hostPlatform.system}.default ];
+            home.packages = [ cfg.package ];
             xdg.configFile."jagpi/${cfg.instance}/config.json".text = builtins.toJSON {
               providers = map (plugin: {
                 module = "${plugin.package}/${

@@ -1,18 +1,29 @@
-{ config, pkgs, lib, userApps ? { }, ... }:
+{ config, pkgs, lib, osConfig ? null, ... }:
 
 let
   homeDirectory = config.home.homeDirectory;
   scriptsPath = "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/hypr/scripts";
 
-  herdrEnabled = userApps.herdr-app.enable or false;
-  herdrJagpi = pkgs.writeShellApplication {
-    name = "herdr-jagpi";
+  # This module is imported by niri. Opportunity uses the SSH alias from
+  # users/jordangarrison/configs/ssh/config; other hosts need a local daemon.
+  jagpiLocal = config.services.jagpi.enable or false;
+  jagpiRemote = osConfig != null && osConfig.networking.hostName == "opportunity";
+  jagpiEnabled = jagpiLocal || jagpiRemote;
+  jagpiCommand =
+    if jagpiLocal then [ (lib.getExe config.services.jagpi.package) ]
+    else [ "ssh" "-t" "endeavour" "jagpi" ];
+  jagpiGhostty = pkgs.writeShellApplication {
+    name = "jagpi-ghostty";
     runtimeInputs = [
-      (import ../herdr-app/package.nix { inherit pkgs; })
+      pkgs.ghostty
+      pkgs.niri
+      pkgs.jq
       pkgs.coreutils
       pkgs.util-linux
-    ];
-    text = builtins.readFile ./herdr-jagpi.sh;
+    ] ++ lib.optional (!jagpiLocal) pkgs.openssh;
+    text = ''
+      set -- ${lib.escapeShellArgs jagpiCommand}
+    '' + builtins.readFile ./jagpi-ghostty.sh;
   };
 
   # Helper to create a menu entry
@@ -116,9 +127,9 @@ let
 
       # [g] Grove
       (entry "g" "Grove" "ghostty -e grove")
-    ] ++ lib.optionals herdrEnabled [
+    ] ++ lib.optionals jagpiEnabled [
       # Plain j at the top level, not inside Apps or Web.
-      (entry "j" "Jagpi (Herdr)" (lib.getExe herdrJagpi))
+      (entry "j" "Jagpi (Ghostty)" (lib.getExe jagpiGhostty))
     ] ++ [
       # [d] Display
       (submenu "d" "Display" [
@@ -155,5 +166,5 @@ in
     pkgs.wlr-which-key
     whichKeyMenu
     yaziScreenshots
-  ] ++ lib.optional herdrEnabled herdrJagpi;
+  ] ++ lib.optional jagpiEnabled jagpiGhostty;
 }

@@ -70,7 +70,52 @@ override the settings theme. To select Rosé Pine for the shown layout, run
 
 Agent priority sorting is already the shipped agents mod's default. The TUI's
 `onboarding`, `experimental.pane_history`, and `session.resume_agents_on_restore`
-have no documented desktop settings equivalents and remain TUI-only.
+have no documented desktop settings equivalents and remain TUI-only. Revive
+(below) takes the place of `resume_agents_on_restore` in the app.
+
+### Agents after a reboot (Revive)
+
+herdr-core brings every kept terminal back after a reboot or core restart, with
+the same address, tab and labels, but only as a shell: it never runs the
+program again. Revive (`inputs.herdr-revive`, pinned to a release tag) resumes
+the agent that the terminal lost, in the same pane, from its saved session.
+
+- **Record:** pi (through `~/.pi/agent/extensions/herdr-revive.ts`) and Claude
+  Code (through SessionStart/SessionEnd hooks in `~/.claude/settings.json`)
+  write `revive.*` labels on their terminal. A session ended with `/quit`,
+  `/exit` or Ctrl+C is forgotten; one ended by a signal (reboot, core
+  restart, `kill`) is kept. Codex, Cursor, Droid and omp are not recorded.
+- **Resume:** the zsh block at the end of `.zshrc` asks `revive.mjs check` in
+  a recovered shell and starts the agent at its first prompt. It leaves out
+  flags that lift approvals; resume from the dialog to keep them.
+- **Dialog:** `ctrl-alt-r` (or `cmd-shift-r`) opens it for the focused
+  terminal: resume an *Interrupted* agent (one that died while its shell
+  lived), retry a failed resume, fork a session, or turn automatic resume off
+  for one terminal.
+- **Ownership:** `modules/home/herdr-app/` copies `mods/revive`, links the pi
+  extension to that copy, and sources the zsh block generated from the pinned
+  source. An activation step runs `revive.mjs install` with every part off
+  except the Claude Code hooks: declaring the hooks in
+  `programs.claude-code.settings` would replace the other tools' hook arrays.
+  Do not run `revive.mjs install` by hand; it would try to write the
+  read-only `.zshrc`.
+- **Not recorded:** an agent started before the extension or hooks existed.
+  Run `/reload` in pi, or restart the agent, to record it.
+- **Inspect:** `hc get <t> --json | jq '.labels | with_entries(select(.key | startswith("revive.")))'`;
+  `REVIVE_DEBUG=1 zsh` in a terminal says why it did or did not resume;
+  `node ~/.config/herdr-app/mods/revive/revive.mjs doctor`.
+- **Update:** read the release notes, change the tag on the `herdr-revive`
+  input in `flake.nix`, run `nix flake update herdr-revive`, rebuild. It was
+  tested with pi 1.4; check pi's resume after a pi update.
+
+### Agent names
+
+The T3 sidebar, Inbox and tabs name an agent by the `pi.session` label on its
+terminal, then by its tab. `modules/home/pi/extensions/herdr-thread-name.ts`
+copies pi's session name into that label. While a session has no name, its
+`name_session` tool asks the agent to name the work. It renames the agent's
+tab too when Herdr still calls the tab by its number and the agent is alone in
+it.
 
 Leave app runtime state (`shared.json`, `view.json`, `layouts/.state/`, core
 session data) and app-generated files (the guide, types, shipped layouts and

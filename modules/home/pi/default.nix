@@ -199,6 +199,7 @@ let
     "codex-subscription-usage.ts".source = ./extensions/codex-subscription-usage.ts;
     "expandable-bash-command.ts".source = ./extensions/expandable-bash-command.ts;
     "html-popup.ts".source = ./extensions/html-popup.ts;
+    "herdr-thread-name.ts".source = ./extensions/herdr-thread-name.ts;
     "protected-paths.ts".source = ./extensions/protected-paths.ts;
     "status-line.ts".source = ./extensions/status-line.ts;
   };

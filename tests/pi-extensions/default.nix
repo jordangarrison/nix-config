@@ -1,7 +1,7 @@
 # Runs the regression tests for the owned pi extensions in
 # modules/home/pi/extensions/ against the real @earendil-works/pi-tui that
-# matches the installed pi. The pi-coding-agent values they import come from
-# ./stubs, because the real package is compiled into the pi binary.
+# matches the installed pi. The pi-coding-agent and typebox values they import
+# come from ./stubs, because the real packages are compiled into the pi binary.
 #
 #   nix build .#checks.x86_64-linux.pi-extensions
 #
@@ -36,9 +36,12 @@ runCommand "pi-extension-tests"
     cp ${./compact-until.test.ts} work/tests/compact-until.test.ts
     cp ${../../modules/home/pi/extensions/expandable-bash-command.ts} work/extensions/expandable-bash-command.ts
     cp ${./expandable-bash-command.test.ts} work/tests/expandable-bash-command.test.ts
+    cp ${../../modules/home/pi/extensions/herdr-thread-name.ts} work/extensions/herdr-thread-name.ts
+    cp ${./herdr-thread-name.test.ts} work/tests/herdr-thread-name.test.ts
     cp -r ${nodeModules}/node_modules/. work/node_modules/
     chmod -R u+w work/node_modules
     cp -r ${./stubs/pi-coding-agent} work/node_modules/@earendil-works/pi-coding-agent
+    cp -r ${./stubs/typebox} work/node_modules/typebox
 
     cd work
     node --test --test-reporter=spec tests/*.test.ts | tee "$out"

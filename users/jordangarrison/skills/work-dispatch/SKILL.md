@@ -51,7 +51,10 @@ fallback. Missing required capabilities remain blockers.
 - **Herdr app (herdr-core):** `HC_TERMINAL_ID` is set. Load [[herdr-core]]
   to start, message, wait on, and read workers with `hc`. When the user
   should see or steer a dedicated workstream, load [[herdr-app]] to give it
-  a named space or tab. hc has no managed checkouts: use the manual
+  a named space or tab. Name the space and tab after the work, ticket or PR
+  first (`SRE-1127 CloudSearch TF import`): that name is what the user sees
+  when the worker asks for input. Start a pi worker with `--name` set to the
+  same words. hc has no managed checkouts: use the manual
   `.worktrees/<repo>/<slug>` convention and pass that path as the worker's
   `--cwd` or the space's `--folder`. The Herdr app must be the selected
   owner, not just the terminal enclosing another orchestration surface.

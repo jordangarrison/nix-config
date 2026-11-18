@@ -815,6 +815,23 @@
         "type": "github"
       }
     },
+    "herdr-revive": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794206306,
+        "narHash": "sha256-8adf7A+JN9ksJzTWqGZwsiMr44LM21Eai865z8sEw0c=",
+        "owner": "dmazlum",
+        "repo": "herdr-revive",
+        "rev": "fdb3c043a118d5de831ff68bd0ce8879c174fa8c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "dmazlum",
+        "ref": "v0.5.1",
+        "repo": "herdr-revive",
+        "type": "github"
+      }
+    },
     "herdr-space-folders": {
       "flake": false,
       "locked": {
@@ -1630,6 +1647,7 @@
         "grove": "grove",
         "herdr-issues": "herdr-issues",
         "herdr-linear": "herdr-linear",
+        "herdr-revive": "herdr-revive",
         "herdr-space-folders": "herdr-space-folders",
         "herdr-t3": "herdr-t3",
         "herdr-vitals": "herdr-vitals",

@@ -14,6 +14,7 @@ let
       inputs.herdr-issues = flake.inputs.herdr-issues;
       inputs.herdr-vitals = flake.inputs.herdr-vitals;
       inputs.herdr-linear = flake.inputs.herdr-linear;
+      inputs.herdr-revive = flake.inputs.herdr-revive;
       inputs.jagpi = flake.inputs.jagpi;
       userApps.herdr-app.enable = enabled;
     };
@@ -121,6 +122,11 @@ let
     jagpiBoardInstalled = lib.hasInfix "jagpi-board=" enabled.home.activation.herdrMods.data
       && lib.hasInfix "integrations/herdr-app/mods/jagpi-board" enabled.home.activation.herdrMods.data
       && !(files ? "herdr-app/mods/jagpi-board/main.js");
+    # Revive also needs its sibling files, so copy it without replacing the board.
+    reviveInstalled = lib.hasInfix "revive=" enabled.home.activation.herdrMods.data
+      && !(files ? "herdr-app/mods/revive/main.js")
+      && keys.global.ctrl-alt-r == "mod.open:revive"
+      && keys.global.cmd-shift-r == "mod.open:revive";
     # Every jagpi-board block names the daemon's machine; roles stay.
     jagpiBoardMachine =
       let

@@ -51,6 +51,8 @@
     "ctrl-shift-r": "mod.open:atuin-threads",
     "cmd-alt-v": "mod.open:vitals",
     "ctrl-alt-l": "mod.open:linear",
+    "ctrl-alt-r": "mod.open:revive",
+    "cmd-shift-r": "mod.open:revive",
     "ctrl-shift-p": "app.palette",
     "ctrl-,": "app.settings",
     "ctrl-shift-o": "pane.split:right",

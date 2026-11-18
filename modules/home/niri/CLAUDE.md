@@ -106,6 +106,11 @@ Interactive hierarchical command menu powered by `wlr-which-key`. Press `Mod+D` 
 | Media | m | Headphone/Speaker switching, Mic mute |
 | Session | x | Reload config, Quit niri, Hotkey overlay |
 | Display | d | Monitor focus/move |
+| Jagpi | j | Open the Jagpi layout in Herdr (when the desktop app is enabled) |
+
+`Mod+D → j` uses `herdr-jagpi`: reuse and raise the Herdr window, or start it
+and wait for readiness before selecting the Nix-managed `jagpi` layout. See
+`docs/runbooks/herdr.md` for how the board selects its daemon host.
 
 **Configuration:** `modules/home/wlr-which-key/default.nix`
 

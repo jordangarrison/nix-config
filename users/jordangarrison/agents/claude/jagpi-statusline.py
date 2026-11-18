@@ -1,5 +1,6 @@
-"""Publish only Claude Code's two subscription windows before rendering its status line."""
+"""Feed the enabled local quota trackers, then render Claude Code's status line."""
 
+import argparse
 import json
 import os
 from pathlib import Path
@@ -8,7 +9,21 @@ import sys
 import tempfile
 
 
-def publish(payload, instance):
+def write_private(path, payload):
+    path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    # Write beside the destination so readers see a complete old or new sample.
+    temp = tempfile.NamedTemporaryFile(dir=path.parent, delete=False)
+    tmp = Path(temp.name)
+    try:
+        with temp:
+            os.fchmod(temp.fileno(), 0o600)
+            temp.write(payload)
+        os.replace(tmp, path)
+    finally:
+        tmp.unlink(missing_ok=True)
+
+
+def publish_jagpi(payload, instance):
     home = Path.home()
     profile = os.environ.get("CLAUDE_CONFIG_DIR")
     if profile and Path(os.path.abspath(profile)) != home / ".claude":
@@ -40,28 +55,29 @@ def publish(payload, instance):
     if not state.is_absolute():
         state = home / ".local" / "state"
     dest = state / "jagpi" / instance / "claude-statusline.json"
-    dest.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
-    # Same directory for atomic replacement. NamedTemporaryFile creates mode 0600.
-    temp = tempfile.NamedTemporaryFile(mode="w", dir=dest.parent, delete=False)
-    tmp = Path(temp.name)
-    try:
-        with temp:
-            os.fchmod(temp.fileno(), 0o600)
-            json.dump({"rate_limits": windows}, temp)
-        os.replace(tmp, dest)
-    finally:
-        tmp.unlink(missing_ok=True)
+    write_private(dest, json.dumps({"rate_limits": windows}).encode("utf-8"))
 
 
 def main():
-    instance, *renderer = sys.argv[1:]
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--onwatch", action="store_true")
+    parser.add_argument("instance", help="jagpi instance, or an empty string to skip its feed")
+    parser.add_argument("renderer", nargs=argparse.REMAINDER)
+    args = parser.parse_args()
+
     payload = sys.stdin.buffer.read()
-    try:
-        publish(payload, instance)
-    except (ValueError, RecursionError, OSError):
-        # The optional feed must not break the status line or dump its raw input.
-        pass
-    return subprocess.run(renderer, input=payload, check=False).returncode
+    if args.onwatch:
+        try:
+            write_private(Path.home() / ".onwatch/data/anthropic-statusline.json", payload)
+        except OSError:
+            pass
+    if args.instance:
+        try:
+            publish_jagpi(payload, args.instance)
+        except (ValueError, RecursionError, OSError):
+            pass
+    # A feed failure must not break rendering or dump the raw input.
+    return subprocess.run(args.renderer, input=payload, check=False).returncode
 
 
 if __name__ == "__main__":

@@ -26,10 +26,12 @@ class StatuslineFeedTest(unittest.TestCase):
         self.state = self.home / "state"
         self.env = {"HOME": str(self.home), "XDG_STATE_HOME": str(self.state)}
         self.dest = self.state / "jagpi/test-instance/claude-statusline.json"
+        self.onwatch = self.home / ".onwatch/data/anthropic-statusline.json"
 
-    def render(self, payload=PAYLOAD, code=0):
+    def render(self, payload=PAYLOAD, code=0, *, onwatch=False):
+        flags = ["--onwatch"] if onwatch else []
         result = subprocess.run(
-            [sys.executable, WRAPPER, "test-instance", sys.executable, "-c",
+            [sys.executable, WRAPPER, *flags, "test-instance", sys.executable, "-c",
              f"import sys; sys.stdout.buffer.write(sys.stdin.buffer.read()); sys.exit({code})"],
             env=self.env, input=payload, capture_output=True, check=False,
         )
@@ -48,6 +50,22 @@ class StatuslineFeedTest(unittest.TestCase):
         self.assertNotEqual(self.dest.stat().st_ino, inode)
         self.assertEqual(list(self.dest.parent.iterdir()), [self.dest])
         self.assertEqual(json.loads(self.dest.read_bytes())["rate_limits"]["five_hour"]["used_percentage"], 50)
+        self.assertFalse(self.onwatch.exists())
+
+    def test_onwatch_enabled_publishes_both_feeds(self):
+        self.render(onwatch=True)
+        self.assertEqual(json.loads(self.dest.read_bytes()), {"rate_limits": {
+            "five_hour": {"used_percentage": 0, "resets_at": 1800000000},
+        }})
+        self.assertEqual(self.onwatch.read_bytes(), PAYLOAD)
+        self.assertEqual(stat.S_IMODE(self.onwatch.stat().st_mode), 0o600)
+
+        inode = self.onwatch.stat().st_ino
+        updated = PAYLOAD.replace(b'"used_percentage":0', b'"used_percentage":50')
+        self.render(payload=updated, onwatch=True)
+        self.assertNotEqual(self.onwatch.stat().st_ino, inode)
+        self.assertEqual(self.onwatch.read_bytes(), updated)
+        self.assertEqual(list(self.onwatch.parent.iterdir()), [self.onwatch])
 
     def test_does_not_replace_good_sample_on_invalid_or_missing_windows(self):
         self.render()
@@ -62,10 +80,16 @@ class StatuslineFeedTest(unittest.TestCase):
         self.render()
         self.assertFalse(self.dest.exists())
 
-    def test_write_failure_does_not_change_renderer(self):
+    def test_jagpi_write_failure_does_not_block_onwatch(self):
         self.state.touch()
-        self.render()
+        self.render(onwatch=True)
         self.assertFalse(self.dest.exists())
+        self.assertEqual(self.onwatch.read_bytes(), PAYLOAD)
+
+    def test_onwatch_write_failure_does_not_block_jagpi(self):
+        self.onwatch.parent.parent.touch()
+        self.render(onwatch=True)
+        self.assertTrue(self.dest.is_file())
 
     def test_ignores_relative_xdg_state_home(self):
         self.env["XDG_STATE_HOME"] = "relative"

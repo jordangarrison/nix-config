@@ -7,7 +7,7 @@
   inputs,
   userApps ? { },
   ...
-}:
+}@args:
 
 let
   borkedNsScriptPath = pkgs.writeTextFile {
@@ -22,9 +22,13 @@ let
   emacsPackage = if pkgs.stdenv.hostPlatform.isLinux then pkgs.emacs-pgtk else pkgs.emacs;
   # Live-checkout path for hand-authored agent content (see ./agents)
   agentsLive = "${config.home.homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/agents";
+  jagpiStatuslineEnabled = config.services.jagpi.enable or false;
+  onwatchStatuslineEnabled = args.osConfig.systemd.services.onwatch.enable or false;
+  jagpiStatuslineInstance = if jagpiStatuslineEnabled then config.services.jagpi.instance else "";
   claudeStatuslineWithJagpi = pkgs.writeShellScript "claude-statusline-with-jagpi" ''
     exec ${pkgs.python3}/bin/python3 ${./agents/claude/jagpi-statusline.py} \
-      ${lib.escapeShellArg config.services.jagpi.instance} ${pkgs.bash}/bin/bash "$HOME/.claude/statusline.sh"
+      ${lib.optionalString onwatchStatuslineEnabled "--onwatch"} ${lib.escapeShellArg jagpiStatuslineInstance} \
+      ${pkgs.bash}/bin/bash "$HOME/.claude/statusline.sh"
   '';
   # Shape one programs.mcp server for a client: `remote` for url servers,
   # `local` for stdio (command) servers.
@@ -357,7 +361,7 @@ in
       statusLine = {
         type = "command";
         command =
-          if config.services.jagpi.enable or false then
+          if jagpiStatuslineEnabled || onwatchStatuslineEnabled then
             "${claudeStatuslineWithJagpi}"
           else
             ''bash "$HOME/.claude/statusline.sh"'';

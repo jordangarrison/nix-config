@@ -10,6 +10,9 @@
     # Keep the upstream signature for Microphone and Accessibility grants.
     # copyApps below installs the bundle; see packages/hex-bin/README.md.
     (pkgs.callPackage ../../packages/hex-bin { })
+  ] ++ lib.optionals (userApps.grok-bot.enable or false) [
+    # Keep the upstream signature and notarization ticket for macOS grants.
+    inputs.grok-bot.packages.${pkgs.stdenv.hostPlatform.system}.default
   ] ++ lib.optionals (userApps.hermes-desktop.enable or false) [
     pkgs.llm-agents.hermes-desktop
   ];

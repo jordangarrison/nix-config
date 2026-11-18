@@ -853,6 +853,7 @@
                   username = "jordan.garrison";
                   homeDirectory = "/Users/jordan.garrison";
                   userApps = {
+                    grok-bot.enable = true;
                     # Same llm-agents release as the other hosts. Do not add the
                     # Homebrew cask; its updater would drift ahead of the server.
                     t3code.enable = true;

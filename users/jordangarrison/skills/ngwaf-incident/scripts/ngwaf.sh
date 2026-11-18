@@ -48,7 +48,7 @@ now() { date -u +%s; }
 iso() { jq -nr --argjson t "$1" '$t | todate'; }
 
 # Octal permission bits of a file, GNU or BSD stat.
-file_mode() { stat -c %a "$1" 2>/dev/null || stat -f %Lp "$1"; }
+file_mode() { stat -L -c %a "$1" 2>/dev/null || stat -L -f %Lp "$1"; }
 
 # A token file must be readable by its owner only.
 assert_private() {
@@ -519,6 +519,47 @@ writable_rule() {
       | walk(if type == "object" then with_entries(select(.value != null)) else . end)'
 }
 
+# Narrow action-only transition for an existing exact-IP AND exact-host rule.
+# Caller pins both scope values and the existing observation signal. No generic PUT.
+cmd_set_action() {
+  load_config
+  [ $# -eq 5 ] || die "set-action needs RULE_ID block|log EXACT_IP EXACT_HOST LOG_SIGNAL"
+  local id="$1" mode="$2" ip="$3" host="$4" signal="$5"
+  case "$id" in ''|*[!a-zA-Z0-9]*) die "rule id must be alphanumeric" ;; esac
+  case "$mode" in block|log) ;; *) die "mode must be block or log" ;; esac
+  tmpdir
+  api GET "$(site_path "/rules/$id")" > "$TMPD/rule.json" || die "rule read failed"
+  jq -e --arg id "$id" --arg ip "$ip" --arg host "$host" --arg sig "$signal" '
+    .id == $id and .type == "request" and .enabled == true and .groupOperator == "all"
+    and (.conditions | length == 2)
+    and any(.conditions[]; .type == "single" and .field == "ip" and .operator == "equals" and .value == $ip)
+    and any(.conditions[]; .type == "single" and .field == "domain" and .operator == "equals" and .value == $host)
+    and ((.actions | map(with_entries(select(.value != null))) | sort_by(.type)) == ([{type:"addSignal",signal:$sig}] | sort_by(.type))
+      or (.actions | map(with_entries(select(.value != null))) | sort_by(.type)) == ([{type:"addSignal",signal:$sig},{type:"block"}] | sort_by(.type)))
+  ' "$TMPD/rule.json" >/dev/null || die "scope/action guard failed; nothing changed"
+  writable_rule < "$TMPD/rule.json" > "$TMPD/before.json"
+  jq --arg mode "$mode" '
+    .actions |= (if $mode == "block" then
+      if any(.[]; .type == "block") then . else . + [{type:"block"}] end
+    else map(select(.type != "block")) end)
+  ' "$TMPD/before.json" > "$TMPD/body.json"
+  printf 'target: %s/%s rule=%s; exact IP AND host scope validated; action mode=%s; other fields unchanged\n' "$SIGSCI_CORP" "$SIGSCI_SITE" "$id" "$mode"
+  if cmp -s <(jq -S . "$TMPD/before.json") <(jq -S . "$TMPD/body.json"); then
+    printf 'already in requested mode; no write\n'; return 0
+  fi
+  if ! write_allowed; then
+    printf 'DRY RUN: nothing sent. To apply, re-run with SIGSCI_ALLOW_WRITE=%s\n' "$SIGSCI_SITE"; return 0
+  fi
+  # Fresh-state test immediately before PUT. This API exposes no documented CAS field.
+  api GET "$(site_path "/rules/$id")" | writable_rule > "$TMPD/fresh.json" || die "fresh read failed"
+  cmp -s <(jq -S . "$TMPD/before.json") <(jq -S . "$TMPD/fresh.json") || die "rule changed since backup; stop without write"
+  local out; out=$(api PUT "$(site_path "/rules/$id")" --data-binary @"$TMPD/body.json") || die "action write failed; read live rule before any retry"
+  api GET "$(site_path "/rules/$id")" > "$TMPD/after.json" || die "post-write read failed; verify live before retry"
+  writable_rule < "$TMPD/after.json" > "$TMPD/after-writable.json"
+  cmp -s <(jq -S . "$TMPD/body.json") <(jq -S . "$TMPD/after-writable.json") || die "readback mismatch; investigate and notify owner"
+  jq -r '"verified rule=\(.id) actions=\([.actions[].type]|join(",")) updated=\(.updated)"' "$TMPD/after.json"
+}
+
 cmd_create() {
   load_config
   local src="${1:-}"; [ -n "$src" ] || die "create needs a rule JSON file (or - for stdin)"
@@ -603,6 +644,8 @@ Read (TIME = unix seconds, -30m, -2h, -1d, or ISO-8601 UTC):
                          Raw site- or corp-scoped GET. Secret-bearing endpoints refused.
 
 Write (dry run unless SIGSCI_ALLOW_WRITE=<site name>):
+  set-action ID block|log EXACT_IP EXACT_HOST LOG_SIGNAL
+                         Action-only edit of an exact-IP AND exact-host rule; fresh-state and readback guards.
   create FILE|-          POST a new site rule (never retried).
   disable ID             PUT the rule back with enabled=false (incident rollback).
 USAGE
@@ -618,6 +661,7 @@ case "$cmd" in
   timeseries) cmd_timeseries "$@" ;;
   search) cmd_search "$@" ;;
   verify-rule) cmd_verify_rule "$@" ;;
+  set-action) cmd_set_action "$@" ;;
   create) cmd_create "$@" ;;
   disable) cmd_disable "$@" ;;
   get) cmd_get "$@" ;;

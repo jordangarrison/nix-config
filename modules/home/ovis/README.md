@@ -24,9 +24,9 @@ devices** on an authenticated desktop.
 ## Pi conversations
 
 Ovis 0.5.0 or later supports Pi chat through herdr-core. When Pi is enabled,
-this module bundles the unmodified `integrations/pi-ask.ts` from the published
-Ovis package's source and links it as `~/.pi/agent/extensions/herdr-web-ui.js`.
-The extension and server therefore update together through `llm-agents`.
+this module links the published `llm-agents.ovis.integrations.pi` file as
+`~/.pi/agent/extensions/herdr-web-ui.js`. The extension and server therefore
+update together through `llm-agents`; no local bundling step is needed.
 Do not run Ovis's mutable integration installer over this Nix-managed link.
 
 New Pi sessions load the extension automatically. In each existing interactive

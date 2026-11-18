@@ -4,7 +4,7 @@ set -euo pipefail
 
 # Aikido MCP server (stdio) with its API token read from a fixed path.
 # Create the file by hand with mode 0600; it is never in the Nix store.
-SECRETS_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/aikido/api-key"
+SECRETS_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/flo-secrets/aikido-api-key"
 
 if [ -z "${AIKIDO_API_KEY:-}" ] && [ -r "$SECRETS_FILE" ]; then
   AIKIDO_API_KEY="$(tr -d '[:space:]' < "$SECRETS_FILE")"

@@ -26,6 +26,74 @@ let
   # `local` for stdio (command) servers.
   mcpEntry = remote: local: s: if s.command != null then local s else remote s;
   mcpStdio = s: { inherit (s) command args; };
+
+  # Temporary catalog additions; remove once the packaged Pi includes GPT-6.2.
+  # Follow-up: https://github.com/jordangarrison/nix-config/issues/163
+  # Specs: earendil-works/pi@cead615b48b80d1c61eecab2f0b576d16eeaf4c5,
+  # packages/ai/catalog/{providers/openai-codex.ts,families/openai.ts}.
+  piGpt62Models = map
+    (model: model // {
+      api = "openai-codex-responses";
+      baseUrl = "https://chatgpt.com/backend-api";
+      reasoning = true;
+      input = [ "text" "image" ];
+      maxTokens = 128000;
+      # Both reject off and the minimal effort value; map minimal to low,
+      # as upstream's Codex catalog does, rather than sending minimal.
+      thinkingLevelMap = {
+        off = null;
+        minimal = "low";
+        low = "low";
+        medium = "medium";
+        high = "high";
+        xhigh = "xhigh";
+        max = "max";
+      };
+      compat = {
+        supportsOpenAIGrammarTools = true;
+        supportsAdditionalTools = true;
+        supportsToolSearch = true;
+        supportsMidConvoSystemMessages = true;
+      };
+    })
+    [
+      {
+        id = "gpt-6.2-astra";
+        name = "GPT-6.2 Astra";
+        contextWindow = 272000;
+        cost = {
+          input = 8;
+          output = 40;
+          cacheRead = 0.4;
+          cacheWrite = 10;
+          tiers = [ {
+            inputTokensAbove = 272000;
+            input = 16;
+            output = 60;
+            cacheRead = 0.8;
+            cacheWrite = 20;
+          } ];
+        };
+      }
+      {
+        id = "gpt-6.2-sol";
+        name = "GPT-6.2 Sol";
+        contextWindow = 500000;
+        cost = {
+          input = 2;
+          output = 10;
+          cacheRead = 0.1;
+          cacheWrite = 2.5;
+          tiers = [ {
+            inputTokensAbove = 272000;
+            input = 4;
+            output = 15;
+            cacheRead = 0.2;
+            cacheWrite = 5;
+          } ];
+        };
+      }
+    ];
 in
 {
   imports = [
@@ -113,6 +181,71 @@ in
         (fromDir "${inputs.boristane-agent-skills}/skills" [ "logging-best-practices" ])
         (fromDir "${inputs.caveman}/skills" [ "caveman" ])
         (fromDir "${inputs.diagram-design}/skills" [ "diagram-design" ])
+        # pstack, from the Cursor tree, not harness/pstack/claude-code: that
+        # copy only adds a link to ../../docs/harness, which breaks once each
+        # skill is copied alone. Skipped: tdd (mattpocock's tdd is kept).
+        # Not installed: the plugin's agents/ (poteto-agent, comment-sicko)
+        # that poteto-mode and no-comments spawn. make-bot-ui needs Cursor
+        # Automations.
+        (fromDir "${inputs.cursor-plugins}/pstack/skills" [
+          "architect"
+          "arena"
+          "automate-me"
+          "benchmark-checklist"
+          "blast-radius"
+          "bro"
+          "correct"
+          "create-formal-verification-skill"
+          "create-verification-skill"
+          "figure-it-out"
+          "how"
+          "in-your-own-words"
+          "interrogate"
+          "ketchup"
+          "ketchup-video"
+          "maintain-formal-verification-skill"
+          "maintain-verification-skill"
+          "make-bot-ui"
+          "no-comments"
+          "poteto-help"
+          "poteto-mode"
+          "principle-attack-the-premise"
+          "principle-boundary-discipline"
+          "principle-build-the-lever"
+          "principle-encode-lessons-in-structure"
+          "principle-exhaust-the-design-space"
+          "principle-experience-first"
+          "principle-explain-the-number"
+          "principle-fix-root-causes"
+          "principle-foundational-thinking"
+          "principle-guard-the-context-window"
+          "principle-laziness-protocol"
+          "principle-make-operations-idempotent"
+          "principle-migrate-callers-then-delete-legacy-apis"
+          "principle-minimize-reader-load"
+          "principle-model-the-domain"
+          "principle-never-block-on-the-human"
+          "principle-outcome-oriented-execution"
+          "principle-prove-it-works"
+          "principle-redesign-from-first-principles"
+          "principle-separate-before-serializing-shared-state"
+          "principle-sequence-verifiable-units"
+          "principle-subtract-before-you-add"
+          "principle-test-behavior-not-implementation"
+          "principle-type-system-discipline"
+          "recall"
+          "reflect"
+          "setup-pstack"
+          "sharpen"
+          "show-me-your-work"
+          "statechart"
+          "swarm"
+          "teach"
+          "technical-writing"
+          "typescript-best-practices"
+          "unslop"
+          "why"
+        ])
         (fromDir "${inputs.lavish-axi}/skills" [ "lavish" ])
         (fromDir "${inputs.mattpocock-skills}/skills/engineering" [
           "code-review"
@@ -367,9 +500,10 @@ in
         "npm:pi-web-access"
         "npm:pi-foldable-tools"
         "git:github.com/joelhooks/pi-until"
-        # Registers ask_user: structured questions instead of guessing.
-        # Peers @earendil-works/pi-coding-agent >=0.74.0; current pi is 1.5.0.
-        "npm:pi-ask-user"
+        # Native blocked status for Herdr Core/App (edlsh/pi-ask-user#100).
+        # Overlays need Pi >=1.5.2. Return to "npm:pi-ask-user" when an
+        # upstream release includes this fix, then run pi update --extensions.
+        "git:github.com/jordangarrison/pi-ask-user@7ad9e0e38d62a3b8f1541a2490cbd1d92831da04"
       ];
       # Install with the Nix npm, so package installs do not depend on PATH.
       npmCommand = [ "${pkgs.nodejs}/bin/npm" ];
@@ -383,6 +517,28 @@ in
       # on the next activation — so a rebuild re-collapses the blocks.
       hideThinkingBlock = true;
     };
+
+    # Adding IDs to built-in providers preserves their other models and auth.
+    # No provider-level api/baseUrl override: existing models stay unchanged.
+    models.providers.openai-codex.models = piGpt62Models;
+    # Workers also use openai with its own ChatGPT OAuth sign-in (not Codex).
+    # Match upstream's direct-API context cap and compatibility flags.
+    models.providers.openai.models = map
+      (model: model // {
+        api = "openai-responses";
+        baseUrl = "https://api.openai.com/v1";
+        contextWindow = 272000;
+        compat = model.compat // {
+          supportsStrictMode = true;
+          supportsExplicitPromptCacheMode = true;
+          supportsMidConvoEffort = true;
+        };
+        inputLimits = {
+          maxRequestBytes = 536870912;
+          images.maxPerRequest = 1500;
+        };
+      })
+      piGpt62Models;
 
     # Local models served by ollama on flomac (the work MacBook), reached over
     # the tailnet rather than the LAN so this works from anywhere. flomac's
@@ -462,7 +618,7 @@ in
   #
   # The one exception is Aikido: it ships only a local stdio server that
   # scans code on this machine, and executor-flo cannot run stdio servers.
-  # Its token is read at startup from ~/.config/aikido/api-key (see
+  # Its token is read at startup from ~/.config/flo-secrets/aikido-api-key (see
   # packages/aikido-mcp), gated by userApps.aikido (endeavour, flomac).
   #
   # On every host, so agents never fall back to direct servers. The work
@@ -1331,6 +1487,9 @@ in
   };
 
   home.file = {
+    # Use pstack's own lookup path; keep the sheet out of global agent context.
+    ".cursor/rules/pstack-models.mdc".source = ./agents/pstack-models.md;
+
     # Pin ~/.local/bin/claude to the Nix-managed version to prevent auto-updater overwrites
     ".local/bin/claude".source = "${pkgs.llm-agents.claude-code}/bin/claude";
 

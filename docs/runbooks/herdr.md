@@ -54,6 +54,14 @@ The desktop package and personal configuration are managed together in
   weekly credit percent from the Grok billing endpoint. It stores percents and
   reset times only, never tokens.
 
+- `~/.config/herdr-app/layouts/jagpi.json` and its SVG, and the copied
+  `mods/jagpi-board/`: jagpi's board, from `inputs.jagpi`, on every host.
+  On the host that runs the jagpi daemon (`services.jagpi`, endeavour), the
+  board reads it there. On every other host, each jagpi-board block gets
+  `machine = "endeavour"`, and the board runs `jagpi` there through
+  herdr-core (jagpi ADR 0070); that host needs endeavour in `hc machine ls`.
+  A new board needs `nix flake update jagpi`, then a rebuild.
+
 These are read-only symlinks, like the TUI config. Change their source files
 and rebuild; do not edit them through the app. Existing per-layout theme picks
 override the settings theme. To select Rosé Pine for the shown layout, run

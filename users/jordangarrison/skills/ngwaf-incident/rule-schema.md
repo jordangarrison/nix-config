@@ -12,7 +12,7 @@ The body `ngwaf.sh create` sends (`POST /corps/<corp>/sites/<site>/rules`). Star
 | `conditions` | at least one condition (below) |
 | `actions` | at least one action (below) |
 | `reason` | why the rule exists: fingerprint, incident, date |
-| `requestLogging` | `sampled` (default) or `none`. `sampled` is what makes the rule's hits visible in the feed |
+| `requestLogging` | request rules only: `sampled` (default) or `none`. `sampled` is what makes the rule's hits visible in the feed. Omit it on a `rateLimit` rule: the API rejects the body |
 | `expiration` | `""` for always on |
 | `signal` | rate-limit rules only: the signal the rule attaches when it trips |
 
@@ -29,6 +29,7 @@ The server sets `id`, `siteNames`, `created`, `createdBy`, and `updated`; `creat
   "conditions": [ { "type": "single", "field": "signalType", "operator": "equals", "value": "SUSPECTED-BAD-BOT" } ] }
 ```
 
+- A `group` holds only `single` and `multival` conditions. The API rejects a group inside a group: flatten it, or split the rule in two.
 - `single` fields: `scheme`, `method`, `path`, `useragent`, `domain`, `ip`, `responseCode`, `agentname`, `paramname`, `paramvalue`, `country`, `signalType`, `ja3Fingerprint`, `ja4Fingerprint`.
 - `multival` fields: `requestHeader`, `responseHeader`, `requestCookie`, `queryParameter`, `postParameter`, `signal`; the inner conditions test `name` and `valueString`/`valueInt`/`valueIp`.
 - Operators: `equals`, `doesNotEqual`, `contains`, `doesNotContain`, `matches`, `doesNotMatch` (regex), `like`, `greaterEqual`, `lesserEqual`, `exists`, `doesNotExist`, `inList`, `notInList`.
@@ -52,5 +53,5 @@ A block rule can carry both `block` and `addSignal`, so its hits are countable w
 
 - a top-level `signal: "site.<name>"`: the signal the rule attaches when a client crosses the threshold (create it first);
 - actions that each carry a `type` and a `signal`, the signal to act on once the limit trips: `{ "type": "logRequest", "signal": "site.<name>" }` to observe, `{ "type": "blockSignal", "signal": "site.<name>" }` to enforce, or `"signal": "ALL-REQUESTS"` to act on every request from that client;
-- `"rateLimit": { "threshold": N, "interval": 1 | 10, "duration": 300..86400, "clientIdentifiers": [ { "type": "ip" } ] }`, where `interval` is minutes and `clientIdentifiers` is required;
-- the common fields above. A sustained 429 or 503 to a verified search crawler drops pages from its index, so rate-limit real crawlers only with care.
+- `"rateLimit": { "threshold": N, "interval": 1 | 10, "duration": 300..86400, "clientIdentifiers": [ { "type": "ip" } ] }`, where `interval` is minutes and `clientIdentifiers` is required. To count per body field, use `{ "type": "postParameter", "name": "<field>" }` (the field goes in `name`; a `key` property fails validation);
+- the common fields above, without `requestLogging`. A sustained 429 or 503 to a verified search crawler drops pages from its index, so rate-limit real crawlers only with care.

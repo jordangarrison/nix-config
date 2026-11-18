@@ -3,7 +3,7 @@ name: consolidator
 package: pr-review
 description: Consolidates multi-agent-pr-review reports for one PR into the strict _final.md review artifact.
 tools: read, grep, find, ls, bash, write, contact_supervisor
-model: claude-bridge/claude-opus-5-5
+model: openai/gpt-6.1-sol
 thinking: high
 systemPromptMode: replace
 inheritProjectContext: true

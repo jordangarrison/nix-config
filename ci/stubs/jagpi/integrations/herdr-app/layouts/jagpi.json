@@ -1,0 +1,15 @@
+{
+  "id": "root",
+  "type": "row",
+  "children": [
+    { "id": "jagpi-board", "type": "block", "content": { "mod": "jagpi-board" } },
+    {
+      "id": "right",
+      "type": "stack",
+      "header": { "content": { "mod": "jagpi-board", "props": { "role": "tabs" } } },
+      "children": [
+        { "id": "top", "type": "block", "content": { "mod": "jagpi-board", "props": { "role": "top" } } }
+      ]
+    }
+  ]
+}

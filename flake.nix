@@ -191,6 +191,12 @@
       url = "github:cathrynlavery/diagram-design";
       flake = false;
     };
+    # Cursor's plugin repo. Only pstack/skills is used (poteto's pstack,
+    # MIT); the plugin's agents/ and Cursor rules are not installed.
+    cursor-plugins = {
+      url = "github:cursor/plugins";
+      flake = false;
+    };
     lavish-axi = {
       url = "github:kunchenguid/lavish-axi";
       flake = false;

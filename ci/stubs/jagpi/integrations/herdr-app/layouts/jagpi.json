@@ -8,7 +8,8 @@
       "type": "stack",
       "header": { "content": { "mod": "jagpi-board", "props": { "role": "tabs" } } },
       "children": [
-        { "id": "top", "type": "block", "content": { "mod": "jagpi-board", "props": { "role": "top" } } }
+        { "id": "top", "type": "block", "content": { "mod": "jagpi-board", "props": { "role": "top" } } },
+        { "id": "usage", "type": "block", "content": { "mod": "jagpi-board", "props": { "role": "usage" } } }
       ]
     }
   ]

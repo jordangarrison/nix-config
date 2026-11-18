@@ -38,31 +38,35 @@ let
   jagpiBoardMachine = if config.services.jagpi.enable or false then null else jagpiDaemonMachine;
   jagpiBoardSrc = "${inputs.jagpi}/integrations/herdr-app";
 
-  # Every jagpi-board content, wherever the layout puts it (blocks, a
-  # stack's header), gets `machine`, so no copy that starts before the
-  # board runs jagpi here.
-  withMachine =
+  # Put the same Usage allowlist in every copy of the layout. Preserve
+  # the machine route for every board block, including stack headers.
+  withBoardProps =
     value:
     if builtins.isList value then
-      map withMachine value
+      map withBoardProps value
     else if builtins.isAttrs value then
       let
-        walked = lib.mapAttrs (_: withMachine) value;
+        walked = lib.mapAttrs (_: withBoardProps) value;
+        props =
+          lib.optionalAttrs (jagpiBoardMachine != null) { machine = jagpiBoardMachine; }
+          // lib.optionalAttrs ((value.props.role or null) == "usage") {
+            providers = [
+              "openai-flo"
+              "openai-personal"
+              "claude-bridge"
+            ];
+          };
       in
-      if (value.mod or null) == "jagpi-board" then
-        lib.recursiveUpdate walked { props.machine = jagpiBoardMachine; }
+      if (value.mod or null) == "jagpi-board" && props != { } then
+        lib.recursiveUpdate walked { inherit props; }
       else
         walked
     else
       value;
 
-  jagpiLayout =
-    if jagpiBoardMachine == null then
-      "${jagpiBoardSrc}/layouts/jagpi.json"
-    else
-      builtins.toFile "jagpi.json" (
-        builtins.toJSON (withMachine (lib.importJSON "${jagpiBoardSrc}/layouts/jagpi.json"))
-      );
+  jagpiLayout = builtins.toFile "jagpi.json" (
+    builtins.toJSON (withBoardProps (lib.importJSON "${jagpiBoardSrc}/layouts/jagpi.json"))
+  );
 
   # Third-party mods with more than one file: copied, not linked (see
   # install-herdr-mods.sh). Name in mods/ -> its folder in a flake input.
@@ -175,8 +179,8 @@ in
       # main-issues: Herdr's main layout with the issues panel (copiedMods)
       # and its button.
       "herdr-app/layouts/main-issues.json".source = "${inputs.herdr-issues}/layouts/main-issues.json";
-      # The jagpi layout, with `machine` on every jagpi-board block when the
-      # daemon runs elsewhere (see jagpiLayout).
+      # The jagpi layout with the Usage allowlist and, when needed, the
+      # daemon machine on every board block (see jagpiLayout).
       "herdr-app/layouts/jagpi.json".source = jagpiLayout;
       "herdr-app/layouts/jagpi.svg".source = "${jagpiBoardSrc}/layouts/jagpi.svg";
     };

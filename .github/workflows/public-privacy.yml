@@ -1,0 +1,35 @@
+name: Public privacy
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited, ready_for_review]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  privacy:
+    name: Public privacy check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository with comparison history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Test privacy checker
+        run: python3 -m unittest discover -s ci/privacy -p 'test_*.py'
+      - name: Install Nix for Gitleaks
+        uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25 # v22
+        with:
+          github-token: ''
+          diagnostic-endpoint: ''
+          summarize: false
+      - name: Scan new public text
+        env:
+          # Configuration variables are public-safe only, not secrets.
+          PRIVACY_PATTERNS: ${{ vars.PRIVACY_PATTERNS }}
+        run: python3 ci/privacy/check.py event --gitleaks

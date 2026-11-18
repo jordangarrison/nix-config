@@ -986,11 +986,11 @@
         "slack-cli": "slack-cli"
       },
       "locked": {
-        "lastModified": 1794991698,
-        "narHash": "sha256-5WsXNpeVEGBL8lhA8AN3PQWYp+24/pjFi7/nz3VBBvw=",
+        "lastModified": 1795017009,
+        "narHash": "sha256-V9/aYx9SsS79cpW6MM82zEag0N/FuSAHHJhqkKl5aMQ=",
         "ref": "refs/heads/main",
-        "rev": "0f5a4952a943a23aa6d5ba894e46d0c43374eb68",
-        "revCount": 522,
+        "rev": "24691f4c0e6d537a3fa54e9c810d75f9e5ca744c",
+        "revCount": 534,
         "type": "git",
         "url": "ssh://git@github.com/jordangarrison/jagpi"
       },

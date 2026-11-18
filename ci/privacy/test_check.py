@@ -1,10 +1,16 @@
+from contextlib import redirect_stderr
+from io import StringIO
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
+
+import check as privacy
 
 
 CHECK = Path(__file__).with_name("check.py").resolve()
@@ -92,6 +98,39 @@ class PrivacyCheckTest(unittest.TestCase):
         result = self.check("staged", "--message", ".git/message")
         self.assert_finding(result, "'changes.txt':1: incident ID")
         self.assertIn("commit message line 1: incident ID", result.stderr)
+
+    def test_hook_ignores_the_verbose_diff_but_checks_the_proposed_message(self):
+        for name in ("check.py", "allowlist.tsv"):
+            self.write(Path("ci/privacy") / name, (CHECK.parent / name).read_text())
+        self.write(".githooks/commit-msg", "")
+        shutil.copy2(CHECK.parents[2] / ".githooks/commit-msg", self.root / ".githooks/commit-msg")
+        self.git("config", "core.hooksPath", ".githooks")
+        self.git("config", "core.commentString", "//")
+        self.write("existing.txt", f"legacy {TICKET}\nclean edit\n")
+        self.git("add", "existing.txt")
+
+        def verbose_commit(message):
+            return subprocess.run(
+                ["git", "commit", "--edit", "--verbose", "-m", message],
+                cwd=self.root, text=True, capture_output=True,
+                env={**os.environ, "GIT_EDITOR": ":", "PRIVACY_PATTERNS": ""},
+            )
+
+        self.assert_finding(verbose_commit(TICKET), "commit message line 1: incident ID")
+        result = verbose_commit("Generic change")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.git("log", "-1", "--format=%B"), "Generic change")
+
+    def test_secret_scan_includes_metadata_without_file_changes(self):
+        output = StringIO()
+        with redirect_stderr(output), mock.patch.object(
+            privacy.subprocess, "run", return_value=subprocess.CompletedProcess([], 42)
+        ) as run:
+            self.assertTrue(privacy.check_secrets([], [("PR body", "synthetic metadata")]))
+        self.assertNotIn("synthetic metadata", output.getvalue())
+        self.assertEqual(run.call_args.kwargs["input"], b"synthetic metadata\n")
+        self.assertEqual(run.call_args.kwargs["stdout"], subprocess.DEVNULL)
+        self.assertEqual(run.call_args.kwargs["stderr"], subprocess.DEVNULL)
 
     def test_commit_message_is_checked_on_pr_and_push(self):
         flagged = self.commit(f"Some text\n\n{TICKET}")

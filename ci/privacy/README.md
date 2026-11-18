@@ -33,11 +33,16 @@ command line or public record.
   head, commit messages not on the base, and the event's PR title and body.
 - Pushes to `main`: added lines and new commit messages between the event's
   before and after commits. Missing endpoints fail rather than scanning history.
-- Gitleaks reads added text only. It does not receive file paths; path-based
-  rules do not apply. Neither scan covers binary attachments, and the workflow
-  does not inspect comments, PR edit history, or arbitrary names and customer data.
+- File scans use the net diff, not each commit's patch. Text added and then
+  removed within a PR or push can still be public in Git history. Check each
+  commit before pushing, not just the final tree.
+- Gitleaks checks the same new text, including commit messages and PR text,
+  with the nixpkgs revision in `flake.lock`. It does not receive file paths;
+  path-based rules do not apply. Neither scan covers binary attachments, and the
+  workflow does not inspect comments, PR edit history, or arbitrary names and
+  customer data.
 - Findings do not print matched text. The Gitleaks result is intentionally
-  generic; inspect it locally, not in a public log or comment.
+  generic; inspect the changes and messages locally, not in a public log or comment.
 
 After the workflow is active on `main`, require **Public privacy check** in the
 branch ruleset to block merging a PR that fails it. Review changes to this

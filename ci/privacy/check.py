@@ -24,6 +24,10 @@ DIFF_OPTIONS = (
     "--src-prefix=a/", "--dst-prefix=b/", "--unified=0", "--inter-hunk-context=0",
 )
 HUNK = re.compile(r"^@@ -\d+(?:,\d+)? \+(\d+)(?:,\d+)? @@")
+# Git's scissors marker followed by its two explanatory comment lines. Match
+# the repeated comment prefix instead of assuming English or the default '#'.
+GIT_SCISSORS = re.compile(r"(?m)^(?P<prefix>[^\n]+?) -{24} >8 -{24}\n"
+                          r"(?P=prefix) [^\n]*\n(?P=prefix) [^\n]*\n")
 
 
 class CheckError(Exception):
@@ -139,25 +143,45 @@ def privacy_findings(hunks, messages):
                     yield f"{label} line {number}: {name}"
 
 
-def check_secrets(hunks):
-    added_text = "\n\n".join("\n".join(lines) for _, _, lines in hunks)
-    if not added_text:
+def staged_inputs(message_path, hook_path):
+    messages = []
+    if path := message_path or hook_path:
+        message = path.read_text(errors="surrogateescape")
+        if hook_path and (cut := GIT_SCISSORS.search(message)):
+            message = message[:cut.start()]
+        messages.append(("commit message", message))
+    return git("diff", *DIFF_OPTIONS, "--cached", "--"), messages
+
+
+def gitleaks_installable():
+    lock = json.loads((Path(__file__).resolve().parents[2] / "flake.lock").read_bytes())
+    nodes = lock["nodes"]
+    nixpkgs = nodes[lock["root"]]["inputs"]["nixpkgs"]
+    rev = commit_sha(nodes[nixpkgs]["locked"]["rev"])
+    return f"github:NixOS/nixpkgs/{rev}#gitleaks"
+
+
+def check_secrets(hunks, messages):
+    sections = ["\n".join(lines) for _, _, lines in hunks]
+    sections.extend(body for _, body in messages)
+    new_text = "\n\n".join(section for section in sections if section)
+    if not new_text:
         return False
     # No repo-provided configuration and no logs that can echo candidate text.
     with tempfile.TemporaryDirectory() as directory:
         result = subprocess.run(
-            ["nix", "run", "nixpkgs#gitleaks", "--", "stdin", "--redact=100",
+            ["nix", "run", gitleaks_installable(), "--", "stdin", "--redact=100",
              "--ignore-gitleaks-allow", "--exit-code=42"],
             cwd=directory,
-            input=added_text.encode("utf-8", errors="surrogateescape") + b"\n",
+            input=new_text.encode("utf-8", errors="surrogateescape") + b"\n",
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False,
         )
     if result.returncode == 42:
-        print("gitleaks: potential secret in added lines; review the diff locally", file=sys.stderr)
+        print("gitleaks: potential secret in new text; review the diff and messages locally", file=sys.stderr)
         return True
     if result.returncode:
         raise CheckError("gitleaks could not complete; check Nix and gitleaks locally")
-    print("gitleaks: no findings in added lines")
+    print("gitleaks: no findings in new text")
     return False
 
 
@@ -167,7 +191,9 @@ def main():
     event = modes.add_parser("event", help="read the GitHub Actions event payload")
     event.add_argument("--gitleaks", action="store_true")
     staged = modes.add_parser("staged", help="check staged lines and a proposed commit message")
-    staged.add_argument("--message", type=Path)
+    message = staged.add_mutually_exclusive_group()
+    message.add_argument("--message", type=Path, help="read literal commit message text")
+    message.add_argument("--hook-message", type=Path, help="read the Git commit-msg hook input")
     staged.add_argument("--gitleaks", action="store_true")
     args = parser.parse_args()
 
@@ -176,15 +202,12 @@ def main():
             payload = json.loads(Path(os.environ["GITHUB_EVENT_PATH"]).read_bytes())
             patch, messages = event_inputs(os.environ["GITHUB_EVENT_NAME"], payload)
         else:
-            patch = git("diff", *DIFF_OPTIONS, "--cached", "--")
-            messages = [] if args.message is None else [
-                ("commit message", args.message.read_text(errors="surrogateescape"))
-            ]
+            patch, messages = staged_inputs(args.message, args.hook_message)
         hunks = list(added_hunks(patch))
         findings = list(privacy_findings(hunks, messages))
         for finding in findings:
             print(f"privacy check: {finding}", file=sys.stderr)
-        secrets_found = check_secrets(hunks) if args.gitleaks else False
+        secrets_found = check_secrets(hunks, messages) if args.gitleaks else False
     except CheckError as error:
         print(f"privacy check: {error}", file=sys.stderr)
         return 2

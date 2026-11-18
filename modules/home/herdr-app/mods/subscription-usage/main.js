@@ -1,17 +1,14 @@
 // Claude, Codex, and xAI subscription windows.
-// Reads local login files and calls the provider usage endpoints.
-// Tokens stay in memory for the request. Shared state stores percents only.
+// Claude and Codex share jagpi's collector with the board. Only xAI is fetched locally.
 
 import { View, div, svg } from "gpui-kit";
 import { h_flex, v_flex } from "gpui-base";
 import { theme, checking, props, agents, spaces, run, window, keys, shared, setShared, openOverlay, closeOverlay, home, exec } from "herdr";
 import * as fs from "fs/promises";
 
-const KEY = "subscription.usage";
+const KEY = "subscription.usage.jagpi";
 const USAGE_POLL_MS = 60 * 1000;
 const USAGE_STALE_AFTER_MS = 15 * 60 * 1000;
-const CLAUDE_URL = "https://api.anthropic.com/api/oauth/usage";
-const CODEX_URL = "https://chatgpt.com/backend-api/wham/usage";
 const XAI_URL = "https://cli-chat-proxy.grok.com/v1/billing?format=credits";
 
 const join = (...parts) => parts.filter(Boolean).join("/").replace(/\/+/g, "/");
@@ -32,18 +29,8 @@ function finite(value) {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
 }
 
-function windowLabel(seconds, fallback) {
-  if (!seconds || seconds < 3600) return fallback;
-  const hours = Math.round(seconds / 3600);
-  return hours % 24 === 0 ? `${hours / 24}d` : `${hours}h`;
-}
-
-function resetTime(at) {
-  return typeof at === "number" ? (at < 1e12 ? at * 1000 : at) : Date.parse(at);
-}
-
 function formatReset(at, measuredAt) {
-  const ms = resetTime(at);
+  const ms = typeof at === "number" ? at : typeof at === "string" ? Date.parse(at) : NaN;
   if (!Number.isFinite(ms)) return "unknown";
   if (Number.isFinite(measuredAt) && measuredAt < ms && ms <= Date.now()) return "passed since measurement";
   const minutes = Math.ceil((ms - Date.now()) / 60000);
@@ -70,124 +57,37 @@ async function fetchJson(url, headers) {
   return response.json();
 }
 
-function claudeWindow(value) {
-  if (!value || typeof value !== "object") return undefined;
-  const utilization = finite(value.utilization);
-  if (utilization === undefined) return undefined;
-  return { label: "", percent: clamp(utilization), resetsAt: typeof value.resets_at === "string" ? value.resets_at : null };
-}
+const JAGPI_PROVIDERS = [
+  { provider: "claude", id: "claude", label: "Claude" },
+  { provider: "openai", id: "codex", label: "Codex" },
+];
 
-function fableWindow(limits) {
-  if (!Array.isArray(limits)) return undefined;
-  for (const item of limits) {
-    if (!item || item.kind !== "weekly_scoped") continue;
-    const name = item.scope?.model?.display_name;
-    if (typeof name !== "string" || name.toLowerCase() !== "fable") continue;
-    const percent = finite(item.percent);
-    if (percent === undefined) continue;
-    return { label: "fable", percent: clamp(percent), resetsAt: typeof item.resets_at === "string" ? item.resets_at : null };
-  }
-  return undefined;
-}
-
-function claudeWindows(payload) {
-  if (!payload || typeof payload !== "object") return [];
-  const named = [
-    ["5h", claudeWindow(payload.five_hour)],
-    ["7d", claudeWindow(payload.seven_day)],
-    ["fable", fableWindow(payload.limits)],
-    ["opus", claudeWindow(payload.seven_day_opus)],
-    ["sonnet", claudeWindow(payload.seven_day_sonnet)],
-  ];
-  return named.filter(([, window]) => window).map(([label, window]) => ({ ...window, label: window.label || label }));
-}
-
-async function claudeToken() {
-  let dir = join(home(), ".claude");
-  try {
-    const result = await exec("claude", ["auth", "status", "--json"]);
-    if (result.code === 0) {
-      const status = JSON.parse(result.stdout);
-      if (typeof status.configDirectory === "string" && status.configDirectory.startsWith("/")) dir = status.configDirectory;
-      const method = status.authMethod;
-      const subscribed = status.loggedIn === true && status.apiProvider === "firstParty"
-        && ((method === "claude.ai" && typeof status.subscriptionType === "string" && status.subscriptionType.length > 0)
-          || method === "oauth_token");
-      if (!subscribed) return undefined;
-      const envToken = typeof process !== "undefined" ? process.env?.CLAUDE_CODE_OAUTH_TOKEN : undefined;
-      if (method === "oauth_token" && envToken) return envToken;
-    } else {
-      return undefined;
-    }
-  } catch {
-    return undefined;
-  }
-  const credentials = await readJson(join(dir, ".credentials.json"));
-  const token = credentials?.claudeAiOauth?.accessToken;
-  return typeof token === "string" && token.length > 0 ? token : undefined;
-}
-
-async function loadClaude() {
-  const token = await claudeToken();
-  if (!token) return undefined;
-  const payload = await fetchJson(CLAUDE_URL, {
-    accept: "application/json",
-    authorization: `Bearer ${token}`,
-    "anthropic-beta": "oauth-2025-04-20",
-    "anthropic-dangerous-direct-browser-access": "true",
-    "user-agent": "claude-cli/pi-claude-bridge",
-    "x-app": "cli",
+async function loadJagpi(machine, allowlist) {
+  const reply = await exec("jagpi", ["--instance", "default", "usage", "--json"], { on: machine, timeout: 30000 });
+  if (reply.code !== 0) throw new Error("Usage unavailable");
+  const subscriptions = JSON.parse(reply.stdout)?.result?.subscriptions;
+  if (!Array.isArray(subscriptions)) throw new Error("Invalid usage result");
+  return JAGPI_PROVIDERS.flatMap(({ provider, id, label }) => {
+    const cards = subscriptions.filter((row) => row?.provider === provider
+      && (!Array.isArray(allowlist) || allowlist.includes(row.modelProvider)));
+    if (!cards.length) return [{ id, label, windows: [] }];
+    return cards.map((card, index) => {
+      const measuredAt = finite(card.measuredAt);
+      const windows = measuredAt === undefined ? [] : (card.windows ?? []).flatMap((window) => {
+        const used = finite(window?.used);
+        const limit = finite(window?.limit);
+        if (used === undefined || limit === undefined || limit <= 0 || used < 0 || used > limit
+          || typeof window.label !== "string") return [];
+        return [{ label: window.label, percent: used / limit * 100, resetsAt: finite(window.resetAt) ?? null }];
+      });
+      return {
+        id: cards.length > 1 ? `${id}-${index}` : id,
+        label: cards.length > 1 ? `${label} · ${card.account}` : label,
+        windows,
+        measuredAt,
+      };
+    });
   });
-  const windows = claudeWindows(payload);
-  return windows.length ? windows : undefined;
-}
-
-function codexWindow(raw, fallback) {
-  if (!raw || typeof raw !== "object") return undefined;
-  const used = finite(raw.used_percent);
-  if (used === undefined) return undefined;
-  return {
-    label: windowLabel(finite(raw.limit_window_seconds), fallback),
-    percent: clamp(used),
-    resetsAt: finite(raw.reset_at) ?? null,
-  };
-}
-
-function collectCodex(node, fallback) {
-  if (!node || typeof node !== "object") return [];
-  const direct = codexWindow(node, fallback);
-  if (direct) return [direct];
-  if (Array.isArray(node)) return node.flatMap((item, index) => collectCodex(item, `${fallback}${index + 1}`));
-  return Object.entries(node).flatMap(([key, value]) => collectCodex(value, key.split("_").join(" ")));
-}
-
-async function codexAuth() {
-  const codex = await readJson(join(home(), ".codex", "auth.json"));
-  const fromCodex = codex?.tokens;
-  if (typeof fromCodex?.access_token === "string" && fromCodex.access_token.length > 0) {
-    return { token: fromCodex.access_token, account: typeof fromCodex.account_id === "string" ? fromCodex.account_id : undefined };
-  }
-  const pi = await readJson(join(home(), ".pi", "agent", "auth.json"));
-  const fromPi = pi?.["openai-codex"];
-  if (typeof fromPi?.access === "string" && fromPi.access.length > 0) {
-    return { token: fromPi.access, account: typeof fromPi.accountId === "string" ? fromPi.accountId : undefined };
-  }
-  return undefined;
-}
-
-async function loadCodex() {
-  const auth = await codexAuth();
-  if (!auth) return undefined;
-  const headers = { Authorization: `Bearer ${auth.token}`, "User-Agent": "herdr-subscription-usage" };
-  if (auth.account) headers["ChatGPT-Account-Id"] = auth.account;
-  const payload = await fetchJson(CODEX_URL, headers);
-  if (!payload || typeof payload !== "object") return undefined;
-  const windows = [
-    ...collectCodex(payload.rate_limit, "limit"),
-    ...collectCodex(payload.code_review_rate_limit, "review"),
-    ...collectCodex(payload.additional_rate_limits, "extra"),
-  ];
-  return windows.length ? windows : undefined;
 }
 
 function tokenField(value) {
@@ -227,12 +127,6 @@ async function loadXai() {
   return window ? [window] : undefined;
 }
 
-const PROVIDERS = [
-  { id: "claude", label: "Claude", load: loadClaude },
-  { id: "codex", label: "Codex", load: loadCodex },
-  { id: "xai", label: "xAI", load: loadXai },
-];
-
 export default class SubscriptionUsage extends View {
   init(_props, cx) {
     if (checking() || props()?.detail) return;
@@ -243,23 +137,22 @@ export default class SubscriptionUsage extends View {
 
   refresh(cx) {
     const gen = ++this.gen;
-    const previous = shared(KEY)?.providers ?? [];
+    const { machine = null, providers: allowlist } = props() ?? {};
+    const source = JSON.stringify([machine, allowlist]);
+    const previous = shared(KEY);
     cx.spawn(async (cx) => {
-      const providers = [];
-      for (const provider of PROVIDERS) {
-        const prior = previous.find((row) => row.id === provider.id);
-        let windows;
-        try {
-          windows = await provider.load();
-        } catch {
-          // Keep the last successful measurement and its original timestamp.
-        }
-        providers.push(windows
-          ? { id: provider.id, label: provider.label, windows, measuredAt: Date.now() }
-          : prior?.windows?.length && Number.isFinite(prior.measuredAt) ? prior : { id: provider.id, label: provider.label, windows: [] });
-      }
+      // On transport failure retain measurements only from the same source and allowlist.
+      // A successful empty result replaces them (for example, when an account is removed).
+      const [jagpi, xai] = await Promise.all([
+        loadJagpi(machine, allowlist).catch(() => previous?.source === source
+          ? previous.providers.filter((row) => row.id !== "xai")
+          : JAGPI_PROVIDERS.map(({ id, label }) => ({ id, label, windows: [] }))),
+        loadXai().then((windows) => windows && { id: "xai", label: "xAI", windows, measuredAt: Date.now() })
+          .catch(() => undefined),
+      ]);
+      const local = xai ?? previous?.providers?.find((row) => row.id === "xai") ?? { id: "xai", label: "xAI", windows: [] };
       if (this.gen !== gen) return;
-      setShared(KEY, { at: Date.now(), providers });
+      setShared(KEY, { at: Date.now(), source, providers: [...jagpi, local] });
       cx.notify();
     });
   }

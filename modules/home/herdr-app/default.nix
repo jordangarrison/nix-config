@@ -35,37 +35,39 @@ let
   # jagpi.nix) reads it here. Any other host runs jagpi on the daemon's
   # herdr-core machine (jagpi ADR 0070), so it needs no jagpi package.
   jagpiDaemonMachine = "endeavour"; # as `hc machine ls` names it
-  jagpiBoardMachine = if config.services.jagpi.enable or false then null else jagpiDaemonMachine;
+  jagpiMachine = if config.services.jagpi.enable or false then null else jagpiDaemonMachine;
   jagpiBoardSrc = "${inputs.jagpi}/integrations/herdr-app";
 
-  # Put the same Usage allowlist in every copy of the layout. Preserve
-  # the machine route for every board block, including stack headers.
-  withBoardProps =
+  # Both usage views use the same instance and display the same named accounts.
+  jagpiUsageProviders = [
+    "openai-flo"
+    "openai-personal"
+    "claude-bridge"
+  ];
+  withJagpiProps =
     value:
     if builtins.isList value then
-      map withBoardProps value
+      map withJagpiProps value
     else if builtins.isAttrs value then
       let
-        walked = lib.mapAttrs (_: withBoardProps) value;
+        walked = lib.mapAttrs (_: withJagpiProps) value;
+        board = (value.mod or null) == "jagpi-board";
+        statusBar = (value.mod or null) == "subscription-usage";
         props =
-          lib.optionalAttrs (jagpiBoardMachine != null) { machine = jagpiBoardMachine; }
-          // lib.optionalAttrs ((value.props.role or null) == "usage") {
-            providers = [
-              "openai-flo"
-              "openai-personal"
-              "claude-bridge"
-            ];
+          lib.optionalAttrs ((board || statusBar) && jagpiMachine != null) { machine = jagpiMachine; }
+          // lib.optionalAttrs (statusBar || (board && (value.props.role or null) == "usage")) {
+            providers = jagpiUsageProviders;
           };
       in
-      if (value.mod or null) == "jagpi-board" && props != { } then
-        lib.recursiveUpdate walked { inherit props; }
-      else
-        walked
+      if props != { } then lib.recursiveUpdate walked { inherit props; } else walked
     else
       value;
 
   jagpiLayout = builtins.toFile "jagpi.json" (
-    builtins.toJSON (withBoardProps (lib.importJSON "${jagpiBoardSrc}/layouts/jagpi.json"))
+    builtins.toJSON (withJagpiProps (lib.importJSON "${jagpiBoardSrc}/layouts/jagpi.json"))
+  );
+  workItemsLayout = builtins.toFile "work-items.json" (
+    builtins.toJSON (withJagpiProps (lib.importJSON ./layouts/work-items.json))
   );
 
   # Third-party mods with more than one file: copied, not linked (see
@@ -152,7 +154,7 @@ in
       "herdr-app/keys.json".source = ./keys.json;
       "herdr-app/settings.json".source = ./settings.json;
       "herdr-app/themes/rose-pine.json".source = ./rose-pine.json;
-      "herdr-app/layouts/work-items.json".source = ./layouts/work-items.json;
+      "herdr-app/layouts/work-items.json".source = workItemsLayout;
       "herdr-app/layouts/work-items.svg".source = ./layouts/work-items.svg;
       "herdr-app/mods/work-items/mod.json".source = ./mods/work-items/mod.json;
       "herdr-app/mods/work-items/main.js".source = ./mods/work-items/main.js;

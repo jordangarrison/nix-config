@@ -1,8 +1,19 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, userApps ? { }, ... }:
 
 let
   homeDirectory = config.home.homeDirectory;
   scriptsPath = "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/hypr/scripts";
+
+  herdrEnabled = userApps.herdr-app.enable or false;
+  herdrJagpi = pkgs.writeShellApplication {
+    name = "herdr-jagpi";
+    runtimeInputs = [
+      (import ../herdr-app/package.nix { inherit pkgs; })
+      pkgs.coreutils
+      pkgs.util-linux
+    ];
+    text = builtins.readFile ./herdr-jagpi.sh;
+  };
 
   # Helper to create a menu entry
   entry = key: desc: cmd: { inherit key desc cmd; };
@@ -105,7 +116,10 @@ let
 
       # [g] Grove
       (entry "g" "Grove" "ghostty -e grove")
-
+    ] ++ lib.optionals herdrEnabled [
+      # Plain j at the top level, not inside Apps or Web.
+      (entry "j" "Jagpi (Herdr)" (lib.getExe herdrJagpi))
+    ] ++ [
       # [d] Display
       (submenu "d" "Display" [
         (entry "h" "Focus Monitor Left" "niri msg action focus-monitor-left")
@@ -141,5 +155,5 @@ in
     pkgs.wlr-which-key
     whichKeyMenu
     yaziScreenshots
-  ];
+  ] ++ lib.optional herdrEnabled herdrJagpi;
 }

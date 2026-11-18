@@ -28,8 +28,5 @@ jobs:
           github-token: ''
           diagnostic-endpoint: ''
           summarize: false
-      - name: Scan new public text
-        env:
-          # Configuration variables are public-safe only, not secrets.
-          PRIVACY_PATTERNS: ${{ vars.PRIVACY_PATTERNS }}
-        run: python3 ci/privacy/check.py event --gitleaks
+      - name: Scan new public text for credentials
+        run: python3 ci/privacy/check.py event

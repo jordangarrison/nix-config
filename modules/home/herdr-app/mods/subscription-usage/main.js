@@ -4,12 +4,12 @@
 
 import { View, div, svg } from "gpui-kit";
 import { h_flex, v_flex } from "gpui-base";
-import { theme, props, agents, spaces, run, window, keys, shared, setShared, openOverlay, closeOverlay, home, exec } from "herdr";
+import { theme, checking, props, agents, spaces, run, window, keys, shared, setShared, openOverlay, closeOverlay, home, exec } from "herdr";
 import * as fs from "fs/promises";
 
 const KEY = "subscription.usage";
-const REFRESH_MS = 5 * 60 * 1000;
-const MIN_FETCH_MS = 30 * 1000;
+const USAGE_POLL_MS = 60 * 1000;
+const USAGE_STALE_AFTER_MS = 15 * 60 * 1000;
 const CLAUDE_URL = "https://api.anthropic.com/api/oauth/usage";
 const CODEX_URL = "https://chatgpt.com/backend-api/wham/usage";
 const XAI_URL = "https://cli-chat-proxy.grok.com/v1/billing?format=credits";
@@ -38,10 +38,14 @@ function windowLabel(seconds, fallback) {
   return hours % 24 === 0 ? `${hours / 24}d` : `${hours}h`;
 }
 
-function formatReset(at) {
-  if (at == null) return "unknown";
-  const ms = typeof at === "number" ? (at < 1e12 ? at * 1000 : at) : Date.parse(at);
+function resetTime(at) {
+  return typeof at === "number" ? (at < 1e12 ? at * 1000 : at) : Date.parse(at);
+}
+
+function formatReset(at, measuredAt) {
+  const ms = resetTime(at);
   if (!Number.isFinite(ms)) return "unknown";
+  if (Number.isFinite(measuredAt) && measuredAt < ms && ms <= Date.now()) return "passed since measurement";
   const minutes = Math.ceil((ms - Date.now()) / 60000);
   if (minutes <= 0) return "now";
   const days = Math.floor(minutes / (24 * 60));
@@ -231,39 +235,28 @@ const PROVIDERS = [
 
 export default class SubscriptionUsage extends View {
   init(_props, cx) {
-    if (props()?.detail) return;
-    this.working = agents().filter((agent) => agent.status === "working").length;
-    this.fetched = 0;
+    if (checking() || props()?.detail) return;
     this.gen = 0;
-    this.refresh(cx, true);
-    cx.timer.every(REFRESH_MS, (cx) => this.refresh(cx, true));
-    cx.timer.every(2000, (cx) => {
-      const working = agents().filter((agent) => agent.status === "working").length;
-      if (working === this.working) return;
-      this.working = working;
-      this.refresh(cx, false);
-    });
+    this.refresh(cx);
+    cx.timer.every(USAGE_POLL_MS, (cx) => this.refresh(cx));
   }
 
-  refresh(cx, force) {
-    if (!force && Date.now() - this.fetched < MIN_FETCH_MS) return;
-    this.fetched = Date.now();
+  refresh(cx) {
     const gen = ++this.gen;
     const previous = shared(KEY)?.providers ?? [];
     cx.spawn(async (cx) => {
       const providers = [];
       for (const provider of PROVIDERS) {
         const prior = previous.find((row) => row.id === provider.id);
+        let windows;
         try {
-          const windows = await provider.load();
-          if (windows) providers.push({ id: provider.id, label: provider.label, windows, stale: false });
-          else if (prior?.windows?.length) providers.push({ ...prior, stale: true });
-          else providers.push({ id: provider.id, label: provider.label, windows: [], stale: false });
+          windows = await provider.load();
         } catch {
-          providers.push(prior?.windows?.length
-            ? { ...prior, stale: true }
-            : { id: provider.id, label: provider.label, windows: [], stale: false });
+          // Keep the last successful measurement and its original timestamp.
         }
+        providers.push(windows
+          ? { id: provider.id, label: provider.label, windows, measuredAt: Date.now() }
+          : prior?.windows?.length && Number.isFinite(prior.measuredAt) ? prior : { id: provider.id, label: provider.label, windows: [] });
       }
       if (this.gen !== gen) return;
       setShared(KEY, { at: Date.now(), providers });
@@ -278,12 +271,12 @@ export default class SubscriptionUsage extends View {
   }
 
   group(t, provider) {
-    const tip = provider.windows.map((window) => `${window.label} ${Math.round(window.percent)}% · resets ${formatReset(window.resetsAt)}`).join("\n");
+    const tip = provider.windows.map((window) => `${window.label} ${Math.round(window.percent)}% · resets: ${formatReset(window.resetsAt, provider.measuredAt)}`).join("\n");
     return h_flex().id(`usage-${provider.id}`).gap(8).items_center().flex_none().tooltip(tip || `${provider.label} n/a`)
       .child(div().text_color(t.muted).child(provider.label))
       .when(provider.windows.length === 0, (el) => el.child(div().text_color(t.dim).child("n/a")))
       .children(provider.windows.map((window) => this.chip(t, window)))
-      .when(provider.stale, (el) => el.child(div().text_color(t.dim).child("stale")));
+      .when(Number.isFinite(provider.measuredAt) && Date.now() - provider.measuredAt > USAGE_STALE_AFTER_MS, (el) => el.child(div().text_color(t.dim).child("stale")));
   }
 
   detail(t) {
@@ -296,7 +289,7 @@ export default class SubscriptionUsage extends View {
         .child(div().w(64).text_color(t.foreground).child(row.window.label))
         .child(div().w(48).text_color(row.window.percent == null ? t.dim : tone(t, row.window.percent))
           .child(row.window.percent == null ? "n/a" : `${Math.round(row.window.percent)}%`))
-        .child(div().flex_1().text_color(t.dim).child(row.window.empty ? "" : `resets ${formatReset(row.window.resetsAt)}`))))
+        .child(div().flex_1().text_color(t.dim).child(row.window.empty ? "" : `resets: ${formatReset(row.window.resetsAt, row.provider.measuredAt)}`))))
       .child(div().px(8).pt(6).text_size(11).text_color(t.dim).child("Esc closes · bar click refreshes"));
   }
 
@@ -310,7 +303,7 @@ export default class SubscriptionUsage extends View {
   }
 
   openDetail(cx) {
-    this.refresh(cx, true);
+    this.refresh(cx);
     if (this.overlay) closeOverlay(this.overlay);
     this.overlay = openOverlay({ mod: "subscription-usage", kind: "popup", width: 420, height: 240, props: { detail: true } });
   }

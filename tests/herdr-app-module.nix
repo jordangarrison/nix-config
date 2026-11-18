@@ -48,7 +48,10 @@ let
       ++ lib.concatMap boardProps (builtins.attrValues value)
     else
       [ ];
-  jagpiLayout = builtins.fromJSON (builtins.readFile files."herdr-app/layouts/jagpi.json".source);
+  jagpiBoardProps = home: boardProps (builtins.fromJSON (builtins.readFile home.xdg.configFile."herdr-app/layouts/jagpi.json".source));
+  remoteBoardProps = jagpiBoardProps enabled;
+  localBoardProps = jagpiBoardProps daemonHost;
+  usageProps = builtins.filter (p: (p.role or null) == "usage");
   files = enabled.xdg.configFile;
   keys = builtins.fromJSON (builtins.readFile files."herdr-app/keys.json".source);
   settings = builtins.fromJSON (builtins.readFile files."herdr-app/settings.json".source);
@@ -130,16 +133,23 @@ let
     # Every jagpi-board block names the daemon's machine; roles stay.
     jagpiBoardMachine =
       let
-        props = boardProps jagpiLayout;
+        props = remoteBoardProps;
       in
       builtins.any (p: !(p ? role)) props
       && builtins.any (p: (p.role or null) == "top") props
       && builtins.any (p: (p.role or null) == "tabs") props
       && builtins.all (p: p.machine == "endeavour") props;
-    # On the daemon's host, the upstream layout as it is, and the same mod.
-    jagpiLocalLayout = lib.hasSuffix "integrations/herdr-app/layouts/jagpi.json"
-      (toString daemonHost.xdg.configFile."herdr-app/layouts/jagpi.json".source)
+    jagpiLocalLayout = builtins.all (p: !(p ? machine)) localBoardProps
       && lib.hasInfix "jagpi-board=" daemonHost.home.activation.herdrMods.data;
+    jagpiUsageAllowlist =
+      let
+        remote = usageProps remoteBoardProps;
+        local = usageProps localBoardProps;
+      in
+      builtins.length remote == 1 && builtins.length local == 1
+      && (builtins.head remote).providers != [ ]
+      && (builtins.head remote).providers == (builtins.head local).providers
+      && builtins.all (p: (p.role or null) == "usage" || !(p ? providers)) (remoteBoardProps ++ localBoardProps);
     soundsDisabled = !settings.sounds.enabled;
     terminalFont = settings.font == "Source Code Pro";
     rosePine = settings.theme == "rose-pine" && theme.background == "#191724"

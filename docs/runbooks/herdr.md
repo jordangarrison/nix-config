@@ -49,10 +49,12 @@ The desktop package and personal configuration are managed together in
   collapsed count row for agents untouched for three days, or settled by
   right-click when the work is done.
 - `~/.config/herdr-app/mods/subscription-usage/`: the work-items status bar.
-  Subscription usage sits to the right of the agent count. It reads the local
-  Claude, Codex, and xAI logins and requests their usage endpoints. xAI is the
-  weekly credit percent from the Grok billing endpoint. It stores percents and
-  reset times only, never tokens.
+  Subscription usage sits to the right of the agent count. Claude and Codex
+  come from `jagpi usage --json` on the same machine as the board, with the
+  same account allowlist and shared provider cooldowns. The bar reads jagpi
+  every minute without changing the timestamp of a cached measurement; values
+  older than 15 minutes are marked stale. xAI still reads the local login and
+  shows the weekly credit percent from Grok. The bar stores no tokens.
 
 - `~/.config/herdr-app/layouts/jagpi.json` and its SVG, and the copied
   `mods/jagpi-board/`: jagpi's board, from `inputs.jagpi`, on every host.

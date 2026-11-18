@@ -57,6 +57,9 @@ jobs:
           done < <(find . -name '*.nix' -not -path './.git/*' -print0)
           exit "$fail"
 
+      - name: Test the Claude status-line feed
+        run: python3 -B -m unittest discover -s ci/claude-statusline
+
   eval-nixos:
     name: eval nixos (${{ matrix.host }})
     runs-on: ubuntu-latest

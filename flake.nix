@@ -428,7 +428,8 @@
                   pup.enable = true;
                   namespace.enable = true;
                   handy.enable = true;
-                  hex.enable = true;
+                  # Disabled Nov 18: Hex holds the mic and blocks Handy.
+                  hex.enable = false;
                   herdr.enable = true;
                   herdr-app.enable = true;
                   ovis.enable = true;
@@ -606,7 +607,8 @@
                   okta.enable = true;
                   pup.enable = true;
                   handy.enable = true;
-                  hex.enable = true;
+                  # Disabled Nov 18: Hex holds the mic and blocks Handy.
+                  hex.enable = false;
                   herdr.enable = true;
                   herdr-app.enable = true;
                   work.enable = true;
@@ -796,7 +798,8 @@
                 enable = true;
                 username = "jordangarrison";
                 homeDirectory = "/home/jordangarrison";
-                apps.hex.enable = true;
+                # Disabled Nov 18: Hex holds the mic and blocks Handy.
+                apps.hex.enable = false;
               };
 
               users.mikayla = {

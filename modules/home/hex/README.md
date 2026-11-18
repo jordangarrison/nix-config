@@ -1,8 +1,12 @@
 # Hex on Linux
 
-Hex is enabled for Jordan on endeavour and opportunity (Niri), and discovery
-(GNOME/GDM, with a real desktop and PipeWire). Handy stays enabled where it
-already was. Voyager, macOS, and standalone WSL Home Manager are unchanged.
+Hex is temporarily disabled on endeavour, opportunity, and discovery as of
+Nov 18: it holds the microphone and blocks Handy. Disabling removes the package,
+`hex.service`, and the Niri Ctrl+Alt+Space binding; downloaded models and user
+data stay in `~/.local/share/hex`. To try it again, set the host's
+`users.jordangarrison.apps.hex.enable = true` in `flake.nix` and follow the
+guarded build → test → approved switch flow. The instructions below apply
+when enabled. Handy, Voyager, macOS, and standalone WSL Home Manager are unchanged.
 
 ## Ownership and updates
 

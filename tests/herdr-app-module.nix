@@ -37,18 +37,19 @@ let
   enabled = mkHome true false;
   daemonHost = mkHome true true;
   disabled = mkHome false false;
-  # Every jagpi-board content anywhere in the layout (blocks, stack
-  # headers): its props, or {} without any.
-  boardProps =
-    value:
+  # The props for each matching mod in a layout (including stack headers).
+  modProps =
+    mod: value:
     if builtins.isList value then
-      lib.concatMap boardProps value
+      lib.concatMap (modProps mod) value
     else if builtins.isAttrs value then
-      lib.optional ((value.mod or null) == "jagpi-board") (value.props or { })
-      ++ lib.concatMap boardProps (builtins.attrValues value)
+      lib.optional ((value.mod or null) == mod) (value.props or { })
+      ++ lib.concatMap (modProps mod) (builtins.attrValues value)
     else
       [ ];
-  jagpiBoardProps = home: boardProps (builtins.fromJSON (builtins.readFile home.xdg.configFile."herdr-app/layouts/jagpi.json".source));
+  readLayout = home: name: builtins.fromJSON (builtins.readFile home.xdg.configFile."herdr-app/layouts/${name}.json".source);
+  jagpiBoardProps = home: modProps "jagpi-board" (readLayout home "jagpi");
+  usageBarProps = home: modProps "subscription-usage" (readLayout home "work-items");
   remoteBoardProps = jagpiBoardProps enabled;
   localBoardProps = jagpiBoardProps daemonHost;
   usageProps = builtins.filter (p: (p.role or null) == "usage");
@@ -56,7 +57,7 @@ let
   keys = builtins.fromJSON (builtins.readFile files."herdr-app/keys.json".source);
   settings = builtins.fromJSON (builtins.readFile files."herdr-app/settings.json".source);
   theme = builtins.fromJSON (builtins.readFile files."herdr-app/themes/rose-pine.json".source);
-  workLayout = builtins.fromJSON (builtins.readFile files."herdr-app/layouts/work-items.json".source);
+  workLayout = readLayout enabled "work-items";
   workMod = builtins.fromJSON (builtins.readFile files."herdr-app/mods/work-items/mod.json".source);
   workItemsJs = builtins.readFile files."herdr-app/mods/work-items/main.js".source;
   managed = [
@@ -158,9 +159,14 @@ let
     noRuntimeFiles = builtins.all (name: !(lib.hasPrefix "herdr-app/" name) || builtins.elem name managed) (builtins.attrNames files);
     workItemsLayout = workLayout.id == "root"
       && workLayout.preview == "layouts/work-items.svg"
-      && lib.hasInfix ''"mod": "work-items"'' (builtins.readFile files."herdr-app/layouts/work-items.json".source)
-      && lib.hasInfix ''"mod": "work-agents"'' (builtins.readFile files."herdr-app/layouts/work-items.json".source)
-      && lib.hasInfix ''"mod": "subscription-usage"'' (builtins.readFile files."herdr-app/layouts/work-items.json".source);
+      && modProps "work-items" workLayout == [ { } ]
+      && modProps "work-agents" workLayout == [ { } ];
+    subscriptionUsageRoute = usageBarProps enabled == [ {
+      machine = "endeavour";
+      inherit (builtins.head (usageProps remoteBoardProps)) providers;
+    } ] && usageBarProps daemonHost == [ {
+      inherit (builtins.head (usageProps localBoardProps)) providers;
+    } ];
     workItemsMod = workMod.place == "none"
       # Each managed file links to its own store path, so a relative import
       # resolves outside the app folder and the app refuses the mod.

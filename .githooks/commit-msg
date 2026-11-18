@@ -1,0 +1,3 @@
+#!/bin/sh
+# Git runs this hook from the root of the working tree.
+exec python3 ci/privacy/check.py staged --hook-message "$1"

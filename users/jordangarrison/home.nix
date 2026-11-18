@@ -7,7 +7,7 @@
   inputs,
   userApps ? { },
   ...
-}:
+}@args:
 
 let
   borkedNsScriptPath = pkgs.writeTextFile {
@@ -22,6 +22,14 @@ let
   emacsPackage = if pkgs.stdenv.hostPlatform.isLinux then pkgs.emacs-pgtk else pkgs.emacs;
   # Live-checkout path for hand-authored agent content (see ./agents)
   agentsLive = "${config.home.homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/agents";
+  jagpiStatuslineEnabled = config.services.jagpi.enable or false;
+  onwatchStatuslineEnabled = args.osConfig.systemd.services.onwatch.enable or false;
+  jagpiStatuslineInstance = if jagpiStatuslineEnabled then config.services.jagpi.instance else "";
+  claudeStatuslineWithJagpi = pkgs.writeShellScript "claude-statusline-with-jagpi" ''
+    exec ${pkgs.python3}/bin/python3 ${./agents/claude/jagpi-statusline.py} \
+      ${lib.optionalString onwatchStatuslineEnabled "--onwatch"} ${lib.escapeShellArg jagpiStatuslineInstance} \
+      ${pkgs.bash}/bin/bash "$HOME/.claude/statusline.sh"
+  '';
   # Shape one programs.mcp server for a client: `remote` for url servers,
   # `local` for stdio (command) servers.
   mcpEntry = remote: local: s: if s.command != null then local s else remote s;
@@ -352,7 +360,11 @@ in
       permissions.defaultMode = "bypassPermissions";
       statusLine = {
         type = "command";
-        command = ''bash "$HOME/.claude/statusline.sh"'';
+        command =
+          if jagpiStatuslineEnabled || onwatchStatuslineEnabled then
+            "${claudeStatuslineWithJagpi}"
+          else
+            ''bash "$HOME/.claude/statusline.sh"'';
       };
       # MCP comes only from programs.mcp (the Executor gateways). The Slack
       # plugin and claude.ai account connectors would each add direct

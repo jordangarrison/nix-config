@@ -22,6 +22,10 @@ let
   emacsPackage = if pkgs.stdenv.hostPlatform.isLinux then pkgs.emacs-pgtk else pkgs.emacs;
   # Live-checkout path for hand-authored agent content (see ./agents)
   agentsLive = "${config.home.homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/agents";
+  claudeStatuslineWithJagpi = pkgs.writeShellScript "claude-statusline-with-jagpi" ''
+    exec ${pkgs.python3}/bin/python3 ${./agents/claude/jagpi-statusline.py} \
+      ${lib.escapeShellArg config.services.jagpi.instance} ${pkgs.bash}/bin/bash "$HOME/.claude/statusline.sh"
+  '';
   # Shape one programs.mcp server for a client: `remote` for url servers,
   # `local` for stdio (command) servers.
   mcpEntry = remote: local: s: if s.command != null then local s else remote s;
@@ -352,7 +356,11 @@ in
       permissions.defaultMode = "bypassPermissions";
       statusLine = {
         type = "command";
-        command = ''bash "$HOME/.claude/statusline.sh"'';
+        command =
+          if config.services.jagpi.enable or false then
+            "${claudeStatuslineWithJagpi}"
+          else
+            ''bash "$HOME/.claude/statusline.sh"'';
       };
       # MCP comes only from programs.mcp (the Executor gateways). The Slack
       # plugin and claude.ai account connectors would each add direct

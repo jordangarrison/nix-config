@@ -41,22 +41,31 @@ in
     };
   };
 
-  # Tray companion in the desktop session. It reads the daemon's dashboard on
-  # localhost and its menubar settings from the same database, and exits ~30s
-  # after the daemon disappears, hence Restart=always.
-  home-manager.users.${user}.systemd.user.services.onwatch-menubar = {
-    Unit = {
-      Description = "onWatch tray companion";
-      After = [ "graphical-session.target" ];
-      PartOf = [ "graphical-session.target" ];
+  home-manager.users.${user} = {
+    # The Claude status-line wrapper writes the quota file that onWatch reads.
+    # Keep the reader enabled, but stop onWatch from rewriting Claude's command
+    # at startup or during its periodic bridge check.
+    home.file.".onwatch/config.json".text = builtins.toJSON {
+      statusline_bridge = false;
     };
-    Service = {
-      Environment = [ "ONWATCH_DB_PATH=${dataDir}/data/onwatch.db" ];
-      ExecStart = "${onwatch}/bin/onwatch menubar --port ${toString port}";
-      Restart = "always";
-      RestartSec = "10s";
+
+    # Tray companion in the desktop session. It reads the daemon's dashboard on
+    # localhost and its menubar settings from the same database, and exits ~30s
+    # after the daemon disappears, hence Restart=always.
+    systemd.user.services.onwatch-menubar = {
+      Unit = {
+        Description = "onWatch tray companion";
+        After = [ "graphical-session.target" ];
+        PartOf = [ "graphical-session.target" ];
+      };
+      Service = {
+        Environment = [ "ONWATCH_DB_PATH=${dataDir}/data/onwatch.db" ];
+        ExecStart = "${onwatch}/bin/onwatch menubar --port ${toString port}";
+        Restart = "always";
+        RestartSec = "10s";
+      };
+      Install.WantedBy = [ "graphical-session.target" ];
     };
-    Install.WantedBy = [ "graphical-session.target" ];
   };
 
   security.acme.certs.${host} = {

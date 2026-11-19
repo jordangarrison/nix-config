@@ -122,11 +122,11 @@ in
         ''
       );
 
-    # Runs between writeBoundary and herdr's integration install so ordering
-    # is deterministic and herdr keeps the last word on hook wiring (we never
-    # declare hooks, so either order is semantically safe).
+    # Link managed files first, including the onWatch config that stops it
+    # from rewriting our status-line command. Herdr still gets the last word
+    # on hook wiring.
     home.activation.claudeCodeSettingsMerge = lib.mkIf (cfg.settings != { }) (
-      lib.hm.dag.entryBetween [ "herdrIntegrations" ] [ "writeBoundary" ] ''
+      lib.hm.dag.entryBetween [ "herdrIntegrations" ] [ "linkGeneration" ] ''
         claudeSettings="$HOME/.claude/settings.json"
         if [[ -v DRY_RUN ]]; then
           echo "Would merge declared Claude Code settings into $claudeSettings"

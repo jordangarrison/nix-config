@@ -371,9 +371,16 @@
         inherit (self.nixosConfigurations.endeavour) pkgs;
       };
 
+      checks.x86_64-linux.remote-access-policy =
+        self.nixosConfigurations.endeavour.pkgs.runCommand "remote-access-policy-tests" {
+          results = builtins.toJSON (import ./tests/remote-access-policy.nix { flake = self; });
+        } ''
+          printf '%s\n' "$results" > "$out"
+        '';
+
       checks.x86_64-linux.endeavour-firewall = import ./tests/firewall-runtime.nix {
         inherit (self.nixosConfigurations.endeavour) pkgs;
-        inherit (self.nixosConfigurations.endeavour.config.networking) firewall;
+        host = self.nixosConfigurations.endeavour.config;
       };
 
       checks.x86_64-linux.ovis-module =

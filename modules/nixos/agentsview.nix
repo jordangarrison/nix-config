@@ -3,15 +3,32 @@
 let
   user = "jordangarrison";
   home = "/home/${user}";
-  dataDir = "${home}/.agentsview";
+  dataDir = "/mnt/gemini/agentsview";
   port = 8080;
   host = "agentsview.jordangarrison.dev";
 in
 {
+  systemd.tmpfiles.rules = [ "d ${dataDir} 0700 ${user} users - -" ];
+
+  # nofail mounts need not finish before the boot-wide tmpfiles pass. Run
+  # this rule again after Gemini mounts, before the unprivileged service.
+  systemd.services.agentsview-state-directory = {
+    description = "Prepare agentsview state on Gemini";
+    requires = [ "mnt-gemini.mount" ];
+    after = [ "mnt-gemini.mount" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStart = "${pkgs.systemd}/bin/systemd-tmpfiles --create --prefix=${dataDir}";
+    };
+  };
+
   systemd.services.agentsview = {
     description = "agentsview - local viewer and analytics for AI agent sessions";
     wantedBy = [ "multi-user.target" ];
-    after = [ "network.target" ];
+    after = [ "network.target" "agentsview-state-directory.service" ];
+    requires = [ "agentsview-state-directory.service" ];
+    unitConfig.RequiresMountsFor = "/mnt/gemini";
 
     environment = {
       AGENTSVIEW_DATA_DIR = dataDir;

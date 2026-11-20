@@ -173,6 +173,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    maple = {
+      # Upstream v0.3.6 currently packages the v0.3.5 binary bundle.
+      url = "github:MapleTechLabs/maple/v0.3.6";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Agent skill sources (plain SKILL.md trees, consumed by
     # programs.agent-skills.external in users/jordangarrison/home.nix).
     # Skills for CLIs we package come from the package itself instead, so
@@ -363,6 +369,13 @@
         inherit (self.nixosConfigurations.endeavour) pkgs config;
       };
 
+      checks.x86_64-linux.maple-module =
+        self.nixosConfigurations.endeavour.pkgs.runCommand "maple-module-tests" {
+          results = builtins.toJSON (import ./tests/maple-module.nix { flake = self; });
+        } ''
+          printf '%s\n' "$results" > "$out"
+        '';
+
       checks.x86_64-linux.ovis-module =
         self.nixosConfigurations.endeavour.pkgs.runCommand "ovis-module-tests" {
           results = builtins.toJSON (import ./tests/ovis-module.nix { flake = self; });
@@ -426,6 +439,7 @@
             ./modules/nixos/onwatch.nix
             ./modules/nixos/collie.nix
             ./modules/nixos/executor.nix
+            ./modules/nixos/maple.nix
             ./modules/nixos/isp-snitch.nix
             ./modules/nixos/norish.nix
             ./modules/nixos/hermes.nix

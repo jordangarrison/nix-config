@@ -10,13 +10,13 @@
         ensureDBOwnership = true;
       }
     ];
-    enableTCPIP = true;
+    # Local clients only: every user of this server (Panko, Norish, local dev
+    # databases) connects over the socket or 127.0.0.1. "false" means
+    # listen_addresses = "localhost"; the unix socket stays.
+    enableTCPIP = false;
     authentication = pkgs.lib.mkOverride 10 ''
       #type database  DBuser      origin                  auth-method
       local all       all                                 trust
-
-      # Allow metabase connections from Tailscale network (100.x.x.x)
-      host  all       all         100.0.0.0/8             trust
 
       # Allow connections from localhost
       host  all       all         127.0.0.1/32            trust
@@ -25,7 +25,8 @@
   };
   services.prometheus.exporters.postgres = {
     enable = true;
-    listenAddress = "0.0.0.0";
+    # Nothing scrapes it from another host.
+    listenAddress = "127.0.0.1";
     port = 9187;
   };
 

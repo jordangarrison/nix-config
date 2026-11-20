@@ -2,7 +2,11 @@
 pkgs.testers.runNixOSTest {
   name = "otel-collector-maple";
   nodes.machine = { lib, pkgs, ... }: {
-    imports = [ ../modules/nixos/otel-collector.nix ../modules/nixos/nginx-tracing.nix ];
+    imports = [ ../modules/nixos/otel-collector.nix ../modules/nixos/nginx-tracing.nix ../modules/nixos/executor-telemetry.nix ];
+    virtualisation.docker.enable = true;
+    # Match endeavour: the dedicated ingress guard must work without the
+    # general NixOS firewall, including when another interface can route here.
+    networking.firewall.enable = false;
     networking.hostName = "endeavour";
     time.timeZone = "America/Chicago";
     virtualisation.memorySize = 2048;
@@ -76,16 +80,40 @@ pkgs.testers.runNixOSTest {
         echo '<4>blocky-warning-kept'
       '';
     };
-    environment.systemPackages = [ pkgs.curl pkgs.acl ];
+    environment.systemPackages = [ pkgs.curl pkgs.acl pkgs.iproute2 pkgs.nftables pkgs.iptables ];
   };
   testScript = ''
-    import json
+    import json, shlex, time
     machine.start()
     machine.wait_for_unit("maple.service")
     machine.wait_for_unit("opentelemetry-collector.service")
     machine.wait_for_unit("nginx.service")
     machine.wait_until_succeeds("test -s /var/lib/mock-maple/captured.jsonl")
     machine.wait_until_succeeds("journalctl -u opentelemetry-collector --grep 'Everything is ready'")
+
+    # Emulate a container on the real Docker bridge without pulling an image.
+    machine.succeed("ip netns add otlp-client; ip link add otlp-host type veth peer name eth0 netns otlp-client; ip link set otlp-host master docker0; ip link set otlp-host up; ip -n otlp-client addr add 172.17.0.2/16 dev eth0; ip -n otlp-client link set eth0 up")
+    now = str(time.time_ns())
+    resource = {"attributes": [{"key": "service.name", "value": {"stringValue": "executor-test"}}]}
+    fixtures = {
+        "traces": {"resourceSpans": [{"resource": resource, "scopeSpans": [{"spans": [{"traceId": "1234567890abcdef1234567890abcdef", "spanId": "1234567890abcdef", "name": "executor-test-span", "startTimeUnixNano": now, "endTimeUnixNano": now}]}]}]},
+        "logs": {"resourceLogs": [{"resource": resource, "scopeLogs": [{"logRecords": [{"timeUnixNano": now, "body": {"stringValue": "executor-test-log"}}]}]}]},
+        "metrics": {"resourceMetrics": [{"resource": resource, "scopeMetrics": [{"metrics": [{"name": "executor.test", "gauge": {"dataPoints": [{"timeUnixNano": now, "asDouble": 1}]}}]}]}]},
+    }
+    for signal, payload in fixtures.items():
+        machine.succeed("ip netns exec otlp-client curl -fsS -H 'Content-Type: application/json' --data " + shlex.quote(json.dumps(payload)) + " http://172.17.0.1:4319/v1/" + signal)
+    # The default metrics protocol needs no http/json override.
+    machine.succeed("ip netns exec otlp-client curl -fsS -H 'Content-Type: application/x-protobuf' --data-binary @/dev/null http://172.17.0.1:4319/v1/metrics")
+    machine.wait_until_succeeds("grep -q executor-test-span /var/lib/mock-maple/captured.jsonl && grep -q executor-test-log /var/lib/mock-maple/captured.jsonl && grep -q executor.test /var/lib/mock-maple/captured.jsonl")
+    # Host-local and off-bridge clients cannot use the unauthenticated receiver.
+    machine.fail("curl -fsS --max-time 2 http://172.17.0.1:4319/v1/traces")
+    machine.succeed("ip netns add otlp-denied; ip link add otlp-outside type veth peer name eth0 netns otlp-denied; ip addr add 192.0.2.1/24 dev otlp-outside; ip link set otlp-outside up; ip -n otlp-denied addr add 192.0.2.2/24 dev eth0; ip -n otlp-denied link set eth0 up; ip -n otlp-denied route add default via 192.0.2.1")
+    machine.fail("ip netns exec otlp-denied curl -fsS --max-time 2 http://172.17.0.1:4319/v1/traces")
+    machine.succeed("nft list chain inet executor_otlp ingest | grep -E 'counter packets [2-9][0-9]* bytes .* reject'")
+    # An ACCEPT inserted by another service must not bypass this guard.
+    machine.succeed("iptables -I INPUT -j ACCEPT")
+    machine.fail("ip netns exec otlp-denied curl -fsS --max-time 2 http://172.17.0.1:4319/v1/traces")
+    machine.succeed("iptables -D INPUT -j ACCEPT")
 
     # Check ACL inheritance on initial creation, rename rotation, and reopen.
     machine.succeed("curl -fsS 'http://127.0.0.1/first?not_logged=private-query'")
@@ -112,7 +140,7 @@ pkgs.testers.runNixOSTest {
     headers = machine.succeed("curl -fsSD - -o /dev/null -H 'traceparent: 00-11111111111111111111111111111111-2222222222222222-01' 'http://127.0.0.1/trace-fixture?not_logged=private-query'")
     trace_id = next(line.split(': ', 1)[1].strip() for line in headers.splitlines() if line.lower().startswith('x-trace-id:'))
     assert trace_id != '11111111111111111111111111111111', headers
-    machine.wait_until_succeeds("grep -q resourceSpans /var/lib/mock-maple/captured.jsonl")
+    machine.wait_until_succeeds("grep -q " + trace_id + " /var/lib/mock-maple/captured.jsonl")
     machine.fail("grep -q private-query /var/lib/mock-maple/captured.jsonl")
 
     # nginx must keep serving when telemetry is unavailable.
@@ -141,7 +169,19 @@ pkgs.testers.runNixOSTest {
         for resource in batch["data"].get("resourceMetrics", []) + batch["data"].get("resourceLogs", []) + batch["data"].get("resourceSpans", []):
             attrs = {attr["key"]: attr["value"].get("stringValue") for attr in resource["resource"]["attributes"]}
             assert attrs["host.name"] == "endeavour", attrs
-            assert attrs["service.name"] in ["hostmetrics", "system-journal", "nginx-access", "nginx-error", "nginx"], attrs
+            assert attrs["service.name"] in ["hostmetrics", "system-journal", "nginx-access", "nginx-error", "nginx", "executor-test"], attrs
+            if attrs["service.name"] == "executor-test":
+                assert attrs["service.namespace"] == "executor", attrs
+                assert attrs["deployment.environment.name"] == "homelab", attrs
     machine.fail("journalctl -u opentelemetry-collector --grep 'permission denied|failed to process|failed to export' --case-sensitive=no")
+    # Removing the guard must first stop the receiver. Starting the collector
+    # recreates its required guard; no broad firewall flush is involved.
+    machine.succeed("systemctl stop executor-otlp-ingress")
+    machine.fail("systemctl is-active opentelemetry-collector")
+    machine.fail("nft list table inet executor_otlp")
+    machine.succeed("systemctl start opentelemetry-collector")
+    machine.wait_for_unit("executor-otlp-ingress.service")
+    machine.wait_for_unit("opentelemetry-collector.service")
+    machine.wait_until_succeeds("ip netns exec otlp-client curl -fsS -H 'Content-Type: application/x-protobuf' --data-binary @/dev/null http://172.17.0.1:4319/v1/metrics")
   '';
 }

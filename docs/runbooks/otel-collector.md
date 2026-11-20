@@ -1,7 +1,8 @@
 # Endeavour telemetry collector
 
 `modules/nixos/otel-collector.nix` sends host metrics and system/nginx logs to
-Maple over **loopback OTLP/HTTP**. Datadog and the Claude Code/Codex telemetry
+Maple over **loopback OTLP/HTTP**. It also relays the personal self-hosted
+Executor's OTLP signals from Docker. Datadog and the Claude Code/Codex telemetry
 settings are unchanged. This collector is not an agent-telemetry proxy.
 
 ## Sources
@@ -13,6 +14,7 @@ settings are unchanged. This collector is not an agent-telemetry proxy.
 | `filelog/nginx-access` | `nginx-access` | `/var/log/nginx/access.log`, JSON: timestamp, host, method, path **without query string**, status, bytes, request duration. No client IP, authorization, cookies, referrer, or user-agent. |
 | `filelog/nginx-error` | `nginx-error` | `/var/log/nginx/error.log`, nginx text format, warn and above, with parsed time/severity. |
 | nginx `ngx_otel_module` | `nginx` | Request spans at 1% sampling, via loopback OTLP/gRPC to the collector. Query strings, user agents, and client socket addresses/ports are removed before export. |
+| Executor OTLP/HTTP | Preserved from Executor | Application traces, logs, and metrics. All carry `service.namespace=executor`, `deployment.environment.name=homelab`, and `host.name=endeavour`. |
 
 nginx's defaults use its prefix for access logs and stderr for errors. This
 module declares both paths explicitly. nixpkgs' existing logrotate rule rotates
@@ -32,7 +34,8 @@ source filters are not a general secret scrubber.
   credential into `MAPLE_INGEST_KEY`; only an environment reference is in the
   store config. Build-time validation uses a public placeholder override.
 - The exporter connects directly to `http://127.0.0.1:4318`, with
-  `x-maple-ingest-key`; no nginx hop and no new firewall rule.
+  `x-maple-ingest-key`; no nginx hop. Executor's separate bridge ingress is
+  guarded as described below.
 - The collector starts after Maple, but does not require a working Maple
   process: it can reconnect after Maple recovers. It requires the credential
   provisioner. It never starts nginx or makes nginx depend on telemetry.
@@ -45,6 +48,64 @@ source filters are not a general secret scrubber.
   durable across restart. Cursor storage is not an exactly-once guarantee.
 - Collector self-metrics are disabled. This avoids another listener and a
   self-observation loop. Check its unit journal for exporter failures.
+
+## Executor: Docker → collector → Maple
+
+`modules/nixos/executor-telemetry.nix`, imported by `executor.nix`, owns this
+path. The container sends to `http://172.17.0.1:4319` on Docker's default
+`docker0` bridge (`172.17.0.0/16`). Port 4318 remains Maple's loopback-only
+listener; nginx's trace receiver remains loopback-only port 4317. No wildcard
+listener, published Docker port, or Maple key is added to the container.
+If Docker's default bridge addressing changes, update this module with it.
+
+Endeavour's general firewall is **disabled**, so `networking.firewall` allow
+rules would not protect this listener. `executor-otlp-ingress.service` installs
+an independent **nftables input hook** for `172.17.0.1:4319`: accept only packets
+arriving on `docker0` from `172.17.0.0/16`, reject all other sources/interfaces,
+including host-local callers. DOCKER-USER is not sufficient: it filters
+forwarding, not packets addressed to the host. An iptables INPUT jump can also
+be bypassed if another service inserts an ACCEPT rule ahead of it. The dedicated
+`inet executor_otlp` table avoids that rule-order dependency without enabling
+the general firewall; it is installed in one atomic transaction. The collector
+requires this guard and starts after it; the guard starts after Docker creates
+its bridge. Stop ordering closes the collector before removing the guard. Other
+ports and the general firewall policy are unchanged. Any container on this
+bridge can submit telemetry: this is a network boundary, not per-container
+authentication.
+
+The base `OTEL_EXPORTER_OTLP_ENDPOINT` enables **all three signals**; it is not
+container loopback. Executor uses HTTP/JSON for traces/logs and HTTP/protobuf
+for metrics. The collector accepts both and forwards protobuf to Maple, so no
+metrics-protocol override is needed. `EXECUTOR_ENVIRONMENT=homelab` and
+`EXECUTOR_BUILD_VERSION` tracks the image tag. Service names are not replaced,
+so Executor's host/runtime/browser identities remain distinct. The host
+collector adds the namespace and environment to each signal. Upstream service
+names can change with the image; filter Maple by the namespace to find them.
+
+This replaces the bundled collector as the destination. Its supervised process
+can still run idle; old records are not deleted. Not every request creates a
+log record: warnings/errors and app page requests do, while normal requests
+may produce traces only. The journal can still contain the container's stdout,
+so application logs may also appear under `system-journal`. No sampling or
+application-data scrubber is added to Executor's OTLP pipeline. Treat those
+records as private and recheck Gemini's disk growth after rollout.
+
+After the approved deployment:
+
+1. Confirm `docker-executor`, `executor-otlp-ingress`, and
+   `opentelemetry-collector` are active. Inspect only the three declared
+   telemetry env fields, never dump the container environment.
+2. Make a request to `https://executor.jordangarrison.dev`, then inspect Maple
+   traces/logs under namespace `executor` and environment `homelab`. Inspect
+   metrics once Executor emits them; an empty log search alone is not failure.
+3. Verify synthetic OTLP POSTs from the Docker bridge succeed and off-bridge
+   attempts fail. `sudo nft list table inet executor_otlp` shows the guard's
+   counters.
+4. Compare all existing `*.jordangarrison.dev` vhost status codes before/after.
+
+Revert the Executor environment/import and this module to return to its bundled
+collector. Apply rollback through the normal guarded flow. Do not remove the
+ingress guard while a bridge receiver is still listening.
 
 ## Volume and disk budget
 
@@ -106,8 +167,11 @@ isolated VM test checks the actual credential wrapper/export header, journal
 filters, host metrics, parsers, inherited log ACLs, log rotation, and persisted
 cursors against a synthetic Maple HTTP sink. It also loads nginx's dynamic
 module, exports a deterministic fixture span through gRPC and HTTP, checks
-attribute removal, and confirms nginx serves when the collector stops. It never
-reads the host's secrets.
+attribute removal, and confirms nginx serves when the collector stops. Docker
+bridge fixtures exercise all three Executor signal pipelines, JSON/protobuf
+acceptance, preserved service names, namespace/environment attribution, and
+rejection of host-local/off-bridge ingress with the general firewall disabled.
+It never reads the host's secrets.
 
 ## nginx tracing and rollback
 

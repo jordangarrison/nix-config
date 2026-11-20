@@ -14,6 +14,7 @@ let
   host = "executor.jordangarrison.dev";
   port = 4400;
   dataDir = "/var/lib/executor";
+  version = "2.0.0-beta.36";
   # Same tailnet boundary as bb and day-dashboard. endeavour's host firewall
   # is off, so without this any LAN client sending this Host/SNI gets through.
   tailnetOnly = ''
@@ -25,16 +26,23 @@ let
   '';
 in
 {
+  imports = [ ./executor-telemetry.nix ];
+
   virtualisation.oci-containers.backend = "docker";
 
   virtualisation.oci-containers.containers.executor = {
-    image = "ghcr.io/usefulsoftwareco/executor-selfhost:2.0.0-beta.36";
+    image = "ghcr.io/usefulsoftwareco/executor-selfhost:${version}";
     ports = [ "127.0.0.1:${toString port}:4400" ];
     volumes = [ "${dataDir}:/app/data" ];
     environment = {
       # Must match the origin the browser uses or sign-in is rejected.
       BETTER_AUTH_URL = "https://${host}";
       DO_NOT_TRACK = "1";
+      # OTLP/HTTP JSON traces/logs and protobuf metrics are accepted by the
+      # host collector. No Maple credential or protocol override is needed.
+      OTEL_EXPORTER_OTLP_ENDPOINT = "http://${config.services.opentelemetry-collector.settings.receivers."otlp/executor".protocols.http.endpoint}";
+      EXECUTOR_ENVIRONMENT = "homelab";
+      EXECUTOR_BUILD_VERSION = version;
       # Apps may fetch private addresses, so the Norish app can reach
       # norish.garrisonsbygrace.com on the tailnet IP. This applies to every
       # app: any of them can reach the LAN, tailnet peers and endeavour's

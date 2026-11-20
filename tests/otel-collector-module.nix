@@ -38,6 +38,28 @@ let
     noNginxDependency = !(lib.elem "opentelemetry-collector.service" cfg.systemd.services.nginx.requires)
       && !(lib.elem "opentelemetry-collector.service" cfg.systemd.services.nginx.after);
     traceSanitizer = lib.elem "transform/nginx" settings.service.pipelines.traces.processors;
+    executorReceiver = settings.receivers."otlp/executor".protocols.http.endpoint == "172.17.0.1:4319"
+      && !(settings.receivers."otlp/executor".protocols ? grpc);
+    executorSignals = lib.all (signal:
+      let pipeline = settings.service.pipelines."${signal}/executor";
+      in pipeline.receivers == [ "otlp/executor" ]
+        && pipeline.processors == [ "memory_limiter" "resource/executor" "batch" ]
+        && pipeline.exporters == [ "otlphttp/maple" ]
+    ) [ "traces" "logs" "metrics" ];
+    executorIdentity = lib.elem { key = "deployment.environment.name"; value = "homelab"; action = "upsert"; }
+      settings.processors."resource/executor".attributes
+      && !(lib.any (attribute: attribute.key == "service.name") settings.processors."resource/executor".attributes);
+    executorEnvironment = let container = cfg.virtualisation.oci-containers.containers.executor;
+      in container.environment.OTEL_EXPORTER_OTLP_ENDPOINT == "http://172.17.0.1:4319"
+        && container.environment.EXECUTOR_ENVIRONMENT == "homelab"
+        && lib.hasSuffix ":${container.environment.EXECUTOR_BUILD_VERSION}" container.image
+        && !(container.environment ? OTEL_EXPORTER_OTLP_HEADERS)
+        && !(container.environment ? OTEL_EXPORTER_OTLP_METRICS_PROTOCOL);
+    executorIngressGuard = lib.elem "executor-otlp-ingress.service" unit.requires
+      && lib.elem "executor-otlp-ingress.service" unit.after
+      && lib.elem "docker.service" cfg.systemd.services.executor-otlp-ingress.after
+      && lib.hasInfix "/bin/nft -f" cfg.systemd.services.executor-otlp-ingress.script
+      && lib.hasInfix "delete table inet executor_otlp" cfg.systemd.services.executor-otlp-ingress.preStop;
     rotatedLogs = lib.elem "/var/log/nginx/*.log" cfg.services.logrotate.settings.nginx.files;
     noQueryStringInAccessLog = !(lib.hasInfix "$request_uri" cfg.services.nginx.commonHttpConfig)
       && lib.hasInfix ''"path":"$uri"'' cfg.services.nginx.commonHttpConfig;

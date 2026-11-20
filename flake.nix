@@ -270,9 +270,6 @@
       ...
     }:
     {
-      nixosModules.bb = ./modules/nixos/bb.nix;
-      homeManagerModules.bb-desktop = ./modules/home/bb-desktop;
-
       # Intentionally a small fleet, not every nixosConfiguration. Voyager
       # currently runs Omarchy; opportunity is a laptop. See docs/runbooks/deploy.md.
       deploy = {
@@ -334,19 +331,6 @@
         let pkgs = nixpkgs.legacyPackages.x86_64-linux;
         in pkgs.runCommand "deploy-policy-tests" {
           results = builtins.toJSON (import ./tests/deploy-policy.nix { flake = self; });
-        } ''
-          printf '%s\n' "$results" > "$out"
-        '';
-
-      packages.x86_64-linux.bb-desktop =
-        let
-          pkgs = import nixpkgs { system = "x86_64-linux"; };
-        in
-        pkgs.callPackage ./packages/bb-desktop { };
-
-      checks.x86_64-linux.bb-module =
-        self.nixosConfigurations.endeavour.pkgs.runCommand "bb-module-tests" {
-          results = builtins.toJSON (import ./tests/bb-module.nix { flake = self; });
         } ''
           printf '%s\n' "$results" > "$out"
         '';
@@ -430,7 +414,6 @@
             ./modules/stack-cli-overlay.nix
             ./modules/brave-overlay.nix
             ./modules/tea-overlay.nix
-            ./modules/day-dashboard-overlay.nix
             ./modules/nixos/common.nix
             ./modules/nixos/brother-printer.nix
             ./modules/nixos/lan.nix
@@ -456,7 +439,6 @@
             ./modules/nixos/isp-snitch.nix
             ./modules/nixos/norish.nix
             ./modules/nixos/hermes.nix
-            ./modules/nixos/bb.nix
             ./modules/nixos/drawl.nix
             ./modules/nixos/tic-tac-toe-4-in-a-row.nix
             ./modules/nixos/cloudflared.nix
@@ -470,7 +452,6 @@
             ./modules/nixos/blocky.nix
             ./modules/nixos/lakeline-cg.nix
             ./modules/nixos/sre-claude-auto-runner.nix
-            ./modules/nixos/day-dashboard.nix
             ./users/jordangarrison/nixos.nix
             ./users/mikayla/nixos.nix
             ./users/jane/nixos.nix
@@ -488,18 +469,6 @@
             lakeline-cg.nixosModules.default
             isp-snitch.nixosModules.default
             (
-              let
-                # Single source of truth for the day-dashboard's shared knobs.
-                # The NixOS module (state dirs + vhost) and the Home Manager
-                # generator both need the same stateDir/dismissPort/user;
-                # declare them once here and pass them to both call sites so
-                # they can't silently drift out of sync.
-                dayDashboard = {
-                  stateDir = "/var/lib/day-dashboard";
-                  dismissPort = 8846;
-                  user = "jordangarrison";
-                };
-              in
               {
               # Configure users for endeavour
               users.jordangarrison = {
@@ -559,19 +528,6 @@
                 users = [ "jordangarrison" ];
               };
 
-              # bb owns its server + host daemon; Nix owns its version.
-              services.bb = {
-                enable = true;
-                user = "jordangarrison";
-                environment.BB_APP_URL = "https://bb.jordangarrison.dev";
-                providers = {
-                  cursor.enable = true;
-                  codex.enable = true;
-                  pi.enable = true;
-                  claude.enable = true;
-                };
-              };
-
               # Enable FreeRDP
               services.freerdp.enable = true;
 
@@ -582,38 +538,14 @@
               services.super-productivity.enable = true;
               programs.super-productivity.enable = true;
 
-              # Hourly private personal day/work dashboard (06:00–21:00).
-              # This enables the system side: state dirs + the private nginx
-              # vhost (needs a `day.jordangarrison.dev` A record → 100.118.65.11
-              # Tailscale). The generator itself is a Home Manager *user*
-              # service (below) so it can reach the login keyring for Pi MCP +
-              # gws. See packages/day-dashboard/README.md.
-              services.day-dashboard = {
-                enable = true;
-                inherit (dayDashboard) stateDir dismissPort user;
-              };
-
               # Import home modules for jordangarrison on endeavour
               home-manager.users.jordangarrison.imports = [
                 ./modules/home/niri
                 ./modules/home/orca
                 ./modules/home/tea
                 ./modules/home/yazi
-                ./modules/home/day-dashboard
                 ./hosts/endeavour/jagpi.nix
               ];
-
-              # The generator runs as a systemd --user service (needs the login
-              # keyring for Pi MCP + gws); the system module above owns the
-              # private nginx vhost and served directory.
-              home-manager.users.jordangarrison.services.day-dashboard = {
-                enable = true;
-                inherit (dayDashboard) stateDir dismissPort;
-                # Confluence collector needs a token file too (see README);
-                # this only points it at the right Atlassian site.
-                environment.DAY_DASHBOARD_CONFLUENCE_BASE =
-                  "https://flocasts.atlassian.net/wiki";
-              };
 
               home-manager.users.jordangarrison.programs.orca.enable = false;
 
@@ -666,7 +598,6 @@
             ./modules/nixos/audio/pipewire.nix
             ./modules/nixos/audio/speech-dispatcher.nix
             ./modules/nixos/development.nix
-            ./modules/nixos/bb.nix
             ./modules/nixos/virtualization.nix
             ./modules/nixos/tablet-mode.nix
             ./users/jordangarrison/nixos.nix
@@ -750,22 +681,6 @@
 
               programs.super-productivity.enable = true;
 
-              # Desktop app is a client. This daemon runs tasks for the server
-              # on endeavour. Enroll once with bb-host-enroll; see docs/runbooks/bb.md.
-              services.bb = {
-                enable = true;
-                role = "host";
-                user = "jordangarrison";
-                serverUrl = "https://bb.jordangarrison.dev";
-                # The desktop app binds its own daemon to 38887.
-                hostDaemonPort = 38888;
-                providers = {
-                  cursor.enable = true;
-                  codex.enable = true;
-                  pi.enable = true;
-                  claude.enable = true;
-                };
-              };
             }
           ];
 

@@ -7,7 +7,7 @@
 #
 # The app container uses host networking so it reaches Postgres and Redis on
 # 127.0.0.1; it binds 127.0.0.1 only. It connects as the passwordless norish
-# role, which postgres.nix's trust rules admit from localhost and the tailnet.
+# role, which postgres.nix's trust rules admit from localhost.
 # It runs as its own norish uid, not the image's 1000, which is jordangarrison
 # here and would reach his X11 session over the shared network namespace.
 #

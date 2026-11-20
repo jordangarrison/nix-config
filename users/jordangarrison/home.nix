@@ -114,19 +114,12 @@ in
     ../../modules/home/herdr-app
     ../../modules/home/ovis
     ../../modules/home/tuicr
-    ../../modules/home/bb
-    ../../modules/home/bb-desktop
     ../../modules/home/agent-skills
     ../../modules/home/agent-workspaces
     ../../modules/home/claude-code
     ../../modules/home/codex
     ../../modules/home/cursor-agent
   ];
-
-  programs.bb-desktop = {
-    enable = userApps.bb-desktop.enable or false;
-    defaultServerUrl = "https://bb.jordangarrison.dev";
-  };
 
   programs.agent-skills = {
     enable = true;
@@ -644,7 +637,7 @@ in
       url = "https://executor.flostag-us-west-2.flokubernetes.com/mcp";
     };
     # Executor v2 for FloSports. Runs next to v1 (executor-flo) while
-    # integrations move over; skills and day-dashboard still use v1.
+    # integrations move over; skills still use v1.
     servers.executor-flo-v2 = lib.mkIf (userApps.work.enable or false) {
       url = "https://executor.flosports.tv/mcp";
     };

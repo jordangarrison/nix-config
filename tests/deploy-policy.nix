@@ -19,7 +19,7 @@ let
       builtins.elem "root" flake.nixosConfigurations.${name}.config.nix.settings.trusted-users
       && builtins.elem "jordangarrison" flake.nixosConfigurations.${name}.config.nix.settings.trusted-users
     ) [ "endeavour" "discovery" ];
-    existingChecksRetained = flake.checks.x86_64-linux ? bb-module
+    existingChecksRetained = flake.checks.x86_64-linux ? t3code-module
       && flake.checks.x86_64-linux ? pi-extensions;
   };
 in

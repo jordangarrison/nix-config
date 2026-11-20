@@ -30,6 +30,14 @@ let
     servicesPerSource = lib.all (name: settings.processors.${name}.attributes != [ ]) [
       "resource/host" "resource/journal" "resource/nginx-access" "resource/nginx-error"
     ];
+    tracingModule = lib.any (module: module.pname == "otel") cfg.services.nginx.additionalModules;
+    loopbackTraceReceiver = settings.receivers.otlp.protocols.grpc.endpoint == "127.0.0.1:4317"
+      && !(lib.elem 4317 cfg.networking.firewall.allowedTCPPorts);
+    modestSampling = lib.hasInfix "1% on;" cfg.services.nginx.commonHttpConfig
+      && lib.hasInfix "otel_trace_context inject;" cfg.services.nginx.commonHttpConfig;
+    noNginxDependency = !(lib.elem "opentelemetry-collector.service" cfg.systemd.services.nginx.requires)
+      && !(lib.elem "opentelemetry-collector.service" cfg.systemd.services.nginx.after);
+    traceSanitizer = lib.elem "transform/nginx" settings.service.pipelines.traces.processors;
     rotatedLogs = lib.elem "/var/log/nginx/*.log" cfg.services.logrotate.settings.nginx.files;
     noQueryStringInAccessLog = !(lib.hasInfix "$request_uri" cfg.services.nginx.commonHttpConfig)
       && lib.hasInfix ''"path":"$uri"'' cfg.services.nginx.commonHttpConfig;

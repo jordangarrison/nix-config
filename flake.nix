@@ -452,6 +452,7 @@
             ./modules/nixos/executor.nix
             ./modules/nixos/maple.nix
             ./modules/nixos/otel-collector.nix
+            ./modules/nixos/nginx-tracing.nix
             ./modules/nixos/isp-snitch.nix
             ./modules/nixos/norish.nix
             ./modules/nixos/hermes.nix

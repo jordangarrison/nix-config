@@ -2,14 +2,24 @@
 pkgs.testers.runNixOSTest {
   name = "otel-collector-maple";
   nodes.machine = { lib, pkgs, ... }: {
-    imports = [ ../modules/nixos/otel-collector.nix ];
+    imports = [ ../modules/nixos/otel-collector.nix ../modules/nixos/nginx-tracing.nix ];
     networking.hostName = "endeavour";
     time.timeZone = "America/Chicago";
     virtualisation.memorySize = 2048;
     fileSystems."/mnt/gemini" = { device = "tmpfs"; fsType = "tmpfs"; };
     services.nginx = {
       enable = true;
-      virtualHosts.localhost.locations."/".return = "200 otel-ok";
+      virtualHosts.localhost.locations = {
+        "/".return = "200 otel-ok";
+        # Deterministic span fixture; production sampling is asserted separately.
+        "/trace-fixture" = {
+          return = "200 otel-trace-ok";
+          extraConfig = ''
+            otel_trace on;
+            add_header X-Trace-Id $otel_trace_id always;
+          '';
+        };
+      };
     };
     # Only synthetic telemetry and a public test credential enter this VM.
     systemd.services.maple-secrets = {
@@ -98,8 +108,18 @@ pkgs.testers.runNixOSTest {
     machine.wait_until_succeeds("grep -q system.cpu.time /var/lib/mock-maple/captured.jsonl")
     machine.wait_until_succeeds("grep -q system.filesystem.usage /var/lib/mock-maple/captured.jsonl")
 
+    # Actual dynamic module -> OTLP/gRPC -> collector -> OTLP/HTTP span export.
+    headers = machine.succeed("curl -fsSD - -o /dev/null -H 'traceparent: 00-11111111111111111111111111111111-2222222222222222-01' 'http://127.0.0.1/trace-fixture?not_logged=private-query'")
+    trace_id = next(line.split(': ', 1)[1].strip() for line in headers.splitlines() if line.lower().startswith('x-trace-id:'))
+    assert trace_id != '11111111111111111111111111111111', headers
+    machine.wait_until_succeeds("grep -q resourceSpans /var/lib/mock-maple/captured.jsonl")
+    machine.fail("grep -q private-query /var/lib/mock-maple/captured.jsonl")
+
+    # nginx must keep serving when telemetry is unavailable.
+    machine.succeed("systemctl stop opentelemetry-collector")
+    machine.succeed("curl -fsS http://127.0.0.1/trace-fixture")
     # A collector restart must retain cursors instead of replaying old records.
-    machine.succeed("systemctl restart opentelemetry-collector")
+    machine.succeed("systemctl start opentelemetry-collector")
     machine.wait_until_succeeds("journalctl -u opentelemetry-collector --grep 'Everything is ready' | test $(wc -l) -ge 2")
     machine.succeed("systemctl start otel-journal-after-restart")
     machine.succeed("curl -fsS http://127.0.0.1/after-restart")
@@ -110,11 +130,18 @@ pkgs.testers.runNixOSTest {
     bodies = [record.get("body", {}).get("stringValue", "") for record in logs]
     assert bodies.count("otel-journal-accepted") == 1, bodies
     assert sum('/first' in body for body in bodies) == 1, bodies
+    spans = [span for batch in captured for resource in batch["data"].get("resourceSpans", []) for scope in resource["scopeSpans"] for span in scope["spans"]]
+    assert any(span["traceId"] == trace_id for span in spans), spans
+    for span in spans:
+        attrs = {attr["key"]: attr["value"] for attr in span.get("attributes", [])}
+        assert not any(key in attrs for key in ["http.user_agent", "net.sock.peer.addr", "net.sock.peer.port"]), attrs
+        if "http.target" in attrs:
+            assert '?' not in attrs["http.target"]["stringValue"], attrs
     for batch in captured:
-        for resource in batch["data"].get("resourceMetrics", []) + batch["data"].get("resourceLogs", []):
+        for resource in batch["data"].get("resourceMetrics", []) + batch["data"].get("resourceLogs", []) + batch["data"].get("resourceSpans", []):
             attrs = {attr["key"]: attr["value"].get("stringValue") for attr in resource["resource"]["attributes"]}
             assert attrs["host.name"] == "endeavour", attrs
-            assert attrs["service.name"] in ["hostmetrics", "system-journal", "nginx-access", "nginx-error"], attrs
+            assert attrs["service.name"] in ["hostmetrics", "system-journal", "nginx-access", "nginx-error", "nginx"], attrs
     machine.fail("journalctl -u opentelemetry-collector --grep 'permission denied|failed to process|failed to export' --case-sensitive=no")
   '';
 }

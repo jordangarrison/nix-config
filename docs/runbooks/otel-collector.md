@@ -12,6 +12,7 @@ settings are unchanged. This collector is not an agent-telemetry proxy.
 | `journald` | `system-journal` | System journal, emergency through info. Unit and other journal fields are in `journald` attributes; message is the body. No debug, Blocky info-level DNS query noise, collector/Maple feedback, or duplicate nginx journal records. |
 | `filelog/nginx-access` | `nginx-access` | `/var/log/nginx/access.log`, JSON: timestamp, host, method, path **without query string**, status, bytes, request duration. No client IP, authorization, cookies, referrer, or user-agent. |
 | `filelog/nginx-error` | `nginx-error` | `/var/log/nginx/error.log`, nginx text format, warn and above, with parsed time/severity. |
+| nginx `ngx_otel_module` | `nginx` | Request spans at 1% sampling, via loopback OTLP/gRPC to the collector. Query strings, user agents, and client socket addresses/ports are removed before export. |
 
 nginx's defaults use its prefix for access logs and stderr for errors. This
 module declares both paths explicitly. nixpkgs' existing logrotate rule rotates
@@ -85,7 +86,11 @@ secret is needed. Once applied:
 3. Filter logs by `system-journal`, `nginx-access`, and `nginx-error`. A normal
    site request should produce an access record. Confirm new records after the
    first log rotation and a collector restart.
-4. Check disk growth. Keep Datadog running independently.
+4. Filter traces by `service.name=nginx`. About one in 100 requests is sampled;
+   a quiet host may take a while to show a trace. These are nginx request spans,
+   not automatic backend instrumentation. Backends must support W3C context to
+   join the trace.
+5. Check disk growth. Keep Datadog running independently.
 
 Validation:
 
@@ -99,4 +104,32 @@ nh os build . -H endeavour --no-nom
 The config derivation runs `otelcol-contrib validate` without the live key. The
 isolated VM test checks the actual credential wrapper/export header, journal
 filters, host metrics, parsers, inherited log ACLs, log rotation, and persisted
-cursors against a synthetic Maple HTTP sink. It never reads the host's secrets.
+cursors against a synthetic Maple HTTP sink. It also loads nginx's dynamic
+module, exports a deterministic fixture span through gRPC and HTTP, checks
+attribute removal, and confirms nginx serves when the collector stops. It never
+reads the host's secrets.
+
+## nginx tracing and rollback
+
+`modules/nixos/nginx-tracing.nix` adds nixpkgs' **`nginxModules.otel`** (native
+`ngx_otel_module`, not the older third-party OpenTelemetry webserver module).
+nixpkgs builds the module and nginx against the same source/ABI and loads the
+module dynamically. The standard nginx config build also checks its directives.
+
+`split_clients` samples 1% by freshly generated trace ID. `otel_trace_context
+inject` overwrites incoming context so a caller's sampled flag cannot force
+100% tracing. This intentionally does not join incoming parent traces. Upstream
+requests receive the new W3C context. The collector listens only on
+`127.0.0.1:4317`, then adds the Maple credential on the HTTP hop; nginx never
+receives the ingest key. Any local process can submit spans on this loopback
+receiver; it is not an authenticated multi-user boundary.
+
+nginx buffers at most two batches of 128 spans per worker and flushes every five
+seconds. Excess spans can be dropped if telemetry is unavailable; nginx has no
+unit dependency on Maple or the collector. Sampling limits volume, not all of
+the module's per-request overhead. Check latency and resource use after rollout.
+
+Tracing is a separate commit. Revert that commit to remove the module, gRPC
+receiver, and trace pipeline while keeping host metrics and log collection.
+Apply any rollback with the normal guarded deployment flow; changing nginx's
+module package may restart nginx, not merely reload it.

@@ -305,6 +305,7 @@ When asked to re-review ("look at this one again", "check if it's addressed"), o
 - Read and apply the **Publishing Contract** in [`reviewers/consolidator.md`](reviewers/consolidator.md) before drafting or posting, including follow-ups without a consolidator. It is the single source of truth for published review content.
 - Keep the research and verification gates intact; concise publication is not a shortcut through review.
 - Review bodies go out under Jordan's name: follow [[feedback_writing_as_jordan]] and [[reference_ai_smells_to_avoid]].
+- **Reader style (Jordan, Nov 20):** write the body and every inline comment in ASD-STE100 for a reader with ADHD. Line 1 is the verdict: emoji plus one plain sentence. Then at most 3 short bullets (bold label, one short sentence). Inline comments: problem first, fix second, about 5 lines at most. Many inline comments are fine when each is necessary and short. No book. Tone: short and direct, like pre-2023 human reviews. Reference: https://readwise.io/reader/shared/01h2c8gjqas6p4crxv71eeeq1x
 
 ## Memory Touch-Points
 

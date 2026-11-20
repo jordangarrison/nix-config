@@ -42,15 +42,13 @@
   #   options = [ "nofail" ];
   # };
 
-  # gemini - Former BitLocker drive (232.4G) - smaller supportive storage
-  # TODO: Wipe and reformat once BitLocker data is recovered (or abandoned)
-  #   sudo mkfs.ext4 -L gemini /dev/sda2
-  #   blkid /dev/sda2  # get UUID
-  # fileSystems."/mnt/gemini" = {
-  #   device = "/dev/disk/by-uuid/REPLACE-WITH-UUID";
-  #   fsType = "ext4";
-  #   options = [ "nofail" ];
-  # };
+  # gemini - Dedicated data drive (Samsung 860 EVO, 250 GB).
+  # GPT/ext4 prepared with the owner's approval; no data migration here.
+  fileSystems."/mnt/gemini" = {
+    device = "/dev/disk/by-uuid/daefadb8-2bb3-4073-8fb8-d4820021506a";
+    fsType = "ext4";
+    options = [ "nofail" "x-systemd.device-timeout=5s" "nodev" "nosuid" ];
+  };
 
   # Intel WiFi AX200 stability improvements
   # Disables problematic WiFi 6 features and power saving that cause disconnections

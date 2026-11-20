@@ -92,8 +92,17 @@
       brave
     ];
 
-    # Enable OpenSSH daemon
-    services.openssh.enable = true;
+    # Enable OpenSSH daemon. Keys only: opportunity is a laptop on any Wi-Fi,
+    # and the desktops keep sshd on the LAN as a way in when Tailscale is down,
+    # so a guessed password must never be enough. Every login in the sshd logs
+    # of endeavour and discovery is already by key.
+    services.openssh = {
+      enable = true;
+      settings = {
+        PasswordAuthentication = false;
+        KbdInteractiveAuthentication = false;
+      };
+    };
 
     # Enable Tailscale (critical networking infrastructure)
     services.tailscale.enable = true;

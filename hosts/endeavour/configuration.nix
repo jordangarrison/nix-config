@@ -165,8 +165,10 @@
     };
   };
 
-  # Or disable the firewall altogether.
-  networking.firewall.enable = false;
+  # Firewall zones come from modules/nixos/firewall.nix. On the LAN, only the
+  # service modules that need LAN devices open ports (SSH, Blocky DNS,
+  # Jellyfin, the HomeKit bridge, LocalSend, KDE Connect). nginx is for the
+  # tailnet and for Docker containers only; see modules/nixos/nginx.nix.
 
   # Tailscale exit node. "server" turns on IP forwarding; the set flag
   # advertises the node. Approve it once in the Tailscale admin console.

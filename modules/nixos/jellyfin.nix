@@ -4,6 +4,8 @@
   # Enable Jellyfin media server
   services.jellyfin = {
     enable = true;
+    # LAN devices (TVs, phones off the tailnet) play directly on 8096 and
+    # find the server by its discovery broadcast.
     openFirewall = true;
   };
 

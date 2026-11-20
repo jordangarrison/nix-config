@@ -371,6 +371,18 @@
         inherit (self.nixosConfigurations.endeavour) pkgs;
       };
 
+      checks.x86_64-linux.remote-access-policy =
+        self.nixosConfigurations.endeavour.pkgs.runCommand "remote-access-policy-tests" {
+          results = builtins.toJSON (import ./tests/remote-access-policy.nix { flake = self; });
+        } ''
+          printf '%s\n' "$results" > "$out"
+        '';
+
+      checks.x86_64-linux.endeavour-firewall = import ./tests/firewall-runtime.nix {
+        inherit (self.nixosConfigurations.endeavour) pkgs;
+        host = self.nixosConfigurations.endeavour.config;
+      };
+
       checks.x86_64-linux.ovis-module =
         self.nixosConfigurations.endeavour.pkgs.runCommand "ovis-module-tests" {
           results = builtins.toJSON (import ./tests/ovis-module.nix { flake = self; });
@@ -415,6 +427,7 @@
             ./modules/brave-overlay.nix
             ./modules/tea-overlay.nix
             ./modules/nixos/common.nix
+            ./modules/nixos/firewall.nix
             ./modules/nixos/brother-printer.nix
             ./modules/nixos/lan.nix
             ./modules/nixos/gnome-desktop.nix
@@ -588,6 +601,7 @@
             ./modules/stack-cli-overlay.nix
             ./modules/brave-overlay.nix
             ./modules/nixos/common.nix
+            ./modules/nixos/firewall.nix
             ./modules/nixos/brother-printer.nix
             ./modules/nixos/lan.nix
             ./modules/nixos/gnome-desktop.nix
@@ -787,6 +801,7 @@
             ./modules/stack-cli-overlay.nix
             ./modules/brave-overlay.nix
             ./modules/nixos/common.nix
+            ./modules/nixos/firewall.nix
             ./modules/nixos/brother-printer.nix
             ./modules/nixos/lan.nix
             ./modules/nixos/gnome-desktop.nix

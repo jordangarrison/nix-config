@@ -2,7 +2,8 @@
 
 ## Status
 
-Accepted
+Removed 2026-11-20 at the owner's request. Retained as a historical design record;
+the modules, package and skill described below no longer exist.
 
 ## Date
 

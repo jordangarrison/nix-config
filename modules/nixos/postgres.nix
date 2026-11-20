@@ -3,13 +3,6 @@
 {
   services.postgresql = {
     enable = true;
-    ensureDatabases = [ "metabase" ];
-    ensureUsers = [
-      {
-        name = "metabase";
-        ensureDBOwnership = true;
-      }
-    ];
     # Local clients only: every user of this server (Panko, Norish, local dev
     # databases) connects over the socket or 127.0.0.1. "false" means
     # listen_addresses = "localhost"; the unix socket stays.

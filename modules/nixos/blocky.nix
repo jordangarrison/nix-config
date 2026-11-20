@@ -7,7 +7,7 @@
 # - Hagezi Pro + StevenBlack ad lists, Hagezi TIF threat list, adult content filter
 # - Per-client group filtering (default + kids)
 # - Tailscale MagicDNS conditional forwarding
-# - Prometheus metrics endpoint (localhost:8053/metrics)
+# - Prometheus metrics endpoint (127.0.0.1:8053/metrics)
 #
 # Manual steps after enabling:
 # 1. Set endeavour's LAN IP (192.168.68.75) as DNS in your router's DHCP settings
@@ -38,7 +38,7 @@ in
             "192.168.68.75:53"   # LAN clients
             "100.118.65.11:53"   # Tailscale clients
           ];
-          http = 8053;
+          http = "127.0.0.1:8053"; # metrics and API: this host only
         };
 
         # Upstream DNS-over-HTTPS resolvers
@@ -154,7 +154,8 @@ in
     # forwarding rule above)
     networking.search = [ "owl-yo.ts.net" ];
 
-    # Open firewall for DNS (LAN + Tailscale clients)
+    # DNS for LAN devices (the router hands out this host as their resolver).
+    # Tailscale clients get through as the tailnet is trusted.
     networking.firewall = {
       allowedTCPPorts = [ 53 ];
       allowedUDPPorts = [ 53 ];

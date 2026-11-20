@@ -42,8 +42,8 @@
   #   options = [ "nofail" ];
   # };
 
-  # gemini - Maple and agentsview state (Samsung 860 EVO, 250 GB).
-  # Prepared with the owner's approval; see docs/runbooks/gemini.md.
+  # gemini - Dedicated data drive (Samsung 860 EVO, 250 GB).
+  # GPT/ext4 prepared with the owner's approval; no data migration here.
   fileSystems."/mnt/gemini" = {
     device = "/dev/disk/by-uuid/daefadb8-2bb3-4073-8fb8-d4820021506a";
     fsType = "ext4";

@@ -16,7 +16,8 @@ agentsview require it, so neither writes a fallback store on the root disk.
 ## One-time agentsview cutover
 
 **Do this only during an approved deployment.** Disk preparation did not mount
-Gemini, copy data, stop agentsview, or apply this configuration.
+Gemini, copy data, stop agentsview, or apply this configuration. The mount-only
+change shipped separately in PR #192 before the service migrations.
 
 agentsview's old `~/.agentsview` directory is on the **root ext4 disk**, not
 NTFS. It currently uses about 13 GB. Moving it frees that space only **after**
@@ -29,15 +30,13 @@ its removal. The source Claude/Codex session directories stay in Jordan's home.
    nh os build . -H endeavour --no-nom
    ```
 
-2. With Jordan's approval, mount the already-formatted drive at the target
-   path. Never format it again. Check the UUID before mounting; abort if
-   another filesystem is already mounted at `/mnt/gemini`.
+2. Verify the mount-only change has already shipped. Never format the drive
+   again. Abort if Gemini is absent or the mounted UUID is different:
 
    ```sh
-   sudo blkid /dev/disk/by-uuid/daefadb8-2bb3-4073-8fb8-d4820021506a
-   sudo mkdir -p /mnt/gemini
-   sudo mount /dev/disk/by-uuid/daefadb8-2bb3-4073-8fb8-d4820021506a /mnt/gemini
-   findmnt /mnt/gemini
+   findmnt --fstab --target /mnt/gemini
+   findmnt -o TARGET,SOURCE,FSTYPE,UUID /mnt/gemini
+   # Expected UUID: daefadb8-2bb3-4073-8fb8-d4820021506a
    ```
 
 3. Record the current UI session count. Stop agentsview to get a consistent

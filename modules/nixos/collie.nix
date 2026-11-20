@@ -4,9 +4,10 @@
 # on this box. It is remote shell access by design: a paired device can read
 # every pane and type into it as jordangarrison. Three layers keep it private:
 #   1. DNS: collie.jordangarrison.dev is an A record to the Tailscale IP.
-#   2. nginx: only localhost and the Tailscale range get through. endeavour's
-#      host firewall is off and nginx routes by Host, so without this a LAN
-#      device could reach Collie with a spoofed Host header.
+#   2. nginx: only localhost and the Tailscale range get through. The host
+#      firewall keeps the LAN off nginx, but Docker containers can reach it
+#      and nginx routes by Host, so without this a container could reach
+#      Collie with a spoofed Host header.
 #   3. Collie: every API request needs a device token from `collie pair`.
 # Collie's Tailscale-identity gate (trusted_user) needs `tailscale serve` in
 # front, so it does not apply here; pairing is the auth.

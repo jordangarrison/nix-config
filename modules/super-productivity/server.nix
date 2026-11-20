@@ -21,8 +21,9 @@ let
   stateDir = "/var/lib/super-productivity-webdav";
   prefillUser = builtins.head cfg.webdavUsers;
 
-  # Same tailnet boundary as executor and norish. endeavour's host firewall is
-  # off, so without this any LAN client sending this Host/SNI gets through.
+  # Tailnet only. Docker containers can reach nginx through the host firewall
+  # (see nginx.nix), so without this a container sending this Host/SNI gets
+  # through.
   tailnetOnly = ''
     allow 127.0.0.1;
     allow ::1;

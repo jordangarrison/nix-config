@@ -7,8 +7,9 @@
 #
 # isp-snitch has no login, so the tailnet allow list below is the only access
 # control. DNS: isp-snitch.jordangarrison.dev is an A record to the Tailscale
-# IP. endeavour's host firewall is off and nginx routes by Host, so without the
-# allow list any LAN client sending this Host/SNI gets through.
+# IP. Docker containers can reach nginx through the host firewall and nginx
+# routes by Host, so without the allow list a container sending this Host/SNI
+# gets through.
 let
   host = "isp-snitch.jordangarrison.dev";
   port = 9180;

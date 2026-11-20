@@ -4,8 +4,8 @@ pkgs.testers.runNixOSTest {
   nodes.machine = { lib, pkgs, ... }: {
     imports = [ ../modules/nixos/otel-collector.nix ../modules/nixos/nginx-tracing.nix ../modules/nixos/executor-telemetry.nix ];
     virtualisation.docker.enable = true;
-    # Match endeavour: the dedicated ingress guard must work without the
-    # general NixOS firewall, including when another interface can route here.
+    # The dedicated ingress guard must work on its own, without the general
+    # NixOS firewall, including when another interface can route here.
     networking.firewall.enable = false;
     networking.hostName = "endeavour";
     time.timeZone = "America/Chicago";

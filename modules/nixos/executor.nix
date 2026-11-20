@@ -15,8 +15,9 @@ let
   port = 4400;
   dataDir = "/var/lib/executor";
   version = "2.0.0-beta.36";
-  # Same tailnet boundary as bb and day-dashboard. endeavour's host firewall
-  # is off, so without this any LAN client sending this Host/SNI gets through.
+  # Tailnet only. Docker containers can reach nginx through the host firewall
+  # (see nginx.nix), so without this a container sending this Host/SNI gets
+  # through.
   tailnetOnly = ''
     allow 127.0.0.1;
     allow ::1;
@@ -45,9 +46,10 @@ in
       EXECUTOR_BUILD_VERSION = version;
       # Apps may fetch private addresses, so the Norish app can reach
       # norish.garrisonsbygrace.com on the tailnet IP. This applies to every
-      # app: any of them can reach the LAN, tailnet peers and endeavour's
-      # 0.0.0.0 listeners. The other half is the /api/v1/ and /api/trpc/
-      # allows in norish.nix.
+      # app: any of them can reach the LAN and tailnet peers. On endeavour
+      # itself the host firewall limits Docker's bridge to nginx, the OTLP
+      # receiver and the ports opened for the LAN. The other half is the
+      # /api/v1/ and /api/trpc/ allows in norish.nix.
       EXECUTOR_APPS_ALLOW_PRIVATE_FETCH = "true";
     };
   };

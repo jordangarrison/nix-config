@@ -45,7 +45,6 @@ in {
       vscode.enable = lib.mkEnableOption "VSCode / Cursor editor";
       warp.enable = lib.mkEnableOption "Warp terminal (preview)";
       grok-bot.enable = lib.mkEnableOption "Grok Bot desktop agent";
-      bb-desktop.enable = lib.mkEnableOption "BB desktop app";
       herdr-app.enable = lib.mkEnableOption "Herdr desktop app";
       ovis.enable = lib.mkEnableOption "Ovis browser and phone client for herdr-core";
       hermes-desktop.enable = lib.mkEnableOption "Hermes desktop client";

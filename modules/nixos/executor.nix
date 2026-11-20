@@ -15,7 +15,7 @@ let
   port = 4400;
   dataDir = "/var/lib/executor";
   version = "2.0.0-beta.36";
-  # Same tailnet boundary as bb and day-dashboard. endeavour's host firewall
+  # Restrict access to the tailnet. endeavour's host firewall
   # is off, so without this any LAN client sending this Host/SNI gets through.
   tailnetOnly = ''
     allow 127.0.0.1;

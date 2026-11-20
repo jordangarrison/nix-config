@@ -1113,6 +1113,27 @@
         "type": "github"
       }
     },
+    "maple": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1794616494,
+        "narHash": "sha256-RbyfzKxyekgxgVVcCTdPP01LF4L5kD0bUkVvJeD5QFE=",
+        "owner": "MapleTechLabs",
+        "repo": "maple",
+        "rev": "22881c7346b725853a232e0bdce7dca9baf1fa40",
+        "type": "github"
+      },
+      "original": {
+        "owner": "MapleTechLabs",
+        "ref": "v0.3.6",
+        "repo": "maple",
+        "type": "github"
+      }
+    },
     "mattpocock-skills": {
       "flake": false,
       "locked": {
@@ -1722,6 +1743,7 @@
         "lakeline-cg": "lakeline-cg",
         "lavish-axi": "lavish-axi",
         "llm-agents": "llm-agents",
+        "maple": "maple",
         "mattpocock-skills": "mattpocock-skills",
         "niri": "niri",
         "nix-darwin": "nix-darwin",

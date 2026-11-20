@@ -376,6 +376,17 @@
           printf '%s\n' "$results" > "$out"
         '';
 
+      checks.x86_64-linux.otel-collector-module =
+        self.nixosConfigurations.endeavour.pkgs.runCommand "otel-collector-module-tests" {
+          results = builtins.toJSON (import ./tests/otel-collector-module.nix { flake = self; });
+        } ''
+          printf '%s\n' "$results" > "$out"
+        '';
+
+      checks.x86_64-linux.otel-collector-runtime = import ./tests/otel-collector-runtime.nix {
+        inherit (self.nixosConfigurations.endeavour) pkgs;
+      };
+
       checks.x86_64-linux.ovis-module =
         self.nixosConfigurations.endeavour.pkgs.runCommand "ovis-module-tests" {
           results = builtins.toJSON (import ./tests/ovis-module.nix { flake = self; });
@@ -440,6 +451,8 @@
             ./modules/nixos/collie.nix
             ./modules/nixos/executor.nix
             ./modules/nixos/maple.nix
+            ./modules/nixos/otel-collector.nix
+            ./modules/nixos/nginx-tracing.nix
             ./modules/nixos/isp-snitch.nix
             ./modules/nixos/norish.nix
             ./modules/nixos/hermes.nix

@@ -61,10 +61,13 @@ checks that Gemini is mounted before creating its private directory.
 
 All Maple state, including embedded ClickHouse, checkpoint copies and store
 sidecars, is on Gemini. Root retains the package in the Nix store, small
-credential files and normal system journal entries. Nothing exports telemetry
-to Maple by default. For the expected low-volume homelab/agent workload, the
-initial planning estimate is 5–30 GB, **not a measured limit**; checkpoints and
-rollups can add more. No size cap is configured on the dedicated drive.
+credential files and normal system journal entries. Endeavour's
+[collector](otel-collector.md) sends host metrics, filtered journal logs, nginx
+logs, and sampled nginx request traces to Maple over loopback. Datadog and
+Claude Code/Codex telemetry remain separate. The original low-volume planning
+estimate was 5–30 GB, **not a measured limit**; recheck actual growth after
+adding sources. Checkpoints and rollups can add more. No size cap is configured
+on the dedicated drive.
 
 Keep the bundled schema TTLs: raw traces/logs expire after **30 days**, raw
 metrics after **90 days**; derived tables have their own, sometimes longer,

@@ -280,7 +280,7 @@ in
           "wait-what"
           "writing-for-agents"
         ])
-        (fromDir "${inputs.obsidian-skills}/skills" [
+        (fromDir "${inputs.obsidian-skills}/plugins/obsidian/skills" [
           "obsidian-bases"
           "obsidian-cli"
           "obsidian-markdown"

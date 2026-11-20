@@ -13,20 +13,7 @@ let
   wallpapersPath = "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/wallpapers";
   scriptsPath = "${homeDirectory}/dev/jordangarrison/nix-config/users/jordangarrison/configs/hypr/scripts";
 
-  # Frozen Noctalia v4's fork predates the Qt 6.12 MOC fix (quickshell #1235).
-  # Keep its Qt at 6.11, scoped to this shell, until the fork includes 5d5d498
-  # or we move Noctalia off the frozen fork. Match the launcher/plugin wrapper
-  # to the binary's Qt too; mixing Qt versions breaks plugin loading.
-  noctaliaQt = inputs.nixpkgs-stable.legacyPackages.${pkgs.stdenv.hostPlatform.system}.qt6;
-  noctaliaQuickshell =
-    inputs.noctalia.inputs.noctalia-qs.packages.${pkgs.stdenv.hostPlatform.system}.default.override
-      {
-        qt6 = noctaliaQt;
-      };
-  noctaliaPkg = inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default.override {
-    quickshell = noctaliaQuickshell;
-    qt6 = noctaliaQt;
-  };
+  noctaliaPkg = inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default;
   sweetNothingsPkg =
     inputs.sweet-nothings.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs
       (_: {
@@ -492,11 +479,7 @@ in
 
       # Hex - compositor-owned fallback: our portal may lack GlobalShortcuts.
       "Ctrl+Alt+Space" = lib.mkIf (config.programs.hex.enable or false) {
-        action.spawn = [
-          (lib.getExe config.programs.hex.package)
-          "dictation"
-          "toggle"
-        ];
+        action.spawn = [ (lib.getExe config.programs.hex.package) "dictation" "toggle" ];
         hotkey-overlay.title = "Hex voice dictation";
       };
 

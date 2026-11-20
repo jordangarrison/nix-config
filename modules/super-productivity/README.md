@@ -7,8 +7,12 @@ Self-hosted Super Productivity with WebDAV sync, reachable only on the tailnet.
 | `server.nix` | `services.super-productivity` | NixOS | Web app + WebDAV sync on `superproductivity.jordangarrison.dev` |
 | `app.nix` | `programs.super-productivity` | NixOS, nix-darwin | Desktop (Electron) app |
 
-endeavour runs the server; every host gets the app. Both are enabled in
-`flake.nix`.
+Disabled 2026-11-20 by Jordan. The server and app modules remain available;
+change the corresponding enable flags in `flake.nix` to restore them.
+Previously, endeavour ran the server and every host got the app. Disabling
+removes the nginx vhost and WebDAV unit from the next configuration, but does
+not delete `/var/lib/super-productivity-webdav` or the manually managed DNS
+record.
 
 Super Productivity has no accounts. Each app or browser profile keeps its own
 data, and devices share it by syncing to the same WebDAV folder. Each login

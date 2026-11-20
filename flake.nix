@@ -5,6 +5,10 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-26.05";
     nixpkgs-master.url = "github:nixos/nixpkgs/master";
+    # Reuse the deployed Noctalia/Quickshell closure: its frozen fork fails
+    # with Qt 6.12 (quickshell #1235). Remove this UI-only pin when the fork
+    # includes 5d5d498 or Noctalia moves off the frozen fork.
+    nixpkgs-noctalia.url = "github:nixos/nixpkgs/151fa4e8ddfdd8dd25d945ad94ed54a13de9f6e4";
     nixos-hardware.url = "github:nixos/nixos-hardware";
     deploy-rs = {
       url = "github:serokell/deploy-rs";
@@ -86,7 +90,7 @@
       # rewrite with an incompatible config schema; migrate settings.json
       # separately from the input/security refresh.
       url = "github:noctalia-dev/noctalia-shell/40dd5f54a0597b77ff78ac6a3a6d2ef42f04d544";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs-noctalia";
     };
     sweet-nothings = {
       url = "github:jordangarrison/sweet-nothings";
@@ -535,8 +539,8 @@
               services.dns-blocking.enable = true;
 
               # Super Productivity: sync server + web app, and the desktop app.
-              services.super-productivity.enable = true;
-              programs.super-productivity.enable = true;
+              services.super-productivity.enable = false; # disabled 2026-11-20 by Jordan
+              programs.super-productivity.enable = false; # disabled 2026-11-20 by Jordan
 
               # Import home modules for jordangarrison on endeavour
               home-manager.users.jordangarrison.imports = [
@@ -679,7 +683,7 @@
               # Enable tablet mode for Framework 12 touchscreen
               tablet-mode.enable = true;
 
-              programs.super-productivity.enable = true;
+              programs.super-productivity.enable = false; # disabled 2026-11-20 by Jordan
 
             }
           ];
@@ -729,7 +733,7 @@
             home-manager.nixosModules.home-manager
             ./modules/home/defaults.nix
             {
-              programs.super-productivity.enable = true;
+              programs.super-productivity.enable = false; # disabled 2026-11-20 by Jordan
 
               # Configure users for voyager
               users.jordangarrison = {
@@ -805,7 +809,7 @@
             home-manager.nixosModules.home-manager
             ./modules/home/defaults.nix
             {
-              programs.super-productivity.enable = true;
+              programs.super-productivity.enable = false; # disabled 2026-11-20 by Jordan
 
               # Configure users for discovery (GNOME desktop with PipeWire).
               users.jordangarrison = {
@@ -861,7 +865,7 @@
             ./modules/home/defaults.nix
             {
               nix.enable = false;
-              programs.super-productivity.enable = true;
+              programs.super-productivity.enable = false; # disabled 2026-11-20 by Jordan
               nixpkgs.config.allowUnfree = true;
               home-manager = {
                 users."jordan.garrison" = import ./users/jordangarrison/home-darwin.nix;

@@ -46,16 +46,13 @@ with lib;
     services.gnome.gnome-keyring.enable = true;
     services.gnome.gnome-remote-desktop.enable = true;
 
-    # GNOME desktop settings
-    services.desktopManager.gnome.extraGSettingsOverrides = ''
-      [org.gnome.mutter]
-      experimental-features=['scale-monitor-framebuffer']
-    ''
+    # GNOME 51 removed Mutter's experimental-features key. Fractional
+    # scaling no longer needs the scale-monitor-framebuffer opt-in.
     # Desktops/servers: also stop the GNOME session from *attempting* idle
     # suspend (schema default is 'suspend' after 15 min, even on AC). The
     # systemd.sleep block above already makes the verb fail, but without this
     # gsd-power retries a refused suspend every idle period.
-    + optionalString (config.gbg-config.machine.type == "desktop") ''
+    services.desktopManager.gnome.extraGSettingsOverrides = optionalString (config.gbg-config.machine.type == "desktop") ''
       [org.gnome.settings-daemon.plugins.power]
       sleep-inactive-ac-type='nothing'
       sleep-inactive-battery-type='nothing'

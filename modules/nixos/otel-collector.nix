@@ -19,7 +19,9 @@ in
 {
   services.opentelemetry-collector = {
     enable = true;
-    package = pkgs.opentelemetry-collector-contrib;
+    # nixos-unstable 0.155.0 fails to build/not cached on 2026-11-20;
+    # return to pkgs.opentelemetry-collector-contrib once it's cached.
+    package = pkgs.stable.opentelemetry-collector-contrib;
     # Validation must not read the real credential (or require it at build time).
     validateConfigOverrides = [ "exporters::otlphttp/maple::headers::x-maple-ingest-key=validation-only" ];
     settings = {

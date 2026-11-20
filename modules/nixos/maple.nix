@@ -77,10 +77,9 @@ in
   services.nginx.virtualHosts.${host} = {
     forceSSL = true;
     useACMEHost = host;
-    listen = [
-      { addr = "100.118.65.11"; port = 80; }
-      { addr = "100.118.65.11"; port = 443; ssl = true; }
-    ];
+    # Keep the shared listeners. A Maple-only listen on the Tailscale IP
+    # would steal that address from the existing wildcard virtual hosts.
+    # The allowlist below enforces the same tailnet boundary on every path.
     # One origin serves the offline UI, authenticated reads and /v1/* OTLP
     # writes. No nginx basic auth: exporters use Maple's separate ingest key.
     locations."/" = {

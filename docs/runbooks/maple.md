@@ -3,6 +3,9 @@
 Maple Local serves its bundled dashboard, query API and OTLP/HTTP ingest at
 `https://maple.jordangarrison.dev` through the tailnet-only nginx vhost.
 The backend listens only on `127.0.0.1:4318`; no direct ingest port is opened.
+nginx shares its existing listeners with other vhosts and enforces a
+localhost/Tailscale allowlist on every Maple path. A Maple-only IP-specific
+listener would hide the other wildcard vhosts on that address.
 The Cloudflare A record points at `100.118.65.11` (unproxied, TTL 1).
 
 The input is tagged **v0.3.6**, but that tag's `nix/release.json` packages the

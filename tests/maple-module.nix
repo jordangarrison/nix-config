@@ -41,7 +41,7 @@ let
     defaultRetention = cfg.services.maple.extraArgs == [ ];
     checkpointsEnabled = cfg.services.maple.checkpointInterval == "30m";
     https = proxy.forceSSL && proxy.useACMEHost == "maple.jordangarrison.dev";
-    tailnetListen = lib.all (l: l.addr == "100.118.65.11") proxy.listen;
+    sharedListenersPreserved = proxy.listen == [ ];
     correctBackend = proxy.locations."/".proxyPass == "http://127.0.0.1:4318";
     singleIngestAndUiProxy = lib.attrNames proxy.locations == [ "/" ];
     tailnetOnly = lib.hasInfix "allow 100.64.0.0/10;" guard

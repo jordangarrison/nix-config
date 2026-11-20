@@ -82,9 +82,9 @@
     };
     niri.url = "github:sodiboo/niri-flake";
     noctalia = {
-      # Pinned to the last v4 (QML/quickshell) commit. v5 is a ground-up C++
-      # rewrite (alpha) with an incompatible config schema and no migration
-      # path from our v4 settings.json. Revisit once v5 stabilizes.
+      # Keep the known v4 (QML/quickshell) snapshot. v5 is a ground-up C++
+      # rewrite with an incompatible config schema; migrate settings.json
+      # separately from the input/security refresh.
       url = "github:noctalia-dev/noctalia-shell/40dd5f54a0597b77ff78ac6a3a6d2ef42f04d544";
       inputs.nixpkgs.follows = "nixpkgs";
     };

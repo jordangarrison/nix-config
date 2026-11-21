@@ -23,6 +23,7 @@
   services.jagpi = {
     enable = true;
     instance = "default";
+    memory.caps.projects.agentic-blue-team = 4000;
 
     # T3 launches the upstream wrapper against this same user daemon.
     # Requires a jagpi input with services.jagpi.acp.enable; see the T3 runbook.

@@ -80,6 +80,10 @@
               type = (pkgs.formats.json { }).type;
               default = { };
             };
+            memory.caps.projects = lib.mkOption {
+              type = lib.types.attrsOf (lib.types.ints.between 1 9007199254740991);
+              default = { };
+            };
             herdr.package = lib.mkPackageOption pkgs "herdr" { };
             providers = lib.mkOption {
               type = lib.types.listOf (
@@ -110,14 +114,19 @@
             # runtimePackages are only type-checked: upstream puts them on
             # the daemon's PATH, not in the user profile.
             home.packages = [ cfg.package ];
-            xdg.configFile."jagpi/${cfg.instance}/config.json".text = builtins.toJSON {
-              providers = map (plugin: {
-                module = "${plugin.package}/${
-                  if plugin.module != null then plugin.module else plugin.package.jagpiProvider
-                }";
-                inherit (plugin) options;
-              }) cfg.providers;
-            };
+            xdg.configFile."jagpi/${cfg.instance}/config.json".text = builtins.toJSON (
+              {
+                providers = map (plugin: {
+                  module = "${plugin.package}/${
+                    if plugin.module != null then plugin.module else plugin.package.jagpiProvider
+                  }";
+                  inherit (plugin) options;
+                }) cfg.providers;
+              }
+              // lib.optionalAttrs (cfg.memory.caps.projects != { }) {
+                memory.caps.projects = cfg.memory.caps.projects;
+              }
+            );
           };
         };
     };

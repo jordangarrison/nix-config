@@ -77,7 +77,7 @@ Autonomy is not silence. After posting, report per PR: verdict, inline count, he
 
 1. **Triage** — `gh pr view <url> --json state,isDraft,mergedAt,author,headRefOid,baseRefName,title,body`. Skip merged, closed, and drafts (unless asked). Record the skip reason. **Your own PRs are reviewed like any other** — compare `author.login` to `gh api user -q .login` and, if it matches, mark the PR *self-authored*: its posted event is always `COMMENT` (see "Your Own PRs").
 2. **Review worktree** — see "Review Worktrees". Cache the PR body at `/tmp/pr-review-<date>/<pr-key>/pr-body.md`.
-3. **Plan the team** — derive specialists from PR domain + size (see "Team Composition"); always add Hickey and Fairbanks. In pi, inspect the diff and choose the reviewer thinking level using "Reviewer Thinking (pi)"; record the level and a one-sentence rationale in `pr-body.md`.
+3. **Plan the team** — derive specialists from PR domain + size (see "Team Composition"); always add Hickey and Fairbanks. In pi, select the reviewer model and thinking level using "Reviewer Thinking (pi)".
 4. **Launch phase 1 in parallel, in the background.** One reviewer per role, each with a self-contained prompt from `reviewers/`. In Claude Code use the `Agent` tool with `run_in_background: true`; in pi use the `subagent` tool with the `pr-review.specialist` agent (lens reviewers use the same agent with the Hickey/Fairbanks template as the task) and the model from "Reviewer Thinking (pi)". Re-check `mergedAt` right before launching.
 5. **Wait for completions.** Don't poll; the harness notifies on each finish.
 6. **Launch the consolidator** (`reviewers/consolidator.md`; pi agent `pr-review.consolidator`, model per "Reviewer Thinking (pi)") once every phase-1 report for that PR exists. Include its Publishing Contract in the handoff.
@@ -92,8 +92,11 @@ Autonomy is not silence. After posting, report per PR: verdict, inline count, he
 pi-subagents does not hand the parent's thinking level to a child: without one, the child runs at its frontmatter `thinking` (`high` in `pi-agents/`) or its own settings default. So every pi `subagent` launch here passes the level as a model suffix, which overrides frontmatter `thinking`:
 
 1. `LEVEL` = the `--thinking` value if given; otherwise choose per PR using the table below (independent of `$PI_REASONING_LEVEL`).
-2. `MODEL` = the `model:` line of the agent file pi loads: `sed -n 's/^model: //p' ~/.pi/agent/agents/pr-review-specialist.md` (or `pr-review-consolidator.md`).
+2. Resolve `MODEL` once per PR with `bash "$SKILL_DIR/resolve-sol-model.sh"`, where `SKILL_DIR` is the installed directory this `SKILL.md` was loaded from, not the PR checkout. The resolver prints the highest numeric `openai/gpt-*-sol` in Pi's available model list, or the highest `openai-codex/gpt-*-sol` if no OpenAI match exists. On a nonzero exit (listing fails or no match), use the role's frontmatter pin.
+   - Read the pin with `sed -n 's/^model: //p' "${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}/agents/pr-review-specialist.md"` (use `pr-review-consolidator.md` for the consolidator).
+   - Append the selected model (per role if different), `LEVEL`, and a one-sentence thinking rationale to the cached `pr-body.md` before fan-out.
 3. Launch with `model: "<MODEL>:<LEVEL>"`. The full id is required: a bare `:<LEVEL>` is not a model for pi children, and the tool's `thinking` field is ignored on dispatch. In a batched `tasks` launch, pass `model` once at the top level; task items accept only `agent` and `task`.
+   - If dispatch rejects the resolved model as unknown or disallowed before starting a child, retry that launch once with the role's frontmatter pin at the same level if it differs. Update `pr-body.md` to show the model used. Follow the harness's failure handling if the pin is also rejected or a child has already started.
 
 Use the selected level for specialists, lens reviewers, and the consolidator. Automatic selection uses only `low`, `medium`, or `high`:
 
@@ -305,6 +308,8 @@ When asked to re-review ("look at this one again", "check if it's addressed"), o
 - Read and apply the **Publishing Contract** in [`reviewers/consolidator.md`](reviewers/consolidator.md) before drafting or posting, including follow-ups without a consolidator. It is the single source of truth for published review content.
 - Keep the research and verification gates intact; concise publication is not a shortcut through review.
 - Review bodies go out under Jordan's name: follow [[feedback_writing_as_jordan]] and [[reference_ai_smells_to_avoid]].
+- **Reader style (Jordan, Nov 20):** write the body and every inline comment in ASD-STE100 for a reader with ADHD. Line 1 is the verdict: emoji plus one plain sentence. Then at most 3 short bullets (bold label, one short sentence). Inline comments: problem first, fix second, about 5 lines at most. Many inline comments are fine when each is necessary and short. No book. Tone: short and direct, like pre-2023 human reviews. Reference: https://readwise.io/reader/shared/01h2c8gjqas6p4crxv71eeeq1x
+  The three-bullet limit applies to the opening summary only. Keep all substantive findings that cannot go inline in the body, as the Publishing Contract requires.
 
 ## Memory Touch-Points
 

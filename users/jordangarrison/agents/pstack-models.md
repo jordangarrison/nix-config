@@ -17,4 +17,4 @@ judgment and prose: claude-bridge/claude-opus-5-5 high
 arena runners: claude-bridge/claude-opus-5-5 high, openai/gpt-6.1-sol high
 arena cross-judge pool: openai/gpt-6.1-sol high, claude-bridge/claude-opus-5-5 high
 swarm workers: openai/gpt-6.1-sol high
-interrogate reviewers: claude-bridge/claude-opus-5-5 high, openai/gpt-6.1-sol high
+interrogate reviewers: claude-bridge/claude-opus-5-5 high, openai/gpt-6.2-sol high

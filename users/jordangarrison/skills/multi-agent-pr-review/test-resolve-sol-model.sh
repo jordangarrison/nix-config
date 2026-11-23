@@ -8,6 +8,10 @@ export PATH="$tmp:$PATH"
 cat > "$tmp/pi" <<'EOF'
 #!/usr/bin/env bash
 [[ $* == '--no-approve --list-models sol' ]] || exit 2
+case "$PWD/" in "$TEST_CALLER/"*) exit 3 ;; esac
+shopt -s nullglob dotglob
+files=(*)
+(( ${#files[@]} == 0 )) || exit 4
 printf '%s\n' "$TEST_CATALOG"
 exit "${TEST_PI_STATUS:-0}"
 EOF
@@ -15,7 +19,7 @@ chmod +x "$tmp/pi"
 
 check() {
   local expected=$1 status=0 actual
-  actual=$(TEST_CATALOG=$2 TEST_PI_STATUS=${3:-0} bash "$resolver") || status=$?
+  actual=$(TEST_CALLER=$PWD TEST_CATALOG=$2 TEST_PI_STATUS=${3:-0} bash "$resolver") || status=$?
   if [[ $status:$actual != "$expected" ]]; then
     printf 'Expected %s, got %s:%s\n' "$expected" "$status" "$actual" >&2
     exit 1

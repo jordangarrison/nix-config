@@ -7,7 +7,7 @@ trap 'rm -r "$tmp"' EXIT
 export PATH="$tmp:$PATH"
 cat > "$tmp/pi" <<'EOF'
 #!/usr/bin/env bash
-[[ $* == '--list-models sol' ]] || exit 2
+[[ $* == '--no-approve --list-models sol' ]] || exit 2
 printf '%s\n' "$TEST_CATALOG"
 exit "${TEST_PI_STATUS:-0}"
 EOF

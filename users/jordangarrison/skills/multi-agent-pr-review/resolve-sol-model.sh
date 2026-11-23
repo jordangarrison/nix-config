@@ -2,7 +2,8 @@
 # Print one provider/model ID. A nonzero exit means use the agent pin.
 set -eo pipefail
 
-catalog=$(LC_ALL=C pi --list-models sol)
+# Ignore project-local Pi resources when called from a review checkout.
+catalog=$(LC_ALL=C pi --no-approve --list-models sol)
 awk '$1 ~ /^openai(-codex)?$/ && $2 ~ /^gpt-[0-9]+(\.[0-9]+)*-sol$/ { print $2, $1 }' <<< "$catalog" |
   LC_ALL=C sort -k1,1V |
   awk '

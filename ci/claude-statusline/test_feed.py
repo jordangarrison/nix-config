@@ -1,13 +1,16 @@
 """Run with python3 -m unittest discover -s ci/claude-statusline."""
 
 import json
+import os
 from pathlib import Path
+import runpy
 import stat
 import subprocess
 import sys
 import tempfile
 import time
 import unittest
+from unittest.mock import patch
 
 WRAPPER = (Path(__file__).resolve().parents[2] /
            "users/jordangarrison/agents/claude/jagpi-statusline.py")
@@ -90,6 +93,35 @@ class StatuslineFeedTest(unittest.TestCase):
             with self.subTest(bad=bad):
                 self.render(PAYLOAD.replace(str(RESET).encode(), str(bad).encode()))
                 self.assertEqual(self.dest.stat().st_ino, previous.st_ino)
+
+    def test_same_reset_is_valid_for_seven_day_but_not_five_hour(self):
+        reset = int(time.time()) + 86400
+        self.render(json.dumps({"rate_limits": {
+            "five_hour": {"used_percentage": 11, "resets_at": reset},
+            "seven_day": {"used_percentage": 22, "resets_at": reset},
+        }}).encode())
+        self.assertEqual(json.loads(self.dest.read_bytes()), {"rate_limits": {
+            "seven_day": {"used_percentage": 22, "resets_at": reset},
+        }})
+        previous = self.dest.stat()
+        self.render(json.dumps({"rate_limits": {
+            "seven_day": {"used_percentage": 22, "resets_at": reset + 7 * 86400},
+        }}).encode())
+        self.assertEqual(self.dest.stat().st_ino, previous.st_ino)
+
+    def test_each_reset_cutoff_includes_five_minutes_of_skew(self):
+        publish = runpy.run_path(str(WRAPPER))["publish_jagpi"]
+        now = 1_800_000_000
+        with patch.dict(os.environ, self.env, clear=True), patch("time.time", return_value=now):
+            for name, hours in (("five_hour", 5), ("seven_day", 7 * 24)):
+                with self.subTest(window=name):
+                    reset = now + hours * 3600 + 300
+                    window = {"used_percentage": 10, "resets_at": reset}
+                    publish(json.dumps({"rate_limits": {name: window}}), "test-instance")
+                    self.assertEqual(json.loads(self.dest.read_bytes()), {"rate_limits": {name: window}})
+                    previous = self.dest.stat()
+                    publish(json.dumps({"rate_limits": {name: {**window, "resets_at": reset + 1}}}), "test-instance")
+                    self.assertEqual(self.dest.stat().st_ino, previous.st_ino)
 
     def test_environment_auth_is_not_the_default_profile(self):
         for var in ("CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN",

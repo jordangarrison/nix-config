@@ -7,6 +7,7 @@ from pathlib import Path
 import subprocess
 import sys
 import tempfile
+import time
 
 
 def write_private(path, payload):
@@ -40,13 +41,15 @@ def publish_jagpi(payload, instance):
     if not isinstance(limits, dict):
         return
     windows = {}
-    for name in ("five_hour", "seven_day"):
+    now = time.time()
+    for name, duration in (("five_hour", 5 * 3600), ("seven_day", 7 * 86400)):
         window = limits.get(name)
         if not isinstance(window, dict):
             continue
         used, reset = window.get("used_percentage"), window.get("resets_at")
+        # A past window or millisecond timestamp must not replace the last usable file.
         if (type(used) in (int, float) and 0 <= used <= 100
-                and type(reset) in (int, float) and 0 < reset <= 8640000000000):
+                and type(reset) in (int, float) and now < reset <= now + duration + 300):
             windows[name] = {"used_percentage": used, "resets_at": reset}
     if not windows:
         return

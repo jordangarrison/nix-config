@@ -36,7 +36,8 @@ elif name == "nix":
     elif args[0] == "eval":
         print(json.dumps({"sshUser": "jordangarrison", "sshOpts": ["-o", "BatchMode=yes"],
                           "nodes": {"discovery": {"hostname": "discovery"},
-                                    "endeavour": {"hostname": "localhost"}}}))
+                                    "endeavour": {"hostname": "localhost"},
+                                    "opportunity": {"hostname": "opportunity.owl-yo.ts.net"}}}))
     else:
         raise AssertionError(args)
 elif name == "ssh":
@@ -109,7 +110,7 @@ class DeploymentGates(unittest.TestCase):
         self.assertNotIn("--test", deploys[1])
         for call in deploys:
             index = call.index("--targets")
-            self.assertEqual(call[index + 1:index + 3], [
+            self.assertEqual(call[index + 1:call.index("--", index)], [
                 "/nix/store/fleet-snapshot#discovery.system",
                 "/nix/store/fleet-snapshot#endeavour.system",
             ])
@@ -136,6 +137,8 @@ class DeploymentGates(unittest.TestCase):
         self.assertIn("discovery (discovery): /nix/store/old-nixos-system", record)
         self.assertIn("endeavour (localhost): /nix/store/old-nixos-system", record)
         self.assertIn("switch-to-configuration switch", record)
+        self.assertNotIn("opportunity", record)
+        self.assertFalse(any("opportunity" in arg for c in calls if c[0] == "ssh" for arg in c))
         self.assertEqual(result.stdout.count("[y/N]"), 1)
 
     def test_declining_or_eof_never_switches(self):
@@ -173,13 +176,21 @@ class DeploymentGates(unittest.TestCase):
         self.assertFalse(any(c[0] in ("ssh", "deploy") for c in calls))
 
     def test_mac_can_be_skipped_without_source_or_reachability_checks(self):
-        result, calls, _ = self.run_wrapper(["--no-mac"], answer=b"y\n",
+        result, calls, record = self.run_wrapper(["--no-mac"], answer=b"y\n",
                                              DIRTY_SOURCE="1", UNPUSHED_REV="1", MAC_UNREACHABLE="1")
         self.assertEqual(result.returncode, 0, result.stdout)
         self.assertEqual(len([c for c in calls if c[0] == "deploy"]), 2)
         self.assertFalse(any("jordan.garrison@h952l3dphh" in c for c in calls))
         self.assertEqual(len([c for c in calls if c[:3] == ["nix", "flake", "metadata"]]), 1)
         self.assertIn("Mac excluded by --no-mac", result.stdout)
+        for call in (c for c in calls if c[0] == "deploy"):
+            index = call.index("--targets")
+            self.assertEqual(call[index + 1:call.index("--", index)], [
+                "/nix/store/fleet-snapshot#discovery.system",
+                "/nix/store/fleet-snapshot#endeavour.system",
+            ])
+        self.assertNotIn("opportunity", record)
+        self.assertFalse(any("opportunity" in arg for c in calls if c[0] == "ssh" for arg in c))
 
     def test_build_only_accepts_dirty_sources_and_flag_orders(self):
         for args in (["--no-mac", "--build-only"], ["--build-only", "--no-mac"], ["--build-only"]):

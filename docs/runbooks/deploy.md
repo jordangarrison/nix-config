@@ -48,6 +48,8 @@ Excluded deliberately:
 - **opportunity** is a laptop, not part of this always-on fleet. It is a manual
   deploy-rs target at `opportunity.owl-yo.ts.net`: use `deploy .#opportunity` only
   after build/test and explicit switch approval. Bootstrap Nix trust first, as below.
+  **Do not run bare `deploy` or `deploy .`: upstream selects every deploy-rs node,
+  including the laptop, without the wrapper's confirmation gate.**
 - **jordangarrison@normandy** is standalone Home Manager on WSL/Ubuntu.
   `activate.home-manager` could deploy a user profile, not a NixOS system;
   WSL availability and SSH bootstrap are separate concerns.
@@ -64,7 +66,9 @@ Excluded deliberately:
    `--build-only` retain local-snapshot support for Linux development.
 2. **Build locally**: build `deploy-schema`, `deploy-activate`, `deploy-policy`,
    and `deploy-wrapper`. The activation check depends on **full Linux system
-   closures for all three deploy-rs targets**, not Darwin. Nix distributed builders are disabled for this phase.
+   closures for all three deploy-rs targets**, not Darwin. A laptop-only build failure
+   can therefore block this preflight, even though the wrapper never contacts the
+   laptop. Nix distributed builders are disabled for this phase.
    No fleet target is contacted during this local build.
 3. Read each enabled target's hostname and `/run/current-system` over SSH. A wrong
    hostname or failed connection stops the command before Linux live tests.

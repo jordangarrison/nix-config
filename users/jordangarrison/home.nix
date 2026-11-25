@@ -273,7 +273,7 @@ in
           "wait-what"
           "writing-for-agents"
         ])
-        (fromDir "${inputs.obsidian-skills}/skills" [
+        (fromDir "${inputs.obsidian-skills}/plugins/obsidian/skills" [
           "obsidian-bases"
           "obsidian-cli"
           "obsidian-markdown"
@@ -1066,44 +1066,8 @@ in
   programs.atuin = {
     enable = true;
     enableZshIntegration = true;
-    # The Herdr app's atuin-threads mod needs `atuin threads` (18.24.3+).
-    # nixpkgs has 18.23.0. Remove this override when nixpkgs ships 18.24.3+.
-    package = pkgs.master.atuin.overrideAttrs (
-      finalAttrs: old: {
-        version = "18.24.4";
-        src = pkgs.fetchFromGitHub {
-          owner = "atuinsh";
-          repo = "atuin";
-          tag = "v${finalAttrs.version}";
-          hash = "sha256-IyAR7TZqMrCuflkfs9Rgnfm5PrUDYVi0O8//WU8/KAI=";
-        };
-        cargoDeps = pkgs.rustPlatform.fetchCargoVendor {
-          inherit (finalAttrs) src;
-          hash = "sha256-rwB3hdVygTRAxaSCIioFAjMWw9V5bkRUBXHyFrQ4MtI=";
-        };
-        # 18.24's atuin-server tests need Postgres and a live server, absent
-        # in the sandbox. This package does not build the server.
-        cargoTestFlags = [
-          "--workspace"
-          "--exclude"
-          "atuin-server"
-        ];
-        # Tests that depend on the macOS build machine, not on atuin:
-        # - The resume tests look for a running pi in the process list. The
-        #   macOS sandbox shows every process on the machine, so a pi
-        #   session open during the build fails them.
-        # - The reload test needs the reload to be slow enough to time;
-        #   on Apple silicon it is not ("reload too fast to measure").
-        checkFlags =
-          (old.checkFlags or [ ])
-          ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
-            "--skip=a_copy_behind_another_machine_catches_up_as_it_resumes"
-            "--skip=a_diverged_copy_resumes_only_as_chosen"
-            "--skip=a_session_gone_on_with_elsewhere_catches_up_where_it_came_from"
-            "--skip=end_history_is_not_starved_by_an_index_reload"
-          ];
-      }
-    );
+    # nixpkgs now has the `atuin threads` support required by Herdr.
+    package = pkgs.atuin;
     # Threads capture needs the daemon. This is what
     # `atuin config enable threads` writes, done declaratively.
     daemon.enable = true;

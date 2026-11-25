@@ -3,9 +3,10 @@ let
   inherit (flake.inputs.nixpkgs) lib;
   deploy = flake.deploy;
   results = {
-    explicitFleet = builtins.attrNames deploy.nodes == [ "discovery" "endeavour" ];
+    explicitFleet = builtins.attrNames deploy.nodes == [ "discovery" "endeavour" "opportunity" ];
     localWorkstation = deploy.nodes.endeavour.hostname == "localhost";
     discoveryMagicDNS = deploy.nodes.discovery.hostname == "discovery";
+    opportunityFQDN = deploy.nodes.opportunity.hostname == "opportunity.owl-yo.ts.net";
     noRootSSH = deploy.sshUser == "jordangarrison" && deploy.user == "root";
     noninteractiveSudo = deploy.sudo == "sudo -n -u" && !deploy.interactiveSudo;
     localBuild = !deploy.remoteBuild;
@@ -18,7 +19,7 @@ let
     targetTrust = lib.all (name:
       builtins.elem "root" flake.nixosConfigurations.${name}.config.nix.settings.trusted-users
       && builtins.elem "jordangarrison" flake.nixosConfigurations.${name}.config.nix.settings.trusted-users
-    ) [ "endeavour" "discovery" ];
+    ) [ "endeavour" "discovery" "opportunity" ];
     existingChecksRetained = flake.checks.x86_64-linux ? t3code-module
       && flake.checks.x86_64-linux ? pi-extensions;
   };

@@ -153,6 +153,6 @@ jobs:
           for check in deploy-schema deploy-activate; do
             nix eval --raw ".#checks.x86_64-linux.$check.drvPath" $STUB_OVERRIDES
           done
-          for node in discovery endeavour; do
+          for node in discovery endeavour opportunity; do
             nix eval --raw ".#deploy.nodes.$node.profiles.system.path.drvPath" $STUB_OVERRIDES
           done

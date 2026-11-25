@@ -45,7 +45,9 @@ Excluded deliberately:
 
 - **voyager** currently runs Omarchy, per Jordan. Its NixOS configuration,
   including its no-suspend and `machine.type = "desktop"` invariants, is untouched.
-- **opportunity** is a laptop, not part of this always-on fleet.
+- **opportunity** is a laptop, not part of this always-on fleet. It is a manual
+  deploy-rs target at `opportunity.owl-yo.ts.net`: use `deploy .#opportunity` only
+  after build/test and explicit switch approval. Bootstrap Nix trust first, as below.
 - **jordangarrison@normandy** is standalone Home Manager on WSL/Ubuntu.
   `activate.home-manager` could deploy a user profile, not a NixOS system;
   WSL availability and SSH bootstrap are separate concerns.
@@ -61,8 +63,8 @@ Excluded deliberately:
    sources stop the command before contacting any fleet target. `--no-mac` and
    `--build-only` retain local-snapshot support for Linux development.
 2. **Build locally**: build `deploy-schema`, `deploy-activate`, `deploy-policy`,
-   and `deploy-wrapper`. The activation check depends on **both full Linux system
-   closures**, not Darwin. Nix distributed builders are disabled for this phase.
+   and `deploy-wrapper`. The activation check depends on **full Linux system
+   closures for all three deploy-rs targets**, not Darwin. Nix distributed builders are disabled for this phase.
    No fleet target is contacted during this local build.
 3. Read each enabled target's hostname and `/run/current-system` over SSH. A wrong
    hostname or failed connection stops the command before Linux live tests.
@@ -154,7 +156,7 @@ The existing Linux Jordan user has `NOPASSWD` sudo. The draft sets:
 - batch-mode SSH with strict host-key checks, a 10-second connect timeout,
   and bounded keepalives;
 - `nix.settings.trusted-users = [ "root" "jordangarrison" ]` **only** on
-  endeavour and discovery, via `modules/nixos/deploy-target.nix`.
+  endeavour, discovery, and opportunity, via `modules/nixos/deploy-target.nix`.
 
 Nix trust is root-equivalent. Jordan explicitly approved this host-scoped grant;
 he already has unrestricted sudo. It is needed because an ordinary, untrusted
@@ -170,7 +172,7 @@ host through the normal approved **build → test → switch** flow, using a che
 with private-input access. On each target, select that host explicitly:
 
 ```bash
-# HOST is endeavour or discovery, matching the machine running these commands.
+# HOST is endeavour, discovery, or opportunity, matching the local machine.
 nh os build . -H "$HOST" --no-nom
 nh os test . -H "$HOST" --no-nom
 # Inspect services, then obtain Jordan's explicit approval:

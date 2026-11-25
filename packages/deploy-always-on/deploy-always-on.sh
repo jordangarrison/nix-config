@@ -93,8 +93,8 @@ fi
 definition=$(nix eval --json "$snapshot#deploy" "${nix_args[@]}")
 mapfile -t ssh_opts < <(jq -r '.sshOpts[]' <<< "$definition")
 ssh_user=$(jq -er '.sshUser' <<< "$definition")
-# Keep the deploying workstation until last. The policy check also asserts that
-# these, and only these, are the fleet's system profiles.
+# Keep the deploying workstation until last. This always-on subset excludes
+# opportunity: laptop deployments are manual (`deploy .#opportunity`).
 nodes=(discovery endeavour)
 targets=()
 record=$(mktemp "$state_dir/before-$(date +%Y%m%dT%H%M%S)-XXXXXX.txt")

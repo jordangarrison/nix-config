@@ -3,9 +3,10 @@ let
   inherit (flake.inputs.nixpkgs) lib;
   deploy = flake.deploy;
   results = {
-    explicitFleet = builtins.attrNames deploy.nodes == [ "discovery" "endeavour" ];
+    explicitFleet = builtins.attrNames deploy.nodes == [ "discovery" "endeavour" "opportunity" ];
     localWorkstation = deploy.nodes.endeavour.hostname == "localhost";
     discoveryMagicDNS = deploy.nodes.discovery.hostname == "discovery";
+    opportunityFQDN = deploy.nodes.opportunity.hostname == "opportunity.owl-yo.ts.net";
     noRootSSH = deploy.sshUser == "jordangarrison" && deploy.user == "root";
     noninteractiveSudo = deploy.sudo == "sudo -n -u" && !deploy.interactiveSudo;
     localBuild = !deploy.remoteBuild;
@@ -16,9 +17,15 @@ let
     systemProfilesOnly = lib.all (node: builtins.attrNames node.profiles == [ "system" ])
       (builtins.attrValues deploy.nodes);
     targetTrust = lib.all (name:
-      builtins.elem "root" flake.nixosConfigurations.${name}.config.nix.settings.trusted-users
-      && builtins.elem "jordangarrison" flake.nixosConfigurations.${name}.config.nix.settings.trusted-users
-    ) [ "endeavour" "discovery" ];
+      lib.sort builtins.lessThan
+        (lib.unique flake.nixosConfigurations.${name}.config.nix.settings.trusted-users)
+      == [ "jordangarrison" "root" ]
+    ) [ "endeavour" "discovery" "opportunity" ];
+    nonTargetTrust = lib.all (name:
+      !(builtins.elem "jordangarrison"
+        flake.nixosConfigurations.${name}.config.nix.settings.trusted-users)
+    ) (lib.filter (name: !(builtins.hasAttr name deploy.nodes))
+      (builtins.attrNames flake.nixosConfigurations));
     existingChecksRetained = flake.checks.x86_64-linux ? t3code-module
       && flake.checks.x86_64-linux ? pi-extensions;
   };

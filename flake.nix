@@ -271,7 +271,7 @@
     }:
     {
       # Intentionally a small fleet, not every nixosConfiguration. Voyager
-      # currently runs Omarchy; opportunity is a laptop. See docs/runbooks/deploy.md.
+      # currently runs Omarchy. See docs/runbooks/deploy.md.
       deploy = {
         sshUser = "jordangarrison";
         user = "root";
@@ -297,6 +297,8 @@
           # The guarded command runs on endeavour. Avoid its stale SSH alias.
           endeavour = "localhost";
           discovery = "discovery";
+          # Laptop: manual deploys only (`deploy .#opportunity`), not deploy-always-on.
+          opportunity = "opportunity.owl-yo.ts.net";
         };
       };
 
@@ -605,6 +607,7 @@
             ./users/jane/nixos.nix
             ./users/isla/nixos.nix
             ./hosts/opportunity/configuration.nix
+            ./modules/nixos/deploy-target.nix
             ./modules/super-productivity/app.nix
             nixos-hardware.nixosModules.framework-12-13th-gen-intel
             home-manager.nixosModules.home-manager

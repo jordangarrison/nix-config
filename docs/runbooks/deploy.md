@@ -46,8 +46,9 @@ Excluded deliberately:
 - **voyager** currently runs Omarchy, per Jordan. Its NixOS configuration,
   including its no-suspend and `machine.type = "desktop"` invariants, is untouched.
 - **opportunity** is a laptop, not part of this always-on fleet. It is a manual
-  deploy-rs target at `opportunity.owl-yo.ts.net`: use `deploy .#opportunity` only
-  after build/test and explicit switch approval. Bootstrap Nix trust first, as below.
+  deploy-rs target at `opportunity.owl-yo.ts.net`. The upstream selector is
+  `deploy .#opportunity`; use the pinned, immutable-source commands below instead
+  of relying on a CLI on PATH. Bootstrap Nix trust first.
   **Do not run bare `deploy` or `deploy .`: upstream selects every deploy-rs node,
   including the laptop, without the wrapper's confirmation gate.**
 - **jordangarrison@normandy** is standalone Home Manager on WSL/Ubuntu.
@@ -184,11 +185,44 @@ nh os switch . -H "$HOST" --no-nom
 ```
 
 This bootstrap is a real system activation, not a read-only prerequisite. If a
-checkout/private-input access is unavailable on discovery, plan an approved
-root import of the locally built closure instead; do not improvise remote writes
-from an agent session. SSH keys and known-host entries must already be present.
+checkout/private-input access is unavailable on discovery or opportunity, obtain
+approval for a root import of the closure built on endeavour. On the target,
+`sudo -n nix copy --from ssh://jordangarrison@endeavour.owl-yo.ts.net <closure>`
+requires an approved SSH identity and existing host-key verification for root.
+Keep strict host-key and signature checking; do not grant temporary user trust.
+Then run `sudo -n <closure>/bin/switch-to-configuration test`, inspect failed units,
+and obtain explicit approval before any switch. Import alone does not activate
+the trust change. Do not improvise remote writes from an agent session. SSH keys and known-host entries must already be present.
 Use `ssh -o BatchMode=yes -o StrictHostKeyChecking=yes discovery true` and the
 same command for localhost to check that without changing the hosts.
+
+## Manual opportunity deployment after bootstrap
+
+Run on endeavour. Capture one immutable source before building; keep this value
+through test and switch, even if the checkout changes. The pinned CLI needs no
+installation on PATH:
+
+```bash
+snapshot=$(nix flake metadata --json --no-update-lock-file . | jq -er .path)
+nix build --no-link "$snapshot#deploy.nodes.opportunity.profiles.system.path" \
+  --no-update-lock-file --option builders ''
+# Warn the laptop user first: this changes running services and the system profile.
+nix run "$snapshot#deploy-rs" -- --test \
+  --targets "$snapshot#opportunity.system" -- --no-update-lock-file
+```
+
+Inspect system and user failed units and the desktop session. **Stop and obtain
+Jordan's explicit switch approval.** Upstream does not ask by default. Only after
+approval, using the same `snapshot` from above:
+
+```bash
+nix run "$snapshot#deploy-rs" -- --targets "$snapshot#opportunity.system" \
+  -- --no-update-lock-file
+```
+
+Read the live-test/profile and manual recovery limits below before either phase.
+This path is for a host whose Nix trust bootstrap is already active; the first
+unsigned copy still requires the separate approved bootstrap above.
 
 ## Rollback limits: read before the first deployment
 

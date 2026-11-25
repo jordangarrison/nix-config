@@ -17,9 +17,15 @@ let
     systemProfilesOnly = lib.all (node: builtins.attrNames node.profiles == [ "system" ])
       (builtins.attrValues deploy.nodes);
     targetTrust = lib.all (name:
-      builtins.elem "root" flake.nixosConfigurations.${name}.config.nix.settings.trusted-users
-      && builtins.elem "jordangarrison" flake.nixosConfigurations.${name}.config.nix.settings.trusted-users
+      lib.sort builtins.lessThan
+        (lib.unique flake.nixosConfigurations.${name}.config.nix.settings.trusted-users)
+      == [ "jordangarrison" "root" ]
     ) [ "endeavour" "discovery" "opportunity" ];
+    nonTargetTrust = lib.all (name:
+      !(builtins.elem "jordangarrison"
+        flake.nixosConfigurations.${name}.config.nix.settings.trusted-users)
+    ) (lib.filter (name: !(builtins.hasAttr name deploy.nodes))
+      (builtins.attrNames flake.nixosConfigurations));
     existingChecksRetained = flake.checks.x86_64-linux ? t3code-module
       && flake.checks.x86_64-linux ? pi-extensions;
   };

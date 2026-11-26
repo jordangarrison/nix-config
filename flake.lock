@@ -97,11 +97,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795730373,
-        "narHash": "sha256-T7SdHDBGPWefO098ZxBxUBylsNb57lKKGnHDSZeE+gU=",
+        "lastModified": 1795731731,
+        "narHash": "sha256-f7dLwZSvJlq31ytrK+CQEqDJCMPp7etCPyLLh7XxrXk=",
         "owner": "jordangarrison",
         "repo": "bingo",
-        "rev": "cfbbb9aaa4f3f337b5a83ff1cb6329524a5548ab",
+        "rev": "c7182fb8599306ed40564cd0447ff8af6f8f81fb",
         "type": "github"
       },
       "original": {

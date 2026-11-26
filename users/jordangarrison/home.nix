@@ -756,6 +756,7 @@ in
       # LLM Agents (available via overlay as pkgs.llm-agents.*)
       llm-agents.claude-code
       llm-agents.cursor-agent
+      llm-agents.antigravity-cli # Google Antigravity's coding agent (`agy`)
       llm-agents.grok # Grok Build, xAI's coding agent (`grok`)
       sox # Audio playback/recording, used by Claude Code
       otel-tui # Terminal OpenTelemetry viewer

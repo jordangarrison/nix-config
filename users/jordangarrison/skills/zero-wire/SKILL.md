@@ -104,8 +104,8 @@ calling jagpi-only tools.
 
 ## Schedule setup (only when asked)
 
-The hourly cadence, `cve` bot, model, and destination are jagpi routine config,
+The hourly cadence, `security` bot, model, and destination are jagpi routine config,
 not part of this skill. Example request to jagpi `main`:
 
-> Set an hourly routine for the cve bot to run the zero-wire skill and post its
+> Set an hourly routine for the security bot to run the zero-wire skill and post its
 > answer to #cve-dispatch (C0CEULN5ARL). Keep runs with no notice silent.

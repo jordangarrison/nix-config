@@ -6,7 +6,7 @@
     redisCreateLocally = true;
     settings = {
       server = {
-        bind_address = "0.0.0.0";
+        bind_address = "127.0.0.1"; # nginx is the front door
         # port = yourPort;
         # WARNING: setting secret_key here might expose it to the nix cache
         # see below for the sops or environment file instructions to prevent this

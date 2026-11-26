@@ -61,15 +61,12 @@
     };
   };
 
-  # Opportuity-specific firewall configuration
-  # GSConnect (KDE Connect for GNOME) firewall rules
-  networking.firewall = rec {
-    allowedTCPPortRanges = [{
-      from = 1714;
-      to = 1764;
-    }];
-    allowedUDPPortRanges = allowedTCPPortRanges;
-  };
+  # Firewall zones come from modules/nixos/firewall.nix. programs.kdeconnect
+  # (common.nix) opens the GSConnect / KDE Connect ports.
+  #
+  # A laptop joins networks it does not control, so SSH is for the tailnet
+  # only (tailscale0 is trusted); port 22 stays closed on every Wi-Fi.
+  services.openssh.openFirewall = false;
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions

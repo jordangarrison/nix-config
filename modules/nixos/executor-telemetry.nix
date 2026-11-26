@@ -39,10 +39,13 @@ in
     }) [ "traces" "logs" "metrics" ]);
   };
 
-  # endeavour's general firewall is disabled. networking.firewall rules would
-  # do nothing there. Use an independent nftables input hook: Docker's
-  # DOCKER-USER chain only filters forwarding, and an iptables INPUT jump could
-  # be bypassed if another service later inserts an ACCEPT rule ahead of it.
+  # Two layers. The host firewall opens the port on docker0 only. The
+  # independent nftables input hook below does not depend on the host
+  # firewall: Docker's DOCKER-USER chain only filters forwarding, and an
+  # iptables INPUT rule could be bypassed if another service later inserts an
+  # ACCEPT ahead of it. Each layer must accept for a packet to get through.
+  networking.firewall.interfaces.docker0.allowedTCPPorts = [ port ];
+
   systemd.services.executor-otlp-ingress = {
     description = "Restrict Executor OTLP ingest to the Docker bridge";
     requires = [ "docker.service" ];

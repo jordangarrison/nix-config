@@ -86,7 +86,8 @@ in {
         "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDQbMQf/t5SLwjEaAyKnvX5BuARNIS17+Ax2d+4gZY91RR1NlHL6tqe5wIc9gZHHKcCUsxJvqYxdlvfaLUQokMy9t5oufRBN6Zdsu/81ndHvfcfhLFQ4pkJp2YdgWFmOCF9XA4GYWC4MO7cKrShzLp0F8sU6QyC7FKdU1AGPNb98s5MCtkIwQF/5mXs3A9HU2PRteBY5usQDfI/Gc4onSxfUZhoEO2J81UcVDiZdIIpmPMxNI4oQFQ60rblepmGvPERxeT+m+31FZZH/8Se8BXA2CQcaGu5uR3zDq3Gn6s1fOMcuU/0thi8JMf7jMA7M4THzc4CMiUDRO2Qo1D41VVF flosports"
         # opportunity
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHK/0jdVFwj1W0C+H03UHZySTCnsEi4usgj29afZgddG opportunity"
-        # discovery (two keys)
+        # discovery (two keys). "discovery-gh-cli" is also endeavour's
+        # ~/.ssh/id_ed25519: deploy-rs and endeavour -> discovery log in with it.
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILateDtawCsQ3tXgK34MjSwbLPCOOUc4/knJTKdDiIWa discovery"
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKtIJJJFQlRWAJ73n41j1JWGEfka9MSACO+3zM+QZqqT discovery-gh-cli"
         # voyager (garrisonsbygrace)

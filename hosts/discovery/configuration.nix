@@ -22,12 +22,8 @@
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
-  # Discovery-specific firewall configuration
-  # GSConnect (KDE Connect for GNOME) firewall rules
-  networking.firewall = rec {
-    allowedTCPPortRanges = [{ from = 1714; to = 1764; }];
-    allowedUDPPortRanges = allowedTCPPortRanges;
-  };
+  # Firewall zones come from modules/nixos/firewall.nix. programs.kdeconnect
+  # (common.nix) opens the GSConnect / KDE Connect ports.
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions

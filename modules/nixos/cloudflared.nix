@@ -13,6 +13,7 @@
         "panko.jordangarrison.dev" = "http://localhost:4001";
         "drawl.jordangarrison.dev" = "http://localhost:5555";
         "four.jordangarrison.dev" = "http://localhost:4002";
+        "bingo.garrisonsbygrace.com" = "http://localhost:4003";
       };
     };
   };

@@ -90,6 +90,26 @@
         "type": "github"
       }
     },
+    "bingo": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1795728960,
+        "narHash": "sha256-qJ3ErtzwDrb14fmljNuGu+ClzIwT/4op413XLPe3KRg=",
+        "owner": "jordangarrison",
+        "repo": "bingo",
+        "rev": "7a40bc69260045926539273ef21eb30fbc43b53b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "jordangarrison",
+        "repo": "bingo",
+        "type": "github"
+      }
+    },
     "boristane-agent-skills": {
       "flake": false,
       "locked": {
@@ -1716,6 +1736,7 @@
         "ash-kindle": "ash-kindle",
         "aws-tools": "aws-tools",
         "aws-use-sso": "aws-use-sso",
+        "bingo": "bingo",
         "boristane-agent-skills": "boristane-agent-skills",
         "caveman": "caveman",
         "cursor-plugins": "cursor-plugins",

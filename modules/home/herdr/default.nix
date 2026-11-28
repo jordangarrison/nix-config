@@ -56,6 +56,7 @@ in
         "opencode"
         "hermes"
         "qodercli"
+        "antigravity-cli"
       ]);
       default = [ ];
       example = [

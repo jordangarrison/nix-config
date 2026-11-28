@@ -116,6 +116,7 @@ in
     ../../modules/home/tuicr
     ../../modules/home/agent-skills
     ../../modules/home/agent-workspaces
+    ../../modules/home/antigravity
     ../../modules/home/claude-code
     ../../modules/home/codex
     ../../modules/home/cursor-agent
@@ -378,6 +379,20 @@ in
     };
   };
 
+  # Google Antigravity CLI (`agy`). settings.json is merge-on-activation
+  # (trustedWorkspaces and model stay mutable). always-proceed + non-workspace
+  # access + disabled sandbox match claude's bypassPermissions and codex's
+  # danger-full-access.
+  programs.antigravity-cli = {
+    enable = true;
+    instructionsFile = "${agentsLive}/AGENTS.md";
+    settings = {
+      toolPermission = "always-proceed";
+      allowNonWorkspaceAccess = true;
+      enableTerminalSandbox = false;
+    };
+  };
+
   programs.codex = {
     enable = true;
     instructionsFile = "${agentsLive}/AGENTS.md";
@@ -490,6 +505,7 @@ in
         "openai-codex/gpt-6-astra"
         "claude-bridge/claude-opus-5-5"
         "claude-bridge/claude-fable-5-1"
+        "antigravity/gemini-4-neon"
       ];
       # Third-party extensions at their latest release, installed unmodified
       # by pi itself into ~/.pi/agent/npm on first start. Move them forward
@@ -501,6 +517,7 @@ in
         # `npm view pi-claude-bridge version` is newer than 0.8.0, replace
         # this with "npm:pi-claude-bridge" and run `pi update --extensions`.
         "git:github.com/elidickinson/pi-claude-bridge@07507489c0c54f7f978ab752eb9beb5cc0960f24"
+        "npm:@estebanforge/pi-antigravity-bridge"
         "npm:pi-subagents"
         "npm:pi-web-access"
         "npm:pi-foldable-tools"
@@ -629,7 +646,7 @@ in
   # On every host, so agents never fall back to direct servers. The work
   # gateway only goes to hosts allowed to reach work (userApps.work: endeavour,
   # opportunity, flomac). Fanned out to each agent's own format below: pi,
-  # Claude Code, Codex, Cursor and OpenCode.
+  # Claude Code, Codex, Cursor, OpenCode and Antigravity.
   programs.mcp = {
     enable = true;
     servers.executor.url = "https://executor.jordangarrison.dev/mcp";
@@ -664,13 +681,13 @@ in
     };
   };
 
-  # Claude Code, Cursor and OpenCode keep their MCP lists inside files they
-  # also write at runtime (session state, settings), so they can't be
-  # store symlinks. Replace just the user-level server map on activation,
+  # Claude Code, Cursor, OpenCode and Antigravity keep their MCP lists inside
+  # files they also write at runtime (session state, settings), so they can't
+  # be store symlinks. Replace just the user-level server map on activation,
   # which drops anything not declared above. Claude Code's per-project
   # servers (`claude mcp add -s local`) are left alone for local dev
-  # servers such as tidewave. A missing file is created holding only the
-  # server map; the agent fills in the rest on first run.
+  # servers such as tidewave. A missing or empty file is created holding only
+  # the server map; the agent fills in the rest on first run.
   home.activation.mcpClientSync = lib.mkIf config.programs.mcp.enable (
     let
       servers = config.programs.mcp.servers;
@@ -690,7 +707,7 @@ in
         local file="$1" key="$2" servers="$3"
         if [[ -v DRY_RUN ]]; then
           echo "Would set .$key in $file"
-        elif [[ ! -e "$file" ]]; then
+        elif [[ ! -s "$file" ]]; then
           mkdir -p "$(dirname "$file")"
           (
             umask 077
@@ -709,6 +726,51 @@ in
       mcpSet "$HOME/.claude.json" mcpServers ${claude}
       mcpSet "$HOME/.cursor/mcp.json" mcpServers ${cursor}
       mcpSet "$HOME/.config/opencode/opencode.json" mcp ${opencode}
+      mcpSet "$HOME/.gemini/config/mcp_config.json" mcpServers ${cursor}
+    ''
+  );
+
+  # pi-antigravity-bridge reads ~/.pi/agent/antigravity-bridge/config.json and
+  # rewrites it atomically from `/agy`, so merge declared keys on activation
+  # instead of symlinking the Nix store.
+  # - `engine = "acp"` must be explicit: when config.json exists without an
+  #   `engine` key, the bridge assumes a legacy install and falls back to
+  #   `stream-json`.
+  # - `approvals.gateMode = "shadow"` routes agy's native mutating tools
+  #   through pi's `tool_call` hooks so local extensions like
+  #   `protected-paths.ts` enforce policy; `mode = "allow"` auto-approves
+  #   calls no pi extension blocks.
+  home.activation.piAntigravityBridgeConfig = lib.mkIf config.programs.pi.enable (
+    let
+      declared = pkgs.writeText "pi-antigravity-bridge-config.json" (
+        builtins.toJSON {
+          engine = "acp";
+          approvals = {
+            gateMode = "shadow";
+            mode = "allow";
+          };
+        }
+      );
+    in
+    lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      agyBridgeCfg="$HOME/.pi/agent/antigravity-bridge/config.json"
+      if [[ -v DRY_RUN ]]; then
+        echo "Would merge declared pi-antigravity-bridge settings into $agyBridgeCfg"
+      else
+        mkdir -p "$(dirname "$agyBridgeCfg")"
+        if [[ -s "$agyBridgeCfg" ]] && ${pkgs.jq}/bin/jq empty "$agyBridgeCfg" 2>/dev/null; then
+          (
+            umask 077
+            ${pkgs.jq}/bin/jq -s '.[0] * .[1]' "$agyBridgeCfg" ${declared} \
+              > "$agyBridgeCfg.hm-merge"
+          ) && mv "$agyBridgeCfg.hm-merge" "$agyBridgeCfg"
+          chmod 600 "$agyBridgeCfg"
+        elif [[ -s "$agyBridgeCfg" ]]; then
+          warnEcho "$agyBridgeCfg is not valid JSON; skipping declared-settings merge"
+        else
+          install -m 600 ${declared} "$agyBridgeCfg"
+        fi
+      fi
     ''
   );
 
@@ -719,6 +781,7 @@ in
       "codex"
       "pi"
       "opencode"
+      "antigravity-cli"
     ];
     settings = {
       onboarding = false;

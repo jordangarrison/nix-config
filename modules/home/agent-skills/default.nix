@@ -1,8 +1,9 @@
 # Cross-agent skills fan-out.
 #
-# Every skill is linked into both:
-#   ~/.agents/skills/<name>  — read natively by codex, pi, and opencode
-#   ~/.claude/skills/<name>  — Claude Code only reads its own directory
+# Every skill is linked into:
+#   ~/.agents/skills/<name>        — read natively by codex, pi, and opencode
+#   ~/.claude/skills/<name>        — Claude Code only reads its own directory
+#   ~/.gemini/config/skills/<name> — Google Antigravity (agy, app, IDE)
 #
 # Two kinds of skill, kept apart because they change differently:
 #
@@ -56,6 +57,7 @@ let
   mkLinks = name: source: {
     ".agents/skills/${name}".source = source;
     ".claude/skills/${name}".source = source;
+    ".gemini/config/skills/${name}".source = source;
   };
 in
 {

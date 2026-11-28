@@ -35,15 +35,18 @@
     # No extraPackages: git, gh, jq, herdr, nix, and nh are already on the
     # unit's PATH through the user profile and the system profile.
 
-    # Claude (subscription) models through jagpi's own claude-bridge
-    # package (jagpi ADR 0025, docs/providers.md); its passthru.jagpiProvider
-    # names the entry module. It runs the same Nix-managed claude that
-    # home.nix gives pi's bridge, so no claude goes on the unit's PATH. No
-    # model or tiers here: which bot uses Claude is set apart from this.
+    # Subscription models through jagpi's own provider plugins (jagpi ADR 0025,
+    # ADR 0084, docs/providers.md); each package's passthru.jagpiProvider names
+    # its entry module. No model or tiers here: which bot uses which provider
+    # is set apart from this.
     providers = [
       {
         package = inputs.jagpi.packages.${pkgs.stdenv.hostPlatform.system}.claude-bridge;
         options.pathToClaudeCodeExecutable = "${pkgs.llm-agents.claude-code}/bin/claude";
+      }
+      {
+        package = inputs.jagpi.packages.${pkgs.stdenv.hostPlatform.system}.antigravity-bridge;
+        options.pathToAgyExecutable = "${pkgs.llm-agents.antigravity-cli}/bin/agy";
       }
     ];
 

@@ -38,6 +38,19 @@
           // {
             jagpiProvider = "lib/claude-bridge/src/hosts/jagpi.ts";
           };
+        antigravity-bridge =
+          derivation {
+            name = "jagpi-antigravity-bridge-stub";
+            inherit system;
+            builder = "/bin/sh";
+            args = [
+              "-c"
+              "echo ci-stub > $out"
+            ];
+          }
+          // {
+            jagpiProvider = "lib/antigravity-bridge/src/hosts/jagpi.ts";
+          };
       };
     in
     {
